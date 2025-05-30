@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文章字数统计工具</title>
+    <style>
+        /* CSS变量定义 */
+        :root {
+            --primary-color: #4a90e2;
+            --primary-dark: #357abd;
+            --secondary-color: #f8f9fa;
+            --text-color: #333;
+            --text-light: #666;
+            --border-color: #e1e5e9;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --shadow-light: 0 2px 10px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.15);
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        /* 全局样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-color);
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow-medium);
+            overflow: hidden;
+        }
+
+        /* 头部区域 */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        /* 主要内容区域 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 0;
+            min-height: 500px;
+        }
+
+        /* 输入区域 */
+        .input-section {
+            padding: 30px;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .input-label {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+
+        .text-input {
+            width: 100%;
+            min-height: 400px;
+            padding: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            line-height: 1.6;
+            resize: vertical;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .text-input::placeholder {
+            color: #999;
+            font-style: italic;
+        }
+
+        /* 按钮区域 */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        /* 统计结果区域 */
+        .stats-section {
+            background: var(--secondary-color);
+            padding: 30px;
+        }
+
+        .stats-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+
+        .stats-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-unit {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-left: 4px;
+        }
+
+        /* 复制结果区域 */
+        .copy-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+        }
+
+        .copy-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-color);
+        }
+
+        .copy-content {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            white-space: pre-line;
+        }
+
+        /* 成功提示 */
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success-color);
+            color: white;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .success-message.show {
+            transform: translateX(0);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: 12px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .input-section {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding: 20px;
+            }
+
+            .stats-section {
+                padding: 20px;
+            }
+
+            .text-input {
+                min-height: 300px;
+                padding: 15px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .stat-item {
+                padding: 15px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .header p {
+                font-size: 14px;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-item {
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* 图标样式 */
+        .icon {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部区域 -->
+        <div class="header">
+            <h1>📝 文章字数统计工具</h1>
+            <p>实时统计文本字符数、单词数、段落数和预计阅读时间</p>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="main-content">
+            <!-- 输入区域 -->
+            <div class="input-section">
+                <div class="input-label">📄 请输入您的文本内容：</div>
+                <textarea 
+                    id="textInput" 
+                    class="text-input" 
+                    placeholder="在这里输入或粘贴您的文章内容...\n\n工具将实时统计：\n• 字符数（包括/不包括空格）\n• 单词数量\n• 段落数量\n• 预计阅读时间"
+                ></textarea>
+                
+                <div class="button-group">
+                    <button id="clearBtn" class="btn btn-secondary">
+                        <span class="icon">🗑️</span>
+                        清空文本
+                    </button>
+                    <button id="copyBtn" class="btn btn-primary">
+                        <span class="icon">📋</span>
+                        复制统计结果
+                    </button>
+                </div>
+            </div>
+
+            <!-- 统计结果区域 -->
+            <div class="stats-section">
+                <div class="stats-title">📊 统计结果</div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">字符数（含空格）</div>
+                        <div class="stat-value">
+                            <span id="charCountWithSpaces">0</span>
+                            <span class="stat-unit">个</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-label">字符数（不含空格）</div>
+                        <div class="stat-value">
+                            <span id="charCountWithoutSpaces">0</span>
+                            <span class="stat-unit">个</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-label">单词数量</div>
+                        <div class="stat-value">
+                            <span id="wordCount">0</span>
+                            <span class="stat-unit">个</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-label">段落数量</div>
+                        <div class="stat-value">
+                            <span id="paragraphCount">0</span>
+                            <span class="stat-unit">个</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-label">预计阅读时间</div>
+                        <div class="stat-value">
+                            <span id="readingTime">0</span>
+                            <span class="stat-unit">分钟</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 复制结果区域 -->
+                <div class="copy-section">
+                    <div class="copy-title">📋 统计摘要</div>
+                    <div id="copyContent" class="copy-content">
+                        暂无统计数据
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功提示 -->
+    <div id="successMessage" class="success-message">
+        ✅ 统计结果已复制到剪贴板！
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const textInput = document.getElementById('textInput');
+        const clearBtn = document.getElementById('clearBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const successMessage = document.getElementById('successMessage');
+        
+        // 统计结果元素
+        const charCountWithSpaces = document.getElementById('charCountWithSpaces');
+        const charCountWithoutSpaces = document.getElementById('charCountWithoutSpaces');
+        const wordCount = document.getElementById('wordCount');
+        const paragraphCount = document.getElementById('paragraphCount');
+        const readingTime = document.getElementById('readingTime');
+        const copyContent = document.getElementById('copyContent');
+
+        // 统计函数
+        function updateStats() {
+            const text = textInput.value;
+            
+            // 字符数统计
+            const charsWithSpaces = text.length;
+            const charsWithoutSpaces = text.replace(/\s/g, '').length;
+            
+            // 单词数统计（支持中英文）
+            let words = 0;
+            if (text.trim()) {
+                // 英文单词统计
+                const englishWords = text.match(/[a-zA-Z]+/g) || [];
+                // 中文字符统计（每个中文字符算作一个词）
+                const chineseChars = text.match(/[\u4e00-\u9fa5]/g) || [];
+                // 数字统计
+                const numbers = text.match(/\d+/g) || [];
+                
+                words = englishWords.length + chineseChars.length + numbers.length;
+            }
+            
+            // 段落数统计（以空行分隔）
+            const paragraphs = text.trim() ? text.split(/\n\s*\n/).filter(p => p.trim()).length : 0;
+            
+            // 预计阅读时间（每分钟200个单词）
+            const estimatedTime = words > 0 ? Math.ceil(words / 200) : 0;
+            
+            // 更新显示
+            charCountWithSpaces.textContent = charsWithSpaces.toLocaleString();
+            charCountWithoutSpaces.textContent = charsWithoutSpaces.toLocaleString();
+            wordCount.textContent = words.toLocaleString();
+            paragraphCount.textContent = paragraphs.toLocaleString();
+            readingTime.textContent = estimatedTime;
+            
+            // 更新复制内容
+            updateCopyContent({
+                charsWithSpaces,
+                charsWithoutSpaces,
+                words,
+                paragraphs,
+                estimatedTime
+            });
+        }
+
+        // 更新复制内容
+        function updateCopyContent(stats) {
+            if (stats.charsWithSpaces === 0) {
+                copyContent.textContent = '暂无统计数据';
+                return;
+            }
+            
+            const content = `文章统计结果：
+
+📊 字符统计：
+• 字符数（含空格）：${stats.charsWithSpaces.toLocaleString()} 个
+• 字符数（不含空格）：${stats.charsWithoutSpaces.toLocaleString()} 个
+
+📝 内容统计：
+• 单词数量：${stats.words.toLocaleString()} 个
+• 段落数量：${stats.paragraphs.toLocaleString()} 个
+
+⏱️ 阅读时间：
+• 预计阅读时间：${stats.estimatedTime} 分钟
+（基于每分钟200个单词的平均阅读速度）
+
+---
+统计时间：${new Date().toLocaleString()}`;
+            
+            copyContent.textContent = content;
+        }
+
+        // 显示成功消息
+        function showSuccessMessage(message) {
+            successMessage.textContent = message;
+            successMessage.classList.add('show');
+            
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 3000);
+        }
+
+        // 复制到剪贴板
+        async function copyToClipboard(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                showSuccessMessage('✅ 统计结果已复制到剪贴板！');
+            } catch (err) {
+                // 降级方案
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    showSuccessMessage('✅ 统计结果已复制到剪贴板！');
+                } catch (fallbackErr) {
+                    showSuccessMessage('❌ 复制失败，请手动复制');
+                }
+                
+                document.body.removeChild(textArea);
+            }
+        }
+
+        // 事件监听器
+        textInput.addEventListener('input', updateStats);
+        textInput.addEventListener('paste', () => {
+            // 延迟执行以确保粘贴内容已经插入
+            setTimeout(updateStats, 10);
+        });
+
+        // 清空按钮
+        clearBtn.addEventListener('click', () => {
+            if (textInput.value.trim() && confirm('确定要清空所有文本吗？')) {
+                textInput.value = '';
+                textInput.focus();
+                updateStats();
+                showSuccessMessage('🗑️ 文本已清空');
+            } else if (!textInput.value.trim()) {
+                showSuccessMessage('📝 文本框已经是空的');
+            }
+        });
+
+        // 复制按钮
+        copyBtn.addEventListener('click', () => {
+            const content = copyContent.textContent;
+            if (content === '暂无统计数据') {
+                showSuccessMessage('📝 请先输入一些文本');
+                return;
+            }
+            copyToClipboard(content);
+        });
+
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+L 或 Cmd+L 清空文本
+            if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+                e.preventDefault();
+                clearBtn.click();
+            }
+            
+            // Ctrl+Shift+C 或 Cmd+Shift+C 复制统计结果
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') {
+                e.preventDefault();
+                copyBtn.click();
+            }
+        });
+
+        // 页面加载完成后聚焦到文本框
+        document.addEventListener('DOMContentLoaded', () => {
+            textInput.focus();
+            updateStats();
+        });
+
+        // 防止页面意外刷新时丢失内容
+        window.addEventListener('beforeunload', (e) => {
+            if (textInput.value.trim()) {
+                e.preventDefault();
+                e.returnValue = '您有未保存的文本内容，确定要离开吗？';
+            }
+        });
+
+        // 自动保存到本地存储
+        textInput.addEventListener('input', () => {
+            localStorage.setItem('wordCounterText', textInput.value);
+        });
+
+        // 页面加载时恢复保存的内容
+        window.addEventListener('load', () => {
+            const savedText = localStorage.getItem('wordCounterText');
+            if (savedText) {
+                textInput.value = savedText;
+                updateStats();
+            }
+        });
+    </script>
+</body>
+</html>
