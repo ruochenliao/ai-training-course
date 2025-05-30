@@ -1,11 +1,11 @@
-1、环境安装，python, nodejs, 编辑器
+1、环境安装，python, nodejs, 编辑器  （志雄）
 目标：与AI对话
   1.1、安装Tre, python, nodejs
   1.2、30 prompt 生成页面，css, js, html  
   1.3、deepseek大模型，qwen, chatgpt
   1.4、AI 提示词工程
   
-2、python 基础知识
+2、python 基础知识    （志雄）
 目标：历史对话存入数据库
   1.1、变量定义
   1.2、条件，循环语句
@@ -16,48 +16,52 @@
   1.7、debug
   1.8、日志
 
-3、智能客服
+3、智能客服      (志雄)
   3.1、autoGen 流式聊天，历史会话
   3.2、crawAI 
   3.3、google adk
 
-3、AI function call + fastapi
+3、AI function call + fastapi  （志雄）
 目标：电商购物
   1、restful 接口
   2、swagger 
   3、aysnc, await
 
-4、训练AI，RAG
+4、训练AI，RAG  （志雄）
 目标：外挂知识库
   6.1、lamaindex
   6.2、langchain
   6.3、langGraph
 
-5、MCP 
+5、MCP  （志雄）
 目标：完善电商购物系统
 
-6、多模态
+6、多模态  （志雄）
   图像处理
 
-7、text2sql
+7、text2sql  (nebula)
 目标：chatBI
   8.1、vanna 前端页面
   8.2、单表问题（准确率）
   8.3、多表问题（准确率）
   8.4、趋势图
 
-8、手撸text2sql，图库数据分析系统
+8、手撸text2sql，图库数据分析系统  （nebula）
   9.1、图库
 
-9、text2dsl
+
+
+
+待定
+9、text2dsl    (nebula)
 目标：决策系统
   
-10、微调大模型-垂直领域大模型
+10、微调大模型-垂直领域大模型  (nebula)
 目标：精调一个自己的小模型
   9.1、LoRA
   9.2、QLoRA
 
-11、transformer 架构
+11、transformer 架构  （nebula）
   11.1、CNN神经网络
   11.2、注意力机制
   11.3、embedding
