@@ -1,39 +1,14 @@
-# 环境
-## 安装 pip, python 3.11
-    brew install python
+# 安装 vanna 
 
-## 安装 fastapi 和 uvicorn
-pip install fastapi uvicorn
+# 学习 vanna 
 
-## 安装 node
+# vanna 原理
 
-直接默认安装即可
-# 后端管理系统
-## 前端：
-打开终端，进入006/admin/frontend目录
-npm install
-## 后端
-打开终端，进入006/admin/backend目录
-pip install -r requirements.txt
+# 初始化 schema 
 
-# 用户系统
-## 前端：
-打开终端，进入006/client/frontend目录
-npm install
-## 后端
-打开终端，进入006/client/backend目录
-pip install -r requirements.txt
+# 测试数据
 
-2025-04-19之前的版本下载：
-https://github.com/danwen-ai/development/releases
+# 训练问题
 
+# 准确率测试
 
-## 启动后端
-cd vanna_update
-python -m uvicorn app:app --reload --port 8000
-Open your browser and navigate to http://localhost:8000/docs
-
-# 启动前端
-cd vanna_update
-node server.js
-Open your browser and navigate to http://localhost:9000
