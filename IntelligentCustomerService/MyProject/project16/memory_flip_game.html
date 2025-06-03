@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>记忆翻牌游戏</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4f8cff;
+      --secondary: #f5f7fa;
+      --danger: #ff4f4f;
+      --success: #4fcf7f;
+      --bg: #fff;
+      --text: #222;
+      --card-back: #e0e0e0;
+      --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      --card-radius: 12px;
+      --board-gap: 1.2vw;
+      --card-size: 80px;
+      --card-size-mobile: 18vw;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Arial', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 1.2rem 2rem 1rem 2rem;
+      text-align: center;
+      font-size: 2rem;
+      letter-spacing: 2px;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    main {
+      max-width: 600px;
+      margin: 1.5rem auto 0 auto;
+      background: var(--bg);
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+      padding: 1.5rem 1.2rem 2rem 1.2rem;
+      min-height: 60vh;
+      position: relative;
+    }
+    .game-settings {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .game-settings label {
+      font-weight: 500;
+      margin-right: 0.5rem;
+    }
+    .game-settings select, .game-settings input[type=range] {
+      padding: 0.3rem 0.5rem;
+      border-radius: 6px;
+      border: 1px solid var(--card-back);
+      font-size: 1rem;
+      background: var(--secondary);
+    }
+    .game-settings input[type=checkbox] {
+      transform: scale(1.2);
+      margin-right: 0.3rem;
+    }
+    .game-board {
+      display: grid;
+      justify-content: center;
+      align-items: center;
+      gap: var(--board-gap);
+      margin: 0 auto 1.5rem auto;
+      background: none;
+      user-select: none;
+    }
+    .card {
+      width: var(--card-size);
+      height: var(--card-size);
+      background: var(--card-back);
+      border-radius: var(--card-radius);
+      box-shadow: var(--card-shadow);
+      perspective: 800px;
+      cursor: pointer;
+      position: relative;
+      transition: box-shadow 0.2s;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card.flipped, .card.matched {
+      box-shadow: 0 4px 16px rgba(79,140,255,0.18);
+    }
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.5s cubic-bezier(.4,2,.6,1);
+      transform-style: preserve-3d;
+      position: relative;
+    }
+    .card.flipped .card-inner, .card.matched .card-inner {
+      transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      border-radius: var(--card-radius);
+      user-select: none;
+    }
+    .card-front {
+      background: #fff;
+      color: var(--primary);
+      font-size: 2.3rem;
+      font-weight: bold;
+      transform: rotateY(180deg);
+      box-shadow: 0 2px 8px rgba(79,140,255,0.08);
+    }
+    .card-back {
+      background: linear-gradient(135deg, #e0e0e0 60%, #b2bec3 100%);
+      color: #888;
+      font-size: 2.1rem;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .card.matched .card-front {
+      background: var(--success);
+      color: #fff;
+      transition: background 0.3s, color 0.3s;
+    }
+    .card.matched .card-inner {
+      animation: match-pop 0.4s;
+    }
+    @keyframes match-pop {
+      0% { transform: rotateY(180deg) scale(1); }
+      60% { transform: rotateY(180deg) scale(1.15); }
+      100% { transform: rotateY(180deg) scale(1); }
+    }
+    .card.failed .card-inner {
+      animation: shake 0.4s;
+    }
+    @keyframes shake {
+      0%,100% { transform: rotateY(0deg) translateX(0); }
+      20%,60% { transform: rotateY(0deg) translateX(-8px); }
+      40%,80% { transform: rotateY(0deg) translateX(8px); }
+    }
+    .game-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .score-board {
+      display: flex;
+      gap: 1.2rem;
+      align-items: center;
+    }
+    .score-board span {
+      font-weight: bold;
+      color: var(--primary);
+    }
+    .btn, button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1.2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+      font-weight: 500;
+    }
+    .btn.danger, button.danger { background: var(--danger); }
+    .btn.success, button.success { background: var(--success); }
+    .btn:disabled, button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .leaderboard {
+      margin: 1.2rem 0 0.5rem 0;
+      background: var(--secondary);
+      border-radius: 10px;
+      padding: 1rem 0.7rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .leaderboard h4 { margin: 0 0 0.5rem 0; }
+    .leaderboard table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.98rem;
+    }
+    .leaderboard th, .leaderboard td {
+      padding: 0.3rem 0.2rem;
+      text-align: center;
+    }
+    .leaderboard th { background: #e0e0e0; }
+    .leaderboard tr:nth-child(even) { background: #f7f7f7; }
+    .game-modal {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      display: none;
+    }
+    .game-modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: #fff;
+      border-radius: 16px;
+      padding: 2rem 1.5rem 1.5rem 1.5rem;
+      min-width: 260px;
+      max-width: 90vw;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.12);
+      text-align: center;
+      position: relative;
+    }
+    .modal-content h2 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+    .modal-content .btn {
+      margin-top: 1.2rem;
+    }
+    .tutorial {
+      background: #f5f7fa;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      color: #444;
+      text-align: left;
+    }
+    .theme-select {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .theme-thumb {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      background: #fff;
+      cursor: pointer;
+      transition: border 0.2s;
+    }
+    .theme-thumb.selected {
+      border: 2px solid var(--primary);
+    }
+    @media (max-width: 700px) {
+      main { padding: 0.5rem; }
+      .game-board { gap: 2vw; }
+      :root { --card-size: var(--card-size-mobile); }
+    }
+    @media (max-width: 500px) {
+      header { font-size: 1.2rem; padding: 0.7rem 0.5rem; }
+      main { padding: 0.2rem; }
+      .game-settings { flex-direction: column; gap: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>记忆翻牌游戏</header>
+  <main>
+    <div class="tutorial" id="tutorial">
+      <b>玩法说明：</b>点击任意两张卡片，配对成功则保持翻开，否则自动翻回。支持多种难度和主题，计分和排行榜，适合所有年龄段。可在设置中调整音效、速度等。
+    </div>
+    <div class="game-settings" id="game-settings">
+      <div>
+        <label>难度：</label>
+        <select id="difficulty">
+          <option value="4">简单(4x4)</option>
+          <option value="5">中等(5x5)</option>
+          <option value="6">困难(6x6)</option>
+        </select>
+      </div>
+      <div class="theme-select" id="theme-select">
+        <label>主题：</label>
+        <span class="theme-thumb selected" data-theme="emoji">😀</span>
+        <span class="theme-thumb" data-theme="animal">🐶</span>
+        <span class="theme-thumb" data-theme="fruit">🍎</span>
+      </div>
+      <div>
+        <label>翻牌时间：</label>
+        <input type="range" id="flip-time" min="0.5" max="2.5" step="0.1" value="1.2">
+        <span id="flip-time-label">1.2s</span>
+      </div>
+      <div>
+        <label><input type="checkbox" id="sound-toggle" checked>音效</label>
+      </div>
+      <div>
+        <button class="btn" id="btn-restart"><i class="fa fa-rotate"></i> 重新开始</button>
+      </div>
+    </div>
+    <div class="game-info">
+      <div class="score-board">
+        <span>尝试：<span id="try-count">0</span></span>
+        <span>用时：<span id="timer">0.0</span>s</span>
+        <span>得分：<span id="score">0</span></span>
+      </div>
+      <div>
+        <button class="btn" id="btn-pause"><i class="fa fa-pause"></i> 暂停</button>
+        <button class="btn" id="btn-tutorial"><i class="fa fa-question-circle"></i> 教程</button>
+        <button class="btn" id="btn-share"><i class="fa fa-share-alt"></i> 分享成绩</button>
+      </div>
+    </div>
+    <div class="game-board" id="game-board"></div>
+    <div class="leaderboard" id="leaderboard"></div>
+  </main>
+  <div class="game-modal" id="modal-victory">
+    <div class="modal-content">
+      <h2>🎉 恭喜通关！</h2>
+      <div id="victory-detail"></div>
+      <button class="btn success" id="btn-next-level">下一难度</button>
+      <button class="btn" id="btn-close-victory">关闭</button>
+    </div>
+  </div>
+  <div class="game-modal" id="modal-pause">
+    <div class="modal-content">
+      <h2>⏸ 游戏已暂停</h2>
+      <button class="btn success" id="btn-resume">继续游戏</button>
+      <button class="btn" id="btn-close-pause">关闭</button>
+    </div>
+  </div>
+  <audio id="audio-match" src="https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae5e2.mp3"></audio>
+  <audio id="audio-fail" src="https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae5e2.mp3"></audio>
+  <audio id="audio-flip" src="https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae5e2.mp3"></audio>
+  <audio id="audio-victory" src="https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae5e2.mp3"></audio>
+  <script>
+    // 主题图案
+    const THEMES = {
+      emoji: [
+        '😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','😍','😘','😜','🤩','🥳','😎','🤓','🥰','😋','😏','😱','😡','🥶','🥵','🤠','👻','💩','🤖','👽','🦄','🐵','🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🐣','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦥','🦦','🦨','🦡','🐁','🐀','🐇','🐿','🦔'
+      ],
+      animal: [
+        '🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🐣','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦥','🦦','🦨','🦡','🐁','🐀','🐇','🐿','🦔'
+      ],
+      fruit: [
+        '🍎','🍏','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🥦','🥬','🥒','🌶','🌽','🥕','🧄','🧅','🥔','🍠','🥐','🥯','🍞','🥖','🥨','🧀','🥚','🍳','🥞','🧇','🥓','🥩','🍗','🍖','🌭','🍔','🍟','🍕','🥪','🥙','🧆','🌮','🌯','🥗','🥘','🍲','🍛','🍜','🍝','🍠','🍢','🍣','🍤','🍥','🥮','🍡','🥟','🥠','🥡','🦪','🍦','🍧','🍨','🍩','🍪','🎂','🍰','🧁','🥧','🍫','🍬','🍭','🍮','🍯','🍼','🥛','☕','🍵','🧃','🥤','🧋','🍶','🍺','🍻','🥂','🍷','🥃','🍸','🍹','🧉','🍾'
+      ]
+    };
+    // ... JS 逻辑将在后续补充 ...
+  </script>
+</body>
+</html> 

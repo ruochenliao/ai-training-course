@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数独解谜游戏</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4f8cff;
+      --secondary: #f5f7fa;
+      --danger: #ff4f4f;
+      --success: #4fcf7f;
+      --bg: #fff;
+      --text: #222;
+      --cell-bg: #fff;
+      --cell-note: #888;
+      --cell-border: #b2bec3;
+      --cell-border-bold: #4f8cff;
+      --cell-selected: #e0f0ff;
+      --cell-related: #f0f7ff;
+      --cell-error: #ffebee;
+      --cell-fixed: #e3eaf6;
+      --cell-highlight: #ffe082;
+      --night-bg: #23272e;
+      --night-cell: #2d313a;
+      --night-text: #e0e0e0;
+      --night-border: #444;
+      --night-selected: #2a3a4f;
+      --night-related: #2e3a4a;
+      --night-fixed: #2a3a4f;
+      --night-highlight: #4f8cff;
+    }
+    [data-theme="night"] {
+      --bg: var(--night-bg);
+      --cell-bg: var(--night-cell);
+      --text: var(--night-text);
+      --cell-border: var(--night-border);
+      --cell-border-bold: var(--night-highlight);
+      --cell-selected: var(--night-selected);
+      --cell-related: var(--night-related);
+      --cell-fixed: var(--night-fixed);
+      --cell-highlight: var(--night-highlight);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Arial', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 1.2rem 2rem 1rem 2rem;
+      text-align: center;
+      font-size: 2rem;
+      letter-spacing: 2px;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    main {
+      max-width: 520px;
+      margin: 1.5rem auto 0 auto;
+      background: var(--bg);
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+      padding: 1.5rem 1.2rem 2rem 1.2rem;
+      min-height: 60vh;
+      position: relative;
+      transition: background 0.3s;
+    }
+    .sudoku-board {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      grid-template-rows: repeat(9, 1fr);
+      gap: 0;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto 1.2rem auto;
+      aspect-ratio: 1/1;
+      background: var(--cell-border);
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      user-select: none;
+    }
+    .cell {
+      background: var(--cell-bg);
+      border: 1px solid var(--cell-border);
+      font-size: 1.5rem;
+      text-align: center;
+      vertical-align: middle;
+      position: relative;
+      transition: background 0.2s, color 0.2s;
+      cursor: pointer;
+      min-width: 0;
+      min-height: 0;
+      aspect-ratio: 1/1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      z-index: 1;
+    }
+    .cell.selected { background: var(--cell-selected); z-index: 2; }
+    .cell.related { background: var(--cell-related); }
+    .cell.fixed { background: var(--cell-fixed); color: #888; font-weight: bold; cursor: default; }
+    .cell.error { background: var(--cell-error); color: var(--danger); }
+    .cell.highlight { background: var(--cell-highlight); color: #fff; }
+    .cell .note {
+      position: absolute;
+      left: 0; top: 0; width: 100%; height: 100%;
+      font-size: 0.7rem;
+      color: var(--cell-note);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      align-items: center;
+      justify-items: center;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .cell .note span { opacity: 0.8; }
+    .cell .main-num { z-index: 2; }
+    /* 粗边框 */
+    .cell[data-bold-top] { border-top: 2.5px solid var(--cell-border-bold); }
+    .cell[data-bold-left] { border-left: 2.5px solid var(--cell-border-bold); }
+    .cell[data-bold-right] { border-right: 2.5px solid var(--cell-border-bold); }
+    .cell[data-bold-bottom] { border-bottom: 2.5px solid var(--cell-border-bold); }
+    .sudoku-keyboard {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+      margin: 1.2rem auto 0 auto;
+      max-width: 420px;
+      user-select: none;
+    }
+    .key-btn {
+      background: var(--secondary);
+      color: var(--primary);
+      border: 1.5px solid var(--cell-border);
+      border-radius: 8px;
+      font-size: 1.3rem;
+      padding: 0.7rem 0;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s, color 0.2s;
+      outline: none;
+    }
+    .key-btn:active, .key-btn.selected {
+      background: var(--primary);
+      color: #fff;
+    }
+    .game-settings {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .game-settings label {
+      font-weight: 500;
+      margin-right: 0.5rem;
+    }
+    .game-settings select, .game-settings input[type=checkbox] {
+      padding: 0.3rem 0.5rem;
+      border-radius: 6px;
+      border: 1px solid var(--cell-border);
+      font-size: 1rem;
+      background: var(--secondary);
+    }
+    .game-settings input[type=checkbox] {
+      transform: scale(1.2);
+      margin-right: 0.3rem;
+    }
+    .btn, button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1.2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+      font-weight: 500;
+    }
+    .btn.danger, button.danger { background: var(--danger); }
+    .btn.success, button.success { background: var(--success); }
+    .btn:disabled, button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .game-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .stat-board {
+      display: flex;
+      gap: 1.2rem;
+      align-items: center;
+    }
+    .stat-board span {
+      font-weight: bold;
+      color: var(--primary);
+    }
+    .tutorial {
+      background: #f5f7fa;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      color: #444;
+      text-align: left;
+    }
+    .theme-select {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .theme-thumb {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      background: #fff;
+      cursor: pointer;
+      transition: border 0.2s;
+    }
+    .theme-thumb.selected {
+      border: 2px solid var(--primary);
+    }
+    .sudoku-modal {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      display: none;
+    }
+    .sudoku-modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: #fff;
+      border-radius: 16px;
+      padding: 2rem 1.5rem 1.5rem 1.5rem;
+      min-width: 260px;
+      max-width: 90vw;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.12);
+      text-align: center;
+      position: relative;
+    }
+    .modal-content h2 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+    .modal-content .btn {
+      margin-top: 1.2rem;
+    }
+    @media (max-width: 700px) {
+      main { padding: 0.5rem; }
+      .sudoku-board, .sudoku-keyboard { max-width: 98vw; }
+    }
+    @media (max-width: 500px) {
+      header { font-size: 1.2rem; padding: 0.7rem 0.5rem; }
+      main { padding: 0.2rem; }
+      .game-settings { flex-direction: column; gap: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>数独解谜游戏</header>
+  <main>
+    <div class="tutorial" id="tutorial">
+      <b>玩法说明：</b>点击单元格输入数字，可切换笔记模式、夜间模式、难度等。支持候选数、错误检查、提示、保存进度、统计和教程。
+    </div>
+    <div class="game-settings" id="game-settings">
+      <div>
+        <label>难度：</label>
+        <select id="difficulty">
+          <option value="easy">简单</option>
+          <option value="medium">中等</option>
+          <option value="hard">困难</option>
+          <option value="expert">专家</option>
+        </select>
+      </div>
+      <div class="theme-select" id="theme-select">
+        <label>主题：</label>
+        <span class="theme-thumb selected" data-theme="default">🌞</span>
+        <span class="theme-thumb" data-theme="night">🌙</span>
+      </div>
+      <div>
+        <label><input type="checkbox" id="note-mode">笔记模式</label>
+      </div>
+      <div>
+        <label><input type="checkbox" id="error-check" checked>错误检查</label>
+      </div>
+      <div>
+        <button class="btn" id="btn-restart"><i class="fa fa-rotate"></i> 新游戏</button>
+      </div>
+    </div>
+    <div class="game-info">
+      <div class="stat-board">
+        <span>用时：<span id="timer">0:00</span></span>
+        <span>提示：<span id="hint-count">0</span></span>
+        <span>进度：<span id="progress">0%</span></span>
+      </div>
+      <div>
+        <button class="btn" id="btn-pause"><i class="fa fa-pause"></i> 暂停</button>
+        <button class="btn" id="btn-tutorial"><i class="fa fa-question-circle"></i> 教程</button>
+        <button class="btn" id="btn-stats"><i class="fa fa-chart-bar"></i> 统计</button>
+        <button class="btn" id="btn-daily"><i class="fa fa-calendar-day"></i> 每日挑战</button>
+      </div>
+    </div>
+    <div class="sudoku-board" id="sudoku-board"></div>
+    <div class="sudoku-keyboard" id="sudoku-keyboard"></div>
+  </main>
+  <div class="sudoku-modal" id="modal-victory">
+    <div class="modal-content">
+      <h2>🎉 恭喜完成！</h2>
+      <div id="victory-detail"></div>
+      <button class="btn success" id="btn-next-game">下一局</button>
+      <button class="btn" id="btn-close-victory">关闭</button>
+    </div>
+  </div>
+  <div class="sudoku-modal" id="modal-pause">
+    <div class="modal-content">
+      <h2>⏸ 游戏已暂停</h2>
+      <button class="btn success" id="btn-resume">继续游戏</button>
+      <button class="btn" id="btn-close-pause">关闭</button>
+    </div>
+  </div>
+  <div class="sudoku-modal" id="modal-tutorial">
+    <div class="modal-content">
+      <h2>数独教程</h2>
+      <div id="tutorial-content">（后续补充详细解题技巧与教学模式）</div>
+      <button class="btn" id="btn-close-tutorial">关闭</button>
+    </div>
+  </div>
+  <div class="sudoku-modal" id="modal-stats">
+    <div class="modal-content">
+      <h2>个人统计</h2>
+      <div id="stats-content">（后续补充统计数据与分析）</div>
+      <button class="btn" id="btn-close-stats">关闭</button>
+    </div>
+  </div>
+  <div class="sudoku-modal" id="modal-daily">
+    <div class="modal-content">
+      <h2>每日挑战</h2>
+      <div id="daily-content">（后续补充每日挑战功能）</div>
+      <button class="btn" id="btn-close-daily">关闭</button>
+    </div>
+  </div>
+  <script>
+    // ... JS 逻辑将在后续补充 ...
+  </script>
+</body>
+</html> 

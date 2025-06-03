@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>情侣照片墙</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    :root {
+      --primary: #ff6f91;
+      --secondary: #ffe5ec;
+      --bg-gradient: linear-gradient(135deg, #ffe5ec 0%, #b8c6db 100%);
+      --photo-border: #fff;
+      --photo-radius: 18px;
+      --photo-shadow: 0 4px 24px rgba(255,111,145,0.12);
+      --photo-hover: #fff0f6;
+      --heart-color: #ff6f91;
+      --desc-bg: rgba(255,255,255,0.92);
+      --desc-text: #d72660;
+      --title-color: #d72660;
+      --subtitle-color: #6c567b;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Arial', sans-serif;
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      color: #333;
+      transition: background 0.5s;
+    }
+    header {
+      text-align: center;
+      padding: 2rem 1rem 1rem 1rem;
+    }
+    #wall-title {
+      font-size: 2.2rem;
+      color: var(--title-color);
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin-bottom: 0.3rem;
+    }
+    #wall-subtitle {
+      font-size: 1.1rem;
+      color: var(--subtitle-color);
+      margin-bottom: 1.2rem;
+    }
+    .settings-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1.2rem;
+    }
+    .settings-bar label {
+      font-weight: 500;
+      margin-right: 0.5rem;
+    }
+    .settings-bar select, .settings-bar input[type=range], .settings-bar input[type=color] {
+      padding: 0.3rem 0.5rem;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      font-size: 1rem;
+      background: #fff;
+    }
+    .settings-bar input[type=file] {
+      display: none;
+    }
+    .settings-bar .btn, button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1.2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+      margin-right: 0.5rem;
+    }
+    .settings-bar .btn:active, button:active {
+      background: #d72660;
+    }
+    .photo-wall {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 1.2vw;
+      min-height: 320px;
+      margin: 0 auto 2rem auto;
+      position: relative;
+      transition: all 0.5s cubic-bezier(.4,2,.6,1);
+    }
+    .photo-item {
+      position: relative;
+      overflow: visible;
+      transition: transform 0.4s cubic-bezier(.4,2,.6,1), box-shadow 0.3s;
+      border-radius: var(--photo-radius);
+      box-shadow: var(--photo-shadow);
+      background: #fff;
+      cursor: pointer;
+      z-index: 1;
+    }
+    .photo-item img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: inherit;
+      transition: filter 0.3s;
+    }
+    .photo-item .desc {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%) translateY(100%);
+      min-width: 120px;
+      background: var(--desc-bg);
+      color: var(--desc-text);
+      border-radius: 0 0 16px 16px;
+      font-size: 0.95rem;
+      padding: 0.3rem 0.7rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      text-align: center;
+      z-index: 2;
+    }
+    .photo-item:hover, .photo-item:focus {
+      transform: scale(1.08) !important;
+      z-index: 2;
+    }
+    .photo-item:hover .desc, .photo-item:focus .desc {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .photo-item .date {
+      position: absolute;
+      top: 0.5rem;
+      left: 0.7rem;
+      background: rgba(255,255,255,0.8);
+      color: #d72660;
+      font-size: 0.85rem;
+      border-radius: 8px;
+      padding: 0.1rem 0.5rem;
+      z-index: 2;
+      opacity: 0.85;
+    }
+    .photo-item .memory {
+      position: absolute;
+      right: 0.7rem;
+      bottom: 0.5rem;
+      background: var(--heart-color);
+      color: #fff;
+      font-size: 1.1rem;
+      border-radius: 12px;
+      padding: 0.1rem 0.7rem;
+      z-index: 2;
+      opacity: 0.9;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .photo-item .memory:hover {
+      background: #d72660;
+    }
+    .photo-item.heart-shape img {
+      clip-path: path('M50 15 C50 0, 90 0, 90 30 C90 60, 50 90, 50 100 C50 90, 10 60, 10 30 C10 0, 50 0, 50 15 Z');
+    }
+    .photo-item.square img {
+      border-radius: 0;
+    }
+    .photo-item.rounded img {
+      border-radius: 18px;
+    }
+    .photo-item.circle img {
+      border-radius: 50%;
+    }
+    .photo-item.heart img {
+      clip-path: url(#heartClip);
+    }
+    .photo-item.selected {
+      outline: 3px solid var(--primary);
+      z-index: 3;
+    }
+    /* 布局动画 */
+    .photo-wall.animating .photo-item {
+      transition: transform 0.7s cubic-bezier(.4,2,.6,1), box-shadow 0.3s;
+    }
+    /* 全屏查看 */
+    .fullscreen-viewer {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+    }
+    .fullscreen-viewer.active {
+      display: flex;
+    }
+    .fullscreen-img {
+      max-width: 90vw;
+      max-height: 70vh;
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(255,111,145,0.18);
+      background: #fff;
+      margin-bottom: 1rem;
+      object-fit: contain;
+      transition: box-shadow 0.3s;
+    }
+    .fullscreen-desc {
+      color: #fff;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      background: rgba(255,111,145,0.7);
+      border-radius: 10px;
+      padding: 0.3rem 1.2rem;
+      max-width: 80vw;
+      text-align: center;
+    }
+    .fullscreen-controls {
+      display: flex;
+      gap: 1.2rem;
+      margin-bottom: 1.2rem;
+      align-items: center;
+      justify-content: center;
+    }
+    .fullscreen-controls .btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1.2rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    .fullscreen-controls .btn:active {
+      background: #d72660;
+    }
+    .fullscreen-close {
+      position: absolute;
+      top: 2.5vh;
+      right: 3vw;
+      font-size: 2.2rem;
+      color: #fff;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 1001;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    .fullscreen-close:hover {
+      opacity: 1;
+    }
+    /* 爱心动画 */
+    .heart-anim {
+      position: absolute;
+      pointer-events: none;
+      z-index: 10;
+      animation: heart-float 2.2s linear forwards;
+      font-size: 2.2rem;
+      color: var(--heart-color);
+      opacity: 0.8;
+    }
+    @keyframes heart-float {
+      0% { transform: scale(0.7) translateY(0); opacity: 0.8; }
+      60% { transform: scale(1.2) translateY(-40px); opacity: 1; }
+      100% { transform: scale(1) translateY(-80px); opacity: 0; }
+    }
+    /* 季节特效 */
+    .petal {
+      position: fixed;
+      pointer-events: none;
+      z-index: 999;
+      width: 32px; height: 32px;
+      opacity: 0.7;
+      animation: petal-fall 6s linear infinite;
+    }
+    @keyframes petal-fall {
+      0% { transform: translateY(-40px) rotate(0deg); opacity: 0.7; }
+      80% { opacity: 0.7; }
+      100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+    }
+    /* 响应式 */
+    @media (max-width: 900px) {
+      .photo-wall { gap: 2vw; }
+    }
+    @media (max-width: 700px) {
+      header { padding: 1.2rem 0.5rem 0.7rem 0.5rem; }
+      #wall-title { font-size: 1.3rem; }
+      .photo-wall { gap: 2vw; }
+      .photo-item { min-width: 60px; min-height: 60px; }
+    }
+    @media (max-width: 500px) {
+      .settings-bar { flex-direction: column; gap: 0.5rem; }
+      .photo-wall { gap: 2vw; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div id="wall-title">我们的甜蜜回忆</div>
+    <div id="wall-subtitle">记录属于我们的每一个温馨瞬间</div>
+  </header>
+  <div class="settings-bar">
+    <label><input type="file" id="photo-upload" multiple accept="image/*"><span class="btn" id="btn-upload"><i class="fa fa-image"></i> 上传照片</span></label>
+    <label>布局：
+      <select id="layout-mode">
+        <option value="grid">宫格</option>
+        <option value="heart">心形</option>
+        <option value="rotate">旋转相册</option>
+      </select>
+    </label>
+    <label>宫格大小：
+      <select id="grid-size">
+        <option value="1">1</option>
+        <option value="9">9</option>
+        <option value="16">16</option>
+        <option value="25" selected>25</option>
+      </select>
+    </label>
+    <label>边框：
+      <select id="border-style">
+        <option value="rounded">圆角</option>
+        <option value="square">方形</option>
+        <option value="circle">圆形</option>
+        <option value="heart">爱心</option>
+      </select>
+    </label>
+    <label>背景：
+      <select id="bg-style">
+        <option value="gradient">渐变</option>
+        <option value="hearts">爱心</option>
+        <option value="custom">自定义</option>
+      </select>
+      <input type="file" id="bg-upload" accept="image/*" style="display:none;">
+    </label>
+    <label>主题色：<input type="color" id="theme-color" value="#ff6f91"></label>
+    <label>动画：
+      <select id="anim-type">
+        <option value="zoom">缩放</option>
+        <option value="fade">淡入淡出</option>
+        <option value="slide">滑动</option>
+        <option value="rotate">旋转</option>
+      </select>
+    </label>
+    <label>切换速度：<input type="range" id="anim-speed" min="0.3" max="2.5" step="0.1" value="1.0"> <span id="anim-speed-label">1.0s</span></label>
+    <span class="btn" id="btn-slideshow"><i class="fa fa-play"></i> 幻灯片</span>
+    <span class="btn" id="btn-export"><i class="fa fa-download"></i> 导出图片</span>
+    <span class="btn" id="btn-music"><i class="fa fa-music"></i> 背景音乐</span>
+    <span class="btn" id="btn-save"><i class="fa fa-save"></i> 保存配置</span>
+    <span class="btn" id="btn-load"><i class="fa fa-folder-open"></i> 载入配置</span>
+  </div>
+  <div class="photo-wall" id="photo-wall"></div>
+  <div class="fullscreen-viewer" id="fullscreen-viewer">
+    <button class="fullscreen-close" id="fullscreen-close"><i class="fa fa-times"></i></button>
+    <img class="fullscreen-img" id="fullscreen-img">
+    <div class="fullscreen-desc" id="fullscreen-desc"></div>
+    <div class="fullscreen-controls">
+      <button class="btn" id="fullscreen-prev"><i class="fa fa-chevron-left"></i></button>
+      <button class="btn" id="fullscreen-next"><i class="fa fa-chevron-right"></i></button>
+      <button class="btn" id="fullscreen-memory"><i class="fa fa-heart"></i> 爱的记忆</button>
+    </div>
+  </div>
+  <audio id="bg-music" loop></audio>
+  <script>
+    // ... JS 逻辑将在后续补充 ...
+  </script>
+</body>
+</html> 

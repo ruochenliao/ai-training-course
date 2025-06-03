@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个性化祝福生成工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💝</text></svg>') no-repeat center;
+            opacity: 0.1;
+            background-size: 100px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .input-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 3px solid #ff6b6b;
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .checkbox-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .checkbox-item.selected {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            border-color: #fff;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            display: none;
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generate-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transition: all 0.6s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .generate-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .blessing-card {
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            position: relative;
+            transition: all 0.3s ease;
+            border-left: 4px solid #ff6b6b;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .blessing-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .blessing-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 15px;
+            min-height: 60px;
+            resize: none;
+            border: none;
+            background: transparent;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .blessing-text:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            background: #fff;
+            border: 2px solid #ff6b6b;
+            color: #ff6b6b;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .action-btn:hover {
+            background: #ff6b6b;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ff6b6b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .style-preview {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+
+            .card-actions {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                justify-content: center;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💝 个性化祝福生成器</h1>
+            <p>为每一个特别的人，定制专属的祝福语</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">
+                    <span>📝</span>
+                    基本信息
+                </h2>
+                
+                <div class="form-group">
+                    <label for="recipientName">收礼人姓名</label>
+                    <input type="text" id="recipientName" placeholder="请输入收礼人的姓名..." maxlength="20">
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">性别</label>
+                    <select id="gender">
+                        <option value="">请选择性别</option>
+                        <option value="male">男性</option>
+                        <option value="female">女性</option>
+                        <option value="other">其他</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="age">年龄</label>
+                    <input type="number" id="age" placeholder="请输入年龄" min="1" max="120">
+                </div>
+
+                <div class="form-group">
+                    <label for="relationship">关系</label>
+                    <select id="relationship">
+                        <option value="">请选择关系</option>
+                        <option value="friend">朋友</option>
+                        <option value="family">家人</option>
+                        <option value="colleague">同事</option>
+                        <option value="lover">恋人</option>
+                        <option value="classmate">同学</option>
+                        <option value="teacher">老师</option>
+                        <option value="student">学生</option>
+                        <option value="other">其他</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>祝福类型</label>
+                    <div class="checkbox-group" id="blessingTypes">
+                        <div class="checkbox-item" data-value="birthday">
+                            <input type="checkbox" id="birthday" value="birthday">
+                            <label for="birthday">🎂 生日</label>
+                        </div>
+                        <div class="checkbox-item" data-value="holiday">
+                            <input type="checkbox" id="holiday" value="holiday">
+                            <label for="holiday">🎉 节日</label>
+                        </div>
+                        <div class="checkbox-item" data-value="graduation">
+                            <input type="checkbox" id="graduation" value="graduation">
+                            <label for="graduation">🎓 毕业</label>
+                        </div>
+                        <div class="checkbox-item" data-value="promotion">
+                            <input type="checkbox" id="promotion" value="promotion">
+                            <label for="promotion">📈 升职</label>
+                        </div>
+                        <div class="checkbox-item" data-value="wedding">
+                            <input type="checkbox" id="wedding" value="wedding">
+                            <label for="wedding">💒 结婚</label>
+                        </div>
+                        <div class="checkbox-item" data-value="newborn">
+                            <input type="checkbox" id="newborn" value="newborn">
+                            <label for="newborn">👶 新生儿</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>祝福风格</label>
+                    <div class="checkbox-group" id="blessingStyles">
+                        <div class="checkbox-item" data-value="formal">
+                            <input type="checkbox" id="formal" value="formal">
+                            <label for="formal">🎩 正式</label>
+                        </div>
+                        <div class="checkbox-item" data-value="humorous">
+                            <input type="checkbox" id="humorous" value="humorous">
+                            <label for="humorous">😄 幽默</label>
+                        </div>
+                        <div class="checkbox-item" data-value="warm">
+                            <input type="checkbox" id="warm" value="warm">
+                            <label for="warm">🤗 温馨</label>
+                        </div>
+                        <div class="checkbox-item" data-value="poetic">
+                            <input type="checkbox" id="poetic" value="poetic">
+                            <label for="poetic">🌸 诗意</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="generate-btn" id="generateBtn">
+                    <span>✨ 生成祝福语</span>
+                </button>
+            </div>
+
+            <div class="results-section">
+                <h2 class="section-title">
+                    <span>💌</span>
+                    生成的祝福语
+                </h2>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>正在为您精心准备祝福语...</p>
+                </div>
+
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-state-icon">💝</div>
+                    <h3>还没有生成祝福语</h3>
+                    <p>请填写左侧信息，然后点击生成按钮</p>
+                </div>
+
+                <div id="blessingsContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        class BlessingGenerator {
+            constructor() {
+                this.initializeElements();
+                this.bindEvents();
+                this.blessingsData = this.initializeBlessingsData();
+            }
+
+            initializeElements() {
+                this.recipientName = document.getElementById('recipientName');
+                this.gender = document.getElementById('gender');
+                this.age = document.getElementById('age');
+                this.relationship = document.getElementById('relationship');
+                this.generateBtn = document.getElementById('generateBtn');
+                this.loading = document.getElementById('loading');
+                this.emptyState = document.getElementById('emptyState');
+                this.blessingsContainer = document.getElementById('blessingsContainer');
+                this.toast = document.getElementById('toast');
+                
+                this.blessingTypes = document.getElementById('blessingTypes');
+                this.blessingStyles = document.getElementById('blessingStyles');
+            }
+
+            bindEvents() {
+                this.generateBtn.addEventListener('click', () => this.generateBlessings());
+                
+                // 复选框点击事件
+                this.blessingTypes.addEventListener('click', (e) => this.handleCheckboxClick(e));
+                this.blessingStyles.addEventListener('click', (e) => this.handleCheckboxClick(e));
+                
+                // 输入验证
+                [this.recipientName, this.gender, this.age, this.relationship].forEach(input => {
+                    input.addEventListener('input', () => this.validateForm());
+                    input.addEventListener('change', () => this.validateForm());
+                });
+                
+                // 回车键生成
+                document.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && this.validateForm()) {
+                        this.generateBlessings();
+                    }
+                });
+            }
+
+            handleCheckboxClick(e) {
+                const item = e.target.closest('.checkbox-item');
+                if (item) {
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    const isMultiSelect = item.closest('#blessingStyles') !== null;
+                    
+                    if (isMultiSelect) {
+                        // 风格可以多选
+                        checkbox.checked = !checkbox.checked;
+                        item.classList.toggle('selected', checkbox.checked);
+                    } else {
+                        // 类型单选
+                        const parent = item.parentElement;
+                        parent.querySelectorAll('.checkbox-item').forEach(otherItem => {
+                            otherItem.classList.remove('selected');
+                            otherItem.querySelector('input').checked = false;
+                        });
+                        
+                        checkbox.checked = true;
+                        item.classList.add('selected');
+                    }
+                    
+                    this.validateForm();
+                }
+            }
+
+            validateForm() {
+                const name = this.recipientName.value.trim();
+                const gender = this.gender.value;
+                const age = this.age.value;
+                const relationship = this.relationship.value;
+                const selectedType = document.querySelector('#blessingTypes .checkbox-item.selected');
+                const selectedStyles = document.querySelectorAll('#blessingStyles .checkbox-item.selected');
+                
+                const isValid = name && gender && age && relationship && selectedType && selectedStyles.length > 0;
+                
+                this.generateBtn.disabled = !isValid;
+                return isValid;
+            }
+
+            async generateBlessings() {
+                if (!this.validateForm()) {
+                    this.showToast('请填写完整信息', 'error');
+                    return;
+                }
+                
+                this.showLoading();
+                
+                // 模拟API调用延迟
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                const formData = this.getFormData();
+                const blessings = this.generateBlessingsText(formData);
+                
+                this.displayBlessings(blessings);
+                this.hideLoading();
+            }
+
+            getFormData() {
+                const selectedType = document.querySelector('#blessingTypes .checkbox-item.selected')?.dataset.value;
+                const selectedStyles = Array.from(document.querySelectorAll('#blessingStyles .checkbox-item.selected'))
+                    .map(item => item.dataset.value);
+                
+                return {
+                    name: this.recipientName.value.trim(),
+                    gender: this.gender.value,
+                    age: parseInt(this.age.value),
+                    relationship: this.relationship.value,
+                    type: selectedType,
+                    styles: selectedStyles
+                };
+            }
+
+            generateBlessingsText(data) {
+                const templates = this.blessingsData[data.type] || this.blessingsData.birthday;
+                const blessings = [];
+                
+                data.styles.forEach(style => {
+                    const styleTemplates = templates[style] || templates.warm;
+                    const randomTemplates = this.getRandomItems(styleTemplates, 2);
+                    
+                    randomTemplates.forEach(template => {
+                        const blessing = this.personalizeBlessing(template, data);
+                        blessings.push({
+                            text: blessing,
+                            style: style,
+                            id: Date.now() + Math.random()
+                        });
+                    });
+                });
+                
+                // 如果祝福语少于3条，补充一些
+                while (blessings.length < 3) {
+                    const randomStyle = data.styles[Math.floor(Math.random() * data.styles.length)];
+                    const styleTemplates = templates[randomStyle] || templates.warm;
+                    const template = styleTemplates[Math.floor(Math.random() * styleTemplates.length)];
+                    const blessing = this.personalizeBlessing(template, data);
+                    
+                    blessings.push({
+                        text: blessing,
+                        style: randomStyle,
+                        id: Date.now() + Math.random()
+                    });
+                }
+                
+                return blessings.slice(0, 5); // 最多5条
+            }
+
+            personalizeBlessing(template, data) {
+                const genderTerms = {
+                    male: { pronoun: '他', title: data.age < 18 ? '小伙子' : data.age < 40 ? '先生' : '大哥' },
+                    female: { pronoun: '她', title: data.age < 18 ? '小姑娘' : data.age < 40 ? '女士' : '大姐' },
+                    other: { pronoun: 'TA', title: '朋友' }
+                };
+                
+                const relationshipTerms = {
+                    friend: '好朋友',
+                    family: '家人',
+                    colleague: '同事',
+                    lover: '亲爱的',
+                    classmate: '同学',
+                    teacher: '老师',
+                    student: '学生',
+                    other: '朋友'
+                };
+                
+                const terms = genderTerms[data.gender] || genderTerms.other;
+                const relationTerm = relationshipTerms[data.relationship] || '朋友';
+                
+                return template
+                    .replace(/\{name\}/g, data.name)
+                    .replace(/\{pronoun\}/g, terms.pronoun)
+                    .replace(/\{title\}/g, terms.title)
+                    .replace(/\{relation\}/g, relationTerm)
+                    .replace(/\{age\}/g, data.age);
+            }
+
+            getRandomItems(array, count) {
+                const shuffled = [...array].sort(() => 0.5 - Math.random());
+                return shuffled.slice(0, count);
+            }
+
+            displayBlessings(blessings) {
+                this.blessingsContainer.innerHTML = '';
+                
+                blessings.forEach((blessing, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'blessing-card fade-in';
+                    card.style.animationDelay = `${index * 0.1}s`;
+                    
+                    card.innerHTML = `
+                        <textarea class="blessing-text" data-id="${blessing.id}">${blessing.text}</textarea>
+                        <div class="card-actions">
+                            <button class="action-btn" onclick="blessingGenerator.copyBlessing('${blessing.id}')">
+                                📋 复制
+                            </button>
+                            <button class="action-btn" onclick="blessingGenerator.regenerateBlessing('${blessing.id}')">
+                                🔄 重新生成
+                            </button>
+                        </div>
+                    `;
+                    
+                    this.blessingsContainer.appendChild(card);
+                });
+                
+                this.emptyState.style.display = 'none';
+            }
+
+            async copyBlessing(id) {
+                const textarea = document.querySelector(`[data-id="${id}"]`);
+                const text = textarea.value;
+                
+                try {
+                    await navigator.clipboard.writeText(text);
+                    this.showToast('祝福语已复制到剪贴板！', 'success');
+                } catch (err) {
+                    // 降级方案
+                    textarea.select();
+                    document.execCommand('copy');
+                    this.showToast('祝福语已复制到剪贴板！', 'success');
+                }
+            }
+
+            regenerateBlessing(id) {
+                const textarea = document.querySelector(`[data-id="${id}"]`);
+                const formData = this.getFormData();
+                const templates = this.blessingsData[formData.type] || this.blessingsData.birthday;
+                const randomStyle = formData.styles[Math.floor(Math.random() * formData.styles.length)];
+                const styleTemplates = templates[randomStyle] || templates.warm;
+                const template = styleTemplates[Math.floor(Math.random() * styleTemplates.length)];
+                const newBlessing = this.personalizeBlessing(template, formData);
+                
+                textarea.value = newBlessing;
+                textarea.parentElement.classList.add('pulse');
+                setTimeout(() => {
+                    textarea.parentElement.classList.remove('pulse');
+                }, 1000);
+                
+                this.showToast('祝福语已重新生成！', 'success');
+            }
+
+            showLoading() {
+                this.loading.classList.add('show');
+                this.emptyState.style.display = 'none';
+                this.blessingsContainer.style.display = 'none';
+            }
+
+            hideLoading() {
+                this.loading.classList.remove('show');
+                this.blessingsContainer.style.display = 'block';
+            }
+
+            showToast(message, type = 'success') {
+                this.toast.textContent = message;
+                this.toast.className = `toast ${type}`;
+                this.toast.classList.add('show');
+                
+                setTimeout(() => {
+                    this.toast.classList.remove('show');
+                }, 3000);
+            }
+
+            initializeBlessingsData() {
+                return {
+                    birthday: {
+                        formal: [
+                            '祝{name}生日快乐！愿{pronoun}在新的一岁里身体健康，工作顺利，万事如意！',
+                            '在{name}的生日这个特殊的日子里，祝{pronoun}生日快乐，前程似锦，幸福安康！',
+                            '值此{name}生日之际，谨祝{pronoun}生日快乐，事业有成，家庭幸福！',
+                            '祝我们的{relation}{name}生日快乐！愿{pronoun}的每一天都充满阳光和快乐！'
+                        ],
+                        humorous: [
+                            '祝{name}生日快乐！又老了一岁，但是智慧也增长了一岁哦！🎂',
+                            '{name}，生日快乐！记得许愿的时候要大声一点，这样愿望才能听得见！',
+                            '生日快乐{name}！虽然蛋糕上的蜡烛越来越多，但{pronoun}在我心中永远18岁！',
+                            '祝{name}生日快乐！愿{pronoun}的烦恼像{pronoun}的年龄一样...等等，这个比喻好像不太对！😄'
+                        ],
+                        warm: [
+                            '亲爱的{name}，生日快乐！愿{pronoun}的生活像生日蛋糕一样甜蜜美好！',
+                            '{name}，在{pronoun}的生日这天，想对{pronoun}说：有{pronoun}这样的{relation}真的很幸福！',
+                            '祝{name}生日快乐！愿{pronoun}的每一个愿望都能实现，每一天都充满温暖和爱！',
+                            '生日快乐，{name}！感谢{pronoun}一直以来的陪伴，愿我们的友谊地久天长！'
+                        ],
+                        poetic: [
+                            '岁月如歌，{name}如花。愿{pronoun}在人生的道路上，永远绽放最美的光华。生日快乐！',
+                            '时光荏苒，{name}依然如初见时那般美好。愿{pronoun}的生日如春花般绚烂！',
+                            '一年一度的生日，是时光对{name}最温柔的馈赠。愿{pronoun}岁岁年年，平安喜乐！',
+                            '生日的钟声为{name}而鸣，愿{pronoun}的人生如诗如画，美好如梦！'
+                        ]
+                    },
+                    holiday: {
+                        formal: [
+                            '值此佳节之际，祝{name}节日快乐！愿{pronoun}和家人团团圆圆，幸福美满！',
+                            '祝{name}节日快乐！愿{pronoun}在这个美好的节日里，收获满满的快乐和祝福！',
+                            '在这个特殊的节日里，祝{name}节日快乐！愿{pronoun}的生活如节日般精彩！',
+                            '祝我们的{relation}{name}节日快乐！愿{pronoun}在新的一年里心想事成！'
+                        ],
+                        humorous: [
+                            '{name}，节日快乐！记得多吃点好吃的，毕竟节日的卡路里是不算数的！😄',
+                            '祝{name}节日快乐！愿{pronoun}的红包像节日的烟花一样多多多！',
+                            '节日快乐{name}！愿{pronoun}的假期比节日还要长！',
+                            '{name}，节日快乐！愿{pronoun}的快乐像放假一样持续不断！'
+                        ],
+                        warm: [
+                            '亲爱的{name}，节日快乐！愿{pronoun}和家人度过一个温馨美好的节日！',
+                            '{name}，在这个温暖的节日里，想对{pronoun}说：有{pronoun}真好！节日快乐！',
+                            '祝{name}节日快乐！愿{pronoun}的生活像节日一样充满温暖和爱！',
+                            '节日快乐，{name}！愿{pronoun}的每一天都像节日一样快乐！'
+                        ],
+                        poetic: [
+                            '佳节如约而至，{name}如花绽放。愿{pronoun}在这个美好的节日里，收获满满的幸福！',
+                            '节日的钟声响起，为{name}送上最美的祝福。愿{pronoun}岁岁平安，年年如意！',
+                            '在这个诗意的节日里，祝{name}节日快乐！愿{pronoun}的生活如诗如画！',
+                            '节日的月亮为{name}而圆，愿{pronoun}的人生如月光般皎洁美好！'
+                        ]
+                    },
+                    graduation: {
+                        formal: [
+                            '祝贺{name}顺利毕业！愿{pronoun}在人生的新阶段里，前程似锦，事业有成！',
+                            '恭喜{name}毕业！愿{pronoun}带着知识的力量，在人生的道路上勇敢前行！',
+                            '祝{name}毕业快乐！愿{pronoun}的未来如{pronoun}的学业一样优秀出色！',
+                            '值此{name}毕业之际，祝{pronoun}前程似锦，未来可期！'
+                        ],
+                        humorous: [
+                            '恭喜{name}毕业！终于可以不用熬夜写作业了...但是要开始熬夜工作了！😄',
+                            '{name}毕业快乐！从此告别考试，迎接人生这场更大的考试！',
+                            '祝{name}毕业快乐！愿{pronoun}的工资比{pronoun}的成绩还要高！',
+                            '恭喜{name}毕业！现在{pronoun}可以光明正大地说：我是社会人了！'
+                        ],
+                        warm: [
+                            '亲爱的{name}，恭喜{pronoun}毕业！愿{pronoun}带着梦想，勇敢地走向未来！',
+                            '{name}，看着{pronoun}毕业，真为{pronoun}感到骄傲！愿{pronoun}的未来更加精彩！',
+                            '祝{name}毕业快乐！愿{pronoun}在人生的新篇章里，写下最美的故事！',
+                            '毕业快乐，{name}！愿{pronoun}永远保持那份初心和热情！'
+                        ],
+                        poetic: [
+                            '学海无涯，{name}已扬帆起航。愿{pronoun}在知识的海洋里，乘风破浪，勇往直前！',
+                            '毕业如花开，{name}如蝶飞。愿{pronoun}在人生的花园里，自由翱翔！',
+                            '书山有路，{name}已登顶。愿{pronoun}在人生的山峰上，看到更美的风景！',
+                            '毕业的钟声为{name}而鸣，愿{pronoun}的人生如诗如歌，美好如梦！'
+                        ]
+                    },
+                    promotion: {
+                        formal: [
+                            '祝贺{name}升职成功！愿{pronoun}在新的岗位上，发挥所长，再创佳绩！',
+                            '恭喜{name}获得升职！愿{pronoun}在事业的道路上，步步高升，前程似锦！',
+                            '祝{name}升职快乐！愿{pronoun}的事业如{pronoun}的能力一样出色！',
+                            '值此{name}升职之际，祝{pronoun}工作顺利，事业有成！'
+                        ],
+                        humorous: [
+                            '恭喜{name}升职！现在{pronoun}可以光明正大地指挥别人了！😄',
+                            '{name}升职快乐！记得升职后要请客哦，我已经想好要吃什么了！',
+                            '祝{name}升职成功！愿{pronoun}的工资和职位一起升高！',
+                            '恭喜{name}升职！从此{pronoun}就是传说中的"领导"了！'
+                        ],
+                        warm: [
+                            '亲爱的{name}，恭喜{pronoun}升职！{pronoun}的努力终于得到了回报！',
+                            '{name}，看到{pronoun}升职，真为{pronoun}感到高兴！{pronoun}值得这一切！',
+                            '祝{name}升职快乐！愿{pronoun}在新的岗位上，继续发光发热！',
+                            '升职快乐，{name}！愿{pronoun}的事业越来越辉煌！'
+                        ],
+                        poetic: [
+                            '宝剑锋从磨砺出，{name}今日展锋芒。愿{pronoun}在事业的高峰上，俯瞰人生！',
+                            '升职如登山，{name}已达新高度。愿{pronoun}在成功的道路上，越走越远！',
+                            '事业如花开，{name}正值春天。愿{pronoun}的职场人生，四季如春！',
+                            '升职的喜讯为{name}而来，愿{pronoun}的事业如日中天，光芒万丈！'
+                        ]
+                    },
+                    wedding: {
+                        formal: [
+                            '祝贺{name}新婚快乐！愿{pronoun}和爱人白头偕老，幸福美满！',
+                            '恭喜{name}步入婚姻殿堂！愿{pronoun}们的爱情如美酒般越陈越香！',
+                            '祝{name}新婚愉快！愿{pronoun}们的婚姻生活甜蜜幸福，永远相爱！',
+                            '值此{name}大喜之日，祝{pronoun}们百年好合，早生贵子！'
+                        ],
+                        humorous: [
+                            '恭喜{name}结婚！从此{pronoun}就要开始"幸福"的婚姻生活了！😄',
+                            '{name}新婚快乐！记得要好好疼爱{pronoun}的另一半哦！',
+                            '祝{name}新婚快乐！愿{pronoun}们的爱情比蜜还甜，比糖还腻！',
+                            '恭喜{name}结婚！从此{pronoun}就是有家室的人了！'
+                        ],
+                        warm: [
+                            '亲爱的{name}，恭喜{pronoun}找到了人生的另一半！愿{pronoun}们永远幸福！',
+                            '{name}，看到{pronoun}这么幸福，我也很开心！祝{pronoun}们白头偕老！',
+                            '祝{name}新婚快乐！愿{pronoun}们的爱情故事永远美好！',
+                            '新婚快乐，{name}！愿{pronoun}们的家庭充满爱与温暖！'
+                        ],
+                        poetic: [
+                            '良缘天定，{name}今日成佳偶。愿{pronoun}们的爱情如诗如画，永远美好！',
+                            '新婚如花开，{name}正值春天。愿{pronoun}们的婚姻四季如春，永远绽放！',
+                            '爱情如酒香，{name}今日品佳酿。愿{pronoun}们的感情越陈越香，历久弥新！',
+                            '新婚的钟声为{name}而鸣，愿{pronoun}们的爱情如钟声般悠远绵长！'
+                        ]
+                    },
+                    newborn: {
+                        formal: [
+                            '祝贺{name}喜得贵子！愿宝宝健康成长，聪明伶俐！',
+                            '恭喜{name}升级为父母！愿{pronoun}的宝宝平安健康，快乐成长！',
+                            '祝{name}添丁之喜！愿宝宝给{pronoun}们的家庭带来更多欢声笑语！',
+                            '值此{name}喜得麟儿之际，祝宝宝健康成长，{pronoun}们家庭幸福美满！'
+                        ],
+                        humorous: [
+                            '恭喜{name}升级为奶爸/奶妈！从此告别睡懒觉的日子了！😄',
+                            '{name}，恭喜{pronoun}！现在{pronoun}有了24小时的"小闹钟"了！',
+                            '祝{name}喜得宝宝！愿{pronoun}的钱包和耐心都足够大！',
+                            '恭喜{name}！{pronoun}的家里多了一个"小老板"！'
+                        ],
+                        warm: [
+                            '亲爱的{name}，恭喜{pronoun}当爸爸/妈妈了！愿宝宝给{pronoun}带来无尽的快乐！',
+                            '{name}，看到{pronoun}有了宝宝，真为{pronoun}感到幸福！愿{pronoun}们一家三口永远快乐！',
+                            '祝{name}喜得宝宝！愿{pronoun}在育儿的路上，收获满满的幸福！',
+                            '恭喜{name}！愿{pronoun}的宝宝健康快乐，{pronoun}们的家庭温馨美满！'
+                        ],
+                        poetic: [
+                            '新生如花开，{name}家添新丁。愿宝宝如花般美丽，如诗般纯真！',
+                            '小天使降临，{name}家庭更圆满。愿宝宝带来无尽的欢声笑语！',
+                            '生命如歌，{name}家奏响新乐章。愿宝宝的人生如歌般美妙！',
+                            '新生的喜悦为{name}而来，愿宝宝的未来如星辰般璀璨！'
+                        ]
+                    }
+                };
+            }
+        }
+
+        // 初始化应用
+        const blessingGenerator = new BlessingGenerator();
+    </script>
+</body>
+</html>

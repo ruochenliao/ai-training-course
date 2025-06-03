@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>个人理财预算追踪器</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4f8cff;
+      --secondary: #f5f7fa;
+      --danger: #ff4f4f;
+      --success: #4fcf7f;
+      --bg: #fff;
+      --text: #222;
+      --border: #e0e0e0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Arial', sans-serif;
+      background: var(--secondary);
+      color: var(--text);
+    }
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 1rem 2rem;
+      text-align: center;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+      font-weight: bold;
+    }
+    nav {
+      display: flex;
+      justify-content: space-around;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    nav button {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 1rem 0.5rem;
+      font-size: 1rem;
+      color: var(--primary);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    nav button.active, nav button:hover {
+      background: var(--secondary);
+      color: var(--text);
+      font-weight: bold;
+    }
+    main {
+      max-width: 900px;
+      margin: 1rem auto;
+      background: var(--bg);
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      padding: 1.5rem;
+      min-height: 60vh;
+    }
+    .section { display: none; }
+    .section.active { display: block; }
+    h2 { margin-top: 0; }
+    .flex-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .flex-col { display: flex; flex-direction: column; gap: 0.5rem; }
+    .input-group { margin-bottom: 1rem; }
+    label { font-weight: 500; margin-bottom: 0.2rem; display: block; }
+    input, select, textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-size: 1rem;
+      background: var(--secondary);
+    }
+    input[type="file"] { padding: 0.2rem; }
+    button, .btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 0.5rem 1.2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+    }
+    button.danger, .btn.danger { background: var(--danger); }
+    button.success, .btn.success { background: var(--success); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.3rem;
+      text-align: left;
+    }
+    th { background: var(--secondary); }
+    .progress-bar {
+      background: var(--secondary);
+      border-radius: 5px;
+      overflow: hidden;
+      height: 18px;
+      margin: 0.3rem 0;
+    }
+    .progress {
+      height: 100%;
+      background: var(--primary);
+      transition: width 0.4s;
+    }
+    .progress.danger { background: var(--danger); }
+    .progress.success { background: var(--success); }
+    .category-color {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+    .chart-container {
+      width: 100%;
+      max-width: 400px;
+      margin: 1rem auto;
+    }
+    .photo-thumb {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+    }
+    @media (max-width: 700px) {
+      main { padding: 0.5rem; }
+      .flex-row { flex-direction: column; }
+      nav button { font-size: 0.95rem; padding: 0.7rem 0.2rem; }
+    }
+    @media (max-width: 500px) {
+      header { font-size: 1.1rem; padding: 0.7rem 0.5rem; }
+      main { padding: 0.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>个人理财预算追踪器</header>
+  <nav>
+    <button class="active" data-section="records"><i class="fa fa-pen"></i> 收支记录</button>
+    <button data-section="budget"><i class="fa fa-wallet"></i> 预算设置</button>
+    <button data-section="dashboard"><i class="fa fa-chart-pie"></i> 财务仪表盘</button>
+    <button data-section="goals"><i class="fa fa-bullseye"></i> 储蓄目标</button>
+    <button data-section="health"><i class="fa fa-heartbeat"></i> 财务健康</button>
+    <button data-section="report"><i class="fa fa-file-export"></i> 报表导出</button>
+  </nav>
+  <main>
+    <!-- 收支记录 -->
+    <section class="section active" id="section-records">
+      <h2>收支记录</h2>
+      <form id="form-transaction" class="flex-row" autocomplete="off">
+        <div class="flex-col" style="flex:2;min-width:180px;">
+          <div class="input-group">
+            <label>类型</label>
+            <select id="trans-type" required>
+              <option value="income">收入</option>
+              <option value="expense">支出</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>金额</label>
+            <input type="number" id="trans-amount" min="0.01" step="0.01" required>
+          </div>
+          <div class="input-group">
+            <label>货币</label>
+            <select id="trans-currency"></select>
+          </div>
+          <div class="input-group">
+            <label>分类</label>
+            <select id="trans-category"></select>
+            <button type="button" id="btn-manage-category" style="margin-top:0.3rem;">管理分类</button>
+          </div>
+        </div>
+        <div class="flex-col" style="flex:2;min-width:180px;">
+          <div class="input-group">
+            <label>日期</label>
+            <input type="date" id="trans-date" required>
+          </div>
+          <div class="input-group">
+            <label>备注</label>
+            <input type="text" id="trans-note" maxlength="50">
+          </div>
+          <div class="input-group">
+            <label>照片/收据</label>
+            <input type="file" id="trans-photo" accept="image/*">
+          </div>
+          <div class="input-group">
+            <label><input type="checkbox" id="trans-recurring"> 定期交易</label>
+          </div>
+          <button type="submit" class="success">添加记录</button>
+        </div>
+      </form>
+      <div id="recurring-list" style="margin-bottom:1rem;"></div>
+      <div class="table-wrap">
+        <table id="table-transactions">
+          <thead>
+            <tr>
+              <th>日期</th><th>类型</th><th>金额</th><th>货币</th><th>分类</th><th>备注</th><th>照片</th><th>操作</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+    <!-- 预算设置 -->
+    <section class="section" id="section-budget">
+      <h2>预算设置与监控</h2>
+      <form id="form-budget" class="flex-row" autocomplete="off">
+        <div class="flex-col" style="flex:2;min-width:180px;">
+          <div class="input-group">
+            <label>月度总预算</label>
+            <input type="number" id="budget-total" min="0" step="0.01" required>
+          </div>
+        </div>
+        <div class="flex-col" style="flex:2;min-width:180px;">
+          <div class="input-group">
+            <label>货币</label>
+            <select id="budget-currency"></select>
+          </div>
+          <button type="submit" class="success">保存预算</button>
+        </div>
+      </form>
+      <div id="category-budget-list"></div>
+      <div id="budget-progress"></div>
+    </section>
+    <!-- 财务仪表盘 -->
+    <section class="section" id="section-dashboard">
+      <h2>财务仪表盘</h2>
+      <div id="dashboard-summary" class="flex-row"></div>
+      <div class="chart-container">
+        <canvas id="pie-category"></canvas>
+      </div>
+      <div class="chart-container">
+        <canvas id="bar-category"></canvas>
+      </div>
+      <div class="chart-container">
+        <canvas id="line-trend"></canvas>
+      </div>
+      <div id="compare-summary"></div>
+    </section>
+    <!-- 储蓄目标 -->
+    <section class="section" id="section-goals">
+      <h2>储蓄目标追踪</h2>
+      <form id="form-goal" class="flex-row" autocomplete="off">
+        <div class="flex-col" style="flex:2;min-width:180px;">
+          <div class="input-group">
+            <label>目标名称</label>
+            <input type="text" id="goal-name" maxlength="20" required>
+          </div>
+          <div class="input-group">
+            <label>目标金额</label>
+            <input type="number" id="goal-amount" min="0.01" step="0.01" required>
+          </div>
+        </div>
+        <div class="flex-col" style="flex:2;min-width:180px;">
+          <div class="input-group">
+            <label>截止日期</label>
+            <input type="date" id="goal-deadline" required>
+          </div>
+          <button type="submit" class="success">添加目标</button>
+        </div>
+      </form>
+      <div class="table-wrap">
+        <table id="table-goals">
+          <thead>
+            <tr><th>名称</th><th>目标金额</th><th>已储蓄</th><th>截止日期</th><th>进度</th><th>建议</th><th>操作</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+    <!-- 财务健康分析 -->
+    <section class="section" id="section-health">
+      <h2>财务健康分析</h2>
+      <div id="health-summary"></div>
+      <div id="health-suggestions"></div>
+    </section>
+    <!-- 报表与导出 -->
+    <section class="section" id="section-report">
+      <h2>报表与导出</h2>
+      <form id="form-report" class="flex-row" autocomplete="off">
+        <div class="flex-col" style="flex:2;min-width:180px;">
+          <div class="input-group">
+            <label>起始日期</label>
+            <input type="date" id="report-start">
+          </div>
+        </div>
+        <div class="flex-col" style="flex:2;min-width:180px;">
+          <div class="input-group">
+            <label>结束日期</label>
+            <input type="date" id="report-end">
+          </div>
+          <button type="button" id="btn-generate-report" class="success">生成报表</button>
+        </div>
+      </form>
+      <div id="report-content"></div>
+      <button type="button" id="btn-export-csv">导出CSV</button>
+      <button type="button" id="btn-export-pdf">导出PDF</button>
+    </section>
+  </main>
+  <div id="modal-category" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.2);z-index:100;align-items:center;justify-content:center;">
+    <div style="background:#fff;padding:1.5rem 1rem;border-radius:10px;min-width:260px;max-width:90vw;">
+      <h3>管理分类</h3>
+      <div id="category-list"></div>
+      <form id="form-category" style="margin-top:1rem;">
+        <input type="text" id="category-name" maxlength="10" placeholder="新分类名称" required>
+        <input type="color" id="category-color" value="#4f8cff">
+        <button type="submit" class="success">添加</button>
+        <button type="button" id="btn-close-category">关闭</button>
+      </form>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // 货币列表
+    const currencyList = [
+      { code: 'CNY', name: '人民币' },
+      { code: 'USD', name: '美元' },
+      { code: 'EUR', name: '欧元' },
+      { code: 'HKD', name: '港币' },
+      { code: 'JPY', name: '日元' },
+      { code: 'GBP', name: '英镑' },
+      { code: 'AUD', name: '澳元' },
+      { code: 'CAD', name: '加元' },
+      { code: 'SGD', name: '新元' },
+      { code: 'TWD', name: '新台币' },
+    ];
+    // 默认分类
+    const defaultCategories = [
+      { name: '餐饮', type: 'expense', color: '#ffb347' },
+      { name: '交通', type: 'expense', color: '#4f8cff' },
+      { name: '房租', type: 'expense', color: '#ff4f4f' },
+      { name: '购物', type: 'expense', color: '#a259ff' },
+      { name: '娱乐', type: 'expense', color: '#4fcf7f' },
+      { name: '医疗', type: 'expense', color: '#ff7f7f' },
+      { name: '工资', type: 'income', color: '#4fcf7f' },
+      { name: '奖金', type: 'income', color: '#ffd700' },
+      { name: '理财收益', type: 'income', color: '#00b894' },
+      { name: '其他', type: 'expense', color: '#b2bec3' },
+    ];
+    // 本地存储键
+    const LS_KEYS = {
+      transactions: 'pb_transactions',
+      categories: 'pb_categories',
+      recurring: 'pb_recurring',
+      budget: 'pb_budget',
+      goals: 'pb_goals',
+      health: 'pb_health',
+    };
+    // 工具函数
+    function saveData(key, data) {
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+    function loadData(key, fallback) {
+      const d = localStorage.getItem(key);
+      if (d) return JSON.parse(d);
+      return fallback;
+    }
+    function formatDate(d) {
+      if (!d) return '';
+      const date = new Date(d);
+      return date.toLocaleDateString('zh-CN');
+    }
+    function formatAmount(a) {
+      return parseFloat(a).toFixed(2);
+    }
+    function getCategoryColor(name, type) {
+      const cats = loadData(LS_KEYS.categories, defaultCategories);
+      const c = cats.find(c => c.name === name && c.type === type);
+      return c ? c.color : '#b2bec3';
+    }
+    function getCurrencyName(code) {
+      const c = currencyList.find(c => c.code === code);
+      return c ? c.name : code;
+    }
+    function getMonthStr(date) {
+      const d = new Date(date);
+      return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    }
+    function getYearStr(date) {
+      const d = new Date(date);
+      return d.getFullYear()+'';
+    }
+    function getTodayStr() {
+      const d = new Date();
+      return d.toISOString().slice(0,10);
+    }
+    // 初始化货币下拉
+    function initCurrencySelect(selId, val) {
+      const sel = document.getElementById(selId);
+      sel.innerHTML = '';
+      currencyList.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.code;
+        opt.textContent = c.name + ' (' + c.code + ')';
+        sel.appendChild(opt);
+      });
+      if (val) sel.value = val;
+    }
+    // 初始化分类下拉
+    function initCategorySelect(selId, type, val) {
+      const sel = document.getElementById(selId);
+      sel.innerHTML = '';
+      const cats = loadData(LS_KEYS.categories, defaultCategories).filter(c => c.type === type);
+      cats.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.name;
+        opt.textContent = c.name;
+        sel.appendChild(opt);
+      });
+      if (val) sel.value = val;
+    }
+    // 分类管理弹窗
+    function showCategoryModal() {
+      document.getElementById('modal-category').style.display = 'flex';
+      renderCategoryList();
+    }
+    function hideCategoryModal() {
+      document.getElementById('modal-category').style.display = 'none';
+    }
+    function renderCategoryList() {
+      const cats = loadData(LS_KEYS.categories, defaultCategories);
+      const list = document.getElementById('category-list');
+      list.innerHTML = '';
+      cats.forEach((c, i) => {
+        const div = document.createElement('div');
+        div.innerHTML = `<span class="category-color" style="background:${c.color}"></span>${c.name} (${c.type}) <button class="danger" data-i="${i}">删除</button>`;
+        list.appendChild(div);
+      });
+      list.querySelectorAll('button.danger').forEach(btn => {
+        btn.onclick = function() {
+          const cats = loadData(LS_KEYS.categories, defaultCategories);
+          cats.splice(this.dataset.i, 1);
+          saveData(LS_KEYS.categories, cats);
+          renderCategoryList();
+          initCategorySelect('trans-category', document.getElementById('trans-type').value);
+        };
+      });
+    }
+    // 导航切换
+    document.querySelectorAll('nav button').forEach(btn => {
+      btn.onclick = function() {
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('section-' + this.dataset.section).classList.add('active');
+        if (this.dataset.section === 'dashboard') renderDashboard();
+        if (this.dataset.section === 'budget') renderBudget();
+        if (this.dataset.section === 'goals') renderGoals();
+        if (this.dataset.section === 'health') renderHealth();
+        if (this.dataset.section === 'report') renderReport();
+      };
+    });
+    // 收支类型切换时分类下拉变化
+    document.getElementById('trans-type').onchange = function() {
+      initCategorySelect('trans-category', this.value);
+    };
+    // 管理分类弹窗
+    document.getElementById('btn-manage-category').onclick = showCategoryModal;
+    document.getElementById('btn-close-category').onclick = hideCategoryModal;
+    // 添加分类
+    document.getElementById('form-category').onsubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('category-name').value.trim();
+      const color = document.getElementById('category-color').value;
+      if (!name) return;
+      const type = document.getElementById('trans-type').value;
+      let cats = loadData(LS_KEYS.categories, defaultCategories);
+      if (cats.find(c => c.name === name && c.type === type)) {
+        alert('该分类已存在');
+        return;
+      }
+      cats.push({ name, type, color });
+      saveData(LS_KEYS.categories, cats);
+      renderCategoryList();
+      initCategorySelect('trans-category', type, name);
+      document.getElementById('category-name').value = '';
+    };
+    // 初始化
+    function init() {
+      initCurrencySelect('trans-currency', 'CNY');
+      initCurrencySelect('budget-currency', 'CNY');
+      initCategorySelect('trans-category', 'expense');
+      document.getElementById('trans-date').value = getTodayStr();
+      renderTransactions();
+      renderRecurringList();
+      renderBudget();
+      renderGoals();
+      renderDashboard();
+      renderHealth();
+      renderReport();
+    }
+    // 收支记录表格渲染
+    function renderTransactions() {
+      const tbody = document.querySelector('#table-transactions tbody');
+      const data = loadData(LS_KEYS.transactions, []);
+      tbody.innerHTML = '';
+      data.slice().reverse().forEach((t, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${formatDate(t.date)}</td>
+          <td>${t.type === 'income' ? '收入' : '支出'}</td>
+          <td>${formatAmount(t.amount)}</td>
+          <td>${t.currency}</td>
+          <td><span class="category-color" style="background:${getCategoryColor(t.category, t.type)}"></span>${t.category}</td>
+          <td>${t.note||''}</td>
+          <td>${t.photo ? `<img src="${t.photo}" class="photo-thumb">` : ''}</td>
+          <td><button class="danger" data-i="${data.length-1-i}">删除</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      tbody.querySelectorAll('button.danger').forEach(btn => {
+        btn.onclick = function() {
+          let data = loadData(LS_KEYS.transactions, []);
+          data.splice(this.dataset.i, 1);
+          saveData(LS_KEYS.transactions, data);
+          renderTransactions();
+          renderDashboard();
+          renderBudget();
+          renderGoals();
+          renderHealth();
+        };
+      });
+    }
+    // 添加收支记录
+    document.getElementById('form-transaction').onsubmit = async function(e) {
+      e.preventDefault();
+      const type = document.getElementById('trans-type').value;
+      const amount = parseFloat(document.getElementById('trans-amount').value);
+      const currency = document.getElementById('trans-currency').value;
+      const category = document.getElementById('trans-category').value;
+      const date = document.getElementById('trans-date').value;
+      const note = document.getElementById('trans-note').value.trim();
+      const recurring = document.getElementById('trans-recurring').checked;
+      let photo = '';
+      const file = document.getElementById('trans-photo').files[0];
+      if (file) {
+        photo = await new Promise(res => {
+          const reader = new FileReader();
+          reader.onload = e => res(e.target.result);
+          reader.readAsDataURL(file);
+        });
+      }
+      let data = loadData(LS_KEYS.transactions, []);
+      data.push({ type, amount, currency, category, date, note, photo });
+      saveData(LS_KEYS.transactions, data);
+      if (recurring) {
+        let rec = loadData(LS_KEYS.recurring, []);
+        rec.push({ type, amount, currency, category, note, photo, interval: 'monthly', start: date });
+        saveData(LS_KEYS.recurring, rec);
+        renderRecurringList();
+      }
+      renderTransactions();
+      renderDashboard();
+      renderBudget();
+      renderGoals();
+      renderHealth();
+      this.reset();
+      document.getElementById('trans-date').value = getTodayStr();
+    };
+    // 定期交易自动填充
+    function renderRecurringList() {
+      const rec = loadData(LS_KEYS.recurring, []);
+      const div = document.getElementById('recurring-list');
+      if (!rec.length) { div.innerHTML = ''; return; }
+      div.innerHTML = '<b>定期交易：</b>';
+      rec.forEach((r, i) => {
+        div.innerHTML += `<span style="margin-right:1rem;">${r.category} ${r.amount}${r.currency} <button class="danger" data-i="${i}">删除</button></span>`;
+      });
+      div.querySelectorAll('button.danger').forEach(btn => {
+        btn.onclick = function() {
+          let rec = loadData(LS_KEYS.recurring, []);
+          rec.splice(this.dataset.i, 1);
+          saveData(LS_KEYS.recurring, rec);
+          renderRecurringList();
+        };
+      });
+    }
+    // 预算设置与监控
+    function renderBudget() {
+      const budget = loadData(LS_KEYS.budget, { total: 0, currency: 'CNY', categories: {} });
+      document.getElementById('budget-total').value = budget.total || '';
+      document.getElementById('budget-currency').value = budget.currency || 'CNY';
+      // 分类预算
+      const cats = loadData(LS_KEYS.categories, defaultCategories).filter(c => c.type === 'expense');
+      let html = '<h4>分类预算</h4>';
+      cats.forEach(c => {
+        html += `<div class="input-group"><span class="category-color" style="background:${c.color}"></span>${c.name} <input type="number" min="0" step="0.01" id="budget-cat-${c.name}" value="${budget.categories[c.name]||''}" style="width:100px;"> ${budget.currency}</div>`;
+      });
+      html += '<button id="btn-save-cat-budget" class="success">保存分类预算</button>';
+      document.getElementById('category-budget-list').innerHTML = html;
+      document.getElementById('btn-save-cat-budget').onclick = function() {
+        const budget = loadData(LS_KEYS.budget, { total: 0, currency: 'CNY', categories: {} });
+        cats.forEach(c => {
+          const v = parseFloat(document.getElementById('budget-cat-' + c.name).value);
+          if (!isNaN(v)) budget.categories[c.name] = v;
+        });
+        saveData(LS_KEYS.budget, budget);
+        renderBudget();
+      };
+      // 预算进度
+      renderBudgetProgress();
+    }
+    document.getElementById('form-budget').onsubmit = function(e) {
+      e.preventDefault();
+      const total = parseFloat(document.getElementById('budget-total').value);
+      const currency = document.getElementById('budget-currency').value;
+      let budget = loadData(LS_KEYS.budget, { total: 0, currency: 'CNY', categories: {} });
+      budget.total = total;
+      budget.currency = currency;
+      saveData(LS_KEYS.budget, budget);
+      renderBudget();
+    };
+    // 预算进度条
+    function renderBudgetProgress() {
+      const budget = loadData(LS_KEYS.budget, { total: 0, currency: 'CNY', categories: {} });
+      const data = loadData(LS_KEYS.transactions, []);
+      const month = getMonthStr(getTodayStr());
+      const monthData = data.filter(t => t.type === 'expense' && getMonthStr(t.date) === month && t.currency === budget.currency);
+      const spent = monthData.reduce((s, t) => s + t.amount, 0);
+      let html = `<h4>本月总预算进度</h4><div>已用：${formatAmount(spent)} / ${formatAmount(budget.total)} ${budget.currency}</div>`;
+      let percent = budget.total ? Math.min(100, spent / budget.total * 100) : 0;
+      html += `<div class="progress-bar"><div class="progress${spent>budget.total?' danger':''}" style="width:${percent}%;"></div></div>`;
+      if (spent > budget.total) html += `<div style="color:var(--danger);font-weight:bold;">⚠️ 已超出预算！</div>`;
+      // 分类预算
+      html += '<h4>分类预算进度</h4>';
+      Object.keys(budget.categories).forEach(cat => {
+        const catSpent = monthData.filter(t => t.category === cat).reduce((s, t) => s + t.amount, 0);
+        const catBudget = budget.categories[cat];
+        let percent = catBudget ? Math.min(100, catSpent / catBudget * 100) : 0;
+        html += `<div>${cat}：${formatAmount(catSpent)} / ${formatAmount(catBudget)} ${budget.currency}`;
+        html += `<div class="progress-bar"><div class="progress${catSpent>catBudget?' danger':''}" style="width:${percent}%;"></div></div>`;
+        if (catSpent > catBudget) html += `<span style="color:var(--danger);font-weight:bold;">⚠️ 超出预算</span>`;
+        html += '</div>';
+      });
+      // 预算建议
+      if (budget.total > 0) {
+        const lastMonth = new Date();
+        lastMonth.setMonth(lastMonth.getMonth()-1);
+        const lastMonthStr = getMonthStr(lastMonth);
+        const lastMonthData = data.filter(t => t.type === 'expense' && getMonthStr(t.date) === lastMonthStr && t.currency === budget.currency);
+        const lastSpent = lastMonthData.reduce((s, t) => s + t.amount, 0);
+        if (spent > budget.total) {
+          html += `<div style="color:var(--danger);">建议：本月支出已超预算，请适当减少非必要支出。</div>`;
+        } else if (spent > lastSpent) {
+          html += `<div style="color:var(--danger);">本月支出高于上月，建议关注消费习惯。</div>`;
+        } else {
+          html += `<div style="color:var(--success);">本月支出低于上月，继续保持！</div>`;
+        }
+      }
+      document.getElementById('budget-progress').innerHTML = html;
+    }
+    // 财务仪表盘
+    let pieChart, barChart, lineChart;
+    function renderDashboard() {
+      const data = loadData(LS_KEYS.transactions, []);
+      const budget = loadData(LS_KEYS.budget, { currency: 'CNY' });
+      const month = getMonthStr(getTodayStr());
+      const monthData = data.filter(t => getMonthStr(t.date) === month && t.currency === budget.currency);
+      const income = monthData.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+      const expense = monthData.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+      const net = income - expense;
+      // 概览
+      let html = `<div>本月收入：<b style="color:var(--success);">${formatAmount(income)}</b> ${budget.currency}</div>`;
+      html += `<div>本月支出：<b style="color:var(--danger);">${formatAmount(expense)}</b> ${budget.currency}</div>`;
+      html += `<div>净结余：<b>${formatAmount(net)}</b> ${budget.currency}</div>`;
+      document.getElementById('dashboard-summary').innerHTML = html;
+      // 饼图-支出类别占比
+      const cats = loadData(LS_KEYS.categories, defaultCategories).filter(c => c.type === 'expense');
+      const catMap = {};
+      cats.forEach(c => catMap[c.name] = 0);
+      monthData.filter(t => t.type === 'expense').forEach(t => {
+        catMap[t.category] = (catMap[t.category]||0) + t.amount;
+      });
+      const pieData = {
+        labels: Object.keys(catMap),
+        datasets: [{
+          data: Object.values(catMap),
+          backgroundColor: cats.map(c => c.color),
+        }]
+      };
+      if (pieChart) pieChart.destroy();
+      pieChart = new Chart(document.getElementById('pie-category'), {
+        type: 'pie', data: pieData, options: { plugins: { legend: { position: 'bottom' } } }
+      });
+      // 条形图-支出类别
+      const barData = {
+        labels: Object.keys(catMap),
+        datasets: [{
+          label: '支出',
+          data: Object.values(catMap),
+          backgroundColor: cats.map(c => c.color),
+        }]
+      };
+      if (barChart) barChart.destroy();
+      barChart = new Chart(document.getElementById('bar-category'), {
+        type: 'bar', data: barData, options: { plugins: { legend: { display: false } } }
+      });
+      // 趋势图（日/周/月/年）
+      const trend = {};
+      monthData.filter(t => t.type === 'expense').forEach(t => {
+        const d = t.date;
+        trend[d] = (trend[d]||0) + t.amount;
+      });
+      const days = Object.keys(trend).sort();
+      const trendData = {
+        labels: days,
+        datasets: [{
+          label: '每日支出',
+          data: days.map(d => trend[d]),
+          borderColor: '#4f8cff',
+          backgroundColor: 'rgba(79,140,255,0.1)',
+          fill: true,
+        }]
+      };
+      if (lineChart) lineChart.destroy();
+      lineChart = new Chart(document.getElementById('line-trend'), {
+        type: 'line', data: trendData, options: { plugins: { legend: { display: false } } }
+      });
+      // 同比环比
+      const lastMonth = new Date();
+      lastMonth.setMonth(lastMonth.getMonth()-1);
+      const lastMonthStr = getMonthStr(lastMonth);
+      const lastMonthData = data.filter(t => getMonthStr(t.date) === lastMonthStr && t.currency === budget.currency);
+      const lastIncome = lastMonthData.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+      const lastExpense = lastMonthData.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+      let compare = `<div>上月收入：${formatAmount(lastIncome)}，支出：${formatAmount(lastExpense)}</div>`;
+      compare += `<div>收入同比：${lastIncome?((income-lastIncome)/lastIncome*100).toFixed(1):'--'}%，支出同比：${lastExpense?((expense-lastExpense)/lastExpense*100).toFixed(1):'--'}%</div>`;
+      document.getElementById('compare-summary').innerHTML = compare;
+    }
+    // 储蓄目标
+    function renderGoals() {
+      const tbody = document.querySelector('#table-goals tbody');
+      const goals = loadData(LS_KEYS.goals, []);
+      const data = loadData(LS_KEYS.transactions, []);
+      tbody.innerHTML = '';
+      goals.forEach((g, i) => {
+        // 计算已储蓄
+        const saved = data.filter(t => t.type === 'income' && t.category === g.name && t.currency === g.currency).reduce((s, t) => s + t.amount, 0);
+        const percent = Math.min(100, saved / g.amount * 100);
+        // 预测
+        const months = Math.max(1, Math.ceil((new Date(g.deadline) - new Date())/1000/60/60/24/30));
+        const remain = Math.max(0, g.amount - saved);
+        const suggest = months > 0 ? `建议每月存入${formatAmount(remain/months)}${g.currency}` : '已到期';
+        const progressColor = percent >= 100 ? 'success' : '';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${g.name}</td>
+          <td>${formatAmount(g.amount)} ${g.currency}</td>
+          <td>${formatAmount(saved)} ${g.currency}</td>
+          <td>${formatDate(g.deadline)}</td>
+          <td><div class="progress-bar"><div class="progress ${progressColor}" style="width:${percent}%;"></div></div>${percent.toFixed(1)}%</td>
+          <td>${suggest}</td>
+          <td><button class="danger" data-i="${i}">删除</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      tbody.querySelectorAll('button.danger').forEach(btn => {
+        btn.onclick = function() {
+          let goals = loadData(LS_KEYS.goals, []);
+          goals.splice(this.dataset.i, 1);
+          saveData(LS_KEYS.goals, goals);
+          renderGoals();
+        };
+      });
+    }
+    document.getElementById('form-goal').onsubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('goal-name').value.trim();
+      const amount = parseFloat(document.getElementById('goal-amount').value);
+      const deadline = document.getElementById('goal-deadline').value;
+      const currency = loadData(LS_KEYS.budget, { currency: 'CNY' }).currency;
+      let goals = loadData(LS_KEYS.goals, []);
+      if (goals.find(g => g.name === name)) {
+        alert('该目标已存在');
+        return;
+      }
+      goals.push({ name, amount, deadline, currency });
+      saveData(LS_KEYS.goals, goals);
+      renderGoals();
+      this.reset();
+    };
+    // 财务健康分析
+    function renderHealth() {
+      const data = loadData(LS_KEYS.transactions, []);
+      const budget = loadData(LS_KEYS.budget, { currency: 'CNY' });
+      const month = getMonthStr(getTodayStr());
+      const monthData = data.filter(t => getMonthStr(t.date) === month && t.currency === budget.currency);
+      const income = monthData.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+      const expense = monthData.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+      const savings = income - expense;
+      const necessaryCats = ['房租','餐饮','交通','医疗'];
+      const necessary = monthData.filter(t => t.type === 'expense' && necessaryCats.includes(t.category)).reduce((s, t) => s + t.amount, 0);
+      const savingRate = income ? (savings/income*100) : 0;
+      const necessaryRate = expense ? (necessary/expense*100) : 0;
+      let score = 80;
+      if (savingRate > 30) score += 10;
+      if (necessaryRate < 60) score += 10;
+      if (expense > income) score -= 20;
+      if (savingRate < 10) score -= 10;
+      let html = `<div>储蓄率：${savingRate.toFixed(1)}%</div>`;
+      html += `<div>必要支出占比：${necessaryRate.toFixed(1)}%</div>`;
+      html += `<div>财务健康评分：<b>${score}</b> / 100</div>`;
+      document.getElementById('health-summary').innerHTML = html;
+      // 建议
+      let suggestions = '';
+      if (savingRate < 10) suggestions += '<div>建议：提高储蓄率，减少非必要支出。</div>';
+      if (necessaryRate > 70) suggestions += '<div>建议：优化必要支出结构，如房租、餐饮等。</div>';
+      if (expense > income) suggestions += '<div>警告：本月支出已超收入，请警惕财务风险。</div>';
+      // 异常消费
+      const cats = loadData(LS_KEYS.categories, defaultCategories).filter(c => c.type === 'expense');
+      cats.forEach(c => {
+        const catSpent = monthData.filter(t => t.category === c.name).reduce((s, t) => s + t.amount, 0);
+        const lastMonth = new Date();
+        lastMonth.setMonth(lastMonth.getMonth()-1);
+        const lastMonthStr = getMonthStr(lastMonth);
+        const lastMonthData = data.filter(t => getMonthStr(t.date) === lastMonthStr && t.currency === budget.currency && t.type === 'expense' && t.category === c.name);
+        const lastSpent = lastMonthData.reduce((s, t) => s + t.amount, 0);
+        if (lastSpent && catSpent > lastSpent * 1.5) {
+          suggestions += `<div>本月${c.name}支出异常增多，请关注。</div>`;
+        }
+      });
+      if (!suggestions) suggestions = '<div>暂无异常，财务状况良好。</div>';
+      document.getElementById('health-suggestions').innerHTML = suggestions;
+    }
+    // 报表与导出
+    function renderReport() {
+      document.getElementById('report-content').innerHTML = '';
+    }
+    document.getElementById('btn-generate-report').onclick = function() {
+      const start = document.getElementById('report-start').value;
+      const end = document.getElementById('report-end').value;
+      const data = loadData(LS_KEYS.transactions, []);
+      let filtered = data;
+      if (start) filtered = filtered.filter(t => t.date >= start);
+      if (end) filtered = filtered.filter(t => t.date <= end);
+      let html = '<table><thead><tr><th>日期</th><th>类型</th><th>金额</th><th>货币</th><th>分类</th><th>备注</th></tr></thead><tbody>';
+      filtered.forEach(t => {
+        html += `<tr><td>${formatDate(t.date)}</td><td>${t.type==='income'?'收入':'支出'}</td><td>${formatAmount(t.amount)}</td><td>${t.currency}</td><td>${t.category}</td><td>${t.note||''}</td></tr>`;
+      });
+      html += '</tbody></table>';
+      document.getElementById('report-content').innerHTML = html;
+    };
+    // 导出CSV
+    document.getElementById('btn-export-csv').onclick = function() {
+      const data = loadData(LS_KEYS.transactions, []);
+      let csv = '日期,类型,金额,货币,分类,备注\n';
+      data.forEach(t => {
+        csv += `${t.date},${t.type==='income'?'收入':'支出'},${formatAmount(t.amount)},${t.currency},${t.category},${t.note||''}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '财务数据.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    // 导出PDF（简单实现，截图表格）
+    document.getElementById('btn-export-pdf').onclick = function() {
+      alert('如需导出PDF，请使用浏览器打印功能（Ctrl+P），选择"另存为PDF"即可。');
+    };
+    // 定期交易自动填充（每次加载自动补充）
+    function autoFillRecurring() {
+      const rec = loadData(LS_KEYS.recurring, []);
+      let data = loadData(LS_KEYS.transactions, []);
+      let changed = false;
+      rec.forEach(r => {
+        let lastDate = r.start;
+        data.filter(t => t.type === r.type && t.category === r.category && t.amount === r.amount && t.currency === r.currency && t.note === r.note).forEach(t => {
+          if (t.date > lastDate) lastDate = t.date;
+        });
+        // 只补充到今天
+        let d = new Date(lastDate);
+        d.setMonth(d.getMonth()+1);
+        while (d <= new Date()) {
+          data.push({ ...r, date: d.toISOString().slice(0,10) });
+          changed = true;
+          d.setMonth(d.getMonth()+1);
+        }
+      });
+      if (changed) saveData(LS_KEYS.transactions, data);
+    }
+    autoFillRecurring();
+    init();
+  </script>
+</body>
+</html> 

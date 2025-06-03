@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>货币换算工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .converter-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        .currency-input {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .amount-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+        }
+
+        .amount-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .currency-select {
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1.1em;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .currency-select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .swap-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 1.5em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        .swap-btn:hover {
+            transform: rotate(180deg) scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .convert-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.3);
+        }
+
+        .result-section {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .result-amount {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .result-info {
+            color: #7f8c8d;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .copy-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin: 0 auto;
+            display: inline-block;
+        }
+
+        .copy-btn:hover {
+            background: #219a52;
+            transform: translateY(-1px);
+        }
+
+        .history-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .history-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #4facfe;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .history-conversion {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .history-rate {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .history-time {
+            color: #95a5a6;
+            font-size: 0.8em;
+            float: right;
+        }
+
+        .clear-history {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .clear-history:hover {
+            background: #c0392b;
+        }
+
+        .currency-symbol {
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        .rate-display {
+            background: rgba(79, 172, 254, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #2c3e50;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px;
+            }
+
+            .converter-section, .history-section {
+                padding: 20px;
+            }
+
+            .currency-input {
+                flex-direction: column;
+            }
+
+            .amount-input, .currency-select {
+                width: 100%;
+                min-width: auto;
+            }
+
+            .result-amount {
+                font-size: 2em;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💱 货币换算工具</h1>
+            <p>支持多种货币实时换算，简单易用</p>
+        </div>
+
+        <div class="main-content">
+            <div class="converter-section">
+                <div class="input-group">
+                    <label>从</label>
+                    <div class="currency-input">
+                        <input type="number" id="fromAmount" class="amount-input" placeholder="输入金额" step="0.01" min="0">
+                        <select id="fromCurrency" class="currency-select">
+                            <option value="CNY">🇨🇳 人民币 (CNY)</option>
+                            <option value="USD">🇺🇸 美元 (USD)</option>
+                            <option value="EUR">🇪🇺 欧元 (EUR)</option>
+                            <option value="GBP">🇬🇧 英镑 (GBP)</option>
+                            <option value="JPY">🇯🇵 日元 (JPY)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="swap-btn" id="swapBtn" title="交换货币">⇅</button>
+
+                <div class="input-group">
+                    <label>到</label>
+                    <div class="currency-input">
+                        <input type="number" id="toAmount" class="amount-input" placeholder="转换结果" readonly>
+                        <select id="toCurrency" class="currency-select">
+                            <option value="CNY">🇨🇳 人民币 (CNY)</option>
+                            <option value="USD" selected>🇺🇸 美元 (USD)</option>
+                            <option value="EUR">🇪🇺 欧元 (EUR)</option>
+                            <option value="GBP">🇬🇧 英镑 (GBP)</option>
+                            <option value="JPY">🇯🇵 日元 (JPY)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="convert-btn" id="convertBtn">💱 立即换算</button>
+
+                <div class="rate-display" id="rateDisplay" style="display: none;">
+                    <span id="rateInfo"></span>
+                </div>
+            </div>
+
+            <div class="result-section" id="resultSection" style="display: none;">
+                <div class="result-amount" id="resultAmount"></div>
+                <div class="result-info" id="resultInfo"></div>
+                <button class="copy-btn" id="copyBtn">📋 复制结果</button>
+            </div>
+
+            <div class="history-section">
+                <div class="history-title">📊 换算记录</div>
+                <div id="historyList">
+                    <p style="text-align: center; color: #7f8c8d; padding: 20px;">暂无换算记录</p>
+                </div>
+                <button class="clear-history" id="clearHistoryBtn" style="display: none;">🗑️ 清空记录</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // 汇率数据 (基于近期汇率，以USD为基准)
+        const exchangeRates = {
+            USD: 1,
+            CNY: 7.25,
+            EUR: 0.85,
+            GBP: 0.73,
+            JPY: 110.50
+        };
+
+        // 货币符号
+        const currencySymbols = {
+            USD: '$',
+            CNY: '¥',
+            EUR: '€',
+            GBP: '£',
+            JPY: '¥'
+        };
+
+        // 货币名称
+        const currencyNames = {
+            USD: '美元',
+            CNY: '人民币',
+            EUR: '欧元',
+            GBP: '英镑',
+            JPY: '日元'
+        };
+
+        // DOM 元素
+        const fromAmount = document.getElementById('fromAmount');
+        const toAmount = document.getElementById('toAmount');
+        const fromCurrency = document.getElementById('fromCurrency');
+        const toCurrency = document.getElementById('toCurrency');
+        const convertBtn = document.getElementById('convertBtn');
+        const swapBtn = document.getElementById('swapBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const resultSection = document.getElementById('resultSection');
+        const resultAmount = document.getElementById('resultAmount');
+        const resultInfo = document.getElementById('resultInfo');
+        const rateDisplay = document.getElementById('rateDisplay');
+        const rateInfo = document.getElementById('rateInfo');
+        const historyList = document.getElementById('historyList');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const notification = document.getElementById('notification');
+
+        // 换算历史记录
+        let conversionHistory = JSON.parse(localStorage.getItem('currencyHistory')) || [];
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            displayHistory();
+            
+            // 实时换算
+            fromAmount.addEventListener('input', function() {
+                if (this.value) {
+                    convertCurrency();
+                } else {
+                    toAmount.value = '';
+                    hideResult();
+                }
+            });
+
+            fromCurrency.addEventListener('change', function() {
+                if (fromAmount.value) {
+                    convertCurrency();
+                }
+            });
+
+            toCurrency.addEventListener('change', function() {
+                if (fromAmount.value) {
+                    convertCurrency();
+                }
+            });
+        });
+
+        // 货币换算函数
+        function convertCurrency() {
+            const amount = parseFloat(fromAmount.value);
+            const from = fromCurrency.value;
+            const to = toCurrency.value;
+
+            if (!amount || amount <= 0) {
+                showNotification('请输入有效的金额', 'error');
+                return;
+            }
+
+            if (from === to) {
+                toAmount.value = amount.toFixed(2);
+                showResult(amount, from, to, 1);
+                return;
+            }
+
+            // 转换为USD，再转换为目标货币
+            const usdAmount = amount / exchangeRates[from];
+            const convertedAmount = usdAmount * exchangeRates[to];
+            const rate = exchangeRates[to] / exchangeRates[from];
+
+            toAmount.value = convertedAmount.toFixed(2);
+            showResult(convertedAmount, from, to, rate);
+            showRate(from, to, rate);
+        }
+
+        // 显示结果
+        function showResult(amount, from, to, rate) {
+            const fromSymbol = currencySymbols[from];
+            const toSymbol = currencySymbols[to];
+            const fromName = currencyNames[from];
+            const toName = currencyNames[to];
+
+            resultAmount.innerHTML = `<span class="currency-symbol">${toSymbol}</span>${amount.toFixed(2)}`;
+            resultInfo.textContent = `${parseFloat(fromAmount.value).toFixed(2)} ${fromName} = ${amount.toFixed(2)} ${toName}`;
+            resultSection.style.display = 'flex';
+        }
+
+        // 隐藏结果
+        function hideResult() {
+            resultSection.style.display = 'none';
+            rateDisplay.style.display = 'none';
+        }
+
+        // 显示汇率
+        function showRate(from, to, rate) {
+            const fromSymbol = currencySymbols[from];
+            const toSymbol = currencySymbols[to];
+            rateInfo.textContent = `汇率: 1 ${from} = ${rate.toFixed(4)} ${to}`;
+            rateDisplay.style.display = 'block';
+        }
+
+        // 交换货币
+        swapBtn.addEventListener('click', function() {
+            const tempCurrency = fromCurrency.value;
+            const tempAmount = fromAmount.value;
+            
+            fromCurrency.value = toCurrency.value;
+            toCurrency.value = tempCurrency;
+            
+            if (toAmount.value) {
+                fromAmount.value = toAmount.value;
+                convertCurrency();
+            } else {
+                fromAmount.value = tempAmount;
+                if (tempAmount) {
+                    convertCurrency();
+                }
+            }
+        });
+
+        // 转换按钮点击事件
+        convertBtn.addEventListener('click', function() {
+            if (!fromAmount.value) {
+                showNotification('请输入要换算的金额', 'error');
+                fromAmount.focus();
+                return;
+            }
+            
+            convertCurrency();
+            addToHistory();
+        });
+
+        // 复制结果
+        copyBtn.addEventListener('click', function() {
+            const result = `${fromAmount.value} ${fromCurrency.value} = ${toAmount.value} ${toCurrency.value}`;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(result).then(() => {
+                    showNotification('结果已复制到剪贴板');
+                }).catch(() => {
+                    fallbackCopy(result);
+                });
+            } else {
+                fallbackCopy(result);
+            }
+        });
+
+        // 备用复制方法
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showNotification('结果已复制到剪贴板');
+            } catch (err) {
+                showNotification('复制失败，请手动复制', 'error');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // 添加到历史记录
+        function addToHistory() {
+            const amount = parseFloat(fromAmount.value);
+            const from = fromCurrency.value;
+            const to = toCurrency.value;
+            const result = parseFloat(toAmount.value);
+            const rate = exchangeRates[to] / exchangeRates[from];
+            
+            const historyItem = {
+                id: Date.now(),
+                fromAmount: amount,
+                fromCurrency: from,
+                toAmount: result,
+                toCurrency: to,
+                rate: rate,
+                timestamp: new Date().toLocaleString('zh-CN')
+            };
+
+            conversionHistory.unshift(historyItem);
+            
+            // 只保留最近5条记录
+            if (conversionHistory.length > 5) {
+                conversionHistory = conversionHistory.slice(0, 5);
+            }
+
+            localStorage.setItem('currencyHistory', JSON.stringify(conversionHistory));
+            displayHistory();
+        }
+
+        // 显示历史记录
+        function displayHistory() {
+            if (conversionHistory.length === 0) {
+                historyList.innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 20px;">暂无换算记录</p>';
+                clearHistoryBtn.style.display = 'none';
+                return;
+            }
+
+            let historyHTML = '';
+            conversionHistory.forEach(item => {
+                const fromSymbol = currencySymbols[item.fromCurrency];
+                const toSymbol = currencySymbols[item.toCurrency];
+                
+                historyHTML += `
+                    <div class="history-item">
+                        <div class="history-time">${item.timestamp}</div>
+                        <div class="history-conversion">
+                            <span class="currency-symbol">${fromSymbol}</span>${item.fromAmount.toFixed(2)} ${item.fromCurrency} 
+                            → <span class="currency-symbol">${toSymbol}</span>${item.toAmount.toFixed(2)} ${item.toCurrency}
+                        </div>
+                        <div class="history-rate">汇率: 1 ${item.fromCurrency} = ${item.rate.toFixed(4)} ${item.toCurrency}</div>
+                    </div>
+                `;
+            });
+
+            historyList.innerHTML = historyHTML;
+            clearHistoryBtn.style.display = 'block';
+        }
+
+        // 清空历史记录
+        clearHistoryBtn.addEventListener('click', function() {
+            if (confirm('确定要清空所有换算记录吗？')) {
+                conversionHistory = [];
+                localStorage.removeItem('currencyHistory');
+                displayHistory();
+                showNotification('历史记录已清空');
+            }
+        });
+
+        // 显示通知
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.className = 'notification show';
+            
+            if (type === 'error') {
+                notification.style.background = '#e74c3c';
+            } else {
+                notification.style.background = '#27ae60';
+            }
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && fromAmount.value) {
+                convertCurrency();
+                addToHistory();
+            }
+            
+            if (e.ctrlKey && e.key === 'c' && resultSection.style.display === 'flex') {
+                copyBtn.click();
+            }
+        });
+
+        // 数字格式化
+        function formatNumber(num) {
+            return new Intl.NumberFormat('zh-CN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(num);
+        }
+
+        // 防抖函数
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // 应用防抖到实时换算
+        const debouncedConvert = debounce(convertCurrency, 300);
+        fromAmount.addEventListener('input', function() {
+            if (this.value) {
+                debouncedConvert();
+            } else {
+                toAmount.value = '';
+                hideResult();
+            }
+        });
+    </script>
+</body>
+</html>

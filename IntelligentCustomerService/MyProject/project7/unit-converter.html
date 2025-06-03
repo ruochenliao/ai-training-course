@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多功能单位转换器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 1.1em;
+            border: none;
+            background: transparent;
+            color: #6c757d;
+        }
+
+        .tab.active {
+            background: white;
+            color: #4facfe;
+            border-bottom: 3px solid #4facfe;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .tab-content {
+            padding: 40px;
+            min-height: 500px;
+        }
+
+        .converter-section {
+            display: none;
+        }
+
+        .converter-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .converter-grid {
+            display: grid;
+            grid-template-columns: 1fr 80px 1fr;
+            gap: 30px;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .input-section, .output-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .number-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+        }
+
+        .number-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .unit-select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1.1em;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .unit-select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .swap-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            font-size: 1.8em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        .swap-btn:hover {
+            transform: rotate(180deg) scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-display {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #2c3e50;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quick-conversions {
+            margin-top: 30px;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .quick-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .quick-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .quick-item {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .quick-item:hover {
+            background: #4facfe;
+            color: white;
+            border-color: #4facfe;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .quick-item .conversion {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .quick-item .description {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .formula-display {
+            background: rgba(79, 172, 254, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #2c3e50;
+        }
+
+        .copy-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #219a52;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .converter-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .swap-btn {
+                order: 2;
+                transform: rotate(90deg);
+            }
+
+            .swap-btn:hover {
+                transform: rotate(270deg) scale(1.1);
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                padding: 15px;
+            }
+
+            .tab-content {
+                padding: 20px;
+            }
+
+            .quick-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .unit-icon {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📏 多功能单位转换器</h1>
+            <p>支持长度、重量、温度等多种单位的精确转换</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="length">📏 长度转换</button>
+            <button class="tab" data-tab="weight">⚖️ 重量转换</button>
+            <button class="tab" data-tab="temperature">🌡️ 温度转换</button>
+        </div>
+
+        <div class="tab-content">
+            <!-- 长度转换 -->
+            <div class="converter-section active" id="length">
+                <div class="converter-grid">
+                    <div class="input-section">
+                        <div class="section-title">输入值</div>
+                        <div class="input-group">
+                            <label>数值</label>
+                            <input type="number" class="number-input" id="lengthInput" placeholder="输入长度值" step="any">
+                        </div>
+                        <div class="input-group">
+                            <label>单位</label>
+                            <select class="unit-select" id="lengthFromUnit">
+                                <option value="mm">📏 毫米 (mm)</option>
+                                <option value="cm">📏 厘米 (cm)</option>
+                                <option value="m" selected>📏 米 (m)</option>
+                                <option value="km">📏 公里 (km)</option>
+                                <option value="in">📏 英寸 (in)</option>
+                                <option value="ft">📏 英尺 (ft)</option>
+                                <option value="yd">📏 码 (yd)</option>
+                                <option value="mi">📏 英里 (mi)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button class="swap-btn" id="lengthSwap" title="交换单位">⇄</button>
+
+                    <div class="output-section">
+                        <div class="section-title">转换结果</div>
+                        <div class="input-group">
+                            <label>单位</label>
+                            <select class="unit-select" id="lengthToUnit">
+                                <option value="mm">📏 毫米 (mm)</option>
+                                <option value="cm" selected>📏 厘米 (cm)</option>
+                                <option value="m">📏 米 (m)</option>
+                                <option value="km">📏 公里 (km)</option>
+                                <option value="in">📏 英寸 (in)</option>
+                                <option value="ft">📏 英尺 (ft)</option>
+                                <option value="yd">📏 码 (yd)</option>
+                                <option value="mi">📏 英里 (mi)</option>
+                            </select>
+                        </div>
+                        <div class="result-display" id="lengthResult">请输入数值</div>
+                        <button class="copy-btn" id="lengthCopy">📋 复制结果</button>
+                    </div>
+                </div>
+
+                <div class="formula-display" id="lengthFormula"></div>
+
+                <div class="quick-conversions">
+                    <div class="quick-title">🚀 常用长度转换</div>
+                    <div class="quick-grid">
+                        <div class="quick-item" data-from="m" data-to="cm" data-value="1">
+                            <div class="conversion">1 米 = 100 厘米</div>
+                            <div class="description">基础单位转换</div>
+                        </div>
+                        <div class="quick-item" data-from="km" data-to="m" data-value="1">
+                            <div class="conversion">1 公里 = 1000 米</div>
+                            <div class="description">距离测量</div>
+                        </div>
+                        <div class="quick-item" data-from="ft" data-to="m" data-value="1">
+                            <div class="conversion">1 英尺 ≈ 0.305 米</div>
+                            <div class="description">英制转公制</div>
+                        </div>
+                        <div class="quick-item" data-from="in" data-to="cm" data-value="1">
+                            <div class="conversion">1 英寸 ≈ 2.54 厘米</div>
+                            <div class="description">屏幕尺寸</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 重量转换 -->
+            <div class="converter-section" id="weight">
+                <div class="converter-grid">
+                    <div class="input-section">
+                        <div class="section-title">输入值</div>
+                        <div class="input-group">
+                            <label>数值</label>
+                            <input type="number" class="number-input" id="weightInput" placeholder="输入重量值" step="any">
+                        </div>
+                        <div class="input-group">
+                            <label>单位</label>
+                            <select class="unit-select" id="weightFromUnit">
+                                <option value="g">⚖️ 克 (g)</option>
+                                <option value="kg" selected>⚖️ 千克 (kg)</option>
+                                <option value="t">⚖️ 吨 (t)</option>
+                                <option value="oz">⚖️ 盎司 (oz)</option>
+                                <option value="lb">⚖️ 磅 (lb)</option>
+                                <option value="st">⚖️ 英石 (st)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button class="swap-btn" id="weightSwap" title="交换单位">⇄</button>
+
+                    <div class="output-section">
+                        <div class="section-title">转换结果</div>
+                        <div class="input-group">
+                            <label>单位</label>
+                            <select class="unit-select" id="weightToUnit">
+                                <option value="g" selected>⚖️ 克 (g)</option>
+                                <option value="kg">⚖️ 千克 (kg)</option>
+                                <option value="t">⚖️ 吨 (t)</option>
+                                <option value="oz">⚖️ 盎司 (oz)</option>
+                                <option value="lb">⚖️ 磅 (lb)</option>
+                                <option value="st">⚖️ 英石 (st)</option>
+                            </select>
+                        </div>
+                        <div class="result-display" id="weightResult">请输入数值</div>
+                        <button class="copy-btn" id="weightCopy">📋 复制结果</button>
+                    </div>
+                </div>
+
+                <div class="formula-display" id="weightFormula"></div>
+
+                <div class="quick-conversions">
+                    <div class="quick-title">🚀 常用重量转换</div>
+                    <div class="quick-grid">
+                        <div class="quick-item" data-from="kg" data-to="g" data-value="1">
+                            <div class="conversion">1 千克 = 1000 克</div>
+                            <div class="description">基础单位转换</div>
+                        </div>
+                        <div class="quick-item" data-from="t" data-to="kg" data-value="1">
+                            <div class="conversion">1 吨 = 1000 千克</div>
+                            <div class="description">大重量单位</div>
+                        </div>
+                        <div class="quick-item" data-from="lb" data-to="kg" data-value="1">
+                            <div class="conversion">1 磅 ≈ 0.454 千克</div>
+                            <div class="description">英制转公制</div>
+                        </div>
+                        <div class="quick-item" data-from="oz" data-to="g" data-value="1">
+                            <div class="conversion">1 盎司 ≈ 28.35 克</div>
+                            <div class="description">小重量单位</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 温度转换 -->
+            <div class="converter-section" id="temperature">
+                <div class="converter-grid">
+                    <div class="input-section">
+                        <div class="section-title">输入值</div>
+                        <div class="input-group">
+                            <label>数值</label>
+                            <input type="number" class="number-input" id="temperatureInput" placeholder="输入温度值" step="any">
+                        </div>
+                        <div class="input-group">
+                            <label>单位</label>
+                            <select class="unit-select" id="temperatureFromUnit">
+                                <option value="c" selected>🌡️ 摄氏度 (°C)</option>
+                                <option value="f">🌡️ 华氏度 (°F)</option>
+                                <option value="k">🌡️ 开尔文 (K)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button class="swap-btn" id="temperatureSwap" title="交换单位">⇄</button>
+
+                    <div class="output-section">
+                        <div class="section-title">转换结果</div>
+                        <div class="input-group">
+                            <label>单位</label>
+                            <select class="unit-select" id="temperatureToUnit">
+                                <option value="c">🌡️ 摄氏度 (°C)</option>
+                                <option value="f" selected>🌡️ 华氏度 (°F)</option>
+                                <option value="k">🌡️ 开尔文 (K)</option>
+                            </select>
+                        </div>
+                        <div class="result-display" id="temperatureResult">请输入数值</div>
+                        <button class="copy-btn" id="temperatureCopy">📋 复制结果</button>
+                    </div>
+                </div>
+
+                <div class="formula-display" id="temperatureFormula"></div>
+
+                <div class="quick-conversions">
+                    <div class="quick-title">🚀 常用温度转换</div>
+                    <div class="quick-grid">
+                        <div class="quick-item" data-from="c" data-to="f" data-value="0">
+                            <div class="conversion">0°C = 32°F</div>
+                            <div class="description">水的冰点</div>
+                        </div>
+                        <div class="quick-item" data-from="c" data-to="f" data-value="100">
+                            <div class="conversion">100°C = 212°F</div>
+                            <div class="description">水的沸点</div>
+                        </div>
+                        <div class="quick-item" data-from="c" data-to="f" data-value="37">
+                            <div class="conversion">37°C = 98.6°F</div>
+                            <div class="description">人体体温</div>
+                        </div>
+                        <div class="quick-item" data-from="c" data-to="k" data-value="0">
+                            <div class="conversion">0°C = 273.15K</div>
+                            <div class="description">绝对温度</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // 转换系数定义
+        const conversionFactors = {
+            length: {
+                // 以米为基准单位
+                mm: 0.001,
+                cm: 0.01,
+                m: 1,
+                km: 1000,
+                in: 0.0254,
+                ft: 0.3048,
+                yd: 0.9144,
+                mi: 1609.344
+            },
+            weight: {
+                // 以克为基准单位
+                g: 1,
+                kg: 1000,
+                t: 1000000,
+                oz: 28.3495,
+                lb: 453.592,
+                st: 6350.29
+            }
+        };
+
+        // 单位名称映射
+        const unitNames = {
+            length: {
+                mm: '毫米', cm: '厘米', m: '米', km: '公里',
+                in: '英寸', ft: '英尺', yd: '码', mi: '英里'
+            },
+            weight: {
+                g: '克', kg: '千克', t: '吨',
+                oz: '盎司', lb: '磅', st: '英石'
+            },
+            temperature: {
+                c: '摄氏度', f: '华氏度', k: '开尔文'
+            }
+        };
+
+        // 当前活动的转换类型
+        let currentTab = 'length';
+
+        // DOM 元素
+        const tabs = document.querySelectorAll('.tab');
+        const sections = document.querySelectorAll('.converter-section');
+        const notification = document.getElementById('notification');
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTabs();
+            initializeConverters();
+            initializeQuickConversions();
+        });
+
+        // 初始化选项卡
+        function initializeTabs() {
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabType = this.dataset.tab;
+                    switchTab(tabType);
+                });
+            });
+        }
+
+        // 切换选项卡
+        function switchTab(tabType) {
+            // 更新选项卡状态
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.tab === tabType) {
+                    tab.classList.add('active');
+                }
+            });
+
+            // 更新内容区域
+            sections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === tabType) {
+                    section.classList.add('active');
+                }
+            });
+
+            currentTab = tabType;
+        }
+
+        // 初始化转换器
+        function initializeConverters() {
+            ['length', 'weight', 'temperature'].forEach(type => {
+                const input = document.getElementById(`${type}Input`);
+                const fromUnit = document.getElementById(`${type}FromUnit`);
+                const toUnit = document.getElementById(`${type}ToUnit`);
+                const swapBtn = document.getElementById(`${type}Swap`);
+                const copyBtn = document.getElementById(`${type}Copy`);
+
+                // 实时转换
+                input.addEventListener('input', () => convert(type));
+                fromUnit.addEventListener('change', () => convert(type));
+                toUnit.addEventListener('change', () => convert(type));
+
+                // 交换单位
+                swapBtn.addEventListener('click', () => swapUnits(type));
+
+                // 复制结果
+                copyBtn.addEventListener('click', () => copyResult(type));
+            });
+        }
+
+        // 转换函数
+        function convert(type) {
+            const input = document.getElementById(`${type}Input`);
+            const fromUnit = document.getElementById(`${type}FromUnit`);
+            const toUnit = document.getElementById(`${type}ToUnit`);
+            const result = document.getElementById(`${type}Result`);
+            const formula = document.getElementById(`${type}Formula`);
+
+            const value = parseFloat(input.value);
+            
+            if (!value && value !== 0) {
+                result.textContent = '请输入数值';
+                formula.textContent = '';
+                return;
+            }
+
+            let convertedValue;
+            let formulaText = '';
+
+            if (type === 'temperature') {
+                convertedValue = convertTemperature(value, fromUnit.value, toUnit.value);
+                formulaText = getTemperatureFormula(fromUnit.value, toUnit.value);
+            } else {
+                const fromFactor = conversionFactors[type][fromUnit.value];
+                const toFactor = conversionFactors[type][toUnit.value];
+                convertedValue = (value * fromFactor) / toFactor;
+                
+                const ratio = fromFactor / toFactor;
+                formulaText = `转换公式: 1 ${unitNames[type][fromUnit.value]} = ${ratio.toFixed(6)} ${unitNames[type][toUnit.value]}`;
+            }
+
+            // 格式化结果
+            const formattedValue = formatNumber(convertedValue);
+            result.textContent = `${formattedValue} ${unitNames[type][toUnit.value]}`;
+            formula.textContent = formulaText;
+        }
+
+        // 温度转换
+        function convertTemperature(value, from, to) {
+            if (from === to) return value;
+
+            // 先转换为摄氏度
+            let celsius;
+            switch (from) {
+                case 'c': celsius = value; break;
+                case 'f': celsius = (value - 32) * 5/9; break;
+                case 'k': celsius = value - 273.15; break;
+            }
+
+            // 再转换为目标单位
+            switch (to) {
+                case 'c': return celsius;
+                case 'f': return celsius * 9/5 + 32;
+                case 'k': return celsius + 273.15;
+            }
+        }
+
+        // 获取温度转换公式
+        function getTemperatureFormula(from, to) {
+            const formulas = {
+                'c-f': '°F = °C × 9/5 + 32',
+                'f-c': '°C = (°F - 32) × 5/9',
+                'c-k': 'K = °C + 273.15',
+                'k-c': '°C = K - 273.15',
+                'f-k': 'K = (°F - 32) × 5/9 + 273.15',
+                'k-f': '°F = (K - 273.15) × 9/5 + 32'
+            };
+            
+            const key = `${from}-${to}`;
+            return formulas[key] || `转换公式: ${unitNames.temperature[from]} → ${unitNames.temperature[to]}`;
+        }
+
+        // 交换单位
+        function swapUnits(type) {
+            const fromUnit = document.getElementById(`${type}FromUnit`);
+            const toUnit = document.getElementById(`${type}ToUnit`);
+            
+            const temp = fromUnit.value;
+            fromUnit.value = toUnit.value;
+            toUnit.value = temp;
+            
+            convert(type);
+        }
+
+        // 复制结果
+        function copyResult(type) {
+            const input = document.getElementById(`${type}Input`);
+            const fromUnit = document.getElementById(`${type}FromUnit`);
+            const toUnit = document.getElementById(`${type}ToUnit`);
+            const result = document.getElementById(`${type}Result`);
+            
+            if (!input.value) {
+                showNotification('请先输入数值进行转换', 'error');
+                return;
+            }
+            
+            const copyText = `${input.value} ${unitNames[type][fromUnit.value]} = ${result.textContent}`;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(copyText).then(() => {
+                    showNotification('转换结果已复制到剪贴板');
+                }).catch(() => {
+                    fallbackCopy(copyText);
+                });
+            } else {
+                fallbackCopy(copyText);
+            }
+        }
+
+        // 备用复制方法
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showNotification('转换结果已复制到剪贴板');
+            } catch (err) {
+                showNotification('复制失败，请手动复制', 'error');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // 初始化快捷转换
+        function initializeQuickConversions() {
+            const quickItems = document.querySelectorAll('.quick-item');
+            quickItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const from = this.dataset.from;
+                    const to = this.dataset.to;
+                    const value = this.dataset.value;
+                    
+                    // 设置输入值和单位
+                    const input = document.getElementById(`${currentTab}Input`);
+                    const fromUnit = document.getElementById(`${currentTab}FromUnit`);
+                    const toUnit = document.getElementById(`${currentTab}ToUnit`);
+                    
+                    input.value = value;
+                    fromUnit.value = from;
+                    toUnit.value = to;
+                    
+                    // 执行转换
+                    convert(currentTab);
+                    
+                    // 滚动到转换器
+                    document.querySelector('.converter-grid').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                });
+            });
+        }
+
+        // 格式化数字
+        function formatNumber(num) {
+            if (Math.abs(num) >= 1000000) {
+                return num.toExponential(6);
+            } else if (Math.abs(num) < 0.001 && num !== 0) {
+                return num.toExponential(6);
+            } else {
+                return parseFloat(num.toFixed(8)).toString();
+            }
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.className = 'notification show';
+            
+            if (type === 'error') {
+                notification.style.background = '#e74c3c';
+            } else {
+                notification.style.background = '#27ae60';
+            }
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            // Tab键切换转换类型
+            if (e.key === 'Tab' && e.ctrlKey) {
+                e.preventDefault();
+                const tabTypes = ['length', 'weight', 'temperature'];
+                const currentIndex = tabTypes.indexOf(currentTab);
+                const nextIndex = (currentIndex + 1) % tabTypes.length;
+                switchTab(tabTypes[nextIndex]);
+            }
+            
+            // Enter键聚焦到输入框
+            if (e.key === 'Enter') {
+                const input = document.getElementById(`${currentTab}Input`);
+                input.focus();
+            }
+            
+            // Ctrl+C复制结果
+            if (e.ctrlKey && e.key === 'c' && !e.target.matches('input')) {
+                e.preventDefault();
+                copyResult(currentTab);
+            }
+        });
+
+        // 防抖函数
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // 应用防抖到转换函数
+        const debouncedConvert = debounce((type) => convert(type), 300);
+        
+        // 重新绑定防抖转换
+        ['length', 'weight', 'temperature'].forEach(type => {
+            const input = document.getElementById(`${type}Input`);
+            input.addEventListener('input', () => debouncedConvert(type));
+        });
+    </script>
+</body>
+</html>

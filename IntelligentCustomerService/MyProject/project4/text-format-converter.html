@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本格式转换工具</title>
+    <style>
+        /* CSS变量定义 */
+        :root {
+            --primary-color: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary-color: #f1f5f9;
+            --accent-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-large: 0 10px 25px rgba(0, 0, 0, 0.15);
+            --border-radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 全局样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-color);
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow-large);
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 头部区域 */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 主要内容区域 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        /* 输入输出区域 */
+        .input-section, .output-section {
+            background: var(--secondary-color);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow-light);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .text-area {
+            width: 100%;
+            min-height: 300px;
+            padding: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            line-height: 1.6;
+            resize: vertical;
+            transition: var(--transition);
+            font-family: inherit;
+            background: white;
+        }
+
+        .text-area:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .text-area::placeholder {
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        /* 转换按钮区域 */
+        .conversion-buttons {
+            margin: 30px;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow-light);
+        }
+
+        .buttons-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .convert-btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .convert-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .convert-btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-uppercase {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .btn-lowercase {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-capitalize {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .btn-trim {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* 操作按钮区域 */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .action-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .action-btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-copy {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .btn-copy:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn-clear {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* 状态提示 */
+        .status-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            color: white;
+            font-weight: 600;
+            box-shadow: var(--shadow-large);
+            transform: translateX(100%);
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .status-message.show {
+            transform: translateX(0);
+        }
+
+        .status-message.success {
+            background: var(--accent-color);
+        }
+
+        .status-message.error {
+            background: var(--danger-color);
+        }
+
+        .status-message.info {
+            background: var(--primary-color);
+        }
+
+        /* 统计信息 */
+        .stats-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            text-align: center;
+        }
+
+        .stat-item {
+            padding: 8px;
+        }
+
+        .stat-number {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: 16px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .conversion-buttons {
+                margin: 20px;
+                padding: 20px;
+            }
+
+            .button-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                justify-content: center;
+            }
+
+            .text-area {
+                min-height: 200px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .header p {
+                font-size: 14px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stats-info {
+            animation: fadeIn 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部区域 -->
+        <div class="header">
+            <h1>📝 文本格式转换工具</h1>
+            <p>快速转换文本格式，支持大小写转换和空格处理</p>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="main-content">
+            <!-- 输入区域 -->
+            <div class="input-section">
+                <div class="section-title">
+                    <span>📝</span>
+                    <span>输入文本</span>
+                </div>
+                <textarea 
+                    id="inputText" 
+                    class="text-area" 
+                    placeholder="请输入您要转换格式的文本内容...\n\n支持功能：\n• 转换为大写\n• 转换为小写\n• 首字母大写\n• 删除多余空格"
+                ></textarea>
+                
+                <!-- 输入统计信息 -->
+                <div class="stats-info">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number" id="inputChars">0</div>
+                            <div class="stat-label">字符数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="inputWords">0</div>
+                            <div class="stat-label">单词数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="inputLines">0</div>
+                            <div class="stat-label">行数</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 输出区域 -->
+            <div class="output-section">
+                <div class="section-title">
+                    <span>✨</span>
+                    <span>转换结果</span>
+                </div>
+                <textarea 
+                    id="outputText" 
+                    class="text-area" 
+                    placeholder="转换结果将在这里显示..." 
+                    readonly
+                ></textarea>
+                
+                <!-- 输出统计信息 -->
+                <div class="stats-info">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number" id="outputChars">0</div>
+                            <div class="stat-label">字符数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="outputWords">0</div>
+                            <div class="stat-label">单词数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="outputLines">0</div>
+                            <div class="stat-label">行数</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 转换按钮区域 -->
+        <div class="conversion-buttons">
+            <div class="buttons-title">🔄 选择转换方式</div>
+            
+            <div class="button-grid">
+                <button class="convert-btn btn-uppercase" data-action="uppercase">
+                    <span>🔤</span>
+                    <span>转换为大写</span>
+                </button>
+                
+                <button class="convert-btn btn-lowercase" data-action="lowercase">
+                    <span>🔡</span>
+                    <span>转换为小写</span>
+                </button>
+                
+                <button class="convert-btn btn-capitalize" data-action="capitalize">
+                    <span>🅰️</span>
+                    <span>首字母大写</span>
+                </button>
+                
+                <button class="convert-btn btn-trim" data-action="trim">
+                    <span>✂️</span>
+                    <span>删除多余空格</span>
+                </button>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="action-buttons">
+                <button id="copyBtn" class="action-btn btn-copy">
+                    <span>📋</span>
+                    <span>复制结果</span>
+                </button>
+                
+                <button id="clearBtn" class="action-btn btn-clear">
+                    <span>🗑️</span>
+                    <span>清空内容</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 状态提示 -->
+    <div id="statusMessage" class="status-message"></div>
+
+    <script>
+        // DOM元素
+        const inputText = document.getElementById('inputText');
+        const outputText = document.getElementById('outputText');
+        const convertButtons = document.querySelectorAll('.convert-btn');
+        const copyBtn = document.getElementById('copyBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        
+        // 统计元素
+        const inputChars = document.getElementById('inputChars');
+        const inputWords = document.getElementById('inputWords');
+        const inputLines = document.getElementById('inputLines');
+        const outputChars = document.getElementById('outputChars');
+        const outputWords = document.getElementById('outputWords');
+        const outputLines = document.getElementById('outputLines');
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedContent();
+            updateStats();
+            inputText.focus();
+        });
+
+        // 显示状态消息
+        function showStatus(message, type = 'info') {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type} show`;
+            setTimeout(() => {
+                statusMessage.classList.remove('show');
+            }, 3000);
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const inputValue = inputText.value;
+            const outputValue = outputText.value;
+            
+            // 输入统计
+            const inputCharCount = inputValue.length;
+            const inputWordCount = inputValue.trim() ? inputValue.trim().split(/\s+/).length : 0;
+            const inputLineCount = inputValue ? inputValue.split('\n').length : 0;
+            
+            inputChars.textContent = inputCharCount.toLocaleString();
+            inputWords.textContent = inputWordCount.toLocaleString();
+            inputLines.textContent = inputLineCount.toLocaleString();
+            
+            // 输出统计
+            const outputCharCount = outputValue.length;
+            const outputWordCount = outputValue.trim() ? outputValue.trim().split(/\s+/).length : 0;
+            const outputLineCount = outputValue ? outputValue.split('\n').length : 0;
+            
+            outputChars.textContent = outputCharCount.toLocaleString();
+            outputWords.textContent = outputWordCount.toLocaleString();
+            outputLines.textContent = outputLineCount.toLocaleString();
+        }
+
+        // 文本转换函数
+        function convertToUppercase(text) {
+            return text.toUpperCase();
+        }
+
+        function convertToLowercase(text) {
+            return text.toLowerCase();
+        }
+
+        function convertToCapitalize(text) {
+            return text.replace(/\b\w/g, char => char.toUpperCase());
+        }
+
+        function trimSpaces(text) {
+            // 删除首尾空格，并将连续空格替换为单个空格
+            return text.trim().replace(/\s+/g, ' ');
+        }
+
+        // 处理转换
+        function processConversion(action) {
+            const input = inputText.value;
+            
+            if (!input.trim()) {
+                showStatus('请输入要转换的文本', 'error');
+                return;
+            }
+
+            let result = '';
+            let actionName = '';
+
+            try {
+                switch (action) {
+                    case 'uppercase':
+                        result = convertToUppercase(input);
+                        actionName = '大写转换';
+                        break;
+                    case 'lowercase':
+                        result = convertToLowercase(input);
+                        actionName = '小写转换';
+                        break;
+                    case 'capitalize':
+                        result = convertToCapitalize(input);
+                        actionName = '首字母大写转换';
+                        break;
+                    case 'trim':
+                        result = trimSpaces(input);
+                        actionName = '空格处理';
+                        break;
+                    default:
+                        throw new Error('未知的转换类型');
+                }
+
+                outputText.value = result;
+                updateStats();
+                saveContent();
+                showStatus(`${actionName}完成！`, 'success');
+            } catch (error) {
+                showStatus(`转换失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 复制结果
+        async function copyResult() {
+            const result = outputText.value.trim();
+            if (!result) {
+                showStatus('没有可复制的内容', 'error');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(result);
+                showStatus('结果已复制到剪贴板！', 'success');
+            } catch (err) {
+                // 降级方案
+                outputText.select();
+                try {
+                    document.execCommand('copy');
+                    showStatus('结果已复制到剪贴板！', 'success');
+                } catch (fallbackErr) {
+                    showStatus('复制失败，请手动复制', 'error');
+                }
+            }
+        }
+
+        // 清空内容
+        function clearContent() {
+            if (inputText.value.trim() || outputText.value.trim()) {
+                if (confirm('确定要清空所有内容吗？')) {
+                    inputText.value = '';
+                    outputText.value = '';
+                    updateStats();
+                    localStorage.removeItem('formatConverterContent');
+                    showStatus('内容已清空', 'info');
+                    inputText.focus();
+                }
+            } else {
+                showStatus('内容已经是空的', 'info');
+            }
+        }
+
+        // 保存内容到本地存储
+        function saveContent() {
+            const content = {
+                input: inputText.value,
+                output: outputText.value
+            };
+            localStorage.setItem('formatConverterContent', JSON.stringify(content));
+        }
+
+        // 加载保存的内容
+        function loadSavedContent() {
+            try {
+                const saved = localStorage.getItem('formatConverterContent');
+                if (saved) {
+                    const content = JSON.parse(saved);
+                    inputText.value = content.input || '';
+                    outputText.value = content.output || '';
+                }
+            } catch (e) {
+                console.warn('加载保存内容失败:', e);
+            }
+        }
+
+        // 事件监听器
+        
+        // 转换按钮点击事件
+        convertButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                processConversion(action);
+            });
+        });
+
+        // 复制和清空按钮
+        copyBtn.addEventListener('click', copyResult);
+        clearBtn.addEventListener('click', clearContent);
+
+        // 输入框变化时更新统计和保存内容
+        inputText.addEventListener('input', () => {
+            updateStats();
+            saveContent();
+        });
+
+        // 输出框变化时更新统计
+        outputText.addEventListener('input', updateStats);
+
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+1 转换为大写
+            if ((e.ctrlKey || e.metaKey) && e.key === '1') {
+                e.preventDefault();
+                processConversion('uppercase');
+            }
+            
+            // Ctrl+2 转换为小写
+            if ((e.ctrlKey || e.metaKey) && e.key === '2') {
+                e.preventDefault();
+                processConversion('lowercase');
+            }
+            
+            // Ctrl+3 首字母大写
+            if ((e.ctrlKey || e.metaKey) && e.key === '3') {
+                e.preventDefault();
+                processConversion('capitalize');
+            }
+            
+            // Ctrl+4 删除多余空格
+            if ((e.ctrlKey || e.metaKey) && e.key === '4') {
+                e.preventDefault();
+                processConversion('trim');
+            }
+            
+            // Ctrl+Shift+C 复制结果
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') {
+                e.preventDefault();
+                copyResult();
+            }
+            
+            // Ctrl+L 清空内容
+            if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+                e.preventDefault();
+                clearContent();
+            }
+        });
+
+        // 防止页面意外刷新时丢失内容
+        window.addEventListener('beforeunload', (e) => {
+            if (inputText.value.trim()) {
+                e.preventDefault();
+                e.returnValue = '您有未保存的内容，确定要离开吗？';
+            }
+        });
+
+        // 页面聚焦时自动聚焦到输入框
+        window.addEventListener('focus', () => {
+            if (!outputText.value.trim()) {
+                inputText.focus();
+            }
+        });
+
+        // 添加按钮点击动画效果
+        function addRippleEffect(button, event) {
+            const rect = button.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+            
+            const ripple = document.createElement('div');
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255, 255, 255, 0.5);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+            `;
+            
+            button.style.position = 'relative';
+            button.style.overflow = 'hidden';
+            button.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+
+        // 为所有按钮添加波纹效果
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                addRippleEffect(button, e);
+            });
+        });
+
+        // 添加CSS动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

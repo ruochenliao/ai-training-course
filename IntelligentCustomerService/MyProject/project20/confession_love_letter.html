@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>心动告白动画信</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    :root {
+      --romantic-bg1: #ffe0f7;
+      --romantic-bg2: #b388ff;
+      --cute-bg1: #fffde7;
+      --cute-bg2: #ffb6b9;
+      --elegant-bg1: #e0eafc;
+      --elegant-bg2: #cfdef3;
+      --main-color: #ff4081;
+      --heart-color: #ff4081;
+      --glow: 0 0 18px #ff4081, 0 0 32px #fff0f6;
+      --font-romantic: 'Pacifico', 'Segoe Script', 'Segoe UI', cursive;
+      --font-cute: 'Comic Sans MS', 'Segoe UI', cursive;
+      --font-elegant: 'Georgia', 'Times New Roman', serif;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-romantic);
+      background: linear-gradient(180deg, var(--romantic-bg1) 0%, var(--romantic-bg2) 100%);
+      transition: background 1s;
+      overflow-x: hidden;
+    }
+    [data-style="romantic"] {
+      --main-color: #ff4081;
+      --heart-color: #ff4081;
+      --glow: 0 0 18px #ff4081, 0 0 32px #fff0f6;
+      font-family: var(--font-romantic);
+      background: linear-gradient(180deg, var(--romantic-bg1) 0%, var(--romantic-bg2) 100%);
+    }
+    [data-style="cute"] {
+      --main-color: #ffb6b9;
+      --heart-color: #ffb6b9;
+      --glow: 0 0 18px #ffb6b9, 0 0 32px #fffde7;
+      font-family: var(--font-cute);
+      background: linear-gradient(180deg, var(--cute-bg1) 0%, var(--cute-bg2) 100%);
+    }
+    [data-style="elegant"] {
+      --main-color: #6a82fb;
+      --heart-color: #6a82fb;
+      --glow: 0 0 18px #6a82fb, 0 0 32px #e0eafc;
+      font-family: var(--font-elegant);
+      background: linear-gradient(180deg, var(--elegant-bg1) 0%, var(--elegant-bg2) 100%);
+    }
+    .confession-container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 2.5rem 1.2rem 3rem 1.2rem;
+      position: relative;
+      z-index: 2;
+    }
+    .confession-title {
+      font-size: 2.2rem;
+      color: var(--main-color);
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 1.2rem;
+      letter-spacing: 2px;
+      text-shadow: var(--glow);
+      user-select: none;
+    }
+    .confession-letter {
+      font-size: 1.2rem;
+      color: #444;
+      line-height: 2.1;
+      background: rgba(255,255,255,0.7);
+      border-radius: 18px;
+      padding: 1.5rem 1.2rem;
+      box-shadow: 0 2px 16px rgba(255,64,129,0.08);
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .confession-letter .typing {
+      display: inline-block;
+      white-space: pre-wrap;
+      animation: bounceIn 0.5s;
+      font-size: 1.2rem;
+      transition: color 0.2s;
+    }
+    @keyframes bounceIn {
+      0% { transform: scale(0.7); opacity: 0.2; }
+      60% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    .confession-letter .highlight {
+      color: var(--main-color);
+      font-size: 1.3rem;
+      font-weight: bold;
+      text-shadow: var(--glow);
+      animation: highlightPop 1.2s;
+    }
+    @keyframes highlightPop {
+      0% { transform: scale(1); filter: brightness(1); }
+      40% { transform: scale(1.15); filter: brightness(1.5); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+    .confession-letter .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,64,129,0.18);
+      pointer-events: none;
+      animation: ripple 0.7s linear;
+      z-index: 10;
+    }
+    @keyframes ripple {
+      0% { transform: scale(0.2); opacity: 0.7; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+    .confession-letter .firework {
+      position: absolute;
+      pointer-events: none;
+      z-index: 20;
+      animation: firework 1.2s linear forwards;
+      font-size: 1.5rem;
+    }
+    @keyframes firework {
+      0% { opacity: 1; transform: scale(0.5) translateY(0); }
+      60% { opacity: 1; transform: scale(1.2) translateY(-30px); }
+      100% { opacity: 0; transform: scale(1) translateY(-60px); }
+    }
+    .confession-photo {
+      display: flex;
+      gap: 1.2rem;
+      justify-content: center;
+      align-items: center;
+      margin: 1.2rem 0 1.5rem 0;
+      flex-wrap: wrap;
+    }
+    .confession-photo img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 18px;
+      box-shadow: 0 2px 12px rgba(255,64,129,0.12);
+      opacity: 0;
+      animation: fadeInPhoto 1.2s forwards;
+    }
+    @keyframes fadeInPhoto {
+      0% { opacity: 0; transform: scale(0.7); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .confession-final {
+      text-align: center;
+      margin-top: 2.2rem;
+      font-size: 1.5rem;
+      color: var(--main-color);
+      font-weight: bold;
+      text-shadow: var(--glow);
+      animation: finalPop 1.2s infinite alternate;
+      letter-spacing: 2px;
+      user-select: none;
+    }
+    @keyframes finalPop {
+      0% { transform: scale(1); filter: brightness(1); }
+      60% { transform: scale(1.12); filter: brightness(1.5); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+    .final-heart {
+      display: inline-block;
+      color: var(--heart-color);
+      font-size: 2.2rem;
+      vertical-align: middle;
+      animation: heartBeat 1.1s infinite alternate;
+      text-shadow: 0 0 12px #fff0f6;
+    }
+    @keyframes heartBeat {
+      0% { transform: scale(1); }
+      60% { transform: scale(1.25); }
+      100% { transform: scale(1); }
+    }
+    .confession-actions {
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      margin: 2.5rem 0 1.5rem 0;
+      align-items: center;
+    }
+    .confession-btn {
+      background: var(--main-color);
+      color: #fff;
+      border: none;
+      border-radius: 18px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      padding: 0.7rem 2.2rem;
+      cursor: pointer;
+      box-shadow: 0 2px 12px rgba(255,64,129,0.12);
+      transition: background 0.2s, transform 0.2s;
+      position: relative;
+      z-index: 10;
+      user-select: none;
+    }
+    .confession-btn:active {
+      background: #d72660;
+      transform: scale(0.95);
+    }
+    .confession-btn.no {
+      background: #bdbdbd;
+      color: #fff;
+      transition: left 0.2s, top 0.2s, background 0.2s;
+      position: relative;
+    }
+    .music-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      margin: 1.2rem 0 0.5rem 0;
+    }
+    .music-bar label {
+      font-size: 1.1rem;
+      color: var(--main-color);
+      font-weight: 500;
+    }
+    .music-bar select {
+      padding: 0.3rem 0.7rem;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      font-size: 1rem;
+      background: #fff;
+    }
+    .voice-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      margin: 1.2rem 0 0.5rem 0;
+    }
+    .voice-bar label {
+      font-size: 1.1rem;
+      color: var(--main-color);
+      font-weight: 500;
+    }
+    .voice-bar input[type=file] {
+      display: none;
+    }
+    .voice-bar .btn {
+      background: var(--main-color);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1.2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    .voice-bar .btn:active {
+      background: #d72660;
+    }
+    .style-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      margin: 1.2rem 0 0.5rem 0;
+    }
+    .style-bar label {
+      font-size: 1.1rem;
+      color: var(--main-color);
+      font-weight: 500;
+    }
+    .style-bar select {
+      padding: 0.3rem 0.7rem;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      font-size: 1rem;
+      background: #fff;
+    }
+    .photo-upload-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      margin: 1.2rem 0 0.5rem 0;
+    }
+    .photo-upload-bar label {
+      font-size: 1.1rem;
+      color: var(--main-color);
+      font-weight: 500;
+    }
+    .photo-upload-bar input[type=file] {
+      display: none;
+    }
+    .photo-upload-bar .btn {
+      background: var(--main-color);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1.2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    .photo-upload-bar .btn:active {
+      background: #d72660;
+    }
+    /* 粒子心形动画层 */
+    #heart-canvas {
+      position: fixed;
+      left: 0; bottom: 0;
+      width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
+    /* 满屏爱心特效 */
+    .love-burst {
+      position: fixed;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+      animation: fadeBurst 2.2s linear forwards;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+    }
+    @keyframes fadeBurst {
+      0% { opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    .love-burst .burst-heart {
+      font-size: 2.5rem;
+      color: var(--heart-color);
+      margin: 0.5rem;
+      animation: burstPop 1.2s infinite alternate;
+      text-shadow: 0 0 12px #fff0f6;
+    }
+    @keyframes burstPop {
+      0% { transform: scale(1); }
+      60% { transform: scale(1.18); }
+      100% { transform: scale(1); }
+    }
+    /* 响应式 */
+    @media (max-width: 700px) {
+      .confession-container { padding: 1.2rem 0.2rem 2rem 0.2rem; }
+      .confession-title { font-size: 1.2rem; }
+      .confession-letter { font-size: 1rem; padding: 1rem 0.5rem; }
+      .confession-photo img { width: 80px; height: 80px; }
+      .confession-final { font-size: 1.1rem; }
+      .confession-btn { font-size: 1rem; padding: 0.5rem 1.2rem; }
+    }
+  </style>
+</head>
+<body data-style="romantic">
+  <canvas id="heart-canvas"></canvas>
+  <div class="confession-container">
+    <div class="confession-title">写给你的一封心动告白信</div>
+    <div class="style-bar">
+      <label>风格：</label>
+      <select id="style-select">
+        <option value="romantic">浪漫</option>
+        <option value="cute">可爱</option>
+        <option value="elegant">优雅</option>
+      </select>
+      <label>动画密度：</label>
+      <select id="density-select">
+        <option value="low">低</option>
+        <option value="medium" selected>中</option>
+        <option value="high">高</option>
+      </select>
+    </div>
+    <div class="photo-upload-bar">
+      <label>插入照片：</label>
+      <input type="file" id="photo-upload" accept="image/*" multiple>
+      <button class="btn" id="btn-photo-upload"><i class="fa fa-image"></i> 上传</button>
+    </div>
+    <div class="confession-photo" id="confession-photo"></div>
+    <div class="music-bar">
+      <label>背景音乐：</label>
+      <select id="music-select">
+        <option value="music1">浪漫钢琴</option>
+        <option value="music2">温柔吉他</option>
+        <option value="music3">梦幻轻音</option>
+        <option value="custom">自定义</option>
+      </select>
+      <input type="file" id="music-upload" accept="audio/*" style="display:none;">
+      <button class="btn" id="btn-music-upload"><i class="fa fa-upload"></i> 上传音乐</button>
+      <button class="btn" id="btn-music-play"><i class="fa fa-play"></i> 播放</button>
+      <button class="btn" id="btn-music-pause"><i class="fa fa-pause"></i> 暂停</button>
+    </div>
+    <div class="voice-bar">
+      <label>语音告白：</label>
+      <input type="file" id="voice-upload" accept="audio/*">
+      <button class="btn" id="btn-voice-upload"><i class="fa fa-microphone"></i> 上传语音</button>
+      <button class="btn" id="btn-voice-play"><i class="fa fa-play"></i> 播放</button>
+      <button class="btn" id="btn-voice-pause"><i class="fa fa-pause"></i> 暂停</button>
+    </div>
+    <div class="confession-letter" id="confession-letter"></div>
+    <div class="confession-final" id="confession-final"></div>
+    <div class="confession-actions">
+      <button class="confession-btn yes" id="btn-yes">YES</button>
+      <button class="confession-btn no" id="btn-no">NO</button>
+    </div>
+  </div>
+  <audio id="bg-music" loop></audio>
+  <audio id="voice-audio"></audio>
+  <script>
+    // ... JS 逻辑将在后续补充 ...
+  </script>
+</body>
+</html> 

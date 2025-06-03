@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随机决策工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .sound-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .sound-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .options-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 3px solid #ff6b6b;
+            padding-bottom: 10px;
+        }
+
+        .option-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .option-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .option-input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.2);
+        }
+
+        .add-option-btn {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .add-option-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .options-list {
+            margin-top: 20px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .option-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .option-text {
+            flex: 1;
+            font-size: 1rem;
+        }
+
+        .edit-btn, .delete-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn {
+            color: #007bff;
+        }
+
+        .edit-btn:hover {
+            background: #e3f2fd;
+        }
+
+        .delete-btn {
+            color: #dc3545;
+        }
+
+        .delete-btn:hover {
+            background: #ffebee;
+        }
+
+        .decision-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .mode-btn {
+            padding: 12px 24px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            border-color: transparent;
+        }
+
+        .decision-btn {
+            background: linear-gradient(135deg, #48cae4, #023e8a);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(72, 202, 228, 0.3);
+        }
+
+        .decision-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(72, 202, 228, 0.4);
+        }
+
+        .decision-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            display: none;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 3s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        .wheel-segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            font-size: 0.9rem;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #333;
+            z-index: 10;
+        }
+
+        .result-display {
+            margin: 20px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.5s ease;
+        }
+
+        .result-display.highlight {
+            animation: pulse 1s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .history-section {
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .history-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #ff6b6b;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .history-result {
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-bottom: 5px;
+        }
+
+        .history-time {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .clear-history-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .clear-history-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .wheel-container {
+                width: 250px;
+                height: 250px;
+            }
+
+            .option-input-group {
+                flex-direction: column;
+            }
+
+            .mode-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .spin-animation {
+            animation: spin 3s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(1440deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="sound-toggle" id="soundToggle" title="切换声音">🔊</button>
+            <h1>🎯 随机决策工具</h1>
+            <p>让选择变得简单有趣</p>
+        </div>
+
+        <div class="main-content">
+            <div class="options-section">
+                <h2 class="section-title">📝 选项管理</h2>
+                <div class="option-input-group">
+                    <input type="text" class="option-input" id="optionInput" placeholder="输入选项内容..." maxlength="20">
+                    <button class="add-option-btn" id="addOptionBtn">添加选项</button>
+                </div>
+                <div class="options-list" id="optionsList"></div>
+            </div>
+
+            <div class="decision-section">
+                <h2 class="section-title">🎲 决策模式</h2>
+                <div class="mode-selector">
+                    <button class="mode-btn active" data-mode="simple">简单模式</button>
+                    <button class="mode-btn" data-mode="wheel">转盘模式</button>
+                </div>
+
+                <button class="decision-btn" id="decisionBtn">开始决策</button>
+
+                <div class="wheel-container" id="wheelContainer">
+                    <div class="wheel-pointer"></div>
+                    <div class="wheel" id="wheel"></div>
+                </div>
+
+                <div class="result-display" id="resultDisplay">
+                    添加至少2个选项开始决策
+                </div>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 class="section-title" style="margin: 0;">📚 决策历史</h2>
+                <button class="clear-history-btn" id="clearHistoryBtn">清空历史</button>
+            </div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <script>
+        class RandomDecisionTool {
+            constructor() {
+                this.options = [];
+                this.history = JSON.parse(localStorage.getItem('decisionHistory')) || [];
+                this.currentMode = 'simple';
+                this.soundEnabled = true;
+                this.isSpinning = false;
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.loadHistory();
+                this.updateUI();
+            }
+
+            initializeElements() {
+                this.optionInput = document.getElementById('optionInput');
+                this.addOptionBtn = document.getElementById('addOptionBtn');
+                this.optionsList = document.getElementById('optionsList');
+                this.decisionBtn = document.getElementById('decisionBtn');
+                this.resultDisplay = document.getElementById('resultDisplay');
+                this.wheelContainer = document.getElementById('wheelContainer');
+                this.wheel = document.getElementById('wheel');
+                this.historyList = document.getElementById('historyList');
+                this.clearHistoryBtn = document.getElementById('clearHistoryBtn');
+                this.soundToggle = document.getElementById('soundToggle');
+                this.modeButtons = document.querySelectorAll('.mode-btn');
+            }
+
+            bindEvents() {
+                this.addOptionBtn.addEventListener('click', () => this.addOption());
+                this.optionInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.addOption();
+                });
+                this.decisionBtn.addEventListener('click', () => this.makeDecision());
+                this.clearHistoryBtn.addEventListener('click', () => this.clearHistory());
+                this.soundToggle.addEventListener('click', () => this.toggleSound());
+                
+                this.modeButtons.forEach(btn => {
+                    btn.addEventListener('click', () => this.setMode(btn.dataset.mode));
+                });
+            }
+
+            addOption() {
+                const text = this.optionInput.value.trim();
+                if (!text) return;
+                
+                if (this.options.length >= 10) {
+                    alert('最多只能添加10个选项');
+                    return;
+                }
+                
+                if (this.options.includes(text)) {
+                    alert('选项已存在');
+                    return;
+                }
+                
+                this.options.push(text);
+                this.optionInput.value = '';
+                this.updateUI();
+                this.playSound('add');
+            }
+
+            removeOption(index) {
+                this.options.splice(index, 1);
+                this.updateUI();
+                this.playSound('remove');
+            }
+
+            editOption(index) {
+                const newText = prompt('编辑选项:', this.options[index]);
+                if (newText && newText.trim() && newText.trim() !== this.options[index]) {
+                    if (this.options.includes(newText.trim())) {
+                        alert('选项已存在');
+                        return;
+                    }
+                    this.options[index] = newText.trim();
+                    this.updateUI();
+                }
+            }
+
+            setMode(mode) {
+                this.currentMode = mode;
+                this.modeButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.mode === mode);
+                });
+                
+                if (mode === 'wheel') {
+                    this.wheelContainer.style.display = 'block';
+                    this.createWheel();
+                } else {
+                    this.wheelContainer.style.display = 'none';
+                }
+            }
+
+            createWheel() {
+                if (this.options.length < 2) return;
+                
+                this.wheel.innerHTML = '';
+                const segmentAngle = 360 / this.options.length;
+                const colors = [
+                    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+                    '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+                ];
+                
+                this.options.forEach((option, index) => {
+                    const segment = document.createElement('div');
+                    segment.className = 'wheel-segment';
+                    segment.style.backgroundColor = colors[index % colors.length];
+                    segment.style.transform = `rotate(${index * segmentAngle}deg) skewY(${90 - segmentAngle}deg)`;
+                    segment.textContent = option;
+                    this.wheel.appendChild(segment);
+                });
+            }
+
+            makeDecision() {
+                if (this.options.length < 2) {
+                    alert('至少需要2个选项才能进行决策');
+                    return;
+                }
+                
+                if (this.isSpinning) return;
+                
+                this.isSpinning = true;
+                this.decisionBtn.disabled = true;
+                
+                if (this.currentMode === 'simple') {
+                    this.simpleDecision();
+                } else {
+                    this.wheelDecision();
+                }
+            }
+
+            simpleDecision() {
+                this.resultDisplay.textContent = '决策中...';
+                this.playSound('spin');
+                
+                setTimeout(() => {
+                    const randomIndex = Math.floor(Math.random() * this.options.length);
+                    const result = this.options[randomIndex];
+                    
+                    this.showResult(result);
+                    this.addToHistory(result);
+                    this.playSound('result');
+                    
+                    this.isSpinning = false;
+                    this.decisionBtn.disabled = false;
+                }, 1500);
+            }
+
+            wheelDecision() {
+                const randomIndex = Math.floor(Math.random() * this.options.length);
+                const segmentAngle = 360 / this.options.length;
+                const targetAngle = (randomIndex * segmentAngle) + (segmentAngle / 2);
+                const spinAngle = 1440 + (360 - targetAngle); // 4圈 + 目标角度
+                
+                this.wheel.style.transform = `rotate(${spinAngle}deg)`;
+                this.playSound('spin');
+                
+                setTimeout(() => {
+                    const result = this.options[randomIndex];
+                    this.showResult(result);
+                    this.addToHistory(result);
+                    this.playSound('result');
+                    
+                    this.isSpinning = false;
+                    this.decisionBtn.disabled = false;
+                }, 3000);
+            }
+
+            showResult(result) {
+                this.resultDisplay.textContent = `🎉 结果: ${result}`;
+                this.resultDisplay.classList.add('highlight');
+                
+                setTimeout(() => {
+                    this.resultDisplay.classList.remove('highlight');
+                }, 1000);
+            }
+
+            addToHistory(result) {
+                const historyItem = {
+                    result: result,
+                    options: [...this.options],
+                    mode: this.currentMode,
+                    timestamp: new Date().toLocaleString()
+                };
+                
+                this.history.unshift(historyItem);
+                if (this.history.length > 5) {
+                    this.history = this.history.slice(0, 5);
+                }
+                
+                localStorage.setItem('decisionHistory', JSON.stringify(this.history));
+                this.loadHistory();
+            }
+
+            loadHistory() {
+                this.historyList.innerHTML = '';
+                
+                if (this.history.length === 0) {
+                    this.historyList.innerHTML = '<p style="text-align: center; color: #666;">暂无决策历史</p>';
+                    return;
+                }
+                
+                this.history.forEach((item, index) => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item fade-in';
+                    historyItem.innerHTML = `
+                        <div class="history-result">${item.result}</div>
+                        <div class="history-time">${item.timestamp}</div>
+                        <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">
+                            模式: ${item.mode === 'simple' ? '简单' : '转盘'} | 
+                            选项: ${item.options.join(', ')}
+                        </div>
+                    `;
+                    this.historyList.appendChild(historyItem);
+                });
+            }
+
+            clearHistory() {
+                if (confirm('确定要清空所有历史记录吗？')) {
+                    this.history = [];
+                    localStorage.removeItem('decisionHistory');
+                    this.loadHistory();
+                    this.playSound('remove');
+                }
+            }
+
+            toggleSound() {
+                this.soundEnabled = !this.soundEnabled;
+                this.soundToggle.textContent = this.soundEnabled ? '🔊' : '🔇';
+                this.soundToggle.title = this.soundEnabled ? '关闭声音' : '开启声音';
+            }
+
+            playSound(type) {
+                if (!this.soundEnabled) return;
+                
+                // 使用Web Audio API创建简单的音效
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                switch (type) {
+                    case 'add':
+                        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                        break;
+                    case 'remove':
+                        oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+                        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                        break;
+                    case 'spin':
+                        oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                        oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.5);
+                        gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                        break;
+                    case 'result':
+                        oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+                        oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.1);
+                        oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.2);
+                        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                        break;
+                }
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            }
+
+            updateUI() {
+                // 更新选项列表
+                this.optionsList.innerHTML = '';
+                this.options.forEach((option, index) => {
+                    const optionItem = document.createElement('div');
+                    optionItem.className = 'option-item fade-in';
+                    optionItem.innerHTML = `
+                        <span class="option-text">${option}</span>
+                        <button class="edit-btn" onclick="tool.editOption(${index})" title="编辑">✏️</button>
+                        <button class="delete-btn" onclick="tool.removeOption(${index})" title="删除">🗑️</button>
+                    `;
+                    this.optionsList.appendChild(optionItem);
+                });
+                
+                // 更新决策按钮状态
+                this.decisionBtn.disabled = this.options.length < 2;
+                
+                // 更新结果显示
+                if (this.options.length < 2) {
+                    this.resultDisplay.textContent = '添加至少2个选项开始决策';
+                }
+                
+                // 更新转盘
+                if (this.currentMode === 'wheel') {
+                    this.createWheel();
+                }
+            }
+        }
+
+        // 初始化应用
+        const tool = new RandomDecisionTool();
+        
+        // 添加一些示例选项
+        if (tool.options.length === 0) {
+            ['看电影', '去运动', '读书', '听音乐'].forEach(option => {
+                tool.options.push(option);
+            });
+            tool.updateUI();
+        }
+    </script>
+</body>
+</html>

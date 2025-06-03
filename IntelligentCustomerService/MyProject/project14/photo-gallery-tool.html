@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简易相册展示工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: rgba(118, 75, 162, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn.active {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+        }
+
+        .control-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .select-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        select {
+            padding: 8px 15px;
+            border: 2px solid #ddd;
+            border-radius: 20px;
+            background: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .gallery {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            min-height: 300px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .gallery-masonry {
+            column-count: 4;
+            column-gap: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .photo-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            break-inside: avoid;
+            margin-bottom: 20px;
+        }
+
+        .photo-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .photo-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .photo-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            color: white;
+            padding: 15px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .photo-item:hover .photo-overlay {
+            transform: translateY(0);
+        }
+
+        .photo-name {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .photo-size {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* 滤镜效果 */
+        .filter-grayscale {
+            filter: grayscale(100%);
+        }
+
+        .filter-sepia {
+            filter: sepia(100%) saturate(150%);
+        }
+
+        .filter-vintage {
+            filter: sepia(50%) contrast(120%) brightness(110%) saturate(130%);
+        }
+
+        .filter-blur {
+            filter: blur(2px);
+        }
+
+        .filter-bright {
+            filter: brightness(150%) contrast(120%);
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            animation: zoomIn 0.3s ease;
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .modal-info {
+            position: absolute;
+            bottom: -60px;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 0 0 10px 10px;
+            text-align: center;
+        }
+
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-nav:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .modal-prev {
+            left: -70px;
+        }
+
+        .modal-next {
+            right: -70px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .empty-gallery {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .gallery-masonry {
+                column-count: 2;
+            }
+
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+
+            .control-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .select-group {
+                justify-content: center;
+            }
+
+            .modal-nav {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .modal-prev {
+                left: -50px;
+            }
+
+            .modal-next {
+                right: -50px;
+            }
+
+            .upload-area {
+                padding: 30px 20px;
+            }
+
+            .upload-icon {
+                font-size: 2rem;
+            }
+
+            .upload-text {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gallery-masonry {
+                column-count: 1;
+            }
+
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-prev,
+            .modal-next {
+                display: none;
+            }
+
+            .modal-content {
+                max-width: 95%;
+                max-height: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📸 简易相册展示工具</h1>
+            <p>上传您的照片，享受美好的回忆时光</p>
+        </div>
+
+        <div class="controls">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">点击或拖拽上传图片</div>
+                <div style="font-size: 0.9rem; color: #999;">支持 JPG、PNG、GIF 格式，最多上传 20 张</div>
+                <input type="file" id="fileInput" class="file-input" multiple accept="image/*">
+            </div>
+
+            <div class="control-group">
+                <div class="select-group">
+                    <label>布局模式：</label>
+                    <button class="btn active" id="gridBtn">网格布局</button>
+                    <button class="btn" id="masonryBtn">瀑布流</button>
+                </div>
+
+                <div class="select-group">
+                    <label>排序方式：</label>
+                    <select id="sortSelect">
+                        <option value="upload">上传时间</option>
+                        <option value="name">文件名</option>
+                        <option value="size">文件大小</option>
+                    </select>
+                </div>
+
+                <div class="select-group">
+                    <label>滤镜效果：</label>
+                    <select id="filterSelect">
+                        <option value="none">无滤镜</option>
+                        <option value="grayscale">黑白</option>
+                        <option value="sepia">复古</option>
+                        <option value="vintage">怀旧</option>
+                        <option value="bright">明亮</option>
+                        <option value="blur">模糊</option>
+                    </select>
+                </div>
+
+                <button class="btn" id="clearBtn">清空相册</button>
+            </div>
+        </div>
+
+        <div class="gallery" id="gallery">
+            <div class="empty-gallery" id="emptyGallery">
+                <div class="empty-icon">🖼️</div>
+                <h3>相册为空</h3>
+                <p>请上传一些图片开始使用</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">×</button>
+            <button class="modal-nav modal-prev" id="modalPrev">‹</button>
+            <button class="modal-nav modal-next" id="modalNext">›</button>
+            <img class="modal-image" id="modalImage" src="" alt="">
+            <div class="modal-info" id="modalInfo"></div>
+        </div>
+    </div>
+
+    <script>
+        class PhotoGallery {
+            constructor() {
+                this.photos = [];
+                this.currentLayout = 'grid';
+                this.currentFilter = 'none';
+                this.currentSort = 'upload';
+                this.currentPhotoIndex = 0;
+                this.maxPhotos = 20;
+                
+                this.initElements();
+                this.bindEvents();
+                this.loadFromStorage();
+            }
+
+            initElements() {
+                this.uploadArea = document.getElementById('uploadArea');
+                this.fileInput = document.getElementById('fileInput');
+                this.gallery = document.getElementById('gallery');
+                this.emptyGallery = document.getElementById('emptyGallery');
+                this.gridBtn = document.getElementById('gridBtn');
+                this.masonryBtn = document.getElementById('masonryBtn');
+                this.sortSelect = document.getElementById('sortSelect');
+                this.filterSelect = document.getElementById('filterSelect');
+                this.clearBtn = document.getElementById('clearBtn');
+                this.modal = document.getElementById('modal');
+                this.modalImage = document.getElementById('modalImage');
+                this.modalInfo = document.getElementById('modalInfo');
+                this.modalClose = document.getElementById('modalClose');
+                this.modalPrev = document.getElementById('modalPrev');
+                this.modalNext = document.getElementById('modalNext');
+            }
+
+            bindEvents() {
+                // 上传事件
+                this.uploadArea.addEventListener('click', () => this.fileInput.click());
+                this.fileInput.addEventListener('change', (e) => this.handleFiles(e.target.files));
+                
+                // 拖拽事件
+                this.uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    this.uploadArea.classList.add('dragover');
+                });
+                
+                this.uploadArea.addEventListener('dragleave', () => {
+                    this.uploadArea.classList.remove('dragover');
+                });
+                
+                this.uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    this.uploadArea.classList.remove('dragover');
+                    this.handleFiles(e.dataTransfer.files);
+                });
+
+                // 布局切换
+                this.gridBtn.addEventListener('click', () => this.setLayout('grid'));
+                this.masonryBtn.addEventListener('click', () => this.setLayout('masonry'));
+
+                // 排序和滤镜
+                this.sortSelect.addEventListener('change', (e) => this.setSortBy(e.target.value));
+                this.filterSelect.addEventListener('change', (e) => this.setFilter(e.target.value));
+
+                // 清空相册
+                this.clearBtn.addEventListener('click', () => this.clearGallery());
+
+                // 模态框事件
+                this.modalClose.addEventListener('click', () => this.closeModal());
+                this.modalPrev.addEventListener('click', () => this.showPrevPhoto());
+                this.modalNext.addEventListener('click', () => this.showNextPhoto());
+                this.modal.addEventListener('click', (e) => {
+                    if (e.target === this.modal) this.closeModal();
+                });
+
+                // 键盘事件
+                document.addEventListener('keydown', (e) => {
+                    if (this.modal.classList.contains('show')) {
+                        if (e.key === 'Escape') this.closeModal();
+                        if (e.key === 'ArrowLeft') this.showPrevPhoto();
+                        if (e.key === 'ArrowRight') this.showNextPhoto();
+                    }
+                });
+
+                // 触摸事件（移动端滑动）
+                let startX = 0;
+                this.modal.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                });
+                
+                this.modal.addEventListener('touchend', (e) => {
+                    const endX = e.changedTouches[0].clientX;
+                    const diff = startX - endX;
+                    
+                    if (Math.abs(diff) > 50) {
+                        if (diff > 0) {
+                            this.showNextPhoto();
+                        } else {
+                            this.showPrevPhoto();
+                        }
+                    }
+                });
+            }
+
+            handleFiles(files) {
+                if (this.photos.length >= this.maxPhotos) {
+                    this.showToast(`最多只能上传 ${this.maxPhotos} 张图片`);
+                    return;
+                }
+
+                const remainingSlots = this.maxPhotos - this.photos.length;
+                const filesToProcess = Array.from(files).slice(0, remainingSlots);
+
+                if (files.length > remainingSlots) {
+                    this.showToast(`只能再上传 ${remainingSlots} 张图片`);
+                }
+
+                this.showLoading();
+
+                Promise.all(filesToProcess.map(file => this.processFile(file)))
+                    .then(photos => {
+                        this.photos.push(...photos.filter(photo => photo));
+                        this.saveToStorage();
+                        this.renderGallery();
+                        this.hideLoading();
+                        this.showToast(`成功上传 ${photos.filter(photo => photo).length} 张图片`);
+                    })
+                    .catch(error => {
+                        console.error('上传失败:', error);
+                        this.hideLoading();
+                        this.showToast('上传失败，请重试');
+                    });
+            }
+
+            processFile(file) {
+                return new Promise((resolve) => {
+                    if (!file.type.startsWith('image/')) {
+                        resolve(null);
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const photo = {
+                                id: Date.now() + Math.random(),
+                                name: file.name,
+                                size: file.size,
+                                width: img.width,
+                                height: img.height,
+                                src: e.target.result,
+                                uploadTime: new Date().toISOString()
+                            };
+                            resolve(photo);
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            setLayout(layout) {
+                this.currentLayout = layout;
+                
+                if (layout === 'grid') {
+                    this.gridBtn.classList.add('active');
+                    this.masonryBtn.classList.remove('active');
+                } else {
+                    this.masonryBtn.classList.add('active');
+                    this.gridBtn.classList.remove('active');
+                }
+                
+                this.renderGallery();
+            }
+
+            setSortBy(sortBy) {
+                this.currentSort = sortBy;
+                this.renderGallery();
+            }
+
+            setFilter(filter) {
+                this.currentFilter = filter;
+                this.applyFilter();
+            }
+
+            applyFilter() {
+                const photos = document.querySelectorAll('.photo-item img');
+                photos.forEach(img => {
+                    img.className = this.currentFilter !== 'none' ? `filter-${this.currentFilter}` : '';
+                });
+            }
+
+            getSortedPhotos() {
+                const photos = [...this.photos];
+                
+                switch (this.currentSort) {
+                    case 'name':
+                        return photos.sort((a, b) => a.name.localeCompare(b.name));
+                    case 'size':
+                        return photos.sort((a, b) => b.size - a.size);
+                    case 'upload':
+                    default:
+                        return photos.sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
+                }
+            }
+
+            renderGallery() {
+                if (this.photos.length === 0) {
+                    this.gallery.innerHTML = `
+                        <div class="empty-gallery">
+                            <div class="empty-icon">🖼️</div>
+                            <h3>相册为空</h3>
+                            <p>请上传一些图片开始使用</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const sortedPhotos = this.getSortedPhotos();
+                const layoutClass = this.currentLayout === 'grid' ? 'gallery-grid' : 'gallery-masonry';
+                
+                this.gallery.innerHTML = `<div class="${layoutClass}" id="photoContainer"></div>`;
+                const container = document.getElementById('photoContainer');
+
+                sortedPhotos.forEach((photo, index) => {
+                    const photoElement = this.createPhotoElement(photo, index);
+                    container.appendChild(photoElement);
+                });
+
+                this.applyFilter();
+            }
+
+            createPhotoElement(photo, index) {
+                const div = document.createElement('div');
+                div.className = 'photo-item';
+                div.style.animationDelay = `${index * 0.1}s`;
+                
+                div.innerHTML = `
+                    <img src="${photo.src}" alt="${photo.name}" loading="lazy">
+                    <div class="photo-overlay">
+                        <div class="photo-name">${photo.name}</div>
+                        <div class="photo-size">${this.formatFileSize(photo.size)} • ${photo.width}×${photo.height}</div>
+                    </div>
+                `;
+
+                div.addEventListener('click', () => this.openModal(photo.id));
+                
+                return div;
+            }
+
+            openModal(photoId) {
+                const photoIndex = this.photos.findIndex(p => p.id === photoId);
+                if (photoIndex === -1) return;
+                
+                this.currentPhotoIndex = photoIndex;
+                this.showPhoto(this.photos[photoIndex]);
+                this.modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+
+            closeModal() {
+                this.modal.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+
+            showPhoto(photo) {
+                this.modalImage.src = photo.src;
+                this.modalImage.alt = photo.name;
+                
+                const uploadDate = new Date(photo.uploadTime).toLocaleString('zh-CN');
+                this.modalInfo.innerHTML = `
+                    <div><strong>${photo.name}</strong></div>
+                    <div>尺寸: ${photo.width} × ${photo.height} • 大小: ${this.formatFileSize(photo.size)}</div>
+                    <div>上传时间: ${uploadDate}</div>
+                `;
+            }
+
+            showPrevPhoto() {
+                if (this.photos.length === 0) return;
+                this.currentPhotoIndex = (this.currentPhotoIndex - 1 + this.photos.length) % this.photos.length;
+                this.showPhoto(this.photos[this.currentPhotoIndex]);
+            }
+
+            showNextPhoto() {
+                if (this.photos.length === 0) return;
+                this.currentPhotoIndex = (this.currentPhotoIndex + 1) % this.photos.length;
+                this.showPhoto(this.photos[this.currentPhotoIndex]);
+            }
+
+            clearGallery() {
+                if (this.photos.length === 0) return;
+                
+                if (confirm('确定要清空所有图片吗？此操作不可恢复。')) {
+                    this.photos = [];
+                    this.saveToStorage();
+                    this.renderGallery();
+                    this.showToast('相册已清空');
+                }
+            }
+
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 B';
+                const k = 1024;
+                const sizes = ['B', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+            }
+
+            showLoading() {
+                this.gallery.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <div>正在处理图片...</div>
+                    </div>
+                `;
+            }
+
+            hideLoading() {
+                // 加载完成后会调用 renderGallery
+            }
+
+            showToast(message) {
+                // 创建简单的提示
+                const toast = document.createElement('div');
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: rgba(0,0,0,0.8);
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 25px;
+                    z-index: 10000;
+                    animation: slideIn 0.3s ease;
+                `;
+                toast.textContent = message;
+                
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => document.body.removeChild(toast), 300);
+                }, 3000);
+            }
+
+            saveToStorage() {
+                try {
+                    localStorage.setItem('photoGallery', JSON.stringify(this.photos));
+                } catch (error) {
+                    console.warn('无法保存到本地存储:', error);
+                }
+            }
+
+            loadFromStorage() {
+                try {
+                    const saved = localStorage.getItem('photoGallery');
+                    if (saved) {
+                        this.photos = JSON.parse(saved);
+                        this.renderGallery();
+                    }
+                } catch (error) {
+                    console.warn('无法从本地存储加载:', error);
+                }
+            }
+        }
+
+        // 添加动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 初始化相册
+        document.addEventListener('DOMContentLoaded', () => {
+            new PhotoGallery();
+        });
+    </script>
+</body>
+</html>

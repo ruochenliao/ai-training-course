@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>单词拼图游戏 Wordle</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4f8cff;
+      --success: #4fcf7f;
+      --warning: #ffd600;
+      --gray: #b2bec3;
+      --bg: #fff;
+      --text: #222;
+      --tile-size: 52px;
+      --tile-size-mobile: 12vw;
+      --tile-gap: 0.5rem;
+      --kbd-bg: #e0e0e0;
+      --kbd-text: #222;
+      --kbd-success: #4fcf7f;
+      --kbd-warning: #ffd600;
+      --kbd-gray: #b2bec3;
+      --kbd-border: #b2bec3;
+      --kbd-radius: 8px;
+      --kbd-active: #4f8cff;
+      --kbd-contrast: #000;
+      --kbd-contrast-bg: #fff;
+      --kbd-contrast-success: #228b22;
+      --kbd-contrast-warning: #b8860b;
+      --kbd-contrast-gray: #555;
+      --kbd-contrast-border: #888;
+      --kbd-contrast-active: #222;
+      --kbd-contrast-radius: 8px;
+    }
+    [data-theme="contrast"] {
+      --primary: #000;
+      --success: #228b22;
+      --warning: #b8860b;
+      --gray: #555;
+      --bg: #fff;
+      --text: #000;
+      --kbd-bg: #fff;
+      --kbd-text: #000;
+      --kbd-success: #228b22;
+      --kbd-warning: #b8860b;
+      --kbd-gray: #555;
+      --kbd-border: #888;
+      --kbd-radius: 8px;
+      --kbd-active: #222;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Arial', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 1.2rem 2rem 1rem 2rem;
+      text-align: center;
+      font-size: 2rem;
+      letter-spacing: 2px;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    main {
+      max-width: 420px;
+      margin: 1.5rem auto 0 auto;
+      background: var(--bg);
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+      padding: 1.5rem 1.2rem 2rem 1.2rem;
+      min-height: 60vh;
+      position: relative;
+      transition: background 0.3s;
+    }
+    .game-settings {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .game-settings label {
+      font-weight: 500;
+      margin-right: 0.5rem;
+    }
+    .game-settings select, .game-settings input[type=checkbox] {
+      padding: 0.3rem 0.5rem;
+      border-radius: 6px;
+      border: 1px solid var(--gray);
+      font-size: 1rem;
+      background: var(--bg);
+    }
+    .game-settings input[type=checkbox] {
+      transform: scale(1.2);
+      margin-right: 0.3rem;
+    }
+    .wordle-board {
+      display: grid;
+      grid-template-rows: repeat(6, 1fr);
+      gap: var(--tile-gap);
+      margin: 0 auto 1.5rem auto;
+      user-select: none;
+    }
+    .wordle-row {
+      display: grid;
+      grid-template-columns: repeat(var(--word-length, 5), 1fr);
+      gap: var(--tile-gap);
+      margin-bottom: 0.1rem;
+    }
+    .tile {
+      width: var(--tile-size);
+      height: var(--tile-size);
+      background: var(--kbd-bg);
+      color: var(--kbd-text);
+      border-radius: 10px;
+      border: 2px solid var(--kbd-border);
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      vertical-align: middle;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s, color 0.3s, border 0.2s, transform 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      text-transform: uppercase;
+      user-select: none;
+      position: relative;
+      animation: none;
+    }
+    .tile.filled { border-color: var(--primary); }
+    .tile.correct { background: var(--success); color: #fff; border-color: var(--success); }
+    .tile.present { background: var(--warning); color: #fff; border-color: var(--warning); }
+    .tile.absent { background: var(--gray); color: #fff; border-color: var(--gray); }
+    .tile.reveal { animation: flip 0.5s; }
+    @keyframes flip {
+      0% { transform: rotateY(0deg); }
+      50% { transform: rotateY(90deg); }
+      100% { transform: rotateY(0deg); }
+    }
+    .wordle-keyboard {
+      display: grid;
+      grid-template-rows: repeat(3, 1fr);
+      gap: 0.4rem;
+      margin: 1.2rem auto 0 auto;
+      user-select: none;
+    }
+    .kbd-row {
+      display: flex;
+      gap: 0.3rem;
+      justify-content: center;
+    }
+    .kbd-btn {
+      background: var(--kbd-bg);
+      color: var(--kbd-text);
+      border: 1.5px solid var(--kbd-border);
+      border-radius: var(--kbd-radius);
+      font-size: 1.1rem;
+      padding: 0.7rem 0.7rem;
+      min-width: 2.2rem;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s, color 0.2s;
+      outline: none;
+      text-transform: uppercase;
+      user-select: none;
+    }
+    .kbd-btn.correct { background: var(--kbd-success); color: #fff; border-color: var(--kbd-success); }
+    .kbd-btn.present { background: var(--kbd-warning); color: #fff; border-color: var(--kbd-warning); }
+    .kbd-btn.absent { background: var(--kbd-gray); color: #fff; border-color: var(--kbd-gray); }
+    .kbd-btn:active, .kbd-btn.selected { background: var(--kbd-active); color: #fff; }
+    .kbd-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+    .game-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .stat-board {
+      display: flex;
+      gap: 1.2rem;
+      align-items: center;
+    }
+    .stat-board span {
+      font-weight: bold;
+      color: var(--primary);
+    }
+    .tutorial {
+      background: #f5f7fa;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      color: #444;
+      text-align: left;
+    }
+    .theme-select {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .theme-thumb {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      background: #fff;
+      cursor: pointer;
+      transition: border 0.2s;
+    }
+    .theme-thumb.selected {
+      border: 2px solid var(--primary);
+    }
+    .wordle-modal {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      display: none;
+    }
+    .wordle-modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: #fff;
+      border-radius: 16px;
+      padding: 2rem 1.5rem 1.5rem 1.5rem;
+      min-width: 260px;
+      max-width: 90vw;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.12);
+      text-align: center;
+      position: relative;
+    }
+    .modal-content h2 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+    .modal-content .btn {
+      margin-top: 1.2rem;
+    }
+    @media (max-width: 700px) {
+      main { padding: 0.5rem; }
+      .wordle-board { gap: 1vw; }
+      :root { --tile-size: var(--tile-size-mobile); }
+    }
+    @media (max-width: 500px) {
+      header { font-size: 1.2rem; padding: 0.7rem 0.5rem; }
+      main { padding: 0.2rem; }
+      .game-settings { flex-direction: column; gap: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>单词拼图游戏 Wordle</header>
+  <main>
+    <div class="tutorial" id="tutorial">
+      <b>玩法说明：</b>在6次内猜出目标单词，每次猜测后根据颜色提示调整策略。支持多种难度、主题、中英文切换、色盲友好、统计与分享。
+    </div>
+    <div class="game-settings" id="game-settings">
+      <div>
+        <label>难度：</label>
+        <select id="word-length">
+          <option value="4">4字母</option>
+          <option value="5" selected>5字母</option>
+          <option value="6">6字母</option>
+          <option value="7">7字母</option>
+        </select>
+      </div>
+      <div>
+        <label>主题：</label>
+        <select id="word-theme">
+          <option value="common">常用词</option>
+          <option value="animal">动物</option>
+          <option value="country">国家</option>
+          <option value="idiom">成语</option>
+        </select>
+      </div>
+      <div>
+        <label>语言：</label>
+        <select id="lang-mode">
+          <option value="en">英文</option>
+          <option value="zh">中文</option>
+        </select>
+      </div>
+      <div class="theme-select" id="theme-select">
+        <label>色彩：</label>
+        <span class="theme-thumb selected" data-theme="default">🌞</span>
+        <span class="theme-thumb" data-theme="contrast">🟦</span>
+      </div>
+      <div>
+        <label><input type="checkbox" id="colorblind-mode">色盲友好</label>
+      </div>
+      <div>
+        <button class="btn" id="btn-restart"><i class="fa fa-rotate"></i> 新游戏</button>
+      </div>
+    </div>
+    <div class="game-info">
+      <div class="stat-board">
+        <span>用时：<span id="timer">0:00</span></span>
+        <span>连胜：<span id="streak">0</span></span>
+        <span>胜率：<span id="winrate">0%</span></span>
+      </div>
+      <div>
+        <button class="btn" id="btn-tutorial"><i class="fa fa-question-circle"></i> 教程</button>
+        <button class="btn" id="btn-stats"><i class="fa fa-chart-bar"></i> 统计</button>
+        <button class="btn" id="btn-share"><i class="fa fa-share-alt"></i> 分享</button>
+        <button class="btn" id="btn-infinite"><i class="fa fa-infinity"></i> 无限模式</button>
+        <button class="btn" id="btn-challenge"><i class="fa fa-trophy"></i> 挑战模式</button>
+      </div>
+    </div>
+    <div class="wordle-board" id="wordle-board"></div>
+    <div class="wordle-keyboard" id="wordle-keyboard"></div>
+  </main>
+  <div class="wordle-modal" id="modal-victory">
+    <div class="modal-content">
+      <h2>🎉 恭喜通关！</h2>
+      <div id="victory-detail"></div>
+      <button class="btn success" id="btn-next-game">下一局</button>
+      <button class="btn" id="btn-close-victory">关闭</button>
+    </div>
+  </div>
+  <div class="wordle-modal" id="modal-fail">
+    <div class="modal-content">
+      <h2>😢 很遗憾！</h2>
+      <div id="fail-detail"></div>
+      <button class="btn" id="btn-close-fail">关闭</button>
+    </div>
+  </div>
+  <div class="wordle-modal" id="modal-tutorial">
+    <div class="modal-content">
+      <h2>游戏规则与示例</h2>
+      <div id="tutorial-content">（后续补充详细规则与示例）</div>
+      <button class="btn" id="btn-close-tutorial">关闭</button>
+    </div>
+  </div>
+  <div class="wordle-modal" id="modal-stats">
+    <div class="modal-content">
+      <h2>个人统计</h2>
+      <div id="stats-content">（后续补充统计数据与分布图表）</div>
+      <button class="btn" id="btn-close-stats">关闭</button>
+    </div>
+  </div>
+  <div class="wordle-modal" id="modal-share">
+    <div class="modal-content">
+      <h2>分享你的成绩</h2>
+      <div id="share-content">（后续补充分享图案与复制功能）</div>
+      <button class="btn" id="btn-close-share">关闭</button>
+    </div>
+  </div>
+  <script>
+    // ... JS 逻辑将在后续补充 ...
+  </script>
+</body>
+</html> 
