@@ -1,0 +1,62 @@
+{
+  "common": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "reset": "Reset",
+    "submit": "Submit",
+    "back": "Back",
+    "loading": "Loading...",
+    "noData": "No Data",
+    "operation": "Operation",
+    "status": "Status",
+    "createTime": "Create Time",
+    "updateTime": "Update Time",
+    "remark": "Remark",
+    "pleaseSelect": "Please Select",
+    "pleaseInput": "Please Input"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "username": "Username",
+    "password": "Password",
+    "rememberMe": "Remember Me",
+    "forgotPassword": "Forgot Password?",
+    "loginSuccess": "Login Success",
+    "loginFailed": "Login Failed",
+    "usernameRequired": "Please enter username",
+    "passwordRequired": "Please enter password"
+  },
+  "menu": {
+    "dashboard": "Dashboard",
+    "customerService": "Customer Service",
+    "conversation": "Conversation",
+    "knowledge": "Knowledge Base",
+    "analytics": "Analytics",
+    "system": "System",
+    "user": "User Management",
+    "role": "Role Management",
+    "permission": "Permission Management",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Intelligent Customer Service System",
+    "welcome": "Welcome to Intelligent Customer Service System",
+    "totalConversations": "Total Conversations",
+    "activeUsers": "Active Users",
+    "avgResponseTime": "Avg Response Time",
+    "satisfactionRate": "Satisfaction Rate"
+  },
+  "error": {
+    "404": "Page Not Found",
+    "403": "Access Denied",
+    "500": "Server Error",
+    "networkError": "Network Error",
+    "unknownError": "Unknown Error"
+  }
+}

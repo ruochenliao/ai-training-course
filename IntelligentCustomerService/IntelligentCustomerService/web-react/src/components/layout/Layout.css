@@ -1,0 +1,89 @@
+/* 布局相关样式 */
+.ant-layout {
+  background: transparent;
+}
+
+.ant-layout-content {
+  background: transparent;
+}
+
+/* 侧边栏样式 */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1000;
+  transition: all 0.3s;
+}
+
+.sidebar.collapsed {
+  width: 80px;
+}
+
+.sidebar:not(.collapsed) {
+  width: 256px;
+}
+
+/* 头部样式 */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* 内容区域样式 */
+.content-wrapper {
+  transition: margin-left 0.3s;
+}
+
+/* 菜单样式 */
+.ant-menu-item {
+  display: flex;
+  align-items: center;
+}
+
+.ant-menu-item .anticon {
+  font-size: 16px;
+}
+
+.ant-menu-submenu-title {
+  display: flex;
+  align-items: center;
+}
+
+.ant-menu-submenu-title .anticon {
+  font-size: 16px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  
+  .content-wrapper {
+    margin-left: 0 !important;
+  }
+}
+
+/* 暗黑模式 */
+.dark .header {
+  background: #141414;
+  border-bottom: 1px solid #303030;
+}
+
+.dark .ant-layout-content {
+  background: #000;
+}
+
+.dark .content-wrapper > div {
+  background: #141414 !important;
+  color: #fff;
+}
