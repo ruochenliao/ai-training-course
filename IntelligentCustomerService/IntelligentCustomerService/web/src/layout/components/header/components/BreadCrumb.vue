@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { renderCustomIcon, renderIcon } from '@/utils'
+import {renderCustomIcon, renderIcon} from '@/utils'
 
 const router = useRouter()
 const route = useRoute()

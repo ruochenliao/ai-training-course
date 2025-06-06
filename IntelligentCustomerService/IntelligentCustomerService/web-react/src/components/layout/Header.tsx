@@ -1,26 +1,16 @@
 import React from 'react'
-import { Layout, Button, Dropdown, Avatar, Space, Switch } from 'antd'
-import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  BellOutlined,
-  UserOutlined,
-  SettingOutlined,
-  LogoutOutlined,
-  MoonOutlined,
-  SunOutlined,
-} from '@ant-design/icons'
-import type { MenuProps } from 'antd'
-import { useNavigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import { useAuthStore } from '@/store/auth'
-import { useThemeStore } from '@/store/theme'
+import type {MenuProps} from 'antd'
+import {Avatar, Button, Dropdown, Layout, Typography} from 'antd'
+import {GithubOutlined, MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined,} from '@ant-design/icons'
+import {useNavigate} from 'react-router-dom'
+import {useAuthStore} from '@/store/auth'
+import {useThemeStore} from '@/store/theme'
 
 const { Header: AntdHeader } = Layout
+const { Text } = Typography
 
 const Header: React.FC = () => {
   const navigate = useNavigate()
-  const { t } = useTranslation()
   const { user, logout } = useAuthStore()
   const { sidebarCollapsed, toggleSidebar, isDark, toggleTheme } = useThemeStore()
 
@@ -37,24 +27,17 @@ const Header: React.FC = () => {
       onClick: () => navigate('/profile'),
     },
     {
-      key: 'settings',
-      icon: <SettingOutlined />,
-      label: '设置',
-      onClick: () => navigate('/settings'),
-    },
-    {
       type: 'divider',
     },
     {
       key: 'logout',
-      icon: <LogoutOutlined />,
-      label: t('auth.logout'),
+      label: '退出登录',
       onClick: handleLogout,
     },
   ]
 
   return (
-    <AntdHeader className="header flex-between px-6 h-16">
+    <AntdHeader className="flex-between px-4 h-14 bg-white border-b border-gray-200" style={{ padding: '0 16px' }}>
       <div className="flex items-center">
         <Button
           type="text"
@@ -65,31 +48,23 @@ const Header: React.FC = () => {
       </div>
 
       <div className="flex items-center space-x-4">
-        {/* 主题切换 */}
-        <Switch
-          checked={isDark}
-          onChange={toggleTheme}
-          checkedChildren={<MoonOutlined />}
-          unCheckedChildren={<SunOutlined />}
-        />
-
-        {/* 通知 */}
         <Button
           type="text"
-          icon={<BellOutlined />}
+          icon={<GithubOutlined />}
+          href="https://github.com/"
+          target="_blank"
           className="text-lg"
         />
 
         {/* 用户菜单 */}
         <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-          <Space className="cursor-pointer hover:bg-gray-50 px-2 py-1 rounded">
+          <div className="flex items-center cursor-pointer">
             <Avatar
               size="small"
-              src={user?.avatar}
               icon={<UserOutlined />}
             />
-            <span className="text-sm">{user?.nickname || user?.username}</span>
-          </Space>
+            <Text className="ml-2">{user?.username || 'admin'}</Text>
+          </div>
         </Dropdown>
       </div>
     </AntdHeader>

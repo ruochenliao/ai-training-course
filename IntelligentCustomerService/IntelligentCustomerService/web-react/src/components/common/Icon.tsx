@@ -1,6 +1,6 @@
 import React from 'react';
 import * as AntdIcons from '@ant-design/icons';
-import { IconProps } from '@ant-design/icons/lib/components/Icon';
+import {IconProps} from '@ant-design/icons/lib/components/Icon';
 
 interface CustomIconProps extends Omit<IconProps, 'component'> {
   name: string;

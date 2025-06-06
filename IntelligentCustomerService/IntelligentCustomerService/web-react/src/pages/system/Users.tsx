@@ -1,37 +1,23 @@
-import React, { useState, useRef } from 'react';
+import React, {useRef, useState} from 'react';
+import {Avatar, Button, Card, Dropdown, Image, message, Modal, Space, Switch, Tag,} from 'antd';
 import {
-  Card,
-  Button,
-  Space,
-  Tag,
-  Avatar,
-  Switch,
-  Dropdown,
-  Modal,
-  message,
-  Upload,
-  Image,
-} from 'antd';
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  MoreOutlined,
-  UserOutlined,
-  LockOutlined,
-  UnlockOutlined,
-  UploadOutlined,
-  EyeOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    EyeOutlined,
+    LockOutlined,
+    MoreOutlined,
+    PlusOutlined,
+    UserOutlined,
 } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
-import { DataTable } from '../../components/common/DataTable';
-import { ModalForm } from '../../components/common/ModalForm';
-import { QueryBar } from '../../components/common/QueryBar';
-import { useRequest } from '../../hooks/useRequest';
-import { userApi } from '../../api/user';
-import type { FormField } from '../../components/common/DynamicForm';
-import type { ModalFormRef } from '../../components/common/ModalForm';
-import type { QueryBarRef } from '../../components/common/QueryBar';
+import {useTranslation} from 'react-i18next';
+import {DataTable} from '../../components/common/DataTable';
+import type {ModalFormRef} from '../../components/common/ModalForm';
+import {ModalForm} from '../../components/common/ModalForm';
+import type {QueryBarRef} from '../../components/common/QueryBar';
+import {QueryBar} from '../../components/common/QueryBar';
+import {useRequest} from '../../hooks/useRequest';
+import {userApi} from '../../api/user';
+import type {FormField} from '../../components/common/DynamicForm';
 
 // 用户接口
 interface User {

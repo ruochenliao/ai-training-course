@@ -1,6 +1,6 @@
-import { getToken } from '@/utils'
-import { resolveResError } from './helpers'
-import { useUserStore } from '@/store'
+import {getToken} from '@/utils'
+import {resolveResError} from './helpers'
+import {useUserStore} from '@/store'
 
 export function reqResolve(config) {
   // 处理不需要token的请求

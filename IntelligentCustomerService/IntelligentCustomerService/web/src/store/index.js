@@ -1,4 +1,4 @@
-import { createPinia } from 'pinia'
+import {createPinia} from 'pinia'
 
 export function setupStore(app) {
   app.use(createPinia())

@@ -1,7 +1,7 @@
-import React, { useImperativeHandle, forwardRef, useEffect } from 'react';
-import { Modal, ModalProps } from 'antd';
-import { useTranslation } from 'react-i18next';
-import DynamicForm, { DynamicFormProps, DynamicFormRef, FormItemConfig } from './DynamicForm';
+import React, {forwardRef, useEffect, useImperativeHandle} from 'react';
+import {Modal, ModalProps} from 'antd';
+import {useTranslation} from 'react-i18next';
+import DynamicForm, {DynamicFormProps, DynamicFormRef, FormItemConfig} from './DynamicForm';
 
 export interface ModalFormProps extends Omit<ModalProps, 'onOk' | 'onCancel'> {
   formItems: FormItemConfig[];

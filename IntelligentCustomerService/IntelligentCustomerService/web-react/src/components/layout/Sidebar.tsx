@@ -1,20 +1,20 @@
-import React from 'react'
-import { Layout, Menu } from 'antd'
+import React, {useState} from 'react'
+import type {MenuProps} from 'antd'
+import {Layout, Menu} from 'antd'
 import {
-  DashboardOutlined,
-  CustomerServiceOutlined,
-  MessageOutlined,
-  BookOutlined,
-  BarChartOutlined,
-  SettingOutlined,
-  UserOutlined,
-  SafetyOutlined,
-  ToolOutlined,
+    ApartmentOutlined,
+    ApiOutlined,
+    AppstoreOutlined,
+    DashboardOutlined,
+    FileSearchOutlined,
+    MenuOutlined,
+    TeamOutlined,
+    UserOutlined,
+    WarningOutlined
 } from '@ant-design/icons'
-import { useNavigate, useLocation } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import { useThemeStore } from '@/store/theme'
-import type { MenuProps } from 'antd'
+import {useLocation, useNavigate} from 'react-router-dom'
+import {useTranslation} from 'react-i18next'
+import {useThemeStore} from '@/store/theme'
 
 const { Sider } = Layout
 
@@ -25,98 +25,123 @@ const Sidebar: React.FC = () => {
   const location = useLocation()
   const { t } = useTranslation()
   const { sidebarCollapsed } = useThemeStore()
+  
+  // 默认展开的子菜单
+  const [openKeys, setOpenKeys] = useState<string[]>(() => {
+    const pathname = location.pathname;
+    if (pathname.startsWith('/system')) return ['system'];
+    if (pathname.startsWith('/error')) return ['error'];
+    return [];
+  });
 
+  // 菜单项
   const menuItems: MenuItem[] = [
     {
-      key: '/dashboard',
+      key: '/workbench',
       icon: <DashboardOutlined />,
-      label: t('menu.dashboard'),
+      label: '工作台',
     },
     {
-      key: '/customer-service',
-      icon: <CustomerServiceOutlined />,
-      label: t('menu.customerService'),
+      key: 'system',
+      icon: <AppstoreOutlined />,
+      label: '系统管理',
       children: [
         {
-          key: '/customer-service/conversations',
-          icon: <MessageOutlined />,
-          label: t('menu.conversation'),
+          key: '/system/user',
+          icon: <UserOutlined />,
+          label: '用户管理',
         },
         {
-          key: '/customer-service/knowledge',
-          icon: <BookOutlined />,
-          label: t('menu.knowledge'),
+          key: '/system/role',
+          icon: <TeamOutlined />,
+          label: '角色管理',
+        },
+        {
+          key: '/system/menu',
+          icon: <MenuOutlined />,
+          label: '菜单管理',
+        },
+        {
+          key: '/system/api',
+          icon: <ApiOutlined />,
+          label: 'API管理',
+        },
+        {
+          key: '/system/dept',
+          icon: <ApartmentOutlined />,
+          label: '部门管理',
+        },
+        {
+          key: '/system/auditlog',
+          icon: <FileSearchOutlined />,
+          label: '审计日志',
         },
       ],
     },
     {
-      key: '/analytics',
-      icon: <BarChartOutlined />,
-      label: t('menu.analytics'),
+      key: '/menu',
+      icon: <AppstoreOutlined />,
+      label: '一级菜单',
     },
     {
-      key: '/system',
-      icon: <SettingOutlined />,
-      label: t('menu.system'),
+      key: 'error',
+      icon: <WarningOutlined />,
+      label: '错误页',
       children: [
         {
-          key: '/system/users',
-          icon: <UserOutlined />,
-          label: t('menu.user'),
+          key: '/error/401',
+          label: '401',
         },
         {
-          key: '/system/roles',
-          icon: <SafetyOutlined />,
-          label: t('menu.role'),
+          key: '/error/403',
+          label: '403',
         },
         {
-          key: '/system/settings',
-          icon: <ToolOutlined />,
-          label: t('menu.settings'),
+          key: '/error/404',
+          label: '404',
+        },
+        {
+          key: '/error/500',
+          label: '500',
         },
       ],
     },
   ]
 
   const handleMenuClick = ({ key }: { key: string }) => {
-    navigate(key)
+    // 不要导航到父菜单项
+    if (key === 'system' || key === 'error') return;
+    navigate(key);
   }
+
+  // 处理子菜单展开/收起
+  const handleOpenChange = (keys: string[]) => {
+    setOpenKeys(keys);
+  };
 
   // 获取当前选中的菜单项
   const getSelectedKeys = () => {
-    return [location.pathname]
-  }
-
-  // 获取当前展开的菜单项
-  const getOpenKeys = () => {
-    const pathname = location.pathname
-    const openKeys: string[] = []
-    
-    if (pathname.startsWith('/customer-service')) {
-      openKeys.push('/customer-service')
-    }
-    if (pathname.startsWith('/system')) {
-      openKeys.push('/system')
-    }
-    
-    return openKeys
+    let pathname = location.pathname;
+    if (pathname === '/') pathname = '/workbench';
+    return [pathname];
   }
 
   return (
     <Sider
-      className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}
+      className="sidebar"
       collapsed={sidebarCollapsed}
-      width={256}
-      collapsedWidth={80}
+      width={220}
+      collapsedWidth={64}
       theme="light"
+      style={{ background: '#fff' }}
     >
       {/* Logo */}
-      <div className="h-16 flex-center border-b border-gray-200">
+      <div className="h-16 flex items-center justify-center border-b border-gray-200">
         {sidebarCollapsed ? (
-          <div className="text-xl font-bold text-primary-600">ICS</div>
+          <div className="text-xl font-bold text-primary-600">VFA</div>
         ) : (
-          <div className="text-lg font-bold text-primary-600">
-            智能客服系统
+          <div className="text-xl font-bold text-primary-600">
+            Vue FastAPI Admin
           </div>
         )}
       </div>
@@ -125,10 +150,12 @@ const Sidebar: React.FC = () => {
       <Menu
         mode="inline"
         selectedKeys={getSelectedKeys()}
-        defaultOpenKeys={getOpenKeys()}
+        openKeys={openKeys}
+        onOpenChange={handleOpenChange}
         items={menuItems}
         onClick={handleMenuClick}
         className="border-r-0"
+        style={{ borderRight: 'none' }}
       />
     </Sider>
   )

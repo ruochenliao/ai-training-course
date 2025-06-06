@@ -1,8 +1,8 @@
-import React, { useState, useCallback } from 'react';
-import { Form, Button, Space, Collapse, FormInstance } from 'antd';
-import { SearchOutlined, ReloadOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
-import DynamicForm, { FormItemConfig, DynamicFormRef } from './DynamicForm';
+import React, {useCallback, useState} from 'react';
+import {Button, Collapse, FormInstance} from 'antd';
+import {DownOutlined, ReloadOutlined, SearchOutlined, UpOutlined} from '@ant-design/icons';
+import {useTranslation} from 'react-i18next';
+import DynamicForm, {DynamicFormRef, FormItemConfig} from './DynamicForm';
 
 const { Panel } = Collapse;
 

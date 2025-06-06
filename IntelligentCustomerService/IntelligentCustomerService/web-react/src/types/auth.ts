@@ -1,13 +1,21 @@
 export interface User {
-  id: string
+  id: number
   username: string
   email: string
+  is_active: boolean
+  is_superuser: boolean
   avatar?: string
-  nickname: string
-  roles: string[]
-  permissions: string[]
-  createTime: string
-  updateTime: string
+  last_login?: string
+  created_at: string
+  updated_at: string
+  dept_id?: number
+  roles?: Role[]
+}
+
+export interface Role {
+  id: number
+  name: string
+  remark?: string
 }
 
 export interface LoginParams {
@@ -17,9 +25,8 @@ export interface LoginParams {
 }
 
 export interface LoginResponse {
-  user: User
-  token: string
-  refreshToken?: string
+  access_token: string
+  username: string
 }
 
 export interface RegisterParams {
@@ -36,6 +43,6 @@ export interface ResetPasswordParams {
 }
 
 export interface ChangePasswordParams {
-  oldPassword: string
-  newPassword: string
+  old_password: string
+  new_password: string
 }

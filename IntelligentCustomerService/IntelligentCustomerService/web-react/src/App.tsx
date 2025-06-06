@@ -1,18 +1,17 @@
 import React from 'react';
-import { RouterProvider } from 'react-router-dom';
-import { ConfigProvider, App as AntdApp } from 'antd';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import {RouterProvider} from 'react-router-dom';
+import {App as AntdApp, ConfigProvider} from 'antd';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {ReactQueryDevtools} from '@tanstack/react-query-devtools';
 import zhCN from 'antd/locale/zh_CN';
 import enUS from 'antd/locale/en_US';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import 'dayjs/locale/en';
-import { router } from './router';
-import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { useTranslation } from 'react-i18next';
-import { useTheme } from './contexts/ThemeContext';
+import {router} from './router';
+import {AuthProvider} from './contexts/AuthContext';
+import {ThemeProvider, useTheme} from './contexts/ThemeContext';
+import {useTranslation} from 'react-i18next';
 import './i18n';
 import './App.css';
 

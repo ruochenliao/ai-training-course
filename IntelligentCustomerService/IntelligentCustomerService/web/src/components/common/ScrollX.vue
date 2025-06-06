@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { debounce, useResize } from '@/utils'
+import {debounce, useResize} from '@/utils'
 
 defineProps({
   showArrow: {

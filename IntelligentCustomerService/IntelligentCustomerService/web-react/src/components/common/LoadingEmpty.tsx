@@ -1,7 +1,7 @@
 import React from 'react';
-import { Spin, Empty, Result, Button } from 'antd';
-import { LoadingOutlined, ReloadOutlined } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
+import {Button, Empty, Result, Spin} from 'antd';
+import {LoadingOutlined, ReloadOutlined} from '@ant-design/icons';
+import {useTranslation} from 'react-i18next';
 
 // Loading 组件
 export interface LoadingProps {

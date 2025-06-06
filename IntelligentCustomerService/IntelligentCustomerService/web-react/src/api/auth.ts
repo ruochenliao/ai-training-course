@@ -1,18 +1,43 @@
-import request from '@/utils/request'
+import type {ApiResponse} from './index'
+import {request} from './index'
 import type {
-  LoginParams,
-  LoginResponse,
-  RegisterParams,
-  ResetPasswordParams,
-  ChangePasswordParams,
-  User,
+    ChangePasswordParams,
+    LoginParams,
+    LoginResponse,
+    RegisterParams,
+    ResetPasswordParams,
+    User,
 } from '@/types/auth'
-import type { ApiResponse } from '@/types/api'
 
 export const authApi = {
-  // 登录
+  // 登录获取token
   login: (params: LoginParams): Promise<ApiResponse<LoginResponse>> => {
-    return request.post('/auth/login', params)
+    return request.post('/v1/base/access_token', params)
+  },
+
+  // 获取用户信息
+  getUserInfo: (): Promise<ApiResponse<User>> => {
+    return request.get('/v1/base/userinfo')
+  },
+
+  // 获取用户菜单
+  getUserMenu: (): Promise<ApiResponse<any[]>> => {
+    return request.get('/v1/base/usermenu')
+  },
+
+  // 获取用户API权限
+  getUserApi: (): Promise<ApiResponse<string[]>> => {
+    return request.get('/v1/base/userapi')
+  },
+
+  // 修改密码
+  changePassword: (params: ChangePasswordParams): Promise<ApiResponse> => {
+    return request.post('/v1/base/update_password', params)
+  },
+
+  // 登出 (客户端清除状态)
+  logout: (): Promise<ApiResponse> => {
+    return Promise.resolve({ code: 200, message: 'OK', data: null, success: true })
   },
 
   // 注册
@@ -20,24 +45,9 @@ export const authApi = {
     return request.post('/auth/register', params)
   },
 
-  // 登出
-  logout: (): Promise<ApiResponse> => {
-    return request.post('/auth/logout')
-  },
-
-  // 获取用户信息
-  getUserInfo: (): Promise<ApiResponse<User>> => {
-    return request.get('/auth/user-info')
-  },
-
   // 刷新token
   refreshToken: (refreshToken: string): Promise<ApiResponse<{ token: string; refreshToken: string }>> => {
     return request.post('/auth/refresh-token', { refreshToken })
-  },
-
-  // 修改密码
-  changePassword: (params: ChangePasswordParams): Promise<ApiResponse> => {
-    return request.post('/auth/change-password', params)
   },
 
   // 重置密码

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Result, Button } from 'antd';
-import { useTranslation } from 'react-i18next';
-import { useAuthStore } from '../../store/auth';
+import {Button, Result} from 'antd';
+import {useTranslation} from 'react-i18next';
+import {useAuthStore} from '../../store/auth';
 
 // 权限类型定义
 export type Permission = string | string[];

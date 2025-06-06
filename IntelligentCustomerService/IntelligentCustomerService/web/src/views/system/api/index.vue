@@ -1,6 +1,6 @@
 <script setup>
-import { h, onMounted, ref, resolveDirective, withDirectives } from 'vue'
-import { NButton, NForm, NFormItem, NInput, NPopconfirm } from 'naive-ui'
+import {h, onMounted, ref, resolveDirective, withDirectives} from 'vue'
+import {NButton, NForm, NFormItem, NInput, NPopconfirm} from 'naive-ui'
 
 import CommonPage from '@/components/page/CommonPage.vue'
 import QueryBarItem from '@/components/query-bar/QueryBarItem.vue'
@@ -8,8 +8,8 @@ import CrudModal from '@/components/table/CrudModal.vue'
 import CrudTable from '@/components/table/CrudTable.vue'
 import TheIcon from '@/components/icon/TheIcon.vue'
 
-import { renderIcon } from '@/utils'
-import { useCRUD } from '@/composables'
+import {renderIcon} from '@/utils'
+import {useCRUD} from '@/composables'
 // import { loginTypeMap, loginTypeOptions } from '@/constant/data'
 import api from '@/api'
 

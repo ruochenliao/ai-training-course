@@ -1,6 +1,6 @@
-import React, { createContext, useContext, ReactNode } from 'react';
-import { ConfigProvider, theme } from 'antd';
-import { useThemeStore } from '../store/theme';
+import React, {createContext, ReactNode, useContext} from 'react';
+import {ConfigProvider, theme} from 'antd';
+import {useThemeStore} from '../store/theme';
 
 interface ThemeContextType {
   isDark: boolean;

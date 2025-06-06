@@ -1,4 +1,4 @@
-import { request } from '../utils/request';
+import {request} from '../utils/request';
 
 // 权限接口
 export interface Permission {

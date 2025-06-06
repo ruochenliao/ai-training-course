@@ -1,5 +1,5 @@
 <script setup>
-import { h, onMounted, ref, resolveDirective, withDirectives } from 'vue'
+import {h, onMounted, ref, resolveDirective, withDirectives} from 'vue'
 import {
   NButton,
   NForm,
@@ -7,11 +7,11 @@ import {
   NInput,
   NInputNumber,
   NPopconfirm,
-  NSwitch,
-  NTreeSelect,
   NRadio,
   NRadioGroup,
+  NSwitch,
   NTag,
+  NTreeSelect,
 } from 'naive-ui'
 
 import CommonPage from '@/components/page/CommonPage.vue'
@@ -20,8 +20,8 @@ import CrudTable from '@/components/table/CrudTable.vue'
 import IconPicker from '@/components/icon/IconPicker.vue'
 import TheIcon from '@/components/icon/TheIcon.vue'
 
-import { formatDate, renderIcon } from '@/utils'
-import { useCRUD } from '@/composables'
+import {formatDate, renderIcon} from '@/utils'
+import {useCRUD} from '@/composables'
 import api from '@/api'
 
 defineOptions({ name: '菜单管理' })

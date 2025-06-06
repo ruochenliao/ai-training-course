@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from 'react';
-import { Table, Button, Space, Popconfirm, message, TableProps, TableColumnType } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
+import React, {useCallback, useState} from 'react';
+import {Button, message, Popconfirm, Space, Table, TableColumnType, TableProps} from 'antd';
+import {DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined} from '@ant-design/icons';
+import {useTranslation} from 'react-i18next';
 
 export interface DataTableColumn<T = any> extends Omit<TableColumnType<T>, 'render'> {
   dataIndex: string;

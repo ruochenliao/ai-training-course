@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuthStore } from '../../store/auth';
-import { usePermission, Permission } from './PermissionControl';
-import { PageLoading } from '../common/LoadingEmpty';
-import { useTranslation } from 'react-i18next';
+import React, {useEffect} from 'react';
+import {Navigate, useLocation} from 'react-router-dom';
+import {useAuthStore} from '../../store/auth';
+import {Permission, usePermission} from './PermissionControl';
+import {PageLoading} from '../common/LoadingEmpty';
+import {useTranslation} from 'react-i18next';
 
 // 认证守卫Props
 export interface AuthGuardProps {

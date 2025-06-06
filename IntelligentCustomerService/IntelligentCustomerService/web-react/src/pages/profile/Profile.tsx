@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Card, Form, Input, Button, Avatar, Upload, message, Divider } from 'antd';
-import { UserOutlined, UploadOutlined } from '@ant-design/icons';
-import { useAuth } from '../contexts/AuthContext';
+import React, {useState} from 'react';
+import {Avatar, Button, Card, Divider, Form, Input, message, Upload} from 'antd';
+import {UploadOutlined, UserOutlined} from '@ant-design/icons';
+import {useAuth} from '../contexts/AuthContext';
 
 interface ProfileFormData {
   username: string;

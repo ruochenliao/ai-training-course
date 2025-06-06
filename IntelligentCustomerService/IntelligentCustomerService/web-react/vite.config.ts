@@ -1,10 +1,11 @@
-import { defineConfig } from 'vite';
+import {defineConfig} from 'vite';
 import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
+import {resolve} from 'path';
+import UnoCSS from 'unocss/vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), UnoCSS()],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
@@ -29,13 +30,12 @@ export default defineConfig({
     cors: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'http://127.0.0.1:9999',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '/api'),
       },
       '/ws': {
-        target: 'ws://localhost:3001',
+        target: 'ws://127.0.0.1:9999',
         ws: true,
         changeOrigin: true,
       },

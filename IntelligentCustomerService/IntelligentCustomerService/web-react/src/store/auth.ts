@@ -1,18 +1,19 @@
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
-import { authApi } from '@/api/auth'
-import type { User, LoginParams } from '@/types/auth'
+import {create} from 'zustand'
+import {persist} from 'zustand/middleware'
+import {authApi} from '@/api/auth'
+import type {LoginParams, User} from '@/types/auth'
 
 interface AuthState {
   user: User | null
   token: string | null
+  menus: any[] | null
+  apis: string[] | null
   isAuthenticated: boolean
   loading: boolean
   login: (params: LoginParams) => Promise<void>
   logout: () => void
-  setUser: (user: User) => void
   clearAuth: () => void
-  checkAuth: () => Promise<void>
+  checkAuth: () => Promise<boolean>
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -20,43 +21,62 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       token: null,
+      menus: null,
+      apis: null,
       isAuthenticated: false,
       loading: false,
 
       login: async (params: LoginParams) => {
         set({ loading: true })
         try {
-          const response = await authApi.login(params)
-          const { user, token } = response.data
+          // 1. 获取token
+          const tokenResponse = await authApi.login(params)
+          const { access_token } = tokenResponse.data
           
+          // 设置token
+          localStorage.setItem('token', access_token)
+          set({ token: access_token })
+          
+          // 2. 获取用户信息
+          const userResponse = await authApi.getUserInfo()
+          const user = userResponse.data
+          
+          // 3. 获取用户菜单
+          const menuResponse = await authApi.getUserMenu()
+          const menus = menuResponse.data
+          
+          // 4. 获取用户API权限
+          const apiResponse = await authApi.getUserApi()
+          const apis = apiResponse.data
+          
+          // 设置认证状态
           set({
             user,
-            token,
+            menus,
+            apis,
             isAuthenticated: true,
-            loading: false,
+            loading: false
           })
           
-          // 设置axios默认header
-          if (token) {
-            localStorage.setItem('token', token)
-          }
-        } catch (error) {
+          return
+        } catch (error: any) {
+          // 清除可能已设置的token
+          localStorage.removeItem('token')
           set({ loading: false })
           throw error
         }
       },
 
       logout: () => {
+        authApi.logout() // 客户端登出
         localStorage.removeItem('token')
         set({
           user: null,
           token: null,
+          menus: null,
+          apis: null,
           isAuthenticated: false,
         })
-      },
-
-      setUser: (user: User) => {
-        set({ user })
       },
 
       clearAuth: () => {
@@ -64,6 +84,8 @@ export const useAuthStore = create<AuthState>()(
         set({
           user: null,
           token: null,
+          menus: null,
+          apis: null,
           isAuthenticated: false,
           loading: false,
         })
@@ -73,27 +95,44 @@ export const useAuthStore = create<AuthState>()(
         const token = localStorage.getItem('token')
         if (!token) {
           set({ loading: false })
-          return
+          return false
         }
 
-        set({ loading: true })
+        set({ loading: true, token })
         try {
-          const response = await authApi.verifyToken()
-          const { data: user } = response
+          // 1. 获取用户信息
+          const userResponse = await authApi.getUserInfo()
+          const user = userResponse.data
+          
+          // 2. 获取用户菜单
+          const menuResponse = await authApi.getUserMenu()
+          const menus = menuResponse.data
+          
+          // 3. 获取用户API权限
+          const apiResponse = await authApi.getUserApi()
+          const apis = apiResponse.data
+          
+          // 设置认证状态
           set({
             user,
-            token,
+            menus,
+            apis,
             isAuthenticated: true,
-            loading: false,
+            loading: false
           })
+          
+          return true
         } catch (error) {
           localStorage.removeItem('token')
           set({
             user: null,
             token: null,
+            menus: null,
+            apis: null,
             isAuthenticated: false,
             loading: false,
           })
+          return false
         }
       },
     }),
@@ -102,6 +141,8 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         token: state.token,
+        menus: state.menus,
+        apis: state.apis,
         isAuthenticated: state.isAuthenticated,
       }),
     }

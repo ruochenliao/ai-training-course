@@ -1,8 +1,8 @@
 import React from 'react';
-import { Result, Button } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import {Button, Result} from 'antd';
+import {useNavigate} from 'react-router-dom';
 
-const NotFound: React.FC = () => {
+const Forbidden: React.FC = () => {
   const navigate = useNavigate();
 
   const handleBackHome = () => {
@@ -22,9 +22,9 @@ const NotFound: React.FC = () => {
       padding: '24px'
     }}>
       <Result
-        status="404"
-        title="404"
-        subTitle="抱歉，您访问的页面不存在。"
+        status="403"
+        title="403"
+        subTitle="抱歉，您没有权限访问此页面。"
         extra={
           <div>
             <Button type="primary" onClick={handleBackHome} style={{ marginRight: '8px' }}>
@@ -40,4 +40,4 @@ const NotFound: React.FC = () => {
   );
 };
 
-export default NotFound;
+export default Forbidden; 

@@ -1,4 +1,4 @@
-import { request } from '../utils/request';
+import {request} from '../utils/request';
 
 // 会话状态枚举
 export enum SessionStatus {

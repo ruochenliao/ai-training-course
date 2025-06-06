@@ -1,38 +1,25 @@
-import React, { useState, useRef } from 'react';
+import React, {useRef, useState} from 'react';
+import {Button, Card, Divider, Dropdown, message, Modal, Space, Switch, Tag, Tooltip, Tree, Typography,} from 'antd';
 import {
-  Card,
-  Button,
-  Space,
-  Tag,
-  Switch,
-  Dropdown,
-  Modal,
-  message,
-  Tree,
-  Divider,
-  Typography,
-  Tooltip,
-} from 'antd';
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  MoreOutlined,
-  SafetyOutlined,
-  TeamOutlined,
-  EyeOutlined,
-  CopyOutlined,
+    CopyOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    EyeOutlined,
+    MoreOutlined,
+    PlusOutlined,
+    SafetyOutlined,
+    TeamOutlined,
 } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
-import { DataTable } from '../../components/common/DataTable';
-import { ModalForm } from '../../components/common/ModalForm';
-import { QueryBar } from '../../components/common/QueryBar';
-import { useRequest } from '../../hooks/useRequest';
-import { roleApi } from '../../api/role';
-import type { FormField } from '../../components/common/DynamicForm';
-import type { ModalFormRef } from '../../components/common/ModalForm';
-import type { QueryBarRef } from '../../components/common/QueryBar';
-import type { DataNode } from 'antd/es/tree';
+import {useTranslation} from 'react-i18next';
+import {DataTable} from '../../components/common/DataTable';
+import type {ModalFormRef} from '../../components/common/ModalForm';
+import {ModalForm} from '../../components/common/ModalForm';
+import type {QueryBarRef} from '../../components/common/QueryBar';
+import {QueryBar} from '../../components/common/QueryBar';
+import {useRequest} from '../../hooks/useRequest';
+import {roleApi} from '../../api/role';
+import type {FormField} from '../../components/common/DynamicForm';
+import type {DataNode} from 'antd/es/tree';
 
 const { Text } = Typography;
 
