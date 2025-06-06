@@ -1,4 +1,4 @@
-import { isNullOrUndef } from '@/utils'
+import {isNullOrUndef} from '@/utils'
 
 class Storage {
   constructor(option) {

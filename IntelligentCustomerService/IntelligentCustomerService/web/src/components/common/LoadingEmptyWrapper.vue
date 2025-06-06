@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick, watch, onUnmounted } from 'vue'
+import {computed, nextTick, onUnmounted, ref, watch} from 'vue'
 
 defineOptions({ name: 'LoadingEmptyWrapper' })
 

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { resReject, resResolve, reqReject, reqResolve } from './interceptors'
+import {reqReject, reqResolve, resReject, resResolve} from './interceptors'
 
 export function createAxios(options = {}) {
   const defaultOptions = {

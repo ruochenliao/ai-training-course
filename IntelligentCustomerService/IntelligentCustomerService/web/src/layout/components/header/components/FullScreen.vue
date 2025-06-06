@@ -6,8 +6,8 @@
 </template>
 
 <script setup>
-import { useFullscreen } from '@vueuse/core'
-import { useAppStore } from '@/store'
+import {useFullscreen} from '@vueuse/core'
+import {useAppStore} from '@/store'
 
 const appStore = useAppStore()
 const { isFullscreen, toggle } = useFullscreen()

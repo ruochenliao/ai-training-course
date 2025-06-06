@@ -53,11 +53,11 @@
 </template>
 
 <script setup>
-import { lStorage, setToken } from '@/utils'
+import {lStorage, setToken} from '@/utils'
 import bgImg from '@/assets/images/login_bg.webp'
 import api from '@/api'
-import { addDynamicRoutes } from '@/router'
-import { useI18n } from 'vue-i18n'
+import {addDynamicRoutes} from '@/router'
+import {useI18n} from 'vue-i18n'
 
 const router = useRouter()
 const { query } = useRoute()

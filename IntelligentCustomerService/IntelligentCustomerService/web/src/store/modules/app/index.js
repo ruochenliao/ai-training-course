@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia'
-import { useDark } from '@vueuse/core'
-import { lStorage } from '@/utils'
+import {defineStore} from 'pinia'
+import {useDark} from '@vueuse/core'
+import {lStorage} from '@/utils'
 import i18n from '~/i18n'
 
 const currentLocale = lStorage.get('locale')

@@ -1,4 +1,4 @@
-import { lStorage } from '@/utils'
+import {lStorage} from '@/utils'
 
 const TOKEN_CODE = 'access_token'
 

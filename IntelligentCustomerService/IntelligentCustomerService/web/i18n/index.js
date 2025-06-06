@@ -1,5 +1,5 @@
-import { createI18n } from 'vue-i18n'
-import { lStorage } from '@/utils'
+import {createI18n} from 'vue-i18n'
+import {lStorage} from '@/utils'
 
 import messages from './messages'
 
