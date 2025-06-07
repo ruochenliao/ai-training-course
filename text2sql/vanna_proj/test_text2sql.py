@@ -1,3 +1,4 @@
+import json
 query = "周杰伦有哪些专辑"
 db_type = "mysql"
 db_schema = """
@@ -15,7 +16,17 @@ CREATE TABLE IF NOT EXISTS "Artist" (
 );
 """
 
-_task_template = """请基于以下信息生成SQL命令分析报告：
+mappings = {
+    "AlbumId": "专辑ID",
+    "Title": "专辑标题",
+    "ArtistId": "艺术家ID",
+    "Name": "艺术家姓名"
+}
+
+mapping_str = json.dumps(mappings, ensure_ascii=False, indent=4)
+
+
+task_template = """请基于以下信息生成SQL命令分析报告：
 **数据库环境：**
 - 数据库类型：{db_type}
 - 数据库结构：
@@ -76,3 +87,27 @@ WHERE [筛选条件]
 ### 6. 潜在问题与建议
 [识别查询中的歧义或需要澄清的地方]
 """
+
+task_template = task_template.format(
+    db_type=db_type,
+    db_schema=db_schema,
+    mappings_str=mapping_str,
+    query=query
+)
+
+
+
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-4b16db07796e4dce90d3b45c7c4160fe", base_url="https://api.deepseek.com")
+
+response = client.chat.completions.create(
+    model="deepseek-reasoner",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant"},
+        {"role": "user", "content": "Hello"},
+    ],
+    stream=False
+)
+
+print(response.choices[0].message.content)
