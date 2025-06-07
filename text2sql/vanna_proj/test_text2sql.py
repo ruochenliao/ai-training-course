@@ -1,4 +1,15 @@
 import json
+
+task_template = """你是一名{db_type} 专家，需要根据用户问题回答SQL语句：
+- 数据库结构：
+```sql
+{db_schema}
+```
+**值映射信息：**
+```
+{mappings_str}
+"""
+
 query = "周杰伦有哪些专辑"
 db_type = "mysql"
 db_schema = """
@@ -25,22 +36,10 @@ mappings = {
 
 mapping_str = json.dumps(mappings, ensure_ascii=False, indent=4)
 
-
-task_template = """你是一名{db_type} 专家，需要根据用户问题回答SQL语句：
-- 数据库结构：
-```sql
-{db_schema}
-```
-**值映射信息：**
-```
-{mappings_str}
-"""
-
 task_template = task_template.format(
     db_type=db_type,
     db_schema=db_schema,
-    mappings_str=mapping_str,
-    query=query
+    mappings_str=mapping_str
 )
 
 
@@ -52,23 +51,12 @@ client = OpenAI(api_key="sk-4b16db07796e4dce90d3b45c7c4160fe", base_url="https:/
 response = client.chat.completions.create(
     model="deepseek-chat",
     messages=[
-        {"role": "user", "content": task_template},
-        {"role": "system", "content" : query}
+        {"role": "system", "content": task_template},
+        {"role": "user", "content" : query}
     ],
     stream=False
 )
 
 print(response.choices[0].message.content)
 
-## 
-response = client.chat.completions.create(
-    model="deepseek-chat",
-    messages=[
-        {"role": "user", "content": task_template},
-        {"role": "assistant", "content":"按json格式输出，eg:{\"sql\":\"select * from t\"}"},
-        {"role": "system", "content" : query}
-    ],
-    stream=False
-)
 
-print(response.choices[0].message.content)
