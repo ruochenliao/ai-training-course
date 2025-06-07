@@ -1,0 +1,2920 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI开发实战训练营 - 从零到精通的全栈AI工程师培训</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3bc9db;
+            --accent: #7209b7;
+            --accent-light: #9d4edd;
+            --dark: #1e2a3a;
+            --dark-blue: #0a1128;
+            --light: #f8f9fa;
+            --light-blue: #e9f1fa;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --gray: #6c757d;
+            --gray-light: #dee2e6;
+            --gradient: linear-gradient(135deg, var(--primary), var(--accent));
+            --gradient-light: linear-gradient(135deg, var(--primary-light), var(--accent-light));
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 15px 30px rgba(0, 0, 0, 0.1);
+            --border-radius: 15px;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 2rem;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: var(--transition);
+            font-size: 1rem;
+            padding: 0.5rem 0;
+            position: relative;
+        }
+        
+        .nav-links a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background: var(--gradient);
+            transition: var(--transition);
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .nav-links a:hover:after {
+            width: 100%;
+        }
+        
+        .hamburger {
+            display: none;
+            cursor: pointer;
+        }
+        
+        /* 头部 */
+        header {
+            padding: 10rem 0 7rem;
+            background: var(--gradient);
+            position: relative;
+            overflow: hidden;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            z-index: 0;
+            background: url('https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center center;
+            background-size: cover;
+            opacity: 0.1;
+            transform: rotate(-5deg);
+        }
+        
+        header .container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 3.8rem;
+            margin-bottom: 1.5rem;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.2;
+        }
+        
+        h1 span {
+            color: #ffde59;
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1 span:after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background-color: rgba(255, 222, 89, 0.3);
+            z-index: -1;
+        }
+        
+        .subtitle {
+            font-size: 1.6rem;
+            margin-bottom: 2.5rem;
+            color: rgba(255, 255, 255, 0.95);
+            max-width: 800px;
+            line-height: 1.5;
+        }
+        
+        .header-btns {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.9rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            text-align: center;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+            font-size: 1.05rem;
+        }
+        
+        .btn-primary {
+            background-color: white;
+            color: var(--primary);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: white;
+            color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        /* 统计数字 */
+        .stats {
+            background-color: white;
+            padding: 2.5rem 0;
+            box-shadow: var(--shadow-md);
+            transform: translateY(-50px);
+            border-radius: var(--border-radius);
+            margin: 0 auto;
+            max-width: 1100px;
+        }
+        
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            text-align: center;
+        }
+        
+        .stat-item {
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .stat-text {
+            font-size: 1.1rem;
+            color: var(--dark);
+            font-weight: 500;
+        }
+        
+        /* 动画类 */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        
+        .fade-in-up.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .delay-1 {
+            transition-delay: 0.2s;
+        }
+        
+        .delay-2 {
+            transition-delay: 0.4s;
+        }
+        
+        .delay-3 {
+            transition-delay: 0.6s;
+        }
+        
+        .delay-4 {
+            transition-delay: 0.8s;
+        }
+        
+        .delay-5 {
+            transition-delay: 1s;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+        
+        .float {
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            h1 {
+                font-size: 3rem;
+            }
+            
+            .subtitle {
+                font-size: 1.3rem;
+            }
+            
+            .stat-number {
+                font-size: 2.2rem;
+            }
+            
+            .feature-grid, .team-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .navbar .container {
+                padding: 0.8rem 1.5rem;
+            }
+            
+            .hamburger {
+                display: block;
+                font-size: 1.5rem;
+                color: var(--dark);
+            }
+            
+            .nav-links {
+                position: fixed;
+                top: 70px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 70px);
+                flex-direction: column;
+                background: white;
+                transition: var(--transition);
+                padding: 2rem;
+                box-shadow: var(--shadow-md);
+            }
+            
+            .nav-links.active {
+                left: 0;
+            }
+            
+            .nav-links li {
+                margin: 1.5rem 0;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .stats {
+                padding: 1rem 0;
+            }
+            
+            .stat-item {
+                flex: 0 0 50%;
+                padding: 1rem;
+            }
+            
+            header {
+                padding: 8rem 0 6rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .header-btns {
+                flex-direction: column;
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .stat-item {
+                flex: 0 0 100%;
+            }
+        }
+        
+        /* 特色部分 */
+        .features {
+            padding: 7rem 0 5rem;
+            background-color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .features::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(114, 9, 183, 0.1));
+            top: -150px;
+            right: -150px;
+            z-index: 0;
+        }
+        
+        .features::after {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(114, 9, 183, 0.1));
+            bottom: -100px;
+            left: -100px;
+            z-index: 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        h2 {
+            font-size: 2.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            position: relative;
+            display: inline-block;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: 5px;
+        }
+        
+        .section-subheader {
+            color: var(--gray);
+            max-width: 800px;
+            margin: 1.5rem auto 0;
+            font-size: 1.2rem;
+            line-height: 1.8;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            margin-top: 4rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .feature-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient);
+            transition: var(--transition);
+            transform: scaleX(0);
+            transform-origin: left;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-15px);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(67, 97, 238, 0.2);
+        }
+        
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .feature-icon {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8rem;
+            color: white;
+            border-radius: 50%;
+            background: var(--gradient);
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.25);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(5deg);
+            background: var(--gradient-light);
+        }
+        
+        .feature-card h3 {
+            font-size: 1.6rem;
+            margin-bottom: 1.2rem;
+            color: var(--dark);
+            transition: var(--transition);
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .feature-card:hover h3 {
+            color: var(--primary);
+        }
+        
+        .feature-card p {
+            color: var(--gray);
+            font-size: 1.05rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+            flex-grow: 1;
+        }
+        
+        .feature-points {
+            text-align: left;
+            margin-top: auto;
+        }
+        
+        .feature-point {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.8rem;
+            color: var(--dark);
+        }
+        
+        .feature-point i {
+            color: var(--success);
+            margin-right: 0.7rem;
+            font-size: 1.1rem;
+            margin-top: 0.2rem;
+        }
+        
+        /* 课程大纲 */
+        .curriculum {
+            padding: 7rem 0;
+            background-color: var(--light-blue);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .curriculum::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 500px;
+            height: 500px;
+            background: var(--gradient);
+            border-radius: 50%;
+            opacity: 0.05;
+            transform: translate(30%, -30%);
+        }
+        
+        .curriculum::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 300px;
+            height: 300px;
+            background: var(--gradient);
+            border-radius: 50%;
+            opacity: 0.05;
+            transform: translate(-30%, 30%);
+        }
+        
+        .module-stages {
+            display: flex;
+            justify-content: space-between;
+            margin: 3rem 0 4rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .module-stage {
+            flex: 1;
+            text-align: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            margin: 0 0.7rem;
+            transition: var(--transition);
+            border-top: 4px solid var(--primary);
+        }
+        
+        .module-stage:nth-child(2) {
+            border-top-color: var(--secondary);
+        }
+        
+        .module-stage:nth-child(3) {
+            border-top-color: var(--accent);
+        }
+        
+        .module-stage:nth-child(4) {
+            border-top-color: var(--success);
+        }
+        
+        .module-stage:hover {
+            transform: translateY(-7px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .stage-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+            color: var(--dark);
+        }
+        
+        .stage-modules {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+        
+        .module {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            position: relative;
+            z-index: 1;
+            border-left: 5px solid;
+            overflow: hidden;
+        }
+        
+        .module:nth-child(4n+1) {
+            border-left-color: var(--primary);
+        }
+        
+        .module:nth-child(4n+2) {
+            border-left-color: var(--secondary);
+        }
+        
+        .module:nth-child(4n+3) {
+            border-left-color: var(--accent);
+        }
+        
+        .module:nth-child(4n+4) {
+            border-left-color: var(--success);
+        }
+        
+        .module::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.05), rgba(114, 9, 183, 0.05));
+            border-radius: 0 0 0 100%;
+            z-index: -1;
+            transition: var(--transition);
+        }
+        
+        .module:hover {
+            transform: translateY(-7px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .module:hover::before {
+            transform: scale(1.2);
+        }
+        
+        .module-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.8rem;
+            position: relative;
+        }
+        
+        .module-number {
+            background: var(--gradient);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 1.8rem;
+            font-size: 1.4rem;
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.25);
+            transition: var(--transition);
+        }
+        
+        .module:hover .module-number {
+            transform: scale(1.1) rotate(10deg);
+        }
+        
+        .module h3 {
+            font-size: 1.7rem;
+            color: var(--dark);
+            margin: 0;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+        }
+        
+        .module-objective {
+            background-color: rgba(67, 97, 238, 0.1);
+            padding: 0.9rem 1.7rem;
+            border-radius: 50px;
+            color: var(--primary);
+            font-weight: 500;
+            margin: 1.5rem 0;
+            display: inline-block;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        
+        .module:hover .module-objective {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .module-objective i {
+            margin-right: 0.7rem;
+        }
+        
+        .module-topics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.2rem;
+            margin-top: 2rem;
+        }
+        
+        .topic {
+            background-color: rgba(67, 97, 238, 0.03);
+            padding: 1.2rem;
+            border-radius: 10px;
+            border-left: 3px solid var(--primary);
+            transition: var(--transition);
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .topic i {
+            color: var(--success);
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
+            margin-top: 0.2rem;
+        }
+        
+        .topic:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+            transform: translateX(8px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .learning-path {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: var(--border-radius);
+            margin-top: 4rem;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            border-top: 5px solid var(--accent);
+        }
+        
+        .learning-path h3 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .learning-path h3 i {
+            margin-right: 1rem;
+            color: var(--accent);
+            font-size: 2rem;
+        }
+        
+        .path-description {
+            color: var(--gray);
+            line-height: 1.8;
+        }
+        
+        .path-description p {
+            margin-bottom: 1.5rem;
+        }
+        
+        .path-description ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .path-description li {
+            margin-bottom: 0.8rem;
+        }
+        
+        .path-description strong {
+            color: var(--dark);
+        }
+        
+        .module-project {
+            margin-top: 1.5rem;
+            padding: 1.2rem;
+            background: rgba(46, 204, 113, 0.1);
+            border-radius: 10px;
+            border-left: 3px solid var(--success);
+        }
+        
+        .project-title {
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .project-title i {
+            margin-right: 0.7rem;
+            color: var(--success);
+        }
+        
+        .project-desc {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+        
+        /* 讲师团队 */
+        .team {
+            padding: 7rem 0;
+            background-color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .team::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            left: -100px;
+            width: 300px;
+            height: 300px;
+            background: var(--gradient);
+            opacity: 0.05;
+            border-radius: 50%;
+        }
+        
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            margin-top: 4rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .team-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .team-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 1;
+        }
+        
+        .team-card:hover {
+            transform: translateY(-15px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .team-card:hover::before {
+            opacity: 0.1;
+        }
+        
+        .team-img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+        
+        .team-card:hover .team-img {
+            transform: scale(1.05);
+        }
+        
+        .team-info {
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .team-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.7rem;
+            color: var(--dark);
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .team-role {
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 1.2rem;
+            display: inline-block;
+            padding: 0.4rem 1.2rem;
+            background-color: rgba(67, 97, 238, 0.1);
+            border-radius: 50px;
+        }
+        
+        .team-bio {
+            color: var(--gray);
+            font-size: 1rem;
+            margin-bottom: 1.8rem;
+            line-height: 1.7;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+        }
+        
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark);
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 1.1rem;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .social-link:hover {
+            background: var(--gradient);
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* 学员评价 */
+        .testimonials {
+            padding: 7rem 0;
+            background-color: var(--light-blue);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .testimonials::before {
+            content: '';
+            position: absolute;
+            right: -150px;
+            top: -150px;
+            width: 400px;
+            height: 400px;
+            background: var(--gradient);
+            opacity: 0.05;
+            border-radius: 50%;
+        }
+        
+        .testimonial-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 2.5rem;
+            padding: 1.5rem 0.5rem;
+            margin: 0 -0.5rem;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .testimonial-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .testimonial-card {
+            flex: 0 0 380px;
+            scroll-snap-align: start;
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        .testimonial-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 6rem;
+            color: rgba(67, 97, 238, 0.1);
+            font-family: serif;
+            line-height: 1;
+        }
+        
+        .testimonial-content {
+            margin-bottom: 2rem;
+            color: var(--gray);
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            border-top: 1px solid var(--gray-light);
+            padding-top: 1.5rem;
+        }
+        
+        .author-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 1.2rem;
+            border: 3px solid var(--light);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .author-info h4 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--dark);
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .author-info p {
+            margin: 0.3rem 0 0;
+            font-size: 0.95rem;
+            color: var(--primary);
+            font-weight: 500;
+        }
+        
+        .testimonial-nav {
+            display: flex;
+            justify-content: center;
+            margin-top: 3rem;
+            gap: 0.8rem;
+        }
+        
+        .testimonial-nav button {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: none;
+            background-color: var(--gray-light);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .testimonial-nav button.active {
+            background: var(--gradient);
+            transform: scale(1.3);
+        }
+        
+        /* 常见问题 */
+        .faq {
+            padding: 7rem 0;
+            background-color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .faq::after {
+            content: '';
+            position: absolute;
+            bottom: -150px;
+            right: -150px;
+            width: 400px;
+            height: 400px;
+            background: var(--gradient);
+            opacity: 0.05;
+            border-radius: 50%;
+        }
+        
+        .faq-container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .faq-item {
+            margin-bottom: 1.8rem;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            background-color: white;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+        
+        .faq-item:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-5px);
+        }
+        
+        .faq-question {
+            padding: 1.8rem;
+            background-color: white;
+            color: var(--dark);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.1rem;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .faq-question:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+            color: var(--primary);
+        }
+        
+        .faq-question i {
+            font-size: 1.3rem;
+            transition: var(--transition);
+            color: var(--primary);
+        }
+        
+        .faq-answer {
+            padding: 0 1.8rem;
+            max-height: 0;
+            overflow: hidden;
+            background-color: white;
+            transition: var(--transition);
+            line-height: 1.8;
+            color: var(--gray);
+            font-size: 1.05rem;
+        }
+        
+        .faq-item.active {
+            border: 1px solid rgba(67, 97, 238, 0.3);
+        }
+        
+        .faq-item.active .faq-question {
+            background-color: rgba(67, 97, 238, 0.05);
+            color: var(--primary);
+        }
+        
+        .faq-item.active .faq-question i {
+            transform: rotate(180deg);
+        }
+        
+        .faq-item.active .faq-answer {
+            padding: 0 1.8rem 1.8rem;
+            max-height: 1000px;
+        }
+        
+        /* 价格表 */
+        .pricing {
+            padding: 7rem 0;
+            background-color: var(--light-blue);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pricing::before {
+            content: '';
+            position: absolute;
+            left: -150px;
+            top: -150px;
+            width: 400px;
+            height: 400px;
+            background: var(--gradient);
+            opacity: 0.05;
+            border-radius: 50%;
+        }
+        
+        .pricing-container {
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            flex-wrap: wrap;
+            margin-top: 4rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .pricing-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 3.5rem 2.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            flex: 1;
+            min-width: 320px;
+            max-width: 380px;
+            position: relative;
+            overflow: hidden;
+            border-top: 5px solid var(--secondary);
+            z-index: 1;
+        }
+        
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: var(--gradient);
+            opacity: 0.05;
+            top: -100px;
+            right: -100px;
+            z-index: -1;
+        }
+        
+        .pricing-card:first-child {
+            border-top-color: var(--primary);
+        }
+        
+        .pricing-card:last-child {
+            border-top-color: var(--accent);
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-15px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .pricing-card.featured {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
+            border: 2px solid var(--primary);
+            border-top-width: 5px;
+            z-index: 2;
+        }
+        
+        .pricing-card.featured:hover {
+            transform: scale(1.05) translateY(-10px);
+        }
+        
+        .pricing-card.featured::before {
+            content: '最受欢迎';
+            position: absolute;
+            top: 30px;
+            right: -35px;
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 3.5rem;
+            transform: rotate(45deg);
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-sm);
+            z-index: 3;
+        }
+        
+        .pricing-header {
+            margin-bottom: 2.5rem;
+        }
+        
+        .pricing-name {
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+        }
+        
+        .pricing-price {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .pricing-price span {
+            font-size: 1.2rem;
+            position: absolute;
+            top: 8px;
+            right: -20px;
+            font-weight: 600;
+        }
+        
+        .pricing-description {
+            color: var(--gray);
+            margin-bottom: 2.5rem;
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+        
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 2.5rem;
+            text-align: left;
+        }
+        
+        .pricing-features li {
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--gray-light);
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+        }
+        
+        .pricing-features li:last-child {
+            border-bottom: none;
+        }
+        
+        .pricing-features i {
+            margin-right: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .pricing-features i.fa-check {
+            color: var(--success);
+        }
+        
+        .pricing-features i.fa-times {
+            color: var(--danger);
+        }
+        
+        .pricing-btn {
+            width: 100%;
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            transition: var(--transition);
+        }
+        
+        .pricing-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        /* CTA和倒计时 */
+        .cta {
+            padding: 7rem 0;
+            background: var(--gradient);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            clip-path: polygon(0 15%, 100% 0, 100% 85%, 0 100%);
+        }
+        
+        .cta::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            z-index: 0;
+            background: url('https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center center;
+            background-size: cover;
+            opacity: 0.08;
+            animation: slowly-rotate 60s linear infinite;
+        }
+        
+        @keyframes slowly-rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .cta .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .cta h2 {
+            color: white;
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .cta h2::after {
+            display: none;
+        }
+        
+        .cta p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.3rem;
+            margin-bottom: 3rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+        
+        .countdown-item {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            min-width: 120px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: var(--transition);
+        }
+        
+        .countdown-item:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .countdown-number {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1.2;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .countdown-label {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+        
+        .cta .btn {
+            padding: 1.2rem 3rem;
+            font-size: 1.2rem;
+            transform-origin: center;
+            animation: pulse 2s infinite;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+        }
+        
+        /* 页脚 */
+        footer {
+            background-color: var(--dark-blue);
+            color: white;
+            padding: 5rem 0 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        footer::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 300px;
+            height: 300px;
+            background: var(--gradient);
+            opacity: 0.1;
+            border-radius: 50%;
+        }
+        
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+        
+        .footer-col h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .footer-col h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -10px;
+            width: 50px;
+            height: 3px;
+            background: var(--gradient);
+            border-radius: 5px;
+        }
+        
+        .footer-col p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+        
+        .footer-links a::before {
+            content: '→';
+            margin-right: 0.5rem;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: var(--transition);
+        }
+        
+        .footer-links a:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .footer-links a:hover::before {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .footer-contact p {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-contact i {
+            margin-right: 1rem;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+        
+        .footer-contact p:hover i {
+            background: var(--gradient);
+            transform: rotate(360deg) scale(1.1);
+        }
+        
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .footer-social a {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 1.2rem;
+        }
+        
+        .footer-social a:hover {
+            background: var(--gradient);
+            transform: translateY(-5px);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+        
+        /* 返回顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            z-index: 999;
+            font-size: 1.2rem;
+        }
+        
+        .back-to-top.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        /* 动画增强 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .animate-title {
+            opacity: 0;
+        }
+        
+        .animate-title span {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(20px);
+            animation-fill-mode: forwards;
+        }
+        
+        .animate {
+            opacity: 0;
+        }
+        
+        .animate.fadeInUp {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        .animate.fadeIn {
+            animation: fadeIn 1s ease forwards;
+        }
+        
+        .animate.zoomIn {
+            animation: zoomIn 0.8s ease forwards;
+        }
+        
+        .animate.delay-100 {
+            animation-delay: 0.1s;
+        }
+        
+        .animate.delay-200 {
+            animation-delay: 0.2s;
+        }
+        
+        .animate.delay-300 {
+            animation-delay: 0.3s;
+        }
+        
+        .animate.delay-400 {
+            animation-delay: 0.4s;
+        }
+        
+        .animate.delay-500 {
+            animation-delay: 0.5s;
+        }
+        
+        .animate.delay-600 {
+            animation-delay: 0.6s;
+        }
+        
+        .animate.delay-700 {
+            animation-delay: 0.7s;
+        }
+        
+        .animate.delay-800 {
+            animation-delay: 0.8s;
+        }
+        
+        .animate.delay-900 {
+            animation-delay: 0.9s;
+        }
+        
+        .animate.delay-1000 {
+            animation-delay: 1s;
+        }
+        
+        /* 额外的响应式调整 */
+        @media (max-width: 992px) {
+            .module-stages {
+                flex-wrap: wrap;
+            }
+            
+            .module-stage {
+                flex: 0 0 calc(50% - 1.4rem);
+                margin-bottom: 1.4rem;
+            }
+            
+            .countdown-item {
+                min-width: 100px;
+            }
+            
+            .countdown-number {
+                font-size: 2.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .cta {
+                clip-path: polygon(0 5%, 100% 0, 100% 95%, 0 100%);
+            }
+            
+            .cta h2 {
+                font-size: 2.2rem;
+            }
+            
+            .cta p {
+                font-size: 1.1rem;
+            }
+            
+            .countdown {
+                gap: 1rem;
+            }
+            
+            .countdown-item {
+                min-width: 80px;
+                padding: 1rem;
+            }
+            
+            .countdown-number {
+                font-size: 2rem;
+            }
+            
+            .countdown-label {
+                font-size: 0.9rem;
+            }
+            
+            .module-stage {
+                flex: 0 0 100%;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .countdown {
+                flex-wrap: wrap;
+            }
+            
+            .countdown-item {
+                flex: 0 0 calc(50% - 1rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="logo">
+                <i class="fas fa-brain"></i>AI训练营
+            </a>
+            
+            <ul class="nav-links">
+                <li><a href="#features">课程特色</a></li>
+                <li><a href="#curriculum">课程大纲</a></li>
+                <li><a href="#team">讲师团队</a></li>
+                <li><a href="#testimonials">学员评价</a></li>
+                <li><a href="#faq">常见问题</a></li>
+                <li><a href="#pricing">报名费用</a></li>
+                <li><a href="#contact" class="btn btn-primary" style="padding: 0.5rem 1.5rem;">立即报名</a></li>
+            </ul>
+            
+            <div class="hamburger">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 头部 -->
+    <header id="home">
+        <div class="container">
+            <h1 class="animate fadeInUp">AI开发<span>实战训练营</span><br>从零到精通的全栈AI工程师之路</h1>
+            <p class="subtitle animate fadeInUp delay-200">专为零基础学员打造的系统化AI开发课程，14个实战项目，从基础编程到企业级AI应用开发，一站式掌握当下最热门的AI技术栈</p>
+            <div class="header-btns">
+                <a href="#curriculum" class="btn btn-primary animate fadeInUp delay-400">查看课程大纲</a>
+                <a href="#contact" class="btn btn-secondary animate fadeInUp delay-600">立即报名</a>
+            </div>
+        </div>
+    </header>
+    
+    <!-- 统计数字 -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-container">
+                <div class="stat-item animate fadeInUp">
+                    <div class="stat-number" data-count="14">14</div>
+                    <div class="stat-text">实战项目</div>
+                </div>
+                
+                <div class="stat-item animate fadeInUp delay-200">
+                    <div class="stat-number" data-count="120">120</div>
+                    <div class="stat-text">课时内容</div>
+                </div>
+                
+                <div class="stat-item animate fadeInUp delay-400">
+                    <div class="stat-number" data-count="3500">3500+</div>
+                    <div class="stat-text">成功学员</div>
+                </div>
+                
+                <div class="stat-item animate fadeInUp delay-600">
+                    <div class="stat-number" data-count="96">96%</div>
+                    <div class="stat-text">就业率</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 特色部分 -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header animate fadeInUp">
+                <h2>课程特色</h2>
+                <p class="section-subheader">精心打造的实战课程，帮助零基础学员快速成长为AI开发工程师</p>
+            </div>
+            
+            <div class="feature-grid">
+                <div class="feature-card animate fadeInUp">
+                    <div class="feature-icon">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <h3>项目驱动学习</h3>
+                    <p>每个模块都配有实战项目，通过构建真实AI应用巩固学习成果，掌握企业级开发流程与实践技巧。</p>
+                    <div class="feature-points">
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>14个精心设计的实战项目</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>项目代码审核与指导</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>真实企业级开发场景</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>贯穿全课程的电商AI系统</div>
+                    </div>
+                </div>
+                
+                <div class="feature-card animate fadeInUp delay-200">
+                    <div class="feature-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3>循序渐进课程设计</h3>
+                    <p>课程设计遵循认知规律，从零基础入门到高级应用，每个知识点都有充分的实践和巩固。</p>
+                    <div class="feature-points">
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>科学的学习路径设计</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>基础、进阶、高级、专家四阶段</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>从Python基础到AI高级应用</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>清晰的技能成长规划</div>
+                    </div>
+                </div>
+                
+                <div class="feature-card animate fadeInUp delay-400">
+                    <div class="feature-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3>前沿AI技术栈</h3>
+                    <p>课程内容紧跟行业最新技术发展，涵盖当下最热门的AI应用开发技术栈和实用框架。</p>
+                    <div class="feature-points">
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>RAG知识库检索增强技术</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>多智能体开发(MCP/AutoGen)</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>大模型微调与Function Call</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>多模态AI应用开发</div>
+                    </div>
+                </div>
+                
+                <div class="feature-card animate fadeInUp delay-600">
+                    <div class="feature-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <h3>行业顶尖讲师</h3>
+                    <p>由拥有丰富实战经验的AI行业专家授课，传授企业实战经验和解决方案，培养实用技能。</p>
+                    <div class="feature-points">
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>AI企业一线开发专家</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>多年教学与项目开发经验</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>定期更新前沿技术内容</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>个性化答疑与指导</div>
+                    </div>
+                </div>
+                
+                <div class="feature-card animate fadeInUp">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>社区与人脉资源</h3>
+                    <p>加入活跃的学习社区，与同学协作学习，与讲师和行业专家交流，建立职业发展人脉。</p>
+                    <div class="feature-points">
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>专属学习社区与讨论组</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>每周技术分享与研讨</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>项目协作与代码审核</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>行业资源与人脉对接</div>
+                    </div>
+                </div>
+                
+                <div class="feature-card animate fadeInUp delay-200">
+                    <div class="feature-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <h3>就业与创业支持</h3>
+                    <p>提供全方位的就业指导与支持，包括简历优化、面试辅导、项目作品集打造和就业推荐。</p>
+                    <div class="feature-points">
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>简历与作品集指导</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>AI面试技巧与模拟</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>企业内推与就业对接</div>
+                        <div class="feature-point"><i class="fas fa-check-circle"></i>创业项目孵化支持</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 课程大纲 -->
+    <section class="curriculum" id="curriculum">
+        <div class="container">
+            <div class="section-header animate fadeInUp">
+                <h2>课程大纲</h2>
+                <p class="section-subheader">全面系统的AI开发课程，从零基础到专家级，循序渐进掌握AI应用开发技能</p>
+            </div>
+            
+            <div class="module-stages">
+                <div class="module-stage animate fadeInUp">
+                    <div class="stage-title">基础阶段</div>
+                    <div class="stage-modules">模块1-3</div>
+                    <p>掌握开发环境、编程基础和数据存储，为AI开发打下坚实基础</p>
+                </div>
+                
+                <div class="module-stage animate fadeInUp delay-200">
+                    <div class="stage-title">进阶阶段</div>
+                    <div class="stage-modules">模块4-8</div>
+                    <p>学习智能客服、API开发、Function Call和RAG知识库技术</p>
+                </div>
+                
+                <div class="module-stage animate fadeInUp delay-400">
+                    <div class="stage-title">高级阶段</div>
+                    <div class="stage-modules">模块9-12</div>
+                    <p>掌握多智能体协作、多模态应用、数据分析和知识图谱</p>
+                </div>
+                
+                <div class="module-stage animate fadeInUp delay-600">
+                    <div class="stage-title">专家阶段</div>
+                    <div class="stage-modules">模块13-14</div>
+                    <p>深入学习大模型微调技术和企业级应用部署与优化</p>
+                </div>
+            </div>
+            
+            <div class="module animate fadeInUp">
+                <div class="module-header">
+                    <div class="module-number">1</div>
+                    <h3>AI开发环境搭建与提示词工程</h3>
+                </div>
+                <div class="module-objective">
+                    <i class="fas fa-bullseye"></i>模块目标：搭建AI开发环境并掌握提示词工程技术
+                </div>
+                <p>本模块将帮助学员搭建完整的AI开发环境，并深入学习提示词工程，掌握与大模型高效沟通的技巧，通过实践实现用提示词生成完整网页应用。</p>
+                <div class="module-topics">
+                    <div class="topic"><i class="fas fa-check-circle"></i>开发环境搭建(Python、NodeJS、IDE工具)</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>AI提示词工程基础与实践技巧</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>DeepSeek、Qwen、ChatGPT等模型对比与应用</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>高效提示词设计与优化策略</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>提示词模板设计与复用方法</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>上下文管理与多轮对话技巧</div>
+                </div>
+                <div class="module-project">
+                    <div class="project-title"><i class="fas fa-laptop-code"></i>实战项目：提示词驱动的电商首页开发</div>
+                    <div class="project-desc">使用30个精心设计的提示词，指导AI生成一个完整的电商网站首页，包含HTML、CSS和基础交互功能。</div>
+                </div>
+            </div>
+            
+            <div class="module animate fadeInUp">
+                <div class="module-header">
+                    <div class="module-number">2</div>
+                    <h3>Python基础与数据处理</h3>
+                </div>
+                <div class="module-objective">
+                    <i class="fas fa-bullseye"></i>模块目标：掌握Python核心编程技能，为AI开发打下基础
+                </div>
+                <p>本模块系统讲解Python编程基础，包括语法规则、数据结构、函数设计和面向对象编程，帮助零基础学员快速掌握Python开发能力，为后续AI开发奠定基础。</p>
+                <div class="module-topics">
+                    <div class="topic"><i class="fas fa-check-circle"></i>Python语法基础与编程规范</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>数据类型与结构(列表、字典、集合)</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>条件语句与循环结构</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>函数设计与模块化编程</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>面向对象编程与设计模式</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>文件操作与数据处理</div>
+                </div>
+                <div class="module-project">
+                    <div class="project-title"><i class="fas fa-laptop-code"></i>实战项目：AI对话历史管理系统</div>
+                    <div class="project-desc">开发一个Python应用，能够记录、管理和分析用户与AI的对话历史，支持对话导出和简单统计分析功能。</div>
+                </div>
+            </div>
+            
+            <div class="module animate fadeInUp">
+                <div class="module-header">
+                    <div class="module-number">3</div>
+                    <h3>数据库与存储系统</h3>
+                </div>
+                <div class="module-objective">
+                    <i class="fas fa-bullseye"></i>模块目标：设计和实现数据持久化方案
+                </div>
+                <p>本模块介绍数据库基础知识和设计原则，包括SQL数据库和NoSQL数据库，以及新兴的向量数据库技术，学习如何设计高效的数据存储方案，为AI应用提供数据支持。</p>
+                <div class="module-topics">
+                    <div class="topic"><i class="fas fa-check-circle"></i>SQL基础与MySQL数据库应用</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>数据库设计原则与ER图绘制</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>SQL高级查询与性能优化</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>Python与MySQL集成(SQLAlchemy)</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>NoSQL数据库应用(MongoDB)</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>向量数据库基础(Milvus/Chroma)</div>
+                </div>
+                <div class="module-project">
+                    <div class="project-title"><i class="fas fa-laptop-code"></i>实战项目：电商数据库设计与实现</div>
+                    <div class="project-desc">设计并实现一个完整的电商系统数据库，包含用户、商品、订单、支付等核心模块，并实现基本的CRUD操作接口。</div>
+                </div>
+            </div>
+            
+            <div class="module animate fadeInUp">
+                <div class="module-header">
+                    <div class="module-number">4</div>
+                    <h3>智能客服系统开发</h3>
+                </div>
+                <div class="module-objective">
+                    <i class="fas fa-bullseye"></i>模块目标：构建企业级智能客服应用
+                </div>
+                <p>本模块介绍智能客服系统的架构设计和实现方法，学习多智能体系统设计、流式对话实现和意图识别等技术，开发一个完整的企业知识库智能客服系统。</p>
+                <div class="module-topics">
+                    <div class="topic"><i class="fas fa-check-circle"></i>AutoGen框架架构与原理</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>多智能体系统设计与实现</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>流式对话实现与历史会话管理</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>CrawlAI技术与网页内容抓取</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>意图识别与实体提取技术</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>智能客服多轮对话设计</div>
+                </div>
+                <div class="module-project">
+                    <div class="project-title"><i class="fas fa-laptop-code"></i>实战项目：电商智能客服系统</div>
+                    <div class="project-desc">基于AutoGen框架开发一个电商平台智能客服系统，能够回答商品信息、订单查询、退换货政策等常见问题。</div>
+                </div>
+            </div>
+            
+            <div class="module animate fadeInUp">
+                <div class="module-header">
+                    <div class="module-number">5</div>
+                    <h3>FastAPI后端开发</h3>
+                </div>
+                <div class="module-objective">
+                    <i class="fas fa-bullseye"></i>模块目标：掌握现代化Python后端开发技术
+                </div>
+                <p>本模块深入学习FastAPI框架，掌握高性能API开发技术，包括RESTful API设计、数据验证、依赖注入、异步编程等，为AI应用构建强大的后端支持。</p>
+                <div class="module-topics">
+                    <div class="topic"><i class="fas fa-check-circle"></i>FastAPI框架基础与架构</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>RESTful API设计规范与实现</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>Pydantic数据验证与模型定义</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>依赖注入系统与权限控制</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>异步编程(Async/Await)实现</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>认证与授权(OAuth2/JWT)</div>
+                </div>
+                <div class="module-project">
+                    <div class="project-title"><i class="fas fa-laptop-code"></i>实战项目：电商系统API开发</div>
+                    <div class="project-desc">基于FastAPI开发电商系统后端API，实现用户认证、商品管理、购物车、订单处理等核心功能，对接智能客服系统。</div>
+                </div>
+            </div>
+            
+            <div class="module animate fadeInUp">
+                <div class="module-header">
+                    <div class="module-number">6</div>
+                    <h3>AI Function Call与电商系统开发</h3>
+                </div>
+                <div class="module-objective">
+                    <i class="fas fa-bullseye"></i>模块目标：开发AI驱动的电商购物系统
+                </div>
+                <p>本模块介绍AI Function Call机制与原理，学习如何设计和实现AI函数调用，通过Function Call技术使AI能够与电商系统API交互，实现智能购物体验。</p>
+                <div class="module-topics">
+                    <div class="topic"><i class="fas fa-check-circle"></i>AI Function Call机制与原理</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>JSON Schema设计与验证</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>函数调用状态管理与错误处理</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>高级函数设计模式与最佳实践</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>电商系统架构设计与实现</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>商品推荐与搜索功能开发</div>
+                </div>
+                <div class="module-project">
+                    <div class="project-title"><i class="fas fa-laptop-code"></i>实战项目：AI驱动的电商购物系统</div>
+                    <div class="project-desc">开发一个支持自然语言交互的电商购物系统，用户可以通过对话方式搜索商品、比较价格、添加购物车和完成订单。</div>
+                </div>
+            </div>
+            
+            <div class="module animate fadeInUp">
+                <div class="module-header">
+                    <div class="module-number">7</div>
+                    <h3>RAG技术与知识库构建</h3>
+                </div>
+                <div class="module-objective">
+                    <i class="fas fa-bullseye"></i>模块目标：掌握RAG架构与知识库开发
+                </div>
+                <p>本模块深入讲解检索增强生成(RAG)技术，包括文档处理、向量表示、知识库构建和检索优化等内容，帮助学员掌握构建企业级知识库系统的核心技能。</p>
+                <div class="module-topics">
+                    <div class="topic"><i class="fas fa-check-circle"></i>RAG技术原理与架构设计</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>文档解析与分块策略</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>Embedding模型与向量表示</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>向量数据库设计与查询优化</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>LamaIndex核心功能实现</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>LangChain框架应用开发</div>
+                </div>
+                <div class="module-project">
+                    <div class="project-title"><i class="fas fa-laptop-code"></i>实战项目：电商产品知识库</div>
+                    <div class="project-desc">开发一个电商产品知识库系统，能够从产品说明书、用户手册和常见问题中提取信息，并支持用户自然语言查询。</div>
+                </div>
+            </div>
+            
+            <div class="module animate fadeInUp">
+                <div class="module-header">
+                    <div class="module-number">8</div>
+                    <h3>LangGraph工作流开发</h3>
+                </div>
+                <div class="module-objective">
+                    <i class="fas fa-bullseye"></i>模块目标：构建复杂AI工作流系统
+                </div>
+                <p>本模块讲解LangGraph框架应用和工作流开发技术，帮助学员掌握构建复杂AI工作流的方法，包括工作流状态管理、节点设计与交互等，提升AI应用的复杂性和实用性。</p>
+                <div class="module-topics">
+                    <div class="topic"><i class="fas fa-check-circle"></i>LangGraph框架基础与架构</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>工作流状态管理与持久化</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>节点设计与交互实现</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>工作流分支与条件控制</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>多智能体工作流协作机制</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>错误处理与回退策略</div>
+                </div>
+                <div class="module-project">
+                    <div class="project-title"><i class="fas fa-laptop-code"></i>实战项目：电商客服智能工作流</div>
+                    <div class="project-desc">开发一个电商客服智能工作流系统，能够处理订单查询、退换货申请、商品推荐等复杂场景，支持多轮对话和状态管理。</div>
+                </div>
+            </div>
+            
+            <div class="module animate fadeInUp">
+                <div class="module-header">
+                    <div class="module-number">9</div>
+                    <h3>MCP应用开发</h3>
+                </div>
+                <div class="module-objective">
+                    <i class="fas fa-bullseye"></i>模块目标：掌握MCP多智能体协作系统开发
+                </div>
+                <p>本模块介绍MCP多智能体协作系统开发技术，学习如何设计和实现多个AI智能体协同工作的系统，解决复杂任务分解、角色设计和协作机制等问题。</p>
+                <div class="module-topics">
+                    <div class="topic"><i class="fas fa-check-circle"></i>MCP架构设计与原理</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>多智能体协作系统实现</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>MCP核心API与功能应用</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>自定义工具开发与集成</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>智能体角色设计与交互</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>复杂任务分解与协作处理</div>
+                </div>
+                <div class="module-project">
+                    <div class="project-title"><i class="fas fa-laptop-code"></i>实战项目：智能电商助手系统</div>
+                    <div class="project-desc">基于MCP框架开发一个多智能体电商助手系统，包含商品推荐专家、价格分析师、评价分析师等角色，协同为用户提供购物决策支持。</div>
+                </div>
+            </div>
+            
+            <div class="module animate fadeInUp">
+                <div class="module-header">
+                    <div class="module-number">10</div>
+                    <h3>多模态AI应用开发</h3>
+                </div>
+                <div class="module-objective">
+                    <i class="fas fa-bullseye"></i>模块目标：实现图文互动AI应用
+                </div>
+                <p>本模块介绍多模态AI技术的原理和应用方法，学习如何开发能够处理图像、文本等多种模态数据的AI应用，为电商系统增加图像识别和搜索功能。</p>
+                <div class="module-topics">
+                    <div class="topic"><i class="fas fa-check-circle"></i>多模态AI模型原理与应用</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>图像处理与识别技术</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>OCR文字识别应用开发</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>视觉问答系统实现</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>商品图像识别与属性提取</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>图像生成与编辑技术</div>
+                </div>
+                <div class="module-project">
+                    <div class="project-title"><i class="fas fa-laptop-code"></i>实战项目：电商图像搜索系统</div>
+                    <div class="project-desc">开发一个支持图像搜索的电商应用，用户可以上传产品图片，系统能够识别产品、提取特征并找到相似商品，支持多模态查询。</div>
+                </div>
+            </div>
+            
+            <div class="module animate fadeInUp">
+                <div class="module-header">
+                    <div class="module-number">11</div>
+                    <h3>Text2SQL与ChatBI系统</h3>
+                </div>
+                <div class="module-objective">
+                    <i class="fas fa-bullseye"></i>模块目标：构建智能数据分析平台
+                </div>
+                <p>本模块讲解Text2SQL技术原理和应用，学习如何将自然语言转换为SQL查询，开发能够通过对话方式进行数据分析的ChatBI系统，支持电商数据的智能分析和可视化。</p>
+                <div class="module-topics">
+                    <div class="topic"><i class="fas fa-check-circle"></i>Text2SQL技术原理与架构</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>SQL语法解析与验证</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>Vanna框架应用与前端开发</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>SQL查询优化与执行安全</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>数据可视化与趋势图生成</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>BI报表与仪表盘开发</div>
+                </div>
+                <div class="module-project">
+                    <div class="project-title"><i class="fas fa-laptop-code"></i>实战项目：电商销售分析ChatBI系统</div>
+                    <div class="project-desc">开发一个对话式销售数据分析系统，能够通过自然语言查询分析销售趋势、商品表现、用户行为等数据，并生成可视化报表。</div>
+                </div>
+            </div>
+            
+            <div class="module animate fadeInUp">
+                <div class="module-header">
+                    <div class="module-number">12</div>
+                    <h3>图数据库与知识图谱</h3>
+                </div>
+                <div class="module-objective">
+                    <i class="fas fa-bullseye"></i>模块目标：构建企业知识图谱系统
+                </div>
+                <p>本模块介绍图数据库技术和知识图谱构建方法，学习如何使用Neo4j/Nebula等图数据库，构建电商领域知识图谱，实现复杂关系查询和智能推荐功能。</p>
+                <div class="module-topics">
+                    <div class="topic"><i class="fas fa-check-circle"></i>图数据库原理与应用场景</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>Neo4j/Nebula实践与优化</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>图数据建模与查询语言</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>关系分析与路径查询</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>图可视化技术与工具应用</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>知识图谱构建与智能推荐</div>
+                </div>
+                <div class="module-project">
+                    <div class="project-title"><i class="fas fa-laptop-code"></i>实战项目：电商产品知识图谱</div>
+                    <div class="project-desc">构建一个电商产品知识图谱系统，包含产品、品牌、类别、特性等实体及其关系，实现基于图的智能商品推荐和关联分析。</div>
+                </div>
+            </div>
+            
+            <div class="module animate fadeInUp">
+                <div class="module-header">
+                    <div class="module-number">13</div>
+                    <h3>AI进阶技术与大模型微调</h3>
+                </div>
+                <div class="module-objective">
+                    <i class="fas fa-bullseye"></i>模块目标：掌握AI前沿技术与原理
+                </div>
+                <p>本模块介绍AI进阶技术和大模型微调方法，深入学习Transformer架构、注意力机制、自监督学习等原理，以及LoRA/QLoRA等大模型微调技术，开发垂直领域AI助手。</p>
+                <div class="module-topics">
+                    <div class="topic"><i class="fas fa-check-circle"></i>Text2DSL决策系统开发</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>大模型微调技术(LoRA/QLoRA)</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>Transformer架构解析</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>注意力机制与自监督学习</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>Embedding技术与应用优化</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>垂直领域模型训练与评估</div>
+                </div>
+                <div class="module-project">
+                    <div class="project-title"><i class="fas fa-laptop-code"></i>实战项目：电商垂直领域AI助手</div>
+                    <div class="project-desc">基于开源模型进行微调，训练一个专注于电商领域的垂直AI助手，能够精准理解和回答电商专业术语和问题。</div>
+                </div>
+            </div>
+            
+            <div class="module animate fadeInUp">
+                <div class="module-header">
+                    <div class="module-number">14</div>
+                    <h3>企业级应用部署与优化</h3>
+                </div>
+                <div class="module-objective">
+                    <i class="fas fa-bullseye"></i>模块目标：掌握AI应用上线与运维技术
+                </div>
+                <p>本模块介绍企业级AI应用的部署与优化技术，学习Docker容器化、云服务部署、CI/CD自动化、监控与优化等内容，确保AI应用稳定高效地运行在生产环境中。</p>
+                <div class="module-topics">
+                    <div class="topic"><i class="fas fa-check-circle"></i>Docker容器化部署实践</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>云服务部署策略与实现</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>CI/CD自动化流程构建</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>性能监控与问题诊断</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>安全防护与数据加密</div>
+                    <div class="topic"><i class="fas fa-check-circle"></i>高并发处理与负载均衡</div>
+                </div>
+                <div class="module-project">
+                    <div class="project-title"><i class="fas fa-laptop-code"></i>实战项目：完整电商AI系统上线</div>
+                    <div class="project-desc">将课程中开发的电商AI系统进行整合和优化，通过Docker容器化和云服务部署，实现完整系统的生产环境上线。</div>
+                </div>
+            </div>
+            
+            <div class="learning-path animate fadeInUp">
+                <h3><i class="fas fa-road"></i> 学习路径：从零到精通的AI工程师成长之旅</h3>
+                <div class="path-description">
+                    <p>本课程设计为循序渐进的学习路径，从基础编程到AI高级应用，最终完成一个完整的AI驱动电商系统：</p>
+                    <ol>
+                        <li><strong>基础阶段（模块1-3）</strong>：掌握开发环境、Python编程和数据库知识，建立电商系统的基础架构</li>
+                        <li><strong>进阶阶段（模块4-8）</strong>：学习智能客服、API开发、Function Call和RAG技术，开发电商核心功能</li>
+                        <li><strong>高级阶段（模块9-12）</strong>：掌握多智能体、多模态、数据分析和知识图谱，增强电商系统智能化水平</li>
+                        <li><strong>专家阶段（模块13-14）</strong>：深入学习模型微调和企业级部署，将电商AI系统推向生产环境</li>
+                    </ol>
+                    <p>通过这个系统化的学习路径，您将逐步构建一个包含智能客服、RAG知识库、多模态搜索、数据分析和知识图谱的完整AI电商系统，掌握全栈AI开发能力。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="team" id="team">
+        <div class="container">
+            <div class="section-header fade-in-up">
+                <h2>专业讲师团队</h2>
+                <p class="section-subheader">拥有多年AI开发和教学经验的行业专家，带你快速成长</p>
+            </div>
+            
+            <div class="team-grid">
+                <div class="team-card fade-in-up">
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="讲师照片" class="team-img">
+                    <div class="team-info">
+                        <h4 class="team-name">志雄</h4>
+                        <p class="team-role">AI应用开发专家</p>
+                        <p class="team-bio">10年软件开发经验，专注AI领域5年以上，曾参与多个大型AI项目开发，对Python、FastAPI和大模型应用有深入研究。</p>
+                        <div class="social-links">
+                            <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="team-card fade-in-up delay-1">
+                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="讲师照片" class="team-img">
+                    <div class="team-info">
+                        <h4 class="team-name">Nebula</h4>
+                        <p class="team-role">数据科学与图数据库专家</p>
+                        <p class="team-bio">图数据库和大数据处理专家，拥有丰富的Text2SQL和数据可视化经验，曾主导多个企业级数据分析系统开发。</p>
+                        <div class="social-links">
+                            <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-medium"></i></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="team-card fade-in-up delay-2">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="讲师照片" class="team-img">
+                    <div class="team-info">
+                        <h4 class="team-name">张教授</h4>
+                        <p class="team-role">AI理论与架构专家</p>
+                        <p class="team-bio">计算机科学博士，研究领域包括大模型架构、注意力机制和自然语言处理，在多个顶级AI会议发表论文。</p>
+                        <div class="social-links">
+                            <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-google"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <div class="section-header fade-in-up">
+                <h2>学员反馈</h2>
+                <p class="section-subheader">来自已完成训练营的学员真实评价</p>
+            </div>
+            
+            <div class="testimonial-container">
+                <div class="testimonial-card fade-in-up">
+                    <p class="testimonial-content">参加AI开发训练营是我职业生涯中做过的最好的决定之一。从零基础开始，现在已经能够独立开发AI应用，并且成功转型为AI工程师，薪资提升了60%。</p>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="学员照片" class="author-img">
+                        <div class="author-info">
+                            <h4>李明</h4>
+                            <p>前端开发转AI工程师</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card fade-in-up delay-1">
+                    <p class="testimonial-content">课程内容非常实用，每个模块都有实际项目，讲师经验丰富且耐心解答问题。RAG和Text2SQL部分对我帮助特别大，现在已经在公司负责AI项目开发。</p>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="学员照片" class="author-img">
+                        <div class="author-info">
+                            <h4>王丽</h4>
+                            <p>数据分析师转AI产品经理</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card fade-in-up delay-2">
+                    <p class="testimonial-content">作为一名Python开发者，我一直想进入AI领域但不知从何入手。这个训练营系统性地讲解了AI应用开发的各个方面，让我迅速上手并开发出了自己的AI产品。</p>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="学员照片" class="author-img">
+                        <div class="author-info">
+                            <h4>张伟</h4>
+                            <p>Python开发工程师</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card fade-in-up delay-3">
+                    <p class="testimonial-content">课程内容紧跟行业发展，实战项目贴近企业实际需求，讲师都是行业专家，能解答各种疑难问题。完成训练营后成功获得了三家公司的offer。</p>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" alt="学员照片" class="author-img">
+                        <div class="author-info">
+                            <h4>陈静</h4>
+                            <p>应届毕业生转AI开发</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial-nav">
+                <button class="active"></button>
+                <button></button>
+                <button></button>
+                <button></button>
+            </div>
+        </div>
+    </section>
+    
+    <section class="faq" id="faq">
+        <div class="container">
+            <div class="section-header fade-in-up">
+                <h2>常见问题</h2>
+                <p class="section-subheader">解答您关心的问题</p>
+            </div>
+            
+            <div class="faq-container">
+                <div class="faq-item fade-in-up">
+                    <div class="faq-question">
+                        <span>参加训练营需要什么基础？</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>本训练营适合零基础学员和有一定编程基础的学员。如果您是完全零基础，我们会从Python基础开始教起；如果您已有编程经验，可以更快进入AI应用开发阶段。最重要的是有学习热情和持续学习的意愿。</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item fade-in-up delay-1">
+                    <div class="faq-question">
+                        <span>课程采用什么形式授课？</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>我们提供线上+线下混合教学模式。线上授课通过直播+录播形式进行，每周安排2-3次直播课程，学员可根据自身时间灵活安排学习。同时，我们每月组织1-2次线下实战workshop，深入讲解项目开发过程中的难点。</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item fade-in-up delay-2">
+                    <div class="faq-question">
+                        <span>训练营多长时间？</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>完整的训练营为期3个月，每周约15-20小时学习时间。课程设计为模块化结构，学员可以根据自己的学习进度和目标选择参加部分模块或完整课程。毕业后，学员可永久访问课程资料和社区资源。</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item fade-in-up delay-3">
+                    <div class="faq-question">
+                        <span>训练营是否提供就业支持？</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>是的，我们非常重视学员的就业发展。训练营提供简历优化、面试辅导、项目作品集指导等服务，并与多家AI企业建立了合作关系，为优秀学员提供推荐就业机会。我们的就业服务团队会持续跟进学员的求职过程，提供针对性支持。</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item fade-in-up delay-4">
+                    <div class="faq-question">
+                        <span>是否可以申请分期付款？</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>可以。我们支持最长12期的分期付款计划，学员可以根据自己的经济情况选择合适的分期方案。另外，表现优秀的学员还有机会获得部分学费减免或奖学金支持。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="section-header fade-in-up">
+                <h2>报名费用</h2>
+                <p class="section-subheader">选择最适合您的学习方案</p>
+            </div>
+            
+            <div class="pricing-container">
+                <div class="pricing-card fade-in-up">
+                    <div class="pricing-header">
+                        <h3 class="pricing-name">基础版</h3>
+                        <div class="pricing-price">5,980<span>元</span></div>
+                        <p class="pricing-description">适合对AI开发有初步了解，希望系统学习的学员</p>
+                    </div>
+                    
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> 全部课程视频</li>
+                        <li><i class="fas fa-check"></i> 基础项目代码与资料</li>
+                        <li><i class="fas fa-check"></i> 社区讨论组</li>
+                        <li><i class="fas fa-check"></i> 6个月学习时间</li>
+                        <li><i class="fas fa-times"></i> 导师1对1辅导</li>
+                        <li><i class="fas fa-times"></i> 项目实战指导</li>
+                        <li><i class="fas fa-times"></i> 就业推荐服务</li>
+                    </ul>
+                    
+                    <a href="#contact" class="btn btn-primary pricing-btn">立即报名</a>
+                </div>
+                
+                <div class="pricing-card featured fade-in-up delay-1">
+                    <div class="pricing-header">
+                        <h3 class="pricing-name">进阶版</h3>
+                        <div class="pricing-price">9,980<span>元</span></div>
+                        <p class="pricing-description">适合希望全面掌握AI开发并获得项目指导的学员</p>
+                    </div>
+                    
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> 全部课程视频</li>
+                        <li><i class="fas fa-check"></i> 完整项目代码与资料</li>
+                        <li><i class="fas fa-check"></i> 社区讨论组</li>
+                        <li><i class="fas fa-check"></i> 12个月学习时间</li>
+                        <li><i class="fas fa-check"></i> 每周导师答疑</li>
+                        <li><i class="fas fa-check"></i> 项目实战指导</li>
+                        <li><i class="fas fa-check"></i> 简历与面试指导</li>
+                    </ul>
+                    
+                    <a href="#contact" class="btn btn-primary pricing-btn">立即报名</a>
+                </div>
+                
+                <div class="pricing-card fade-in-up delay-2">
+                    <div class="pricing-header">
+                        <h3 class="pricing-name">精英版</h3>
+                        <div class="pricing-price">15,980<span>元</span></div>
+                        <p class="pricing-description">适合希望快速成为AI工程师并获得全方位支持的学员</p>
+                    </div>
+                    
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> 全部课程视频</li>
+                        <li><i class="fas fa-check"></i> 完整项目代码与资料</li>
+                        <li><i class="fas fa-check"></i> VIP讨论组</li>
+                        <li><i class="fas fa-check"></i> 永久学习时间</li>
+                        <li><i class="fas fa-check"></i> 导师1对1辅导(20次)</li>
+                        <li><i class="fas fa-check"></i> 定制项目开发指导</li>
+                        <li><i class="fas fa-check"></i> 优先就业推荐</li>
+                    </ul>
+                    
+                    <a href="#contact" class="btn btn-primary pricing-btn">立即报名</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="cta" id="contact">
+        <div class="container">
+            <h2 class="fade-in-up">立即加入AI开发实战训练营</h2>
+            <p class="fade-in-up delay-1">下一期训练营即将开始，名额有限，立即报名！</p>
+            
+            <div class="countdown fade-in-up delay-2">
+                <div class="countdown-item">
+                    <div class="countdown-number" id="days">15</div>
+                    <div class="countdown-label">天</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number" id="hours">22</div>
+                    <div class="countdown-label">时</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number" id="minutes">36</div>
+                    <div class="countdown-label">分</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number" id="seconds">45</div>
+                    <div class="countdown-label">秒</div>
+                </div>
+            </div>
+            
+            <a href="#" class="btn btn-primary fade-in-up delay-3">填写报名表</a>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>关于我们</h3>
+                    <p>AI开发实战训练营致力于培养高质量AI工程师，提供从基础到实战的全面培训，帮助学员快速成长为AI领域的专业人才。</p>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>快速链接</h3>
+                    <ul class="footer-links">
+                        <li><a href="#features">课程特色</a></li>
+                        <li><a href="#curriculum">课程大纲</a></li>
+                        <li><a href="#team">讲师团队</a></li>
+                        <li><a href="#testimonials">学员评价</a></li>
+                        <li><a href="#pricing">报名费用</a></li>
+                        <li><a href="#faq">常见问题</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>联系我们</h3>
+                    <div class="footer-contact">
+                        <p><i class="fas fa-map-marker-alt"></i> 北京市海淀区中关村科技园</p>
+                        <p><i class="fas fa-phone"></i> 400-123-4567</p>
+                        <p><i class="fas fa-envelope"></i> contact@aitrainingcamp.com</p>
+                    </div>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-weixin"></i></a>
+                        <a href="#"><i class="fab fa-weibo"></i></a>
+                        <a href="#"><i class="fab fa-qq"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2024 AI开发实战训练营. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <a href="#" class="back-to-top" id="backToTop"><i class="fas fa-arrow-up"></i></a>
+    
+    <script>
+        // 添加滚动动画
+        document.addEventListener('DOMContentLoaded', function() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+            
+            document.querySelectorAll('.animate').forEach(item => {
+                observer.observe(item);
+            });
+        });
+        
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.padding = '0.5rem 0';
+                navbar.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.1)';
+            } else {
+                navbar.style.padding = '1rem 0';
+                navbar.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+            }
+            
+            // 返回顶部按钮
+            const backToTop = document.getElementById('backToTop');
+            if (window.scrollY > 300) {
+                backToTop.classList.add('active');
+            } else {
+                backToTop.classList.remove('active');
+            }
+        });
+        
+        // 返回顶部
+        document.getElementById('backToTop').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // 导航菜单点击平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 70,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // 汉堡菜单
+        document.querySelector('.hamburger').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+        
+        // FAQ手风琴效果
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', function() {
+                this.parentElement.classList.toggle('active');
+            });
+        });
+        
+        // 数字动画
+        function animateNumber(el) {
+            const target = parseInt(el.dataset.count);
+            const duration = 2000; // 动画持续时间
+            const start = 0;
+            const increment = target / (duration / 16); // 每16ms增加的数值
+            
+            let current = start;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    clearInterval(timer);
+                    el.textContent = target;
+                } else {
+                    el.textContent = Math.floor(current);
+                }
+            }, 16);
+        }
+        
+        // 滚动动画
+        document.addEventListener('DOMContentLoaded', function() {
+            const fadeElements = document.querySelectorAll('.fade-in-up');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animated');
+                        
+                        // 如果是数字元素，启动数字动画
+                        if (entry.target.classList.contains('stat-number')) {
+                            animateNumber(entry.target);
+                        }
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+            
+            fadeElements.forEach(item => {
+                observer.observe(item);
+            });
+            
+            // 统计数字初始化
+            document.querySelectorAll('.stat-number').forEach(el => {
+                observer.observe(el);
+            });
+        });
+        
+        // 倒计时功能
+        function updateCountdown() {
+            const targetDate = new Date();
+            targetDate.setDate(targetDate.getDate() + 15); // 15天后
+            
+            const now = new Date();
+            const diff = targetDate - now;
+            
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            document.getElementById('days').textContent = days;
+            document.getElementById('hours').textContent = hours;
+            document.getElementById('minutes').textContent = minutes;
+            document.getElementById('seconds').textContent = seconds;
+        }
+        
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+        
+        // 轮播图效果
+        const testimonialNav = document.querySelectorAll('.testimonial-nav button');
+        const testimonialContainer = document.querySelector('.testimonial-container');
+        
+        testimonialNav.forEach((button, index) => {
+            button.addEventListener('click', () => {
+                // 清除所有active类
+                testimonialNav.forEach(btn => btn.classList.remove('active'));
+                
+                // 添加active类到当前按钮
+                button.classList.add('active');
+                
+                // 滚动到对应的testimonial
+                const testimonialWidth = document.querySelector('.testimonial-card').offsetWidth + 32; // card width + gap
+                testimonialContainer.scrollTo({
+                    left: index * testimonialWidth,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
+</html> 

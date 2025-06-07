@@ -14,9 +14,14 @@ import {
     Table,
     Tag,
     TreeSelect,
+    Typography,
+    Tooltip,
 } from 'antd';
-import {DeleteOutlined, EditOutlined, PlusOutlined, SettingOutlined} from '@ant-design/icons';
+import {DeleteOutlined, EditOutlined, PlusOutlined, SettingOutlined, FolderOutlined, FileOutlined} from '@ant-design/icons';
 import {type Menu, menuApi} from '@/api/menu';
+import './style.css';
+
+const { Title } = Typography;
 
 // 菜单项接口已从API模块导入
 
@@ -103,11 +108,10 @@ const MenuManagement: React.FC = () => {
         const type = menu_type || (record.parent_id === 0 ? 'catalog' : 'menu');
         return (
           <Tag
-            color={type === 'catalog' ? 'orange' : 'green'}
+            color={type === 'catalog' ? 'blue' : 'green'}
             style={{
-              borderRadius: '4px',
-              border: type === 'catalog' ? '1px solid #ff7a00' : '1px solid #52c41a',
-              backgroundColor: type === 'catalog' ? '#fff7e6' : '#f6ffed'
+              borderRadius: '2px',
+              padding: '2px 8px',
             }}
           >
             {type === 'catalog' ? '目录' : '菜单'}
@@ -125,9 +129,9 @@ const MenuManagement: React.FC = () => {
         // 根据菜单类型显示不同图标
         const type = record.menu_type || (record.parent_id === 0 ? 'catalog' : 'menu');
         if (type === 'catalog') {
-          return <SettingOutlined style={{ fontSize: '16px', color: '#1890ff' }} />;
+          return <FolderOutlined style={{ fontSize: '16px', color: '#1890ff' }} />;
         } else {
-          return <SettingOutlined style={{ fontSize: '16px', color: '#52c41a' }} />;
+          return <FileOutlined style={{ fontSize: '16px', color: '#52c41a' }} />;
         }
       },
     },
@@ -144,6 +148,11 @@ const MenuManagement: React.FC = () => {
       key: 'path',
       width: 120,
       align: 'center' as const,
+      render: (path: string) => (
+        <Tooltip title={path}>
+          <span className="ellipsis-text">{path || '-'}</span>
+        </Tooltip>
+      ),
     },
     {
       title: '跳转路径',
@@ -151,7 +160,11 @@ const MenuManagement: React.FC = () => {
       key: 'redirect',
       width: 120,
       align: 'center' as const,
-      render: (redirect: string) => redirect || '-',
+      render: (redirect: string) => (
+        <Tooltip title={redirect}>
+          <span className="ellipsis-text">{redirect || '-'}</span>
+        </Tooltip>
+      ),
     },
     {
       title: '组件路径',
@@ -159,6 +172,11 @@ const MenuManagement: React.FC = () => {
       key: 'component',
       width: 120,
       align: 'center' as const,
+      render: (component: string) => (
+        <Tooltip title={component}>
+          <span className="ellipsis-text">{component || '-'}</span>
+        </Tooltip>
+      ),
     },
     {
       title: '保活',
@@ -171,6 +189,7 @@ const MenuManagement: React.FC = () => {
           size="small"
           checked={keepalive || false}
           onChange={(checked) => handleUpdateKeepAlive(record, checked)}
+          className="custom-switch"
         />
       ),
     },
@@ -185,6 +204,7 @@ const MenuManagement: React.FC = () => {
           size="small"
           checked={is_hidden || false}
           onChange={(checked) => handleUpdateVisible(record, checked)}
+          className="custom-switch"
         />
       ),
     },
@@ -198,7 +218,7 @@ const MenuManagement: React.FC = () => {
         if (created_at) {
           return new Date(created_at).toLocaleDateString('zh-CN');
         }
-        return '2025-05-30';
+        return '-';
       },
     },
     {
@@ -220,6 +240,7 @@ const MenuManagement: React.FC = () => {
                   size="small"
                   type="link"
                   onClick={() => handleAddSubMenu(record)}
+                  className="action-button"
                 >
                   子菜单
                 </Button>
@@ -228,6 +249,7 @@ const MenuManagement: React.FC = () => {
                   type="link"
                   icon={<EditOutlined />}
                   onClick={() => handleEdit(record)}
+                  className="action-button"
                 >
                   编辑
                 </Button>
@@ -242,20 +264,22 @@ const MenuManagement: React.FC = () => {
                   type="link"
                   icon={<EditOutlined />}
                   onClick={() => handleEdit(record)}
+                  className="action-button"
                 >
                   编辑
                 </Button>
                 <Popconfirm
                   title="确定删除该菜单吗？"
                   onConfirm={() => handleDelete(record.id)}
-                  disabled={hasChildren}
+                  disabled={hasChildren || false}
                 >
                   <Button
                     size="small"
                     type="link"
                     danger
                     icon={<DeleteOutlined />}
-                    disabled={hasChildren}
+                    disabled={hasChildren || false}
+                    className="action-button delete-button"
                   >
                     删除
                   </Button>
@@ -402,17 +426,19 @@ const MenuManagement: React.FC = () => {
   return (
     <div className="menu-management" style={{ padding: '24px' }}>
       <Card
-        title="菜单列表"
+        title={<Title level={4}>菜单管理</Title>}
         extra={
           <Button
             type="primary"
             icon={<PlusOutlined />}
             onClick={handleAdd}
+            className="add-button"
           >
             新建根菜单
           </Button>
         }
-        style={{ marginBottom: '16px' }}
+        style={{ borderRadius: '4px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+        className="system-card"
       >
         <Table
           columns={columns}
@@ -422,6 +448,8 @@ const MenuManagement: React.FC = () => {
           pagination={false}
           scroll={{ x: 1200 }}
           size="middle"
+          bordered
+          className="system-table"
         />
       </Card>
 
@@ -436,12 +464,14 @@ const MenuManagement: React.FC = () => {
           }}
           width={600}
           destroyOnClose
+          className="system-modal"
         >
         <Form
             form={form}
             layout="vertical"
             initialValues={{ menu_type: 'catalog', order: 1, is_hidden: false, keepalive: false, ...currentMenu }}
             onFinish={handleSubmit}
+            className="system-form"
           >
           <Form.Item
             label="菜单类型"
@@ -517,7 +547,7 @@ const MenuManagement: React.FC = () => {
             name="is_hidden"
             valuePropName="checked"
           >
-            <Switch />
+            <Switch className="custom-switch" />
           </Form.Item>
 
           <Form.Item
@@ -525,7 +555,7 @@ const MenuManagement: React.FC = () => {
             name="keepalive"
             valuePropName="checked"
           >
-            <Switch />
+            <Switch className="custom-switch" />
           </Form.Item>
         </Form>
       </Modal>

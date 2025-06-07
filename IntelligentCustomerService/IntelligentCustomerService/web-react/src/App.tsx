@@ -1,18 +1,17 @@
 import React from 'react';
 import {RouterProvider} from 'react-router-dom';
-import {App as AntdApp, ConfigProvider} from 'antd';
+import {App as AntdApp} from 'antd';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {ReactQueryDevtools} from '@tanstack/react-query-devtools';
-import zhCN from 'antd/locale/zh_CN';
-import enUS from 'antd/locale/en_US';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import 'dayjs/locale/en';
 import {router} from './router';
 import {AuthProvider} from './contexts/AuthContext';
-import {ThemeProvider, useTheme} from './contexts/ThemeContext';
+import {ThemeProvider} from './contexts/ThemeContext';
 import {useTranslation} from 'react-i18next';
 import './i18n';
+import './styles/index.css';
 import './App.css';
 
 // 配置 dayjs
@@ -33,44 +32,9 @@ const queryClient = new QueryClient({
   },
 });
 
-// Ant Design 主题配置
-const getAntdTheme = (isDark: boolean) => {
-  const config: any = {
-    token: {
-      colorPrimary: '#1890ff',
-      borderRadius: 6,
-      wireframe: false,
-    },
-    components: {
-      Layout: {
-        headerBg: isDark ? '#001529' : '#ffffff',
-        siderBg: isDark ? '#001529' : '#ffffff',
-        bodyBg: isDark ? '#141414' : '#f0f2f5',
-      },
-      Menu: {
-        darkItemBg: '#001529',
-        darkSubMenuItemBg: '#000c17',
-        darkItemSelectedBg: '#1890ff',
-      },
-    },
-  };
-  
-  // 只有在需要时才添加algorithm属性
-  if (isDark) {
-    // 这里可以添加暗色主题算法，例如：
-    // config.algorithm = theme.darkAlgorithm;
-  }
-  
-  return config;
-};
-
 // 内部应用组件
 const InnerApp: React.FC = () => {
   const { i18n } = useTranslation();
-  const { isDark } = useTheme();
-  
-  // 根据语言设置 Ant Design 国际化
-  const antdLocale = i18n.language === 'en' ? enUS : zhCN;
   
   // 根据语言设置 dayjs 国际化
   React.useEffect(() => {
@@ -78,17 +42,11 @@ const InnerApp: React.FC = () => {
   }, [i18n.language]);
 
   return (
-    <ConfigProvider
-      locale={antdLocale}
-      theme={getAntdTheme(isDark)}
-      componentSize="middle"
-    >
-      <AntdApp>
-        <AuthProvider>
-          <RouterProvider router={router} />
-        </AuthProvider>
-      </AntdApp>
-    </ConfigProvider>
+    <AntdApp>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </AntdApp>
   );
 };
 

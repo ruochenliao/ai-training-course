@@ -32,6 +32,37 @@
     "usernameRequired": "请输入用户名",
     "passwordRequired": "请输入密码"
   },
+  "theme": {
+    "settings": "主题设置",
+    "light": "明亮模式",
+    "dark": "暗黑模式",
+    "mode": "外观模式",
+    "darkMode": "深色模式",
+    "preset": "主题预设",
+    "createPreset": "新建预设",
+    "editPreset": "编辑预设",
+    "deletePreset": "删除预设",
+    "confirmDelete": "确定要删除此预设吗？",
+    "saveAsPreset": "保存为预设",
+    "presetName": "预设名称",
+    "presetNameRequired": "请输入预设名称",
+    "presetSaved": "主题预设保存成功",
+    "presetDeleted": "主题预设已删除",
+    "colorConfig": "颜色配置",
+    "primaryColor": "主要颜色",
+    "secondaryColor": "次要颜色",
+    "successColor": "成功颜色",
+    "warningColor": "警告颜色",
+    "errorColor": "错误颜色",
+    "infoColor": "信息颜色",
+    "presetAlreadyExists": "已存在同名预设，请更换名称",
+    "defaultBlue": "默认蓝",
+    "techPurple": "科技紫",
+    "vividOrange": "活力橙",
+    "calmGreen": "沉稳绿",
+    "businessGray": "商务灰",
+    "currentTheme": "当前主题"
+  },
   "menu": {
     "dashboard": "仪表盘",
     "customerService": "客服管理",
@@ -43,6 +74,12 @@
     "role": "角色管理",
     "permission": "权限管理",
     "settings": "系统设置"
+  },
+  "header": {
+    "settings": "设置",
+    "logout": "退出登录",
+    "profile": "个人资料",
+    "language": "语言"
   },
   "dashboard": {
     "title": "智能客服系统",

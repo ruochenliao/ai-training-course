@@ -1,15 +1,39 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Card, Col, DatePicker, Form, Input, message, Popover, Row, Select, Space, Table, Tag} from 'antd';
-import {EyeOutlined, SearchOutlined} from '@ant-design/icons';
+import {
+  Button, 
+  Card, 
+  Col, 
+  DatePicker, 
+  Form, 
+  Input, 
+  App, 
+  Popover, 
+  Row, 
+  Select, 
+  Space, 
+  Table, 
+  Tag,
+  Typography
+} from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import {EyeOutlined, SearchOutlined, ReloadOutlined} from '@ant-design/icons';
 import {type AuditLog, auditLogApi, type AuditLogQueryParams} from '@/api/auditlog';
 import dayjs from 'dayjs';
+import '../menu/style.css';
+import CommonPagination from '@/components/CommonPagination';
+
+const { Title } = Typography;
+const { RangePicker } = DatePicker;
 
 // 查询参数接口
 interface QueryParams extends AuditLogQueryParams {
   dateRange?: [dayjs.Dayjs, dayjs.Dayjs] | null;
+  start_time?: string;
+  end_time?: string;
 }
 
 const AuditLog: React.FC = () => {
+  const { message } = App.useApp();
   const [loading, setLoading] = useState<boolean>(false);
   const [logList, setLogList] = useState<AuditLog[]>([]);
   const [total, setTotal] = useState<number>(0);
@@ -70,9 +94,19 @@ const AuditLog: React.FC = () => {
       delete params.dateRange;
       
       const response = await auditLogApi.list(params);
-      if (response.data) {
-        setLogList(response.data);
-        setTotal(response.total);
+      
+      // 根据API响应结构处理数据
+      if (response && response.data) {
+        // 如果返回的是分页数据
+        if (Array.isArray(response.data.items)) {
+          setLogList(response.data.items);
+          setTotal(response.data.total || response.data.items.length);
+        } 
+        // 如果直接返回数组数据
+        else if (Array.isArray(response.data)) {
+          setLogList(response.data);
+          setTotal(response.data.length);
+        }
       }
     } catch (error) {
       message.error('获取审计日志失败');
@@ -92,8 +126,9 @@ const AuditLog: React.FC = () => {
         newParams.start_time = values.dateRange[0].format('YYYY-MM-DD HH:mm:ss');
         newParams.end_time = values.dateRange[1].format('YYYY-MM-DD HH:mm:ss');
       } else {
-        newParams.start_time = undefined;
-        newParams.end_time = undefined;
+        // 使用空字符串代替undefined
+        newParams.start_time = '';
+        newParams.end_time = '';
       }
       
       setQueryParams(newParams);
@@ -124,55 +159,82 @@ const AuditLog: React.FC = () => {
   };
 
   // 表格列配置
-  const columns = [
+  const columns: ColumnsType<AuditLog> = [
     {
       title: '用户名称',
       dataIndex: 'username',
       key: 'username',
-      width: 'auto',
-      align: 'center' as const,
-      ellipsis: { tooltip: true },
+      width: 120,
+      align: 'center',
+      ellipsis: true,
     },
     {
       title: '接口概要',
       dataIndex: 'summary',
       key: 'summary',
-      align: 'center' as const,
-      width: 'auto',
-      ellipsis: { tooltip: true },
+      align: 'center',
+      width: 150,
+      ellipsis: true,
     },
     {
       title: '功能模块',
       dataIndex: 'module',
       key: 'module',
-      align: 'center' as const,
-      width: 'auto',
-      ellipsis: { tooltip: true },
+      align: 'center',
+      width: 120,
+      ellipsis: true,
     },
     {
       title: '请求方法',
       dataIndex: 'method',
       key: 'method',
-      align: 'center' as const,
-      width: 'auto',
-      ellipsis: { tooltip: true },
+      align: 'center',
+      width: 90,
+      render: (method: string) => {
+        let color = 'default';
+        switch (method) {
+          case 'GET':
+            color = 'blue';
+            break;
+          case 'POST':
+            color = 'green';
+            break;
+          case 'DELETE':
+            color = 'red';
+            break;
+          case 'PUT':
+            color = 'orange';
+            break;
+          case 'PATCH':
+            color = 'purple';
+            break;
+          default:
+            color = 'default';
+        }
+        return <Tag color={color}>{method}</Tag>;
+      },
     },
     {
       title: '请求路径',
       dataIndex: 'path',
       key: 'path',
-      align: 'center' as const,
-      width: 'auto',
-      ellipsis: { tooltip: true },
+      align: 'center',
+      width: 200,
+      ellipsis: true,
     },
     {
       title: '状态码',
       dataIndex: 'status',
       key: 'status',
-      align: 'center' as const,
-      width: 'auto',
+      align: 'center',
+      width: 80,
       render: (status: number) => {
-        const color = status >= 200 && status < 300 ? 'green' : 'red';
+        let color = 'green';
+        if (status >= 400) {
+          color = 'red';
+        } else if (status >= 300) {
+          color = 'orange';
+        }
         return <Tag color={color}>{status}</Tag>;
       },
     },
@@ -180,7 +242,7 @@ const AuditLog: React.FC = () => {
       title: '请求体',
       dataIndex: 'request_args',
       key: 'request_args',
-      align: 'center' as const,
+      align: 'center',
       width: 80,
       render: (params: any) => (
         <Popover
@@ -195,15 +257,14 @@ const AuditLog: React.FC = () => {
                 padding: '8px',
                 borderRadius: '4px',
                 margin: 0,
+                fontSize: '12px',
               }}
             >
               {formatJSON(params)}
             </pre>
           }
         >
-          <div style={{ cursor: 'pointer' }}>
-            <EyeOutlined />
-          </div>
+          <Button type="link" size="small" icon={<EyeOutlined />} className="action-button" />
         </Popover>
       ),
     },
@@ -211,7 +272,7 @@ const AuditLog: React.FC = () => {
       title: '响应体',
       dataIndex: 'response_body',
       key: 'response_body',
-      align: 'center' as const,
+      align: 'center',
       width: 80,
       render: (response: any) => (
         <Popover
@@ -226,15 +287,14 @@ const AuditLog: React.FC = () => {
                 padding: '8px',
                 borderRadius: '4px',
                 margin: 0,
+                fontSize: '12px',
               }}
             >
               {formatJSON(response)}
             </pre>
           }
         >
-          <div style={{ cursor: 'pointer' }}>
-            <EyeOutlined />
-          </div>
+          <Button type="link" size="small" icon={<EyeOutlined />} className="action-button" />
         </Popover>
       ),
     },
@@ -242,27 +302,31 @@ const AuditLog: React.FC = () => {
       title: '响应时间(ms)',
       dataIndex: 'response_time',
       key: 'response_time',
-      align: 'center' as const,
-      width: 'auto',
-      ellipsis: { tooltip: true },
+      align: 'center',
+      width: 100,
+      ellipsis: true,
     },
     {
       title: '操作时间',
       dataIndex: 'created_at',
       key: 'created_at',
-      align: 'center' as const,
-      width: 'auto',
-      ellipsis: { tooltip: true },
+      align: 'center',
+      width: 160,
+      ellipsis: true,
     },
   ];
 
   return (
-    <div className="audit-log">
-      <Card title="审计日志">
+    <div className="audit-log" style={{ padding: '24px' }}>
+      <Card 
+        title={<Title level={4}>审计日志</Title>}
+        style={{ borderRadius: '4px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+        className="system-card"
+      >
         <Form
           form={form}
           layout="horizontal"
-          className="mb-5"
+          className="system-form mb-5"
         >
           <Row gutter={16}>
             <Col span={6}>
@@ -297,7 +361,9 @@ const AuditLog: React.FC = () => {
                 <Select placeholder="请选择请求方法" allowClear>
                   <Select.Option value="GET">GET</Select.Option>
                   <Select.Option value="POST">POST</Select.Option>
+                  <Select.Option value="PUT">PUT</Select.Option>
                   <Select.Option value="DELETE">DELETE</Select.Option>
+                  <Select.Option value="PATCH">PATCH</Select.Option>
                 </Select>
               </Form.Item>
             </Col>
@@ -323,7 +389,7 @@ const AuditLog: React.FC = () => {
             </Col>
             <Col span={8}>
               <Form.Item name="dateRange" label="操作时间" labelCol={{ span: 6 }}>
-                <DatePicker.RangePicker 
+                <RangePicker 
                   showTime 
                   style={{ width: '100%' }} 
                   placeholder={['开始时间', '结束时间']}
@@ -332,10 +398,10 @@ const AuditLog: React.FC = () => {
             </Col>
             <Col span={4} style={{ textAlign: 'right' }}>
               <Space>
-                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
+                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch} className="search-button">
                   搜索
                 </Button>
-                <Button onClick={handleReset}>重置</Button>
+                <Button icon={<ReloadOutlined />} onClick={handleReset} className="reset-button">重置</Button>
               </Space>
             </Col>
           </Row>
@@ -346,18 +412,16 @@ const AuditLog: React.FC = () => {
           dataSource={logList}
           rowKey="id"
           loading={loading}
-          pagination={{
+          pagination={CommonPagination({
             current,
             pageSize,
             total,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/总共 ${total} 条`,
-            onChange: handleTableChange,
-            onShowSizeChange: handleTableChange,
-          }}
+            onChange: handleTableChange
+          })}
           scroll={{ x: 1400 }}
-          size="small"
+          size="middle"
+          bordered
+          className="system-table"
         />
       </Card>
     </div>
