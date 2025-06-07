@@ -34,26 +34,35 @@ const queryClient = new QueryClient({
 });
 
 // Ant Design 主题配置
-const getAntdTheme = (isDark: boolean) => ({
-  token: {
-    colorPrimary: '#1890ff',
-    borderRadius: 6,
-    wireframe: false,
-  },
-  algorithm: isDark ? undefined : undefined, // 这里可以根据需要配置暗色主题
-  components: {
-    Layout: {
-      headerBg: isDark ? '#001529' : '#ffffff',
-      siderBg: isDark ? '#001529' : '#ffffff',
-      bodyBg: isDark ? '#141414' : '#f0f2f5',
+const getAntdTheme = (isDark: boolean) => {
+  const config: any = {
+    token: {
+      colorPrimary: '#1890ff',
+      borderRadius: 6,
+      wireframe: false,
     },
-    Menu: {
-      darkItemBg: '#001529',
-      darkSubMenuItemBg: '#000c17',
-      darkItemSelectedBg: '#1890ff',
+    components: {
+      Layout: {
+        headerBg: isDark ? '#001529' : '#ffffff',
+        siderBg: isDark ? '#001529' : '#ffffff',
+        bodyBg: isDark ? '#141414' : '#f0f2f5',
+      },
+      Menu: {
+        darkItemBg: '#001529',
+        darkSubMenuItemBg: '#000c17',
+        darkItemSelectedBg: '#1890ff',
+      },
     },
-  },
-});
+  };
+  
+  // 只有在需要时才添加algorithm属性
+  if (isDark) {
+    // 这里可以添加暗色主题算法，例如：
+    // config.algorithm = theme.darkAlgorithm;
+  }
+  
+  return config;
+};
 
 // 内部应用组件
 const InnerApp: React.FC = () => {
@@ -90,7 +99,7 @@ const App: React.FC = () => {
       <ThemeProvider>
         <InnerApp />
       </ThemeProvider>
-      {process.env.NODE_ENV === 'development' && (
+      {import.meta.env.DEV && (
         <ReactQueryDevtools initialIsOpen={false} />
       )}
     </QueryClientProvider>

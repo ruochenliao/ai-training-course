@@ -18,8 +18,8 @@ import {useAuthStore} from '../../store/auth'
 import {usePermissionStore} from '../../store/permission'
 import {useTagsStore} from '../../store/tags'
 import {cn} from '../../utils'
-import TagsView from './TagsView'
-import Breadcrumb from './Breadcrumb'
+import TagsView from '@/components/layout/TagsView'
+import Breadcrumb from '@/components/layout/Breadcrumb'
 
 const { Header, Sider, Content } = Layout
 
@@ -62,7 +62,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     if (pathSegments.length > 0) {
       const title = getPageTitle(location.pathname)
       addTag({
-        key: location.pathname,
+        name: title,
         title,
         path: location.pathname,
         closable: location.pathname !== '/dashboard',
@@ -241,7 +241,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <Button
                 type="text"
                 icon={<BellOutlined />}
-                onClick={() => console.log('通知')}
+                onClick={() => {/* TODO: 实现通知功能 */}}
               />
             </Badge>
 

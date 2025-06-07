@@ -1,3 +1,4 @@
+import React from 'react'
 import {usePermissionStore} from '../store/permission'
 import {useAuthStore} from '../store/auth'
 
@@ -83,7 +84,7 @@ export function withPermission<P extends object>(
   permission: string | string[],
   fallback?: React.ReactNode
 ) {
-  return function PermissionWrapper(props: P) {
+  return function PermissionWrapper(props: P): React.ReactNode {
     const hasAccess = Array.isArray(permission)
       ? hasAnyPermission(permission)
       : hasPermission(permission)
@@ -97,15 +98,15 @@ export function withPermission<P extends object>(
 }
 
 /**
- * 角色高阶组件
- * 用于包装需要角色控制的组件
+ * Role higher-order component
+ * Used to wrap components that require role control
  */
 export function withRole<P extends object>(
   Component: React.ComponentType<P>,
   role: string | string[],
   fallback?: React.ReactNode
 ) {
-  return function RoleWrapper(props: P) {
+  return function RoleWrapper(props: P): React.ReactNode {
     const hasAccess = Array.isArray(role)
       ? hasAnyRole(role)
       : hasRole(role)
@@ -129,7 +130,7 @@ interface PermissionProps {
   children: React.ReactNode
 }
 
-export function Permission({ permission, role, fallback, children }: PermissionProps) {
+export function Permission({ permission, role, fallback, children }: PermissionProps): React.ReactNode {
   let hasAccess = true
 
   // 检查权限

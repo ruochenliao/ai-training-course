@@ -65,7 +65,7 @@ export function throttle<T extends (...args: any[]) => any>(
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean
   
-  return function executedFunction(...args: Parameters<T>) {
+  return function executedFunction(this: any, ...args: Parameters<T>) {
     if (!inThrottle) {
       func.apply(this, args)
       inThrottle = true
@@ -227,12 +227,13 @@ export function flatToTree<T extends { id: string; parentId?: string }>(
  */
 export function getBrowserInfo() {
   const ua = navigator.userAgent
-  const isOpera = (!!window.opr && !!window.opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0
-  const isFirefox = typeof window.InstallTrigger !== 'undefined'
-  const isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window.safari || (typeof window.safari !== 'undefined' && window.safari.pushNotification))
-  const isIE = /*@cc_on!@*/false || !!document.documentMode
-  const isEdge = !isIE && !!window.StyleMedia
-  const isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime)
+  const windowAny = window as any
+  const isOpera = (!!windowAny.opr && !!windowAny.opr.addons) || !!windowAny.opera || navigator.userAgent.indexOf(' OPR/') >= 0
+  const isFirefox = typeof windowAny.InstallTrigger !== 'undefined'
+  const isSafari = /constructor/i.test(window.HTMLElement.toString()) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!windowAny.safari || (typeof windowAny.safari !== 'undefined' && windowAny.safari.pushNotification))
+  const isIE = /*@cc_on!@*/false || !!(document as any).documentMode
+  const isEdge = !isIE && !!windowAny.StyleMedia
+  const isChrome = !!windowAny.chrome && (!!windowAny.chrome.webstore || !!windowAny.chrome.runtime)
   const isBlink = (isChrome || isOpera) && !!window.CSS
   
   return {

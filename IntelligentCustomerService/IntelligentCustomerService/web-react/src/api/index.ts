@@ -20,7 +20,7 @@ export interface PageResponse<T = any> {
 // 创建axios实例
 const createAxiosInstance = (): AxiosInstance => {
   const instance = axios.create({
-    baseURL: '/api',
+    baseURL: '/',
     timeout: 10000,
     headers: {
       'Content-Type': 'application/json',

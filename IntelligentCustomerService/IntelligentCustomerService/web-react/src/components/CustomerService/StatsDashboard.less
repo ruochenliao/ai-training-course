@@ -1,0 +1,503 @@
+.stats-dashboard {
+  padding: 16px;
+  background: #f5f5f5;
+  min-height: 100vh;
+
+  .filter-card {
+    margin-bottom: 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    .ant-space {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .ant-picker {
+      border-radius: 6px;
+    }
+
+    .ant-select {
+      .ant-select-selector {
+        border-radius: 6px;
+      }
+    }
+  }
+
+  .stats-overview {
+    margin-bottom: 24px;
+
+    .ant-card {
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s ease;
+
+      &:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+      }
+
+      .ant-card-body {
+        padding: 20px;
+      }
+
+      .ant-statistic {
+        .ant-statistic-title {
+          color: #8c8c8c;
+          font-size: 14px;
+          margin-bottom: 8px;
+        }
+
+        .ant-statistic-content {
+          .ant-statistic-content-value {
+            font-size: 28px;
+            font-weight: 600;
+            line-height: 1.2;
+          }
+
+          .ant-statistic-content-prefix {
+            margin-right: 8px;
+            font-size: 20px;
+          }
+        }
+      }
+
+      .stat-trend {
+        margin-top: 8px;
+        font-size: 12px;
+
+        .trend-up {
+          color: #52c41a;
+          
+          .anticon {
+            margin-right: 4px;
+          }
+        }
+
+        .trend-down {
+          color: #ff4d4f;
+          
+          .anticon {
+            margin-right: 4px;
+          }
+        }
+      }
+    }
+  }
+
+  .charts-section {
+    margin-bottom: 24px;
+
+    .chart-card {
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      height: 400px;
+
+      .ant-card-head {
+        border-bottom: 1px solid #f0f0f0;
+        
+        .ant-card-head-title {
+          font-size: 16px;
+          font-weight: 500;
+          color: #262626;
+        }
+      }
+
+      .ant-card-body {
+        padding: 20px;
+        height: calc(100% - 57px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .empty-chart {
+        color: #bfbfbf;
+        font-size: 14px;
+        text-align: center;
+        padding: 60px 0;
+      }
+    }
+  }
+
+  .agent-ranking-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    margin-bottom: 24px;
+
+    .ant-card-head {
+      border-bottom: 1px solid #f0f0f0;
+      
+      .ant-card-head-title {
+        font-size: 16px;
+        font-weight: 500;
+        color: #262626;
+      }
+    }
+
+    .ant-table {
+      .ant-table-thead {
+        .ant-table-cell {
+          background: #fafafa;
+          font-weight: 500;
+          color: #262626;
+        }
+      }
+
+      .ant-table-tbody {
+        .ant-table-row {
+          &:hover {
+            background: #f5f5f5;
+          }
+        }
+      }
+
+      .rank-badge {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+
+        &.rank-1 {
+          background: linear-gradient(135deg, #ffd700, #ffed4e);
+          box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+        }
+
+        &.rank-2 {
+          background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+          box-shadow: 0 2px 8px rgba(192, 192, 192, 0.3);
+        }
+
+        &.rank-3 {
+          background: linear-gradient(135deg, #cd7f32, #daa520);
+          box-shadow: 0 2px 8px rgba(205, 127, 50, 0.3);
+        }
+
+        &.rank-other {
+          background: #d9d9d9;
+          color: #595959;
+        }
+      }
+
+      .agent-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .agent-name {
+          font-weight: 500;
+          color: #262626;
+        }
+      }
+
+      .satisfaction-cell {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .ant-progress {
+          flex: 1;
+          margin: 0;
+        }
+
+        .satisfaction-text {
+          font-weight: 500;
+          color: #262626;
+          min-width: 32px;
+        }
+      }
+    }
+  }
+
+  .realtime-section {
+    .realtime-card {
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      }
+
+      .ant-card-body {
+        padding: 24px;
+        color: white;
+        text-align: center;
+      }
+
+      .realtime-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        font-size: 14px;
+        opacity: 0.9;
+
+        .realtime-icon {
+          font-size: 16px;
+        }
+      }
+
+      .realtime-value {
+        font-size: 36px;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 8px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .realtime-desc {
+        font-size: 12px;
+        opacity: 0.8;
+      }
+
+      &:nth-child(1) {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      &:nth-child(2) {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      }
+
+      &:nth-child(3) {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      }
+    }
+  }
+
+  // 响应式设计
+  @media (max-width: 1200px) {
+    .charts-section {
+      .chart-card {
+        height: 350px;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 12px;
+
+    .filter-card {
+      .ant-space {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+
+    .stats-overview {
+      .ant-card {
+        .ant-card-body {
+          padding: 16px;
+        }
+
+        .ant-statistic {
+          .ant-statistic-content {
+            .ant-statistic-content-value {
+              font-size: 24px;
+            }
+          }
+        }
+      }
+    }
+
+    .charts-section {
+      .chart-card {
+        height: 300px;
+        margin-bottom: 16px;
+
+        .ant-card-body {
+          padding: 16px;
+        }
+      }
+    }
+
+    .agent-ranking-card {
+      .ant-table {
+        .ant-table-container {
+          .ant-table-content {
+            overflow-x: auto;
+          }
+        }
+      }
+    }
+
+    .realtime-section {
+      .realtime-card {
+        margin-bottom: 12px;
+
+        .ant-card-body {
+          padding: 20px;
+        }
+
+        .realtime-value {
+          font-size: 28px;
+        }
+      }
+    }
+  }
+
+  @media (max-width: 576px) {
+    .stats-overview {
+      .ant-statistic {
+        .ant-statistic-content {
+          .ant-statistic-content-value {
+            font-size: 20px;
+          }
+        }
+      }
+    }
+
+    .charts-section {
+      .chart-card {
+        height: 250px;
+      }
+    }
+
+    .realtime-section {
+      .realtime-card {
+        .realtime-value {
+          font-size: 24px;
+        }
+      }
+    }
+  }
+
+  // 加载状态
+  .ant-spin-nested-loading {
+    .ant-spin {
+      .ant-spin-dot {
+        font-size: 24px;
+      }
+    }
+  }
+
+  // 动画效果
+  .ant-card {
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  // 图表容器样式优化
+  .g2-tooltip {
+    background: rgba(0, 0, 0, 0.8) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    
+    .g2-tooltip-title {
+      color: white !important;
+      font-weight: 500 !important;
+    }
+    
+    .g2-tooltip-list-item {
+      color: white !important;
+    }
+  }
+
+  // 自定义进度条样式
+  .ant-progress {
+    .ant-progress-bg {
+      border-radius: 4px !important;
+    }
+    
+    .ant-progress-inner {
+      border-radius: 4px !important;
+      background: rgba(0, 0, 0, 0.06) !important;
+    }
+  }
+
+  // 标签样式优化
+  .ant-tag {
+    border-radius: 12px;
+    border: none;
+    font-size: 11px;
+    padding: 2px 8px;
+    
+    &.ant-tag-green {
+      background: #f6ffed;
+      color: #52c41a;
+    }
+    
+    &.ant-tag-default {
+      background: #fafafa;
+      color: #8c8c8c;
+    }
+  }
+
+  // 表格行悬停效果增强
+  .ant-table-tbody {
+    .ant-table-row {
+      transition: all 0.3s ease;
+      
+      &:hover {
+        background: #f5f5f5 !important;
+        transform: translateX(2px);
+      }
+    }
+  }
+
+  // 统计卡片渐变背景
+  .stats-overview {
+    .ant-col:nth-child(1) .ant-card {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      border: none;
+      
+      .ant-statistic-content-value {
+        background: linear-gradient(135deg, #1890ff, #096dd9);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    }
+    
+    .ant-col:nth-child(2) .ant-card {
+      background: linear-gradient(135deg, #f1f8e9 0%, #c8e6c9 100%);
+      border: none;
+      
+      .ant-statistic-content-value {
+        background: linear-gradient(135deg, #52c41a, #389e0d);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    }
+    
+    .ant-col:nth-child(3) .ant-card {
+      background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+      border: none;
+      
+      .ant-statistic-content-value {
+        background: linear-gradient(135deg, #faad14, #d48806);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    }
+    
+    .ant-col:nth-child(4) .ant-card {
+      background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+      border: none;
+      
+      .ant-statistic-content-value {
+        background: linear-gradient(135deg, #722ed1, #531dab);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    }
+  }
+}

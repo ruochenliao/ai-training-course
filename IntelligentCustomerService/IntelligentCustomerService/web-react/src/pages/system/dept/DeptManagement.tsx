@@ -1,19 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Card, Form, Input, message, Modal, Popconfirm, Space, Switch, Table, TreeSelect,} from 'antd';
+import {Button, Card, Form, Input, InputNumber, message, Modal, Popconfirm, Space, Table, TreeSelect,} from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined} from '@ant-design/icons';
+import {type Dept, deptApi, type DeptCreate, type DeptUpdate} from '../../../api/dept';
 
-// 部门项接口
-interface DeptItemType {
-  id: number;
-  name: string;
-  code: string;
-  parentId: number | null;
-  sort: number;
-  leader?: string;
-  phone?: string;
-  email?: string;
-  status: boolean;
-  children?: DeptItemType[];
+// 查询参数接口
+interface QueryParams {
+  name?: string;
 }
 
 // TreeSelect数据项接口
@@ -25,73 +17,12 @@ interface TreeDataItem {
 
 const DeptManagement: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [deptList, setDeptList] = useState<DeptItemType[]>([]);
+  const [deptList, setDeptList] = useState<Dept[]>([]);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [currentDept, setCurrentDept] = useState<DeptItemType | null>(null);
+  const [currentDept, setCurrentDept] = useState<Dept | null>(null);
+  const [queryParams, setQueryParams] = useState<QueryParams>({});
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [form] = Form.useForm();
-
-  // 模拟部门数据
-  const mockDeptData: DeptItemType[] = [
-    {
-      id: 1,
-      name: '总公司',
-      code: 'HQ',
-      parentId: null,
-      sort: 1,
-      leader: '张三',
-      phone: '13800138000',
-      email: 'zhangsan@example.com',
-      status: true,
-      children: [
-        {
-          id: 2,
-          name: '研发部',
-          code: 'DEV',
-          parentId: 1,
-          sort: 1,
-          leader: '李四',
-          phone: '13800138001',
-          email: 'lisi@example.com',
-          status: true,
-        },
-        {
-          id: 3,
-          name: '市场部',
-          code: 'MKT',
-          parentId: 1,
-          sort: 2,
-          leader: '王五',
-          phone: '13800138002',
-          email: 'wangwu@example.com',
-          status: true,
-          children: [
-            {
-              id: 4,
-              name: '国内市场',
-              code: 'MKT-CN',
-              parentId: 3,
-              sort: 1,
-              leader: '赵六',
-              phone: '13800138003',
-              email: 'zhaoliu@example.com',
-              status: true,
-            },
-            {
-              id: 5,
-              name: '海外市场',
-              code: 'MKT-OS',
-              parentId: 3,
-              sort: 2,
-              leader: '钱七',
-              phone: '13800138004',
-              email: 'qianqi@example.com',
-              status: true,
-            },
-          ],
-        },
-      ],
-    },
-  ];
 
   // 加载部门数据
   useEffect(() => {
@@ -102,19 +33,18 @@ const DeptManagement: React.FC = () => {
   const fetchDeptList = async () => {
     setLoading(true);
     try {
-      // 这里应该是从API获取数据
-      // const response = await api.getDeptList();
-      // setDeptList(response.data);
-      
-      // 使用模拟数据
-      setTimeout(() => {
-        setDeptList(mockDeptData);
-        setLoading(false);
-      }, 500);
+      const response = await deptApi.list(queryParams);
+      setDeptList(response.data);
     } catch (error) {
       message.error('获取部门列表失败');
+    } finally {
       setLoading(false);
     }
+  };
+
+  // 搜索部门
+  const handleSearch = () => {
+    fetchDeptList();
   };
 
   // 表格列配置
@@ -123,44 +53,25 @@ const DeptManagement: React.FC = () => {
       title: '部门名称',
       dataIndex: 'name',
       key: 'name',
+      width: 'auto',
+      align: 'center' as const,
+      ellipsis: { tooltip: true },
     },
     {
-      title: '部门编码',
-      dataIndex: 'code',
-      key: 'code',
-    },
-    {
-      title: '排序',
-      dataIndex: 'sort',
-      key: 'sort',
-    },
-    {
-      title: '负责人',
-      dataIndex: 'leader',
-      key: 'leader',
-    },
-    {
-      title: '联系电话',
-      dataIndex: 'phone',
-      key: 'phone',
-    },
-    {
-      title: '邮箱',
-      dataIndex: 'email',
-      key: 'email',
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: boolean) => (
-        <Switch checked={status} disabled />
-      ),
+      title: '备注',
+      dataIndex: 'desc',
+      key: 'desc',
+      align: 'center' as const,
+      width: 'auto',
+      ellipsis: { tooltip: true },
     },
     {
       title: '操作',
-      key: 'action',
-      render: (text: string, record: DeptItemType) => (
+      key: 'actions',
+      width: 'auto',
+      align: 'center' as const,
+      fixed: 'right' as const,
+      render: (text: string, record: Dept) => (
         <Space>
           <Button
             type="primary"
@@ -186,22 +97,35 @@ const DeptManagement: React.FC = () => {
   // 处理新增
   const handleAdd = () => {
     setCurrentDept(null);
+    setIsDisabled(false);
     form.resetFields();
+    form.setFieldsValue({ order: 0 });
     setModalVisible(true);
   };
 
   // 处理编辑
-  const handleEdit = (dept: DeptItemType) => {
+  const handleEdit = (dept: Dept) => {
     setCurrentDept(dept);
-    form.setFieldsValue(dept);
+    // 如果是顶级部门（parent_id为0），禁用父级部门选择
+    setIsDisabled(dept.parent_id === 0);
+    form.setFieldsValue({
+      name: dept.name,
+      parent_id: dept.parent_id === 0 ? undefined : dept.parent_id,
+      desc: dept.remark,
+      order: dept.order,
+    });
     setModalVisible(true);
   };
 
   // 处理删除
-  const handleDelete = (id: number) => {
-    // 这里应该调用API删除部门
-    message.success('删除成功');
-    fetchDeptList();
+  const handleDelete = async (id: number) => {
+    try {
+      await deptApi.delete(id);
+      message.success('删除成功');
+      fetchDeptList();
+    } catch (error) {
+      message.error('删除失败');
+    }
   };
 
   // 处理表单提交
@@ -209,24 +133,38 @@ const DeptManagement: React.FC = () => {
     try {
       const values = await form.validateFields();
       
-      // 这里应该调用API保存数据
       if (currentDept) {
         // 编辑
+        const updateData: DeptUpdate = {
+          id: currentDept.id,
+          name: values.name,
+          parent_id: values.parent_id || 0,
+          order: values.order,
+          remark: values.desc,
+        };
+        await deptApi.update(updateData);
         message.success('更新成功');
       } else {
         // 新增
+        const createData: DeptCreate = {
+          name: values.name,
+          parent_id: values.parent_id || 0,
+          order: values.order,
+          remark: values.desc,
+        };
+        await deptApi.create(createData);
         message.success('添加成功');
       }
       
       setModalVisible(false);
       fetchDeptList();
     } catch (error) {
-      console.error('表单验证失败:', error);
+      message.error(currentDept ? '更新失败' : '添加失败');
     }
   };
 
   // 将部门列表转换为TreeSelect所需的数据结构
-  const convertToTreeData = (deptList: DeptItemType[]): TreeDataItem[] => {
+  const convertToTreeData = (deptList: Dept[]): TreeDataItem[] => {
     return deptList.map(item => ({
       title: item.name,
       value: item.id,
@@ -236,18 +174,32 @@ const DeptManagement: React.FC = () => {
 
   return (
     <div className="dept-management">
-      <Card
-        title="部门管理"
-        extra={
+      <Card title="部门列表">
+        {/* 查询栏 */}
+        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 16 }}>
+            <Input
+              placeholder="请输入部门名称"
+              value={queryParams.name}
+              onChange={(e) => setQueryParams({ ...queryParams, name: e.target.value })}
+              onPressEnter={handleSearch}
+              style={{ width: 200 }}
+              allowClear
+            />
+            <Button type="primary" onClick={handleSearch}>
+              搜索
+            </Button>
+          </div>
           <Button
             type="primary"
             icon={<PlusOutlined />}
             onClick={handleAdd}
           >
-            新增部门
+            新建部门
           </Button>
-        }
-      >
+        </div>
+
+        {/* 表格 */}
         <Table
           columns={columns}
           dataSource={deptList}
@@ -267,8 +219,22 @@ const DeptManagement: React.FC = () => {
       >
         <Form
           form={form}
-          layout="vertical"
+          labelCol={{ span: 6 }}
+          wrapperCol={{ span: 18 }}
         >
+          <Form.Item
+            name="parent_id"
+            label="父级部门"
+          >
+            <TreeSelect
+              placeholder="请选择父级部门"
+              treeData={convertToTreeData(deptList)}
+              allowClear
+              treeDefaultExpandAll
+              disabled={isDisabled}
+            />
+          </Form.Item>
+
           <Form.Item
             name="name"
             label="部门名称"
@@ -278,61 +244,17 @@ const DeptManagement: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            name="code"
-            label="部门编码"
-            rules={[{ required: true, message: '请输入部门编码' }]}
+            name="desc"
+            label="备注"
           >
-            <Input placeholder="请输入部门编码" />
+            <Input.TextArea placeholder="请输入备注" />
           </Form.Item>
 
           <Form.Item
-            name="parentId"
-            label="上级部门"
+            name="order"
+            label="排序"
           >
-            <TreeSelect
-              placeholder="请选择上级部门"
-              treeData={convertToTreeData(deptList)}
-              allowClear
-              treeDefaultExpandAll
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="sort"
-            label="排序号"
-            rules={[{ required: true, message: '请输入排序号' }]}
-          >
-            <Input type="number" placeholder="请输入排序号" />
-          </Form.Item>
-
-          <Form.Item
-            name="leader"
-            label="负责人"
-          >
-            <Input placeholder="请输入负责人" />
-          </Form.Item>
-
-          <Form.Item
-            name="phone"
-            label="联系电话"
-          >
-            <Input placeholder="请输入联系电话" />
-          </Form.Item>
-
-          <Form.Item
-            name="email"
-            label="邮箱"
-          >
-            <Input placeholder="请输入邮箱" />
-          </Form.Item>
-
-          <Form.Item
-            name="status"
-            label="状态"
-            valuePropName="checked"
-            initialValue={true}
-          >
-            <Switch />
+            <InputNumber min={0} style={{ width: '100%' }} />
           </Form.Item>
         </Form>
       </Modal>
@@ -340,4 +262,4 @@ const DeptManagement: React.FC = () => {
   );
 };
 
-export default DeptManagement; 
+export default DeptManagement;

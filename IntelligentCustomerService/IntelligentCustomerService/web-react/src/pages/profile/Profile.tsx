@@ -1,25 +1,56 @@
 import React, {useState} from 'react';
-import {Avatar, Button, Card, Divider, Form, Input, message, Upload} from 'antd';
-import {UploadOutlined, UserOutlined} from '@ant-design/icons';
-import {useAuth} from '../contexts/AuthContext';
+import {Avatar, Button, Form, Input, message, Tabs} from 'antd';
+import {useTranslation} from 'react-i18next';
 
-interface ProfileFormData {
+const { TabPane } = Tabs;
+
+interface InfoFormData {
+  avatar: string;
   username: string;
   email: string;
-  phone?: string;
-  department?: string;
 }
 
+interface PasswordFormData {
+  old_password: string;
+  new_password: string;
+  confirm_password: string;
+}
+
+// 模拟用户数据
+const mockUser = {
+  userId: '1',
+  name: '管理员',
+  email: 'admin@example.com',
+  avatar: 'https://avatars.githubusercontent.com/u/54677442?v=4'
+};
+
 const Profile: React.FC = () => {
-  const { user } = useAuth();
-  const [form] = Form.useForm();
+  const { t } = useTranslation();
+  const [infoForm] = Form.useForm();
+  const [passwordForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (values: ProfileFormData) => {
+  // 个人信息表单初始值
+  const infoInitialValues: InfoFormData = {
+    avatar: mockUser.avatar,
+    username: mockUser.name,
+    email: mockUser.email,
+  };
+
+  // 密码表单初始值
+  const passwordInitialValues: PasswordFormData = {
+    old_password: '',
+    new_password: '',
+    confirm_password: '',
+  };
+
+  // 更新个人信息
+  const updateProfile = async (values: InfoFormData) => {
     setLoading(true);
     try {
-      // 这里应该调用更新用户信息的 API
-      console.log('更新用户信息:', values);
+      // 这里应该调用API更新用户信息
+      // await api.updateUser({ ...values, id: mockUser.userId });
+      console.log('更新个人信息:', values);
       message.success('个人信息更新成功');
     } catch (error) {
       message.error('更新失败，请重试');
@@ -28,83 +59,141 @@ const Profile: React.FC = () => {
     }
   };
 
-  const handleAvatarChange = (info: any) => {
-    if (info.file.status === 'done') {
-      message.success('头像上传成功');
-    } else if (info.file.status === 'error') {
-      message.error('头像上传失败');
+  // 更新密码
+  const updatePassword = async (values: PasswordFormData) => {
+    setLoading(true);
+    try {
+      // 这里应该调用API更新密码
+      // await api.updatePassword({ ...values, id: mockUser.userId });
+      console.log('更新密码:', values);
+      message.success('密码更新成功');
+      passwordForm.resetFields();
+    } catch (error) {
+      message.error('密码更新失败，请重试');
+    } finally {
+      setLoading(false);
     }
   };
 
+  // 密码确认验证
+  const validateConfirmPassword = (_: any, value: string) => {
+    const newPassword = passwordForm.getFieldValue('new_password');
+    if (value && value !== newPassword) {
+      return Promise.reject(new Error('两次输入的密码不一致'));
+    }
+    return Promise.resolve();
+  };
+
   return (
-    <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
-      <Card title="个人资料" bordered={false}>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
-          <Avatar size={80} icon={<UserOutlined />} style={{ marginRight: '16px' }} />
-          <div>
-            <Upload
-              name="avatar"
-              showUploadList={false}
-              onChange={handleAvatarChange}
+    <div style={{ padding: '24px' }}>
+      <Tabs type="line" animated>
+        <TabPane tab="修改信息" key="info">
+          <div style={{ margin: '30px', display: 'flex', alignItems: 'center' }}>
+            <Form
+              form={infoForm}
+              labelCol={{ span: 4 }}
+              wrapperCol={{ span: 16 }}
+              style={{ width: '400px' }}
+              initialValues={infoInitialValues}
+              onFinish={updateProfile}
             >
-              <Button icon={<UploadOutlined />}>更换头像</Button>
-            </Upload>
+              <Form.Item label="头像" name="avatar">
+                <Avatar size={100} src={infoInitialValues.avatar} />
+              </Form.Item>
+              
+              <Form.Item
+                label="用户名"
+                name="username"
+                rules={[
+                  { required: true, message: '请输入用户名' }
+                ]}
+              >
+                <Input placeholder="请输入用户名" />
+              </Form.Item>
+              
+              <Form.Item
+                label="邮箱"
+                name="email"
+                rules={[
+                  { type: 'email', message: '请输入有效的邮箱地址' }
+                ]}
+              >
+                <Input placeholder="请输入邮箱" />
+              </Form.Item>
+              
+              <Form.Item wrapperCol={{ offset: 4, span: 16 }}>
+                <Button type="primary" htmlType="submit" loading={loading}>
+                  更新
+                </Button>
+              </Form.Item>
+            </Form>
           </div>
-        </div>
+        </TabPane>
         
-        <Divider />
-        
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          initialValues={{
-            username: user?.username || '',
-            email: user?.email || '',
-            phone: user?.phone || '',
-            department: user?.department || ''
-          }}
-        >
-          <Form.Item
-            label="用户名"
-            name="username"
-            rules={[{ required: true, message: '请输入用户名' }]}
+        <TabPane tab="修改密码" key="password">
+          <Form
+            form={passwordForm}
+            labelCol={{ span: 6 }}
+            wrapperCol={{ span: 12 }}
+            style={{ margin: '30px', width: '500px' }}
+            initialValues={passwordInitialValues}
+            onFinish={updatePassword}
           >
-            <Input placeholder="请输入用户名" />
-          </Form.Item>
-          
-          <Form.Item
-            label="邮箱"
-            name="email"
-            rules={[
-              { required: true, message: '请输入邮箱' },
-              { type: 'email', message: '请输入有效的邮箱地址' }
-            ]}
-          >
-            <Input placeholder="请输入邮箱" />
-          </Form.Item>
-          
-          <Form.Item
-            label="手机号"
-            name="phone"
-          >
-            <Input placeholder="请输入手机号" />
-          </Form.Item>
-          
-          <Form.Item
-            label="部门"
-            name="department"
-          >
-            <Input placeholder="请输入部门" />
-          </Form.Item>
-          
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading}>
-              保存修改
-            </Button>
-          </Form.Item>
-        </Form>
-      </Card>
+            <Form.Item
+              label="原密码"
+              name="old_password"
+              rules={[
+                { required: true, message: '请输入原密码' }
+              ]}
+            >
+              <Input.Password placeholder="请输入原密码" />
+            </Form.Item>
+            
+            <Form.Item
+              label="新密码"
+              name="new_password"
+              dependencies={['old_password']}
+              rules={[
+                { required: true, message: '请输入新密码' },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue('old_password')) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(new Error('请先输入原密码'));
+                  },
+                }),
+              ]}
+            >
+              <Input.Password 
+                placeholder="请输入新密码" 
+                disabled={!passwordForm.getFieldValue('old_password')}
+              />
+            </Form.Item>
+            
+            <Form.Item
+              label="确认密码"
+              name="confirm_password"
+              dependencies={['new_password']}
+              rules={[
+                { required: true, message: '请确认新密码' },
+                { validator: validateConfirmPassword }
+              ]}
+            >
+              <Input.Password 
+                placeholder="请确认新密码" 
+                disabled={!passwordForm.getFieldValue('new_password')}
+              />
+            </Form.Item>
+            
+            <Form.Item wrapperCol={{ offset: 6, span: 12 }}>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                更新
+              </Button>
+            </Form.Item>
+          </Form>
+        </TabPane>
+      </Tabs>
     </div>
   );
 };

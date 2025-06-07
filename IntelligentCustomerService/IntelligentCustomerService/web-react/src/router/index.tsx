@@ -19,13 +19,19 @@ const Unauthorized = React.lazy(() => import('../pages/error/Unauthorized'));
 // 一级菜单
 const SimpleMenu = React.lazy(() => import('../pages/menu/SimpleMenu'));
 
-// 临时页面组件
-const TempPage = ({ title }: { title: string }) => (
-  <div className="p-8">
-    <h1 className="text-2xl font-bold mb-4">{title}</h1>
-    <p>这是一个临时页面，等待实际功能实现。</p>
-  </div>
-);
+// 智能客服页面
+const CustomerService = React.lazy(() => import('../pages/CustomerService'));
+
+// 系统管理页面
+const UserManagement = React.lazy(() => import('../pages/system/user/UserManagement'));
+const RoleManagement = React.lazy(() => import('../pages/system/role/RoleManagement'));
+const MenuManagement = React.lazy(() => import('../pages/system/menu/MenuManagement'));
+const DeptManagement = React.lazy(() => import('../pages/system/dept/DeptManagement'));
+const ApiManagement = React.lazy(() => import('../pages/system/api/ApiManagement'));
+const AuditLog = React.lazy(() => import('../pages/system/auditlog/AuditLog'));
+
+// 个人资料页面
+const Profile = React.lazy(() => import('../pages/profile/Profile'));
 
 // 加载组件包装器
 const SuspenseWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -66,13 +72,25 @@ export const router = createBrowserRouter([
       },
       {
         path: 'profile',
-        element: <TempPage title="个人资料" />,
+        element: (
+          <SuspenseWrapper>
+            <Profile />
+          </SuspenseWrapper>
+        ),
       },
       {
         path: 'menu',
         element: (
           <SuspenseWrapper>
             <SimpleMenu />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: 'customer-service',
+        element: (
+          <SuspenseWrapper>
+            <CustomerService />
           </SuspenseWrapper>
         ),
       },
@@ -85,27 +103,51 @@ export const router = createBrowserRouter([
           },
           {
             path: 'user',
-            element: <TempPage title="用户管理" />,
+            element: (
+              <SuspenseWrapper>
+                <UserManagement />
+              </SuspenseWrapper>
+            ),
           },
           {
             path: 'role',
-            element: <TempPage title="角色管理" />,
+            element: (
+              <SuspenseWrapper>
+                <RoleManagement />
+              </SuspenseWrapper>
+            ),
           },
           {
             path: 'menu',
-            element: <TempPage title="菜单管理" />,
+            element: (
+              <SuspenseWrapper>
+                <MenuManagement />
+              </SuspenseWrapper>
+            ),
           },
           {
             path: 'dept',
-            element: <TempPage title="部门管理" />,
+            element: (
+              <SuspenseWrapper>
+                <DeptManagement />
+              </SuspenseWrapper>
+            ),
           },
           {
             path: 'api',
-            element: <TempPage title="API管理" />,
+            element: (
+              <SuspenseWrapper>
+                <ApiManagement />
+              </SuspenseWrapper>
+            ),
           },
           {
             path: 'auditlog',
-            element: <TempPage title="审计日志" />,
+            element: (
+              <SuspenseWrapper>
+                <AuditLog />
+              </SuspenseWrapper>
+            ),
           },
         ],
       },

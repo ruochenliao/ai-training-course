@@ -1,168 +1,96 @@
-import {request} from '../utils/request';
+import {ApiResponse, request} from './index';
+
+// 分页响应接口
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  page_size: number;
+}
 
 // 角色接口
 export interface Role {
-  id: string;
+  id: number;
   name: string;
-  displayName: string;
-  description?: string;
-  status: 'active' | 'inactive';
-  permissions: string[];
-  userCount: number;
-  isSystem: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// 权限接口
-export interface Permission {
-  id: string;
-  name: string;
-  displayName: string;
-  description?: string;
-  type: 'menu' | 'button' | 'api';
-  parentId?: string;
-  children?: Permission[];
+  desc: string;
+  created_at: string;
+  updated_at: string;
 }
 
 // 角色查询参数
 export interface RoleQueryParams {
   page?: number;
-  pageSize?: number;
-  keyword?: string;
-  status?: 'active' | 'inactive';
-  isSystem?: boolean;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  page_size?: number;
+  role_name?: string;
 }
 
-// 角色创建/更新参数
-export interface RoleFormData {
+// 角色创建参数
+export interface RoleCreateData {
   name: string;
-  displayName: string;
-  description?: string;
-  status: 'active' | 'inactive';
-  permissions?: string[];
+  desc?: string;
 }
 
-// 分页响应
-export interface PaginatedResponse<T> {
-  list: T[];
-  pagination: {
-    current: number;
-    pageSize: number;
-    total: number;
-  };
+// 角色更新参数
+export interface RoleUpdateData {
+  id: number;
+  name?: string;
+  desc?: string;
+}
+
+// 角色权限更新参数
+export interface RoleUpdateMenusApis {
+  id: number;
+  menu_ids: number[];
+  api_infos: Array<{
+    method: string;
+    path: string;
+  }>;
+}
+
+// 角色权限信息
+export interface RoleAuthorized {
+  id: number;
+  name: string;
+  desc: string;
+  menus: any[];
+  apis: any[];
 }
 
 export const roleApi = {
   // 获取角色列表
-  getRoles: (params?: RoleQueryParams): Promise<PaginatedResponse<Role>> => {
-    return request.get('/api/roles', { params });
+  list: (params?: RoleQueryParams): Promise<PaginatedResponse<Role> & { code: number; msg: string }> => {
+    return request.get('/api/v1/role/list', { params });
   },
 
   // 获取角色详情
-  getRoleById: (id: string): Promise<Role> => {
-    return request.get(`/api/roles/${id}`);
+  get: (role_id: number): Promise<ApiResponse<Role>> => {
+    return request.get('/api/v1/role/get', { params: { role_id } });
   },
 
   // 创建角色
-  createRole: (data: RoleFormData): Promise<Role> => {
-    return request.post('/api/roles', data);
+  create: (data: RoleCreateData): Promise<ApiResponse<{ msg: string }>> => {
+    return request.post('/api/v1/role/create', { role_in: data });
   },
 
   // 更新角色
-  updateRole: (id: string, data: Partial<RoleFormData>): Promise<Role> => {
-    return request.put(`/api/roles/${id}`, data);
+  update: (data: RoleUpdateData): Promise<ApiResponse<{ msg: string }>> => {
+    return request.post('/api/v1/role/update', { role_in: data });
   },
 
   // 删除角色
-  deleteRole: (id: string): Promise<void> => {
-    return request.delete(`/api/roles/${id}`);
+  delete: (role_id: number): Promise<ApiResponse<{ msg: string }>> => {
+    return request.delete('/api/v1/role/delete', { params: { role_id } });
   },
 
-  // 批量删除角色
-  batchDeleteRoles: (ids: string[]): Promise<void> => {
-    return request.delete('/api/roles/batch', { data: { ids } });
-  },
-
-  // 切换角色状态
-  toggleRoleStatus: (id: string, status: 'active' | 'inactive'): Promise<Role> => {
-    return request.patch(`/api/roles/${id}/status`, { status });
-  },
-
-  // 复制角色
-  copyRole: (id: string): Promise<Role> => {
-    return request.post(`/api/roles/${id}/copy`);
-  },
-
-  // 获取权限列表
-  getPermissions: (): Promise<Permission[]> => {
-    return request.get('/api/permissions/tree');
-  },
-
-  // 获取角色权限
-  getRolePermissions: (id: string): Promise<string[]> => {
-    return request.get(`/api/roles/${id}/permissions`);
+  // 查看角色权限
+  getAuthorized: (id: number): Promise<ApiResponse<RoleAuthorized>> => {
+    return request.get('/api/v1/role/authorized', { params: { id } });
   },
 
   // 更新角色权限
-  updateRolePermissions: (id: string, permissions: string[]): Promise<void> => {
-    return request.put(`/api/roles/${id}/permissions`, { permissions });
-  },
-
-  // 获取角色用户列表
-  getRoleUsers: (id: string, params?: { page?: number; pageSize?: number }): Promise<PaginatedResponse<any>> => {
-    return request.get(`/api/roles/${id}/users`, { params });
-  },
-
-  // 分配用户到角色
-  assignUsersToRole: (id: string, userIds: string[]): Promise<void> => {
-    return request.post(`/api/roles/${id}/users`, { userIds });
-  },
-
-  // 从角色移除用户
-  removeUsersFromRole: (id: string, userIds: string[]): Promise<void> => {
-    return request.delete(`/api/roles/${id}/users`, { data: { userIds } });
-  },
-
-  // 检查角色名称是否可用
-  checkRoleName: (name: string, excludeId?: string): Promise<{ available: boolean }> => {
-    return request.get('/api/roles/check-name', {
-      params: { name, excludeId },
-    });
-  },
-
-  // 获取角色统计信息
-  getRoleStats: (): Promise<{
-    totalRoles: number;
-    activeRoles: number;
-    systemRoles: number;
-    customRoles: number;
-  }> => {
-    return request.get('/api/roles/stats');
-  },
-
-  // 导出角色
-  exportRoles: (params?: RoleQueryParams): Promise<Blob> => {
-    return request.get('/api/roles/export', {
-      params,
-      responseType: 'blob',
-    });
-  },
-
-  // 导入角色
-  importRoles: (file: File): Promise<{
-    success: number;
-    failed: number;
-    errors: string[];
-  }> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    return request.post('/api/roles/import', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+  updateAuthorized: (data: RoleUpdateMenusApis): Promise<ApiResponse<{ msg: string }>> => {
+    return request.post('/api/v1/role/authorized', { role_in: data });
   },
 };
+
+export default roleApi;

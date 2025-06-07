@@ -1,4 +1,4 @@
-import React, {Component, ErrorInfo, ReactNode} from 'react';
+import {Component, ErrorInfo, ReactNode} from 'react';
 import {Button, Result} from 'antd';
 
 interface ErrorBoundaryProps {
@@ -75,7 +75,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             </Button>
           ]}
         >
-          {process.env.NODE_ENV !== 'production' && this.state.errorInfo && (
+          {import.meta.env.DEV && this.state.errorInfo && (
             <div className="mt-4 p-4 bg-gray-100 rounded overflow-auto max-h-96">
               <details>
                 <summary className="cursor-pointer font-medium mb-2">错误详情</summary>
@@ -97,4 +97,4 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 }
 
-export default ErrorBoundary; 
+export default ErrorBoundary;

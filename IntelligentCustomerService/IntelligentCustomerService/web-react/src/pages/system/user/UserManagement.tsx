@@ -1,5 +1,22 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Card, Col, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Switch, Table, Tag} from 'antd';
+import {
+    Button,
+    Card,
+    Col,
+    Form,
+    Input,
+    Layout,
+    message,
+    Modal,
+    Popconfirm,
+    Row,
+    Select,
+    Space,
+    Switch,
+    Table,
+    Tag,
+    Tree
+} from 'antd';
 import {
     DeleteOutlined,
     EditOutlined,
@@ -8,190 +25,205 @@ import {
     ReloadOutlined,
     SearchOutlined
 } from '@ant-design/icons';
-import {useTranslation} from 'react-i18next';
 
-interface UserData {
-  id: string;
-  username: string;
-  email: string;
-  role: string[];
-  department: string;
-  isAdmin: boolean;
-  status: boolean;
-  lastLogin: string;
-}
+import {type CreateUserParams, type UpdateUserParams, type User, userApi, type UserQueryParams} from '@/api/user';
+import {type Role, roleApi} from '@/api/role';
+import {type Dept, deptApi} from '@/api/dept';
+
+const { Sider, Content } = Layout;
 
 interface RoleOption {
-  value: string;
+  value: number;
   label: string;
 }
 
 interface DepartmentOption {
-  value: string;
+  value: number;
   label: string;
 }
 
 const UserManagement: React.FC = () => {
-  const { t } = useTranslation();
+
   const [loading, setLoading] = useState<boolean>(false);
-  const [userData, setUserData] = useState<UserData[]>([]);
+  const [userData, setUserData] = useState<User[]>([]);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [modalTitle, setModalTitle] = useState<string>('');
-  const [currentUser, setCurrentUser] = useState<UserData | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [form] = Form.useForm();
+  const [searchParams, setSearchParams] = useState<UserQueryParams>({});
+  const [roleOptions, setRoleOptions] = useState<RoleOption[]>([]);
+  const [deptOptions, setDepartmentOptions] = useState<DepartmentOption[]>([]);
+  const [selectedDeptId, setSelectedDeptId] = useState<number | null>(null);
+  const [lastClickedNodeId, setLastClickedNodeId] = useState<number | null>(null);
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
   
-  // 模拟角色和部门数据
-  const roleOptions: RoleOption[] = [
-    { value: 'admin', label: t('system.user.roles.admin') },
-    { value: 'manager', label: t('system.user.roles.manager') },
-    { value: 'operator', label: t('system.user.roles.operator') },
-    { value: 'viewer', label: t('system.user.roles.viewer') },
-  ];
-  
-  const deptOptions: DepartmentOption[] = [
-    { value: 'tech', label: t('system.user.departments.tech') },
-    { value: 'sales', label: t('system.user.departments.sales') },
-    { value: 'hr', label: t('system.user.departments.hr') },
-    { value: 'finance', label: t('system.user.departments.finance') },
-  ];
+  // 获取角色和部门数据
+  const fetchRolesAndDepts = async () => {
+    try {
+      const [rolesRes, deptsRes] = await Promise.all([
+        roleApi.list(),
+        deptApi.list()
+      ]);
+      
+      if (rolesRes.code === 200 && rolesRes.data) {
+        const roleData = rolesRes.data.data || rolesRes.data;
+        setRoleOptions(roleData.map((role: Role) => ({
+          value: role.id,
+          label: role.name
+        })));
+      } else {
+        console.warn('Failed to fetch roles:', rolesRes.message);
+      }
+      
+      if (deptsRes.code === 200 && deptsRes.data) {
+        setDepartmentOptions(deptsRes.data.map((dept: Dept) => ({
+          value: dept.id,
+          label: dept.name
+        })));
+      } else {
+        console.warn('Failed to fetch departments:', deptsRes.message);
+      }
+    } catch (error) {
+      console.error('Failed to fetch roles and departments:', error);
+      message.error('获取角色和部门数据失败');
+    }
+  };
 
-  // 模拟获取用户数据
-  const fetchUserData = async () => {
+  // 获取用户数据
+  const fetchUserData = async (params?: UserQueryParams) => {
     setLoading(true);
     try {
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const queryParams = {
+        page: pagination.current,
+        page_size: pagination.pageSize,
+        ...searchParams,
+        ...params,
+        ...(selectedDeptId && { dept_id: selectedDeptId })
+      };
       
-      const mockData: UserData[] = [
-        {
-          id: '1',
-          username: 'admin',
-          email: 'admin@example.com',
-          role: ['admin'],
-          department: 'tech',
-          isAdmin: true,
-          status: true,
-          lastLogin: '2023-12-25 08:30:00',
-        },
-        {
-          id: '2',
-          username: 'manager',
-          email: 'manager@example.com',
-          role: ['manager'],
-          department: 'sales',
-          isAdmin: false,
-          status: true,
-          lastLogin: '2023-12-24 16:45:00',
-        },
-        {
-          id: '3',
-          username: 'operator1',
-          email: 'operator1@example.com',
-          role: ['operator'],
-          department: 'hr',
-          isAdmin: false,
-          status: true,
-          lastLogin: '2023-12-23 12:15:00',
-        },
-        {
-          id: '4',
-          username: 'viewer1',
-          email: 'viewer1@example.com',
-          role: ['viewer'],
-          department: 'finance',
-          isAdmin: false,
-          status: false,
-          lastLogin: '2023-12-20 09:10:00',
-        },
-      ];
+      const response = await userApi.getUsers(queryParams);
       
-      setUserData(mockData);
-      setPagination({
-        ...pagination,
-        total: mockData.length,
-      });
+      if (response.code === 200 && response.data) {
+        // 处理分页数据结构
+        const userData = response.data.data || response.data || [];
+        setUserData(userData);
+        setPagination({
+          current: response.data.page || queryParams.page || 1,
+          pageSize: response.data.page_size || queryParams.page_size || 10,
+          total: response.data.total || 0,
+        });
+      } else {
+        message.error(response.message || '获取用户数据失败');
+        setUserData([]);
+      }
     } catch (error) {
-      message.error(t('system.user.fetchFailed'));
+      console.error('Fetch user data error:', error);
+      message.error('获取用户数据失败');
+      setUserData([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    fetchRolesAndDepts();
     fetchUserData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleStatusChange = async (checked: boolean, record: UserData) => {
-    try {
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      const newData = userData.map(item => {
-        if (item.id === record.id) {
-          return { ...item, status: checked };
-        }
-        return item;
-      });
-      
-      setUserData(newData);
-      message.success(
-        checked 
-          ? t('system.user.enableSuccess', { username: record.username })
-          : t('system.user.disableSuccess', { username: record.username })
-      );
-    } catch (error) {
-      message.error(t('system.user.updateFailed'));
+  useEffect(() => {
+    if (selectedDeptId !== null) {
+      fetchUserData();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDeptId]);
+
+  // 处理部门树点击
+  const handleDeptSelect = (selectedKeys: React.Key[], info: any) => {
+    const nodeId = selectedKeys[0] as number;
+    
+    if (lastClickedNodeId === nodeId) {
+      // 如果点击的是同一个节点，则取消选择
+      setSelectedDeptId(null);
+      setLastClickedNodeId(null);
+    } else {
+      // 选择新的部门
+      setSelectedDeptId(nodeId);
+      setLastClickedNodeId(nodeId);
     }
   };
 
+  const handleToggleUserStatus = async (userId: number, isActive: boolean) => {
+    try {
+      const response = await userApi.updateUser({ id: userId, is_active: isActive });
+      if (response.code === 200) {
+        message.success('用户状态更新成功');
+        fetchUserData();
+      } else {
+        message.error(response.message || '用户状态更新失败');
+      }
+    } catch (error) {
+      console.error('Toggle user status error:', error);
+      message.error('用户状态更新失败');
+    }
+  };
+
+
+
   const handleAddUser = () => {
-    setModalTitle(t('system.user.addUser'));
+    setModalTitle('新增用户');
     setCurrentUser(null);
     form.resetFields();
+    setConfirmPassword('');
     setModalVisible(true);
   };
 
-  const handleEditUser = (record: UserData) => {
-    setModalTitle(t('system.user.editUser'));
+  const handleEditUser = (record: User) => {
+    setModalTitle('编辑用户');
     setCurrentUser(record);
     form.setFieldsValue({
       username: record.username,
       email: record.email,
-      roles: record.role,
-      department: record.department,
-      isAdmin: record.isAdmin,
+      roles: record.roles && record.roles.length > 0 ? record.roles.map(role => role.id) : [],
+      department: record.dept_id || (record.dept && record.dept.id) || undefined,
+      is_superuser: record.is_superuser,
+      is_active: !record.is_active, // 注意：表单中的is_active表示"禁用"状态
     });
+    setConfirmPassword('');
     setModalVisible(true);
   };
 
-  const handleDeleteUser = async (id: string) => {
+  const handleDeleteUser = async (id: number) => {
     try {
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 300));
+      const response = await userApi.deleteUser(id);
       
-      const newData = userData.filter(item => item.id !== id);
-      setUserData(newData);
-      setPagination({
-        ...pagination,
-        total: newData.length,
-      });
-      
-      message.success(t('system.user.deleteSuccess'));
+      if (response.code === 200) {
+        message.success('删除成功');
+        fetchUserData();
+      } else {
+        message.error(response.message || '删除失败');
+      }
     } catch (error) {
-      message.error(t('system.user.deleteFailed'));
+      console.error('Delete user error:', error);
+      message.error('删除失败');
     }
   };
 
-  const handleResetPassword = async (id: string) => {
+  const handleResetPassword = async (id: number) => {
     try {
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 300));
+      const response = await userApi.resetPassword({
+        user_id: id
+      });
       
-      message.success(t('system.user.resetPasswordSuccess'));
+      if (response.code === 200) {
+        message.success('密码重置成功');
+      } else {
+        message.error(response.message || '密码重置失败');
+      }
     } catch (error) {
-      message.error(t('system.user.resetPasswordFailed'));
+      console.error('Reset password error:', error);
+      message.error('密码重置失败');
     }
   };
 
@@ -199,175 +231,156 @@ const UserManagement: React.FC = () => {
     try {
       const values = await form.validateFields();
       
-      if (currentUser) {
-        // 更新用户
-        const newData = userData.map(item => {
-          if (item.id === currentUser.id) {
-            return { 
-              ...item, 
-              username: values.username,
-              email: values.email,
-              role: values.roles,
-              department: values.department,
-              isAdmin: values.isAdmin,
-            };
-          }
-          return item;
-        });
-        
-        setUserData(newData);
-        message.success(t('system.user.updateSuccess'));
-      } else {
-        // 添加用户
-        const newUser: UserData = {
-          id: Math.random().toString(36).substring(2, 10),
-          username: values.username,
-          email: values.email,
-          role: values.roles,
-          department: values.department,
-          isAdmin: values.isAdmin || false,
-          status: true,
-          lastLogin: '-',
-        };
-        
-        setUserData([...userData, newUser]);
-        setPagination({
-          ...pagination,
-          total: userData.length + 1,
-        });
-        
-        message.success(t('system.user.addSuccess'));
+      // 如果是新增用户，验证确认密码
+      if (!currentUser) {
+        if (values.password !== confirmPassword) {
+          message.error('两次密码输入不一致');
+          return;
+        }
       }
       
-      setModalVisible(false);
+      if (currentUser) {
+        // 更新用户
+        const updateParams: UpdateUserParams = {
+          id: currentUser.id,
+          username: values.username,
+          email: values.email,
+          role_ids: values.roles,
+          dept_id: values.department,
+          is_active: !values.is_active, // 表单中的is_active表示"禁用"，需要取反
+          is_superuser: values.is_superuser,
+        };
+        
+        const response = await userApi.updateUser(updateParams);
+        
+        if (response.code === 200) {
+          message.success('更新成功');
+          fetchUserData();
+          setModalVisible(false);
+        } else {
+          message.error(response.message || '更新失败');
+        }
+      } else {
+        // 添加用户
+        const createParams: CreateUserParams = {
+          username: values.username,
+          email: values.email,
+          password: values.password,
+          role_ids: values.roles,
+          dept_id: values.department,
+        };
+        
+        const response = await userApi.createUser(createParams);
+        
+        if (response.code === 200) {
+          message.success('添加成功');
+          fetchUserData();
+          setModalVisible(false);
+        } else {
+          message.error(response.message || '添加失败');
+        }
+      }
     } catch (error) {
-      // 表单验证失败
+      // 表单验证失败或API调用失败
+      console.error('Failed to save user:', error);
+      message.error('操作失败，请重试');
     }
   };
 
   const columns = [
     {
-      title: t('system.user.username'),
+      title: '用户名',
       dataIndex: 'username',
       key: 'username',
     },
     {
-      title: t('system.user.email'),
+      title: '邮箱',
       dataIndex: 'email',
       key: 'email',
     },
     {
-      title: t('system.user.role'),
-      dataIndex: 'role',
-      key: 'role',
-      render: (roles: string[]) => (
-        <>
-          {roles.map(role => {
-            let color = '';
-            let text = '';
-            
-            switch (role) {
-              case 'admin':
-                color = 'red';
-                text = t('system.user.roles.admin');
-                break;
-              case 'manager':
-                color = 'blue';
-                text = t('system.user.roles.manager');
-                break;
-              case 'operator':
-                color = 'green';
-                text = t('system.user.roles.operator');
-                break;
-              case 'viewer':
-                color = 'gray';
-                text = t('system.user.roles.viewer');
-                break;
-              default:
-                color = 'default';
-                text = role;
-            }
-            
-            return (
-              <Tag color={color} key={role}>
-                {text}
-              </Tag>
-            );
-          })}
-        </>
+      title: '角色',
+      dataIndex: 'roles',
+      key: 'roles',
+      render: (roles: Role[]) => (
+        <Space>
+          {roles && roles.length > 0 ? (
+            roles.map(role => (
+              <Tag key={role.id} color="blue">{role.name}</Tag>
+            ))
+          ) : (
+            <span>-</span>
+          )}
+        </Space>
       ),
     },
     {
-      title: t('system.user.department'),
-      dataIndex: 'department',
-      key: 'department',
-      render: (dept: string) => {
-        const deptMap: Record<string, string> = {
-          'tech': t('system.user.departments.tech'),
-          'sales': t('system.user.departments.sales'),
-          'hr': t('system.user.departments.hr'),
-          'finance': t('system.user.departments.finance'),
-        };
-        
-        return deptMap[dept] || dept;
-      },
+      title: '部门',
+      dataIndex: 'dept',
+      key: 'dept',
+      render: (dept: Dept) => (dept && Object.keys(dept).length > 0) ? dept.name : '-',
     },
     {
-      title: t('system.user.isAdmin'),
-      dataIndex: 'isAdmin',
-      key: 'isAdmin',
-      render: (isAdmin: boolean) => (
-        isAdmin ? <Tag color="red">{t('system.user.superUser')}</Tag> : '-'
+      title: '超级用户',
+      dataIndex: 'is_superuser',
+      key: 'is_superuser',
+      render: (is_superuser: boolean) => (
+        <Tag color={is_superuser ? 'red' : 'default'}>
+          {is_superuser ? '是' : '否'}
+        </Tag>
       ),
     },
     {
-      title: t('system.user.status'),
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: boolean, record: UserData) => (
-        <Switch 
-          checked={status}
-          onChange={(checked) => handleStatusChange(checked, record)}
+      title: '上次登录',
+      dataIndex: 'last_login',
+      key: 'last_login',
+      render: (last_login: string) => last_login ? new Date(last_login).toLocaleString() : '-',
+    },
+    {
+      title: '禁用',
+      dataIndex: 'is_active',
+      key: 'is_active',
+      render: (is_active: boolean, record: User) => (
+        <Switch
+          checked={!is_active}
+          onChange={(checked) => handleToggleUserStatus(record.id, !checked)}
+          checkedChildren="禁用"
+          unCheckedChildren="启用"
         />
       ),
     },
     {
-      title: t('system.user.lastLogin'),
-      dataIndex: 'lastLogin',
-      key: 'lastLogin',
-    },
-    {
-      title: t('common.actions'),
-      key: 'action',
-      render: (_: any, record: UserData) => (
-        <Space size="small">
-          <Button 
-            type="text" 
-            icon={<EditOutlined />} 
+      title: '操作',
+      key: 'actions',
+      render: (_: any, record: User) => (
+        <Space>
+          <Button
+            type="link"
+            icon={<EditOutlined />}
             onClick={() => handleEditUser(record)}
-          />
+          >
+            编辑
+          </Button>
+          <Button
+            type="link"
+            icon={<KeyOutlined />}
+            onClick={() => handleResetPassword(record.id)}
+          >
+            重置密码
+          </Button>
           <Popconfirm
-            title={t('system.user.deleteConfirm')}
+            title="确认删除"
             onConfirm={() => handleDeleteUser(record.id)}
-            okText={t('common.yes')}
-            cancelText={t('common.no')}
+            okText="确认"
+            cancelText="取消"
           >
-            <Button 
-              type="text" 
-              danger 
-              icon={<DeleteOutlined />} 
-            />
-          </Popconfirm>
-          <Popconfirm
-            title={t('system.user.resetPasswordConfirm')}
-            onConfirm={() => handleResetPassword(record.id)}
-            okText={t('common.yes')}
-            cancelText={t('common.no')}
-          >
-            <Button 
-              type="text" 
-              icon={<KeyOutlined />} 
-            />
+            <Button
+              type="link"
+              danger
+              icon={<DeleteOutlined />}
+            >
+              删除
+            </Button>
           </Popconfirm>
         </Space>
       ),
@@ -376,44 +389,96 @@ const UserManagement: React.FC = () => {
 
   return (
     <div className="p-6">
-      <Card>
-        <div className="mb-4">
-          <Row gutter={16}>
-            <Col span={6}>
-              <Input 
-                prefix={<SearchOutlined />}
-                placeholder={t('system.user.search')} 
-              />
-            </Col>
-            <Col span={18} className="flex justify-end">
-              <Space>
-                <Button 
-                  type="primary" 
-                  icon={<PlusOutlined />}
-                  onClick={handleAddUser}
-                >
-                  {t('system.user.add')}
-                </Button>
-                <Button 
-                  icon={<ReloadOutlined />}
-                  onClick={() => fetchUserData()}
-                >
-                  {t('common.refresh')}
-                </Button>
-              </Space>
-            </Col>
-          </Row>
-        </div>
+      <Layout style={{ minHeight: '600px', background: '#fff' }}>
+        <Sider 
+          width={240} 
+          style={{ 
+            background: '#fff', 
+            borderRight: '1px solid #f0f0f0',
+            padding: '24px'
+          }}
+        >
+          <h3 style={{ marginBottom: '16px' }}>部门列表</h3>
+          <Tree
+            treeData={deptOptions.map(dept => ({
+              title: dept.label,
+              key: dept.value,
+              value: dept.value
+            }))}
+            onSelect={handleDeptSelect}
+            selectedKeys={selectedDeptId ? [selectedDeptId] : []}
+            defaultExpandAll
+          />
+        </Sider>
+        <Content style={{ padding: '0 24px' }}>
+          <Card>
+            <div className="mb-4">
+              <Row gutter={16}>
+                <Col span={6}>
+                  <Input 
+                    prefix={<SearchOutlined />}
+                    placeholder="请输入用户名"
+                    value={searchParams.username}
+                    onChange={(e) => setSearchParams({ ...searchParams, username: e.target.value })}
+                    onPressEnter={() => fetchUserData()}
+                  />
+                </Col>
+                <Col span={6}>
+                  <Input 
+                    prefix={<SearchOutlined />}
+                    placeholder="请输入邮箱"
+                    value={searchParams.email}
+                    onChange={(e) => setSearchParams({ ...searchParams, email: e.target.value })}
+                    onPressEnter={() => fetchUserData()}
+                  />
+                </Col>
+                <Col span={12} className="flex justify-end">
+                  <Space>
+                    <Button 
+                      type="primary" 
+                      icon={<PlusOutlined />}
+                      onClick={handleAddUser}
+                    >
+                      新增用户
+                    </Button>
+                    <Button 
+                      icon={<ReloadOutlined />}
+                      onClick={() => {
+                        setSearchParams({});
+                        setSelectedDeptId(null);
+                        setLastClickedNodeId(null);
+                        fetchUserData({});
+                      }}
+                    >
+                      刷新
+                    </Button>
+                  </Space>
+                </Col>
+              </Row>
+            </div>
+            
+            <Table 
+              columns={columns}
+              dataSource={userData}
+              rowKey="id"
+              loading={loading}
+              pagination={{
+                ...pagination,
+                showSizeChanger: true,
+                showQuickJumper: true,
+                showTotal: (total, range) => 
+                  `${range[0]}-${range[1]} of ${total} items`,
+                onChange: (page, pageSize) => {
+                  setPagination({ ...pagination, current: page, pageSize });
+                  fetchUserData({ page, pageSize });
+                },
+              }}
+            />
+          </Card>
+        </Content>
+      </Layout>
         
-        <Table 
-          columns={columns}
-          dataSource={userData}
-          rowKey="id"
-          loading={loading}
-          pagination={pagination}
-        />
-        
-        <Modal
+      <Modal
           title={modalTitle}
           open={modalVisible}
           onOk={handleModalOk}
@@ -426,10 +491,10 @@ const UserManagement: React.FC = () => {
           >
             <Form.Item
               name="username"
-              label={t('system.user.username')}
+              label="用户名"
               rules={[
-                { required: true, message: t('system.user.usernameRequired') },
-                { min: 3, message: t('system.user.usernameLength') }
+                { required: true, message: '请输入用户名' },
+                { min: 3, message: '用户名至少3个字符' }
               ]}
             >
               <Input />
@@ -437,10 +502,10 @@ const UserManagement: React.FC = () => {
             
             <Form.Item
               name="email"
-              label={t('system.user.email')}
+              label="邮箱"
               rules={[
-                { required: true, message: t('system.user.emailRequired') },
-                { type: 'email', message: t('system.user.emailInvalid') }
+                { required: true, message: '请输入邮箱' },
+                { type: 'email', message: '请输入有效的邮箱地址' }
               ]}
             >
               <Input />
@@ -449,54 +514,87 @@ const UserManagement: React.FC = () => {
             {!currentUser && (
               <Form.Item
                 name="password"
-                label={t('system.user.password')}
+                label="密码"
                 rules={[
-                  { required: true, message: t('system.user.passwordRequired') },
-                  { min: 6, message: t('system.user.passwordLength') }
+                  { required: true, message: '请输入密码' },
+                  { min: 6, message: '密码至少6个字符' }
                 ]}
               >
                 <Input.Password />
               </Form.Item>
             )}
             
+            {!currentUser && (
+              <Form.Item
+                label="确认密码"
+                rules={[
+                  { required: true, message: '请再次输入密码' }
+                ]}
+              >
+                <Input.Password 
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="请确认密码"
+                />
+              </Form.Item>
+            )}
+            
             <Form.Item
               name="roles"
-              label={t('system.user.roles.title')}
+              label="角色"
               rules={[
-                { required: true, message: t('system.user.roleRequired') }
+                { required: true, message: '请选择角色' }
               ]}
             >
-              <Select 
+              <Select
                 mode="multiple"
                 options={roleOptions}
-                placeholder={t('system.user.selectRole')}
+                placeholder="请选择角色"
+                allowClear
               />
             </Form.Item>
+            
+            {currentUser && (
+              <>
+                <Form.Item
+                  name="is_superuser"
+                  label="超级用户"
+                  valuePropName="checked"
+                >
+                  <Switch 
+                    checkedChildren="是" 
+                    unCheckedChildren="否"
+                  />
+                </Form.Item>
+                
+                <Form.Item
+                  name="is_active"
+                  label="禁用"
+                  valuePropName="checked"
+                >
+                  <Switch 
+                    checkedChildren="禁用" 
+                    unCheckedChildren="启用"
+                  />
+                </Form.Item>
+              </>
+            )}
             
             <Form.Item
               name="department"
-              label={t('system.user.department')}
-              rules={[
-                { required: true, message: t('system.user.departmentRequired') }
-              ]}
+              label="部门"
             >
               <Select 
                 options={deptOptions}
-                placeholder={t('system.user.selectDepartment')}
+                placeholder="请选择部门"
+                allowClear
               />
             </Form.Item>
-            
-            <Form.Item
-              name="isAdmin"
-              valuePropName="checked"
-            >
-              <Switch checkedChildren={t('system.user.superUser')} unCheckedChildren={t('system.user.normalUser')} />
-            </Form.Item>
+
           </Form>
         </Modal>
-      </Card>
     </div>
   );
 };
 
-export default UserManagement; 
+export default UserManagement;

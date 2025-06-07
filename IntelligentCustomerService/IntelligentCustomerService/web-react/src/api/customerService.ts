@@ -428,7 +428,7 @@ export const customerServiceApi = {
 
   // 实时通信
   connectWebSocket: (token: string): WebSocket => {
-    const wsUrl = process.env.REACT_APP_WS_URL || 'ws://localhost:3001';
+    const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
     const ws = new WebSocket(`${wsUrl}/ws?token=${token}`);
     return ws;
   },

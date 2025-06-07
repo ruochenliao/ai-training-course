@@ -1,182 +1,137 @@
 import React from 'react';
-import {Avatar, Card, Col, List, Row, Space, Statistic, Tag, Typography} from 'antd';
-import {
-    CheckCircleOutlined,
-    ClockCircleOutlined,
-    MessageOutlined,
-    SolutionOutlined,
-    UserOutlined
-} from '@ant-design/icons';
+import {Avatar, Button, Card, Space, Statistic, Typography} from 'antd';
 import {useTranslation} from 'react-i18next';
 
 const { Title, Text } = Typography;
 
-interface StatisticItemProps {
-  title: string;
-  value: number;
-  icon: React.ReactNode;
-  color: string;
-}
-
-const StatisticItem: React.FC<StatisticItemProps> = ({ title, value, icon, color }) => (
-  <Card className="hover:shadow-md transition-shadow duration-300">
-    <Statistic 
-      title={
-        <Space>
-          <span style={{ color }}>{icon}</span>
-          <span>{title}</span>
-        </Space>
-      }
-      value={value}
-      valueStyle={{ color }}
-    />
-  </Card>
-);
-
-const recentTickets = [
-  {
-    id: '1',
-    title: '产品无法登录',
-    status: 'open',
-    priority: 'high',
-    time: '10分钟前',
-    user: 'user1',
-  },
-  {
-    id: '2',
-    title: '如何重置密码',
-    status: 'closed',
-    priority: 'medium',
-    time: '30分钟前',
-    user: 'user2',
-  },
-  {
-    id: '3',
-    title: '订单支付失败',
-    status: 'processing',
-    priority: 'high',
-    time: '1小时前',
-    user: 'user3',
-  },
-  {
-    id: '4',
-    title: '产品功能咨询',
-    status: 'open',
-    priority: 'low',
-    time: '2小时前',
-    user: 'user4',
-  },
-  {
-    id: '5',
-    title: '账号异常登录',
-    status: 'processing',
-    priority: 'high',
-    time: '3小时前',
-    user: 'user5',
-  },
-];
-
-const getStatusTag = (status: string) => {
-  const statusMap = {
-    open: { color: 'blue', text: '待处理', icon: <ClockCircleOutlined /> },
-    processing: { color: 'orange', text: '处理中', icon: <SolutionOutlined /> },
-    closed: { color: 'green', text: '已解决', icon: <CheckCircleOutlined /> },
-  };
-  const currentStatus = statusMap[status as keyof typeof statusMap];
-  return (
-    <Tag color={currentStatus.color} icon={currentStatus.icon}>
-      {currentStatus.text}
-    </Tag>
-  );
+// 模拟用户数据
+const mockUser = {
+  name: '管理员',
+  avatar: 'https://api.dicebear.com/7.x/miniavs/svg?seed=1'
 };
 
-const getPriorityTag = (priority: string) => {
-  const priorityMap = {
-    high: { color: 'red', text: '高' },
-    medium: { color: 'orange', text: '中' },
-    low: { color: 'green', text: '低' },
-  };
-  const currentPriority = priorityMap[priority as keyof typeof priorityMap];
-  return <Tag color={currentPriority.color}>{currentPriority.text}</Tag>;
-};
+// 模拟项目数据
+const dummyText = '一个基于 Vue3.0、FastAPI、Naive UI 的轻量级后台管理模板';
 
 const Workbench: React.FC = () => {
   const { t } = useTranslation();
 
-  const statistics = [
+  // 统计数据
+  const statisticData = [
     {
-      title: t('workbench.totalUsers'),
-      value: 1285,
-      icon: <UserOutlined />,
-      color: '#1890ff',
+      id: 0,
+      title: '项目数量',
+      value: 25,
     },
     {
-      title: t('workbench.onlineUsers'),
-      value: 428,
-      icon: <UserOutlined />,
-      color: '#52c41a',
+      id: 1,
+      title: '待办事项',
+      value: '4/16',
     },
     {
-      title: t('workbench.totalTickets'),
-      value: 3254,
-      icon: <MessageOutlined />,
-      color: '#722ed1',
-    },
-    {
-      title: t('workbench.pendingTickets'),
-      value: 42,
-      icon: <SolutionOutlined />,
-      color: '#faad14',
+      id: 2,
+      title: '消息通知',
+      value: 12,
     },
   ];
 
   return (
-    <div className="p-6">
-      <Title level={4} className="mb-6">{t('workbench.title')}</Title>
-      
-      <Row gutter={[16, 16]} className="mb-6">
-        {statistics.map((stat, index) => (
-          <Col xs={24} sm={12} md={12} lg={6} key={index}>
-            <StatisticItem {...stat} />
-          </Col>
-        ))}
-      </Row>
-
+    <div style={{ flex: 1, padding: '24px' }}>
+      {/* 顶部用户信息和统计卡片 */}
       <Card 
-        title={t('workbench.recentTickets')} 
-        className="mb-6"
-        extra={<a href="#">{t('workbench.viewAll')}</a>}
+        style={{ 
+          borderRadius: '10px',
+          marginBottom: '15px'
+        }}
       >
-        <List
-          itemLayout="horizontal"
-          dataSource={recentTickets}
-          renderItem={(item) => (
-            <List.Item
-              actions={[
-                <a key="view" href={`#/ticket/${item.id}`}>
-                  {t('workbench.view')}
-                </a>,
-              ]}
-            >
-              <List.Item.Meta
-                avatar={<Avatar icon={<UserOutlined />} />}
-                title={<a href={`#/ticket/${item.id}`}>{item.title}</a>}
-                description={
-                  <Space>
-                    {getStatusTag(item.status)}
-                    {getPriorityTag(item.priority)}
-                    <Text type="secondary">
-                      <ClockCircleOutlined /> {item.time}
-                    </Text>
-                  </Space>
-                }
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between' 
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Avatar 
+              size={60} 
+              src={mockUser.avatar}
+              style={{ borderRadius: '50%' }}
+            />
+            <div style={{ marginLeft: '40px' }}>
+              <Text 
+                style={{ 
+                  fontSize: '20px', 
+                  fontWeight: 600,
+                  display: 'block'
+                }}
+              >
+                你好，{mockUser.name}！
+              </Text>
+              <Text 
+                style={{ 
+                  marginTop: '5px',
+                  fontSize: '14px',
+                  opacity: 0.6,
+                  display: 'block'
+                }}
+              >
+                欢迎回来，祝你开心每一天！
+              </Text>
+            </div>
+          </div>
+          <Space size={12}>
+            {statisticData.map((item) => (
+              <Statistic
+                key={item.id}
+                title={item.title}
+                value={item.value}
               />
-            </List.Item>
-          )}
-        />
+            ))}
+          </Space>
+        </div>
+      </Card>
+
+      {/* 项目列表卡片 */}
+      <Card
+        title="项目"
+        size="small"
+        style={{
+          marginTop: '15px',
+          borderRadius: '10px'
+        }}
+        extra={
+          <Button type="link">
+            更多
+          </Button>
+        }
+      >
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'space-between',
+          gap: '16px'
+        }}>
+          {Array.from({ length: 9 }, (_, i) => (
+            <Card
+              key={i}
+              title="Vue FastAPI Admin"
+              size="small"
+              style={{
+                width: '300px',
+                marginBottom: '10px',
+                marginTop: '10px',
+                cursor: 'pointer',
+                transition: 'box-shadow 0.3s'
+              }}
+              className="hover:shadow-lg"
+            >
+              <Text style={{ opacity: 0.6 }}>
+                {dummyText}
+              </Text>
+            </Card>
+          ))}
+        </div>
       </Card>
     </div>
   );
 };
 
-export default Workbench; 
+export default Workbench;

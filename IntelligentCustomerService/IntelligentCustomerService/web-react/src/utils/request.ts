@@ -42,9 +42,9 @@ request.interceptors.response.use(
       return data
     }
     
-    // 处理业务错误
-    message.error(data.message || '请求失败')
-    return Promise.reject(new Error(data.message || '请求失败'))
+    // 处理业务错误 - 不在拦截器中显示错误消息，让组件自己处理
+    console.warn('API business error:', data.message || '请求失败')
+    return data // 返回数据而不是reject，让组件处理错误
   },
   (error) => {
     // 处理HTTP错误
@@ -80,3 +80,4 @@ request.interceptors.response.use(
 )
 
 export default request
+export { request }

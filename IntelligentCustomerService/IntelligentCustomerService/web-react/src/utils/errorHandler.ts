@@ -45,7 +45,7 @@ export class ApiError extends AppError {
  * 网络错误类
  */
 export class NetworkError extends AppError {
-  constructor(message: string = '网络连接错误，请检查网络设置') {
+  constructor(message = '网络连接错误，请检查网络设置') {
     super(message, ErrorType.NETWORK);
     this.name = 'NetworkError';
   }
@@ -65,7 +65,7 @@ export class ValidationError extends AppError {
  * 认证错误类
  */
 export class AuthenticationError extends AppError {
-  constructor(message: string = '用户未登录或登录已过期') {
+  constructor(message = '用户未登录或登录已过期') {
     super(message, ErrorType.AUTHENTICATION);
     this.name = 'AuthenticationError';
   }
@@ -75,7 +75,7 @@ export class AuthenticationError extends AppError {
  * 授权错误类
  */
 export class AuthorizationError extends AppError {
-  constructor(message: string = '没有权限执行此操作') {
+  constructor(message = '没有权限执行此操作') {
     super(message, ErrorType.AUTHORIZATION);
     this.name = 'AuthorizationError';
   }
@@ -103,7 +103,7 @@ class ErrorHandler {
    * @param error 错误对象
    * @param showMessage 是否显示错误消息
    */
-  public handleError(error: Error, showMessage: boolean = true): void {
+  public handleError(error: Error, showMessage = true): void {
     console.error('Error caught:', error);
 
     // 通知所有监听器
@@ -252,7 +252,7 @@ class ErrorHandler {
    * @param error 错误对象
    */
   private showErrorMessage(error: Error): void {
-    let errorMessage = error.message || '发生了未知错误';
+    const errorMessage = error.message || '发生了未知错误';
     
     // 根据错误类型显示不同的消息
     if (error instanceof AppError) {

@@ -5,6 +5,7 @@ import {
     ApartmentOutlined,
     ApiOutlined,
     AppstoreOutlined,
+    CustomerServiceOutlined,
     DashboardOutlined,
     FileSearchOutlined,
     MenuOutlined,
@@ -31,6 +32,7 @@ const Sidebar: React.FC = () => {
     const pathname = location.pathname;
     if (pathname.startsWith('/system')) return ['system'];
     if (pathname.startsWith('/error')) return ['error'];
+    if (pathname.startsWith('/customer-service')) return [];
     return [];
   });
 
@@ -40,6 +42,11 @@ const Sidebar: React.FC = () => {
       key: '/workbench',
       icon: <DashboardOutlined />,
       label: '工作台',
+    },
+    {
+      key: '/customer-service',
+      icon: <CustomerServiceOutlined />,
+      label: '智能客服',
     },
     {
       key: 'system',

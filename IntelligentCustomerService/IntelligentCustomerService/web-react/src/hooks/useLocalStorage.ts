@@ -16,7 +16,6 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
       const item = window.localStorage.getItem(key);
       return item ? (JSON.parse(item) as T) : initialValue;
     } catch (error) {
-      console.warn(`Error reading localStorage key "${key}":`, error);
       return initialValue;
     }
   }, [initialValue, key]);
@@ -28,7 +27,7 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
   const setValue = useCallback(
     (value: T | ((val: T) => T)) => {
       if (typeof window === 'undefined') {
-        console.warn(`Tried setting localStorage key "${key}" even though environment is not a client`);
+        // 非客户端环境，跳过localStorage操作
         return;
       }
 
@@ -45,7 +44,7 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
         // 触发自定义事件，以便其他组件可以响应存储的变化
         window.dispatchEvent(new Event('local-storage'));
       } catch (error) {
-        console.warn(`Error setting localStorage key "${key}":`, error);
+        // 静默处理localStorage错误
       }
     },
     [key, storedValue]
@@ -54,7 +53,7 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
   // 移除项目
   const removeValue = useCallback(() => {
     if (typeof window === 'undefined') {
-      console.warn(`Tried removing localStorage key "${key}" even though environment is not a client`);
+      // 非客户端环境，跳过localStorage操作
       return;
     }
 
@@ -68,7 +67,7 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
       // 触发自定义事件
       window.dispatchEvent(new Event('local-storage'));
     } catch (error) {
-      console.warn(`Error removing localStorage key "${key}":`, error);
+      // 静默处理localStorage错误
     }
   }, [initialValue, key]);
 
@@ -93,4 +92,4 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
   return [storedValue, setValue, removeValue];
 }
 
-export default useLocalStorage; 
+export default useLocalStorage;

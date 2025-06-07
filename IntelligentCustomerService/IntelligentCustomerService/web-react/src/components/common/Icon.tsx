@@ -12,7 +12,6 @@ const Icon: React.FC<CustomIconProps> = ({ name, size, style, ...props }) => {
   const IconComponent = (AntdIcons as any)[name];
   
   if (!IconComponent) {
-    console.warn(`Icon "${name}" not found in @ant-design/icons`);
     return <AntdIcons.QuestionCircleOutlined {...props} style={{ fontSize: size, ...style }} />;
   }
 

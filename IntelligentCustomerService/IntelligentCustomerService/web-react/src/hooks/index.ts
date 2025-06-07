@@ -4,6 +4,7 @@ import useLocalStorage from './useLocalStorage';
 import usePermission from './usePermission';
 import useTheme from './useTheme';
 import useWindowSize from './useWindowSize';
+import useWebSocket from './useWebSocket';
 
 export {
   useRequest,
@@ -12,6 +13,7 @@ export {
   usePermission,
   useTheme,
   useWindowSize,
+  useWebSocket,
 };
 
 // 默认导出
@@ -22,4 +24,5 @@ export default {
   usePermission,
   useTheme,
   useWindowSize,
-}; 
+  useWebSocket,
+};

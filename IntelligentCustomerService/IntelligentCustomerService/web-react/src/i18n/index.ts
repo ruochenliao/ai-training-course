@@ -19,7 +19,7 @@ i18n
     fallbackLng: 'zh-CN',
     
     // 调试模式
-    debug: process.env.NODE_ENV === 'development',
+    debug: import.meta.env.DEV,
     
     // 命名空间
     defaultNS: 'common',

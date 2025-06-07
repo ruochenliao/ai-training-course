@@ -1,136 +1,90 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Card, Form, Input, message, Modal, Popconfirm, Select, Space, Switch, Table, Tabs, Tag,} from 'antd';
-import {DeleteOutlined, EditOutlined, PlusOutlined} from '@ant-design/icons';
-
-// API项接口
-interface ApiItem {
-  id: number;
-  name: string;
-  url: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  module: string;
-  description?: string;
-  status: boolean;
-}
+import {App, Button, Card, Form, Input, Modal, Popconfirm, Select, Space, Table, Tag,} from 'antd';
+import {DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined} from '@ant-design/icons';
+import {apiApi, ApiItem, ApiQueryParams} from '@/api/api';
 
 const ApiManagement: React.FC = () => {
+  const { message } = App.useApp();
   const [loading, setLoading] = useState<boolean>(false);
   const [apiList, setApiList] = useState<ApiItem[]>([]);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [currentApi, setCurrentApi] = useState<ApiItem | null>(null);
   const [form] = Form.useForm();
-  const [activeTab, setActiveTab] = useState<string>('all');
-  const { TabPane } = Tabs;
-
-  // 模拟API数据
-  const mockApiData: ApiItem[] = [
-    {
-      id: 1,
-      name: '获取用户列表',
-      url: '/api/users',
-      method: 'GET',
-      module: '用户管理',
-      description: '获取所有用户的列表数据',
-      status: true,
-    },
-    {
-      id: 2,
-      name: '创建用户',
-      url: '/api/users',
-      method: 'POST',
-      module: '用户管理',
-      description: '创建新用户',
-      status: true,
-    },
-    {
-      id: 3,
-      name: '更新用户',
-      url: '/api/users/{id}',
-      method: 'PUT',
-      module: '用户管理',
-      description: '更新指定用户信息',
-      status: true,
-    },
-    {
-      id: 4,
-      name: '删除用户',
-      url: '/api/users/{id}',
-      method: 'DELETE',
-      module: '用户管理',
-      description: '删除指定用户',
-      status: false,
-    },
-    {
-      id: 5,
-      name: '获取角色列表',
-      url: '/api/roles',
-      method: 'GET',
-      module: '角色管理',
-      description: '获取所有角色的列表数据',
-      status: true,
-    },
-    {
-      id: 6,
-      name: '创建角色',
-      url: '/api/roles',
-      method: 'POST',
-      module: '角色管理',
-      description: '创建新角色',
-      status: true,
-    },
-  ];
-
-  // 获取唯一的模块列表
-  const modules = Array.from(new Set(mockApiData.map(api => api.module)));
+  const [queryParams, setQueryParams] = useState<ApiQueryParams>({
+    page: 1,
+    page_size: 10,
+  });
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
 
   // 加载API数据
   useEffect(() => {
     fetchApiList();
-  }, []);
+  }, [queryParams]);
 
   // 获取API列表
   const fetchApiList = async () => {
     setLoading(true);
     try {
-      // 这里应该是从API获取数据
-      // const response = await api.getApiList();
-      // setApiList(response.data);
-      
-      // 使用模拟数据
-      setTimeout(() => {
-        setApiList(mockApiData);
-        setLoading(false);
-      }, 500);
+      const response = await apiApi.getApis(queryParams);
+      if (response.code === 200 && response.data) {
+        // 根据实际接口返回结构调整数据解析
+        setApiList(response.data || []);
+        setPagination({
+          current: response.page || 1,
+          pageSize: response.page_size || 10,
+          total: response.total || 0,
+        });
+      }
     } catch (error) {
       message.error('获取API列表失败');
+      console.error('API列表获取错误:', error);
+    } finally {
       setLoading(false);
     }
   };
 
-  // 过滤API列表
-  const getFilteredApiList = () => {
-    if (activeTab === 'all') {
-      return apiList;
-    }
-    return apiList.filter(api => api.module === activeTab);
+  // 搜索处理
+  const handleSearch = () => {
+    setQueryParams({
+      ...queryParams,
+      page: 1,
+    });
+  };
+
+  // 重置搜索
+  const handleReset = () => {
+    setQueryParams({
+      page: 1,
+      page_size: 10,
+    });
+  };
+
+  // 分页处理
+  const handleTableChange = (page: number, pageSize: number) => {
+    setQueryParams({
+      ...queryParams,
+      page,
+      page_size: pageSize,
+    });
   };
 
   // 表格列配置
   const columns = [
     {
-      title: 'API名称',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'URL',
-      dataIndex: 'url',
-      key: 'url',
+      title: 'API路径',
+      dataIndex: 'path',
+      key: 'path',
+      ellipsis: true,
     },
     {
       title: '请求方式',
       dataIndex: 'method',
       key: 'method',
+      width: 100,
       render: (method: string) => {
         const colorMap: Record<string, string> = {
           GET: 'green',
@@ -142,26 +96,23 @@ const ApiManagement: React.FC = () => {
       },
     },
     {
-      title: '所属模块',
-      dataIndex: 'module',
-      key: 'module',
+      title: 'API简介',
+      dataIndex: 'summary',
+      key: 'summary',
+      ellipsis: true,
     },
     {
-      title: '描述',
-      dataIndex: 'description',
-      key: 'description',
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: boolean) => (
-        <Switch checked={status} disabled />
-      ),
+      title: 'Tags',
+      dataIndex: 'tags',
+      key: 'tags',
+      width: 120,
+      ellipsis: true,
     },
     {
       title: '操作',
       key: 'action',
+      width: 150,
+      fixed: 'right',
       render: (text: string, record: ApiItem) => (
         <Space>
           <Button
@@ -200,10 +151,25 @@ const ApiManagement: React.FC = () => {
   };
 
   // 处理删除
-  const handleDelete = (id: number) => {
-    // 这里应该调用API删除数据
-    message.success('删除成功');
-    fetchApiList();
+  const handleDelete = async (id: number) => {
+    try {
+      await apiApi.deleteApi(id);
+      message.success('删除成功');
+      fetchApiList();
+    } catch (error) {
+      message.error('删除失败');
+    }
+  };
+
+  // 处理刷新API
+  const handleRefreshApi = async () => {
+    try {
+      await apiApi.refreshApi();
+      message.success('刷新完成');
+      fetchApiList();
+    } catch (error) {
+      message.error('刷新失败');
+    }
   };
 
   // 处理表单提交
@@ -211,49 +177,108 @@ const ApiManagement: React.FC = () => {
     try {
       const values = await form.validateFields();
       
-      // 这里应该调用API保存数据
       if (currentApi) {
         // 编辑
+        await apiApi.updateApi({ id: currentApi.id, ...values });
         message.success('更新成功');
       } else {
         // 新增
+        await apiApi.createApi(values);
         message.success('添加成功');
       }
       
       setModalVisible(false);
       fetchApiList();
     } catch (error) {
-      console.error('表单验证失败:', error);
+      message.error('操作失败');
     }
   };
 
   return (
     <div className="api-management">
       <Card
-        title="API管理"
+        title="API列表"
         extra={
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={handleAdd}
-          >
-            新增API
-          </Button>
+          <Space>
+            <Button
+              type="warning"
+              icon={<ReloadOutlined />}
+              onClick={handleRefreshApi}
+            >
+              刷新API
+            </Button>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={handleAdd}
+            >
+              新建API
+            </Button>
+          </Space>
         }
       >
-        <Tabs activeKey={activeTab} onChange={setActiveTab}>
-          <TabPane tab="全部" key="all" />
-          {modules.map(module => (
-            <TabPane tab={module} key={module} />
-          ))}
-        </Tabs>
+        {/* 搜索栏 */}
+        <div style={{ marginBottom: 16 }}>
+          <Form layout="inline">
+            <Form.Item label="路径">
+              <Input
+                placeholder="请输入API路径"
+                value={queryParams.path}
+                onChange={(e) => setQueryParams({ ...queryParams, path: e.target.value })}
+                onPressEnter={handleSearch}
+                allowClear
+                style={{ width: 200 }}
+              />
+            </Form.Item>
+            <Form.Item label="API简介">
+              <Input
+                placeholder="请输入API简介"
+                value={queryParams.summary}
+                onChange={(e) => setQueryParams({ ...queryParams, summary: e.target.value })}
+                onPressEnter={handleSearch}
+                allowClear
+                style={{ width: 200 }}
+              />
+            </Form.Item>
+            <Form.Item label="Tags">
+              <Input
+                placeholder="请输入API模块"
+                value={queryParams.tags}
+                onChange={(e) => setQueryParams({ ...queryParams, tags: e.target.value })}
+                onPressEnter={handleSearch}
+                allowClear
+                style={{ width: 200 }}
+              />
+            </Form.Item>
+            <Form.Item>
+              <Space>
+                <Button type="primary" onClick={handleSearch}>
+                  搜索
+                </Button>
+                <Button onClick={handleReset}>
+                  重置
+                </Button>
+              </Space>
+            </Form.Item>
+          </Form>
+        </div>
         
         <Table
           columns={columns}
-          dataSource={getFilteredApiList()}
+          dataSource={apiList}
           rowKey="id"
           loading={loading}
-          pagination={{ pageSize: 10 }}
+          pagination={{
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            total: pagination.total,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
+            onChange: handleTableChange,
+            onShowSizeChange: handleTableChange,
+          }}
+          scroll={{ x: 800 }}
         />
       </Card>
 
@@ -264,25 +289,19 @@ const ApiManagement: React.FC = () => {
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
         width={600}
+        destroyOnHidden
       >
         <Form
           form={form}
           layout="vertical"
+          preserve={false}
         >
           <Form.Item
-            name="name"
-            label="API名称"
-            rules={[{ required: true, message: '请输入API名称' }]}
+            name="path"
+            label="API路径"
+            rules={[{ required: true, message: '请输入API路径' }]}
           >
-            <Input placeholder="请输入API名称" />
-          </Form.Item>
-
-          <Form.Item
-            name="url"
-            label="请求URL"
-            rules={[{ required: true, message: '请输入请求URL' }]}
-          >
-            <Input placeholder="请输入请求URL" />
+            <Input placeholder="请输入API路径" />
           </Form.Item>
 
           <Form.Item
@@ -295,31 +314,24 @@ const ApiManagement: React.FC = () => {
               <Select.Option value="POST">POST</Select.Option>
               <Select.Option value="PUT">PUT</Select.Option>
               <Select.Option value="DELETE">DELETE</Select.Option>
+              <Select.Option value="PATCH">PATCH</Select.Option>
             </Select>
           </Form.Item>
 
           <Form.Item
-            name="module"
-            label="所属模块"
-            rules={[{ required: true, message: '请输入所属模块' }]}
+            name="summary"
+            label="API简介"
+            rules={[{ required: true, message: '请输入API简介' }]}
           >
-            <Input placeholder="请输入所属模块" />
+            <Input placeholder="请输入API简介" />
           </Form.Item>
 
           <Form.Item
-            name="description"
-            label="API描述"
+            name="tags"
+            label="Tags"
+            rules={[{ required: true, message: '请输入Tags' }]}
           >
-            <Input.TextArea rows={3} placeholder="请输入API描述" />
-          </Form.Item>
-
-          <Form.Item
-            name="status"
-            label="状态"
-            valuePropName="checked"
-            initialValue={true}
-          >
-            <Switch />
+            <Input placeholder="请输入Tags" />
           </Form.Item>
         </Form>
       </Modal>
@@ -327,4 +339,4 @@ const ApiManagement: React.FC = () => {
   );
 };
 
-export default ApiManagement; 
+export default ApiManagement;
