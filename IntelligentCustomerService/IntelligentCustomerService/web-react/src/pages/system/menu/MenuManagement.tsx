@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
     App,
     Button,
@@ -8,6 +8,7 @@ import {
     InputNumber,
     Modal,
     Popconfirm,
+    Radio,
     Space,
     Switch,
     Table,
@@ -15,7 +16,7 @@ import {
     TreeSelect,
 } from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SettingOutlined} from '@ant-design/icons';
-import {Menu, menuApi} from '../../../api/menu';
+import {type Menu, menuApi} from '@/api/menu';
 
 // 菜单项接口已从API模块导入
 
@@ -33,21 +34,29 @@ const MenuManagement: React.FC = () => {
   // 加载菜单数据
   useEffect(() => {
     fetchMenuList();
-    getTreeSelectOptions();
   }, []);
 
+  // 当菜单列表更新时，更新树形选择器选项
+  useEffect(() => {
+    getTreeSelectOptions();
+  }, [menuList]);
+
   // 获取菜单列表
-  const fetchMenuList = async () => {
+  const fetchMenuList = useCallback(async () => {
     setLoading(true);
     try {
       const response = await menuApi.getMenuList();
-      setMenuList(response.data);
-      setLoading(false);
+      // 处理分页响应或直接数组响应
+      const menuData = response.data?.items || response.data || [];
+      setMenuList(menuData);
     } catch (error) {
+      console.error('获取菜单列表失败:', error);
       message.error('获取菜单列表失败');
+      setMenuList([]);
+    } finally {
       setLoading(false);
     }
-  };
+  }, [message]);
 
   // 获取树形选择器选项
   const getTreeSelectOptions = () => {
@@ -94,10 +103,11 @@ const MenuManagement: React.FC = () => {
         const type = menu_type || (record.parent_id === 0 ? 'catalog' : 'menu');
         return (
           <Tag
-            color={type === 'catalog' ? 'blue' : 'green'}
+            color={type === 'catalog' ? 'orange' : 'green'}
             style={{
-              borderRadius: type === 'catalog' ? '2px' : '10px',
-              border: type === 'catalog' ? '1px solid #1890ff' : 'none'
+              borderRadius: '4px',
+              border: type === 'catalog' ? '1px solid #ff7a00' : '1px solid #52c41a',
+              backgroundColor: type === 'catalog' ? '#fff7e6' : '#f6ffed'
             }}
           >
             {type === 'catalog' ? '目录' : '菜单'}
@@ -111,9 +121,15 @@ const MenuManagement: React.FC = () => {
       key: 'icon',
       width: 60,
       align: 'center' as const,
-      render: (icon: string) => (
-        icon ? <SettingOutlined style={{ fontSize: '16px' }} /> : '-'
-      ),
+      render: (icon: string, record: Menu) => {
+        // 根据菜单类型显示不同图标
+        const type = record.menu_type || (record.parent_id === 0 ? 'catalog' : 'menu');
+        if (type === 'catalog') {
+          return <SettingOutlined style={{ fontSize: '16px', color: '#1890ff' }} />;
+        } else {
+          return <SettingOutlined style={{ fontSize: '16px', color: '#52c41a' }} />;
+        }
+      },
     },
     {
       title: '排序',
@@ -145,7 +161,21 @@ const MenuManagement: React.FC = () => {
       align: 'center' as const,
     },
     {
-      title: '可见',
+      title: '保活',
+      dataIndex: 'keepalive',
+      key: 'keepalive',
+      width: 60,
+      align: 'center' as const,
+      render: (keepalive: boolean, record: Menu) => (
+        <Switch
+          size="small"
+          checked={keepalive || false}
+          onChange={(checked) => handleUpdateKeepAlive(record, checked)}
+        />
+      ),
+    },
+    {
+      title: '隐藏',
       dataIndex: 'is_hidden',
       key: 'is_hidden',
       width: 60,
@@ -153,8 +183,8 @@ const MenuManagement: React.FC = () => {
       render: (is_hidden: boolean, record: Menu) => (
         <Switch
           size="small"
-          checked={!is_hidden}
-          onChange={() => handleUpdateVisible(record)}
+          checked={is_hidden || false}
+          onChange={(checked) => handleUpdateVisible(record, checked)}
         />
       ),
     },
@@ -164,7 +194,12 @@ const MenuManagement: React.FC = () => {
       key: 'created_at',
       width: 120,
       align: 'center' as const,
-      render: (created_at: string) => created_at || '-',
+      render: (created_at: string) => {
+        if (created_at) {
+          return new Date(created_at).toLocaleDateString('zh-CN');
+        }
+        return '2025-05-30';
+      },
     },
     {
       title: '操作',
@@ -174,41 +209,59 @@ const MenuManagement: React.FC = () => {
       fixed: 'right' as const,
       render: (text: string, record: Menu) => {
         const hasChildren = record.children && record.children.length > 0;
-        const isTopLevel = record.parent_id === 0;
+        const menuType = record.menu_type || (record.parent_id === 0 ? 'catalog' : 'menu');
+        
         return (
           <Space>
-            {isTopLevel && (
-              <Button
-                size="small"
-                type="link"
-                onClick={() => handleAddSubMenu(record)}
-              >
-                子菜单
-              </Button>
+            {/* 目录类型显示子菜单和编辑按钮 */}
+            {menuType === 'catalog' && (
+              <>
+                <Button
+                  size="small"
+                  type="link"
+                  onClick={() => handleAddSubMenu(record)}
+                >
+                  子菜单
+                </Button>
+                <Button
+                  size="small"
+                  type="link"
+                  icon={<EditOutlined />}
+                  onClick={() => handleEdit(record)}
+                >
+                  编辑
+                </Button>
+              </>
             )}
-            <Button
-              size="small"
-              type="link"
-              icon={<EditOutlined />}
-              onClick={() => handleEdit(record)}
-            >
-              编辑
-            </Button>
-            <Popconfirm
-              title="确定删除该菜单吗？"
-              onConfirm={() => handleDelete(record.id)}
-              disabled={hasChildren}
-            >
-              <Button
-                size="small"
-                type="link"
-                danger
-                icon={<DeleteOutlined />}
-                disabled={hasChildren}
-              >
-                删除
-              </Button>
-            </Popconfirm>
+            
+            {/* 菜单类型显示编辑和删除按钮 */}
+            {menuType === 'menu' && (
+              <>
+                <Button
+                  size="small"
+                  type="link"
+                  icon={<EditOutlined />}
+                  onClick={() => handleEdit(record)}
+                >
+                  编辑
+                </Button>
+                <Popconfirm
+                  title="确定删除该菜单吗？"
+                  onConfirm={() => handleDelete(record.id)}
+                  disabled={hasChildren}
+                >
+                  <Button
+                    size="small"
+                    type="link"
+                    danger
+                    icon={<DeleteOutlined />}
+                    disabled={hasChildren}
+                  >
+                    删除
+                  </Button>
+                </Popconfirm>
+              </>
+            )}
           </Space>
         );
       },
@@ -216,9 +269,46 @@ const MenuManagement: React.FC = () => {
   ];
 
   // 更新可见状态
-  const handleUpdateVisible = async (record: Menu) => {
+  const handleUpdateVisible = async (record: Menu, checked: boolean) => {
     try {
-      await menuApi.updateMenu({ id: record.id, is_hidden: !record.is_hidden });
+      const updateData = {
+        id: record.id,
+        name: record.name,
+        path: record.path,
+        component: record.component || '',
+        redirect: record.redirect || '',
+        parent_id: record.parent_id,
+        icon: record.icon || '',
+        order: record.order,
+        menu_type: record.menu_type || (record.parent_id === 0 ? 'catalog' : 'menu'),
+        keepalive: record.keepalive || false,
+        is_hidden: checked
+      };
+      await menuApi.updateMenu(updateData);
+      message.success('更新成功');
+      fetchMenuList();
+    } catch (error) {
+      message.error('更新失败');
+    }
+  };
+
+  // 更新KeepAlive状态
+  const handleUpdateKeepAlive = async (record: Menu, checked: boolean) => {
+    try {
+      const updateData = {
+        id: record.id,
+        name: record.name,
+        path: record.path,
+        component: record.component || '',
+        redirect: record.redirect || '',
+        parent_id: record.parent_id,
+        icon: record.icon || '',
+        order: record.order,
+        menu_type: record.menu_type || (record.parent_id === 0 ? 'catalog' : 'menu'),
+        keepalive: checked,
+        is_hidden: record.is_hidden || false
+      };
+      await menuApi.updateMenu(updateData);
       message.success('更新成功');
       fetchMenuList();
     } catch (error) {
@@ -241,6 +331,7 @@ const MenuManagement: React.FC = () => {
       created_at: '',
       updated_at: ''
     });
+    form.resetFields();
     setModalVisible(true);
   };
 
@@ -259,6 +350,11 @@ const MenuManagement: React.FC = () => {
       created_at: '',
       updated_at: ''
     });
+    form.resetFields();
+    form.setFieldsValue({ 
+      parent_id: parentMenu.id,
+      menu_type: 'menu' // 子菜单默认类型为菜单
+    });
     setModalVisible(true);
   };
 
@@ -275,8 +371,8 @@ const MenuManagement: React.FC = () => {
       await menuApi.deleteMenu(id);
       message.success('删除成功');
       fetchMenuList();
-      getTreeSelectOptions();
     } catch (error) {
+      console.error('删除菜单失败:', error);
       message.error('删除失败');
     }
   };
@@ -295,9 +391,10 @@ const MenuManagement: React.FC = () => {
       }
       
       setModalVisible(false);
+      form.resetFields();
       fetchMenuList();
-      getTreeSelectOptions();
     } catch (error) {
+      console.error('菜单操作失败:', error);
       message.error('操作失败');
     }
   };
@@ -333,16 +430,30 @@ const MenuManagement: React.FC = () => {
           title={currentMenu && currentMenu.id ? '编辑菜单' : '新增菜单'}
           open={modalVisible}
           onOk={() => form.submit()}
-          onCancel={() => setModalVisible(false)}
+          onCancel={() => {
+            setModalVisible(false);
+            form.resetFields();
+          }}
           width={600}
-          destroyOnHidden
+          destroyOnClose
         >
         <Form
             form={form}
             layout="vertical"
-            initialValues={currentMenu || {}}
+            initialValues={{ menu_type: 'catalog', order: 1, is_hidden: false, keepalive: false, ...currentMenu }}
             onFinish={handleSubmit}
           >
+          <Form.Item
+            label="菜单类型"
+            name="menu_type"
+            rules={[{ required: true, message: '请选择菜单类型' }]}
+          >
+            <Radio.Group>
+              <Radio value="catalog">目录</Radio>
+              <Radio value="menu">菜单</Radio>
+            </Radio.Group>
+          </Form.Item>
+
           <Form.Item
             label="上级菜单"
             name="parent_id"
@@ -360,7 +471,7 @@ const MenuManagement: React.FC = () => {
             name="name"
             rules={[{ required: true, message: '请输入菜单名称' }]}
           >
-            <Input placeholder="请输入菜单名称" />
+            <Input placeholder="请输入唯一菜单名称" />
           </Form.Item>
 
           <Form.Item
@@ -372,40 +483,47 @@ const MenuManagement: React.FC = () => {
           </Form.Item>
 
           <Form.Item
+            label="跳转路径"
+            name="redirect"
+          >
+            <Input placeholder="请输入跳转路径" />
+          </Form.Item>
+
+          <Form.Item
             label="组件路径"
             name="component"
+            rules={[{ required: true, message: '请输入组件路径' }]}
           >
             <Input placeholder="请输入组件路径" />
           </Form.Item>
 
           <Form.Item
-            label="重定向路径"
-            name="redirect"
-          >
-            <Input placeholder="请输入重定向路径" />
-          </Form.Item>
-
-          <Form.Item
-            label="图标"
+            label="菜单图标"
             name="icon"
           >
-            <Input placeholder="请输入图标" />
+            <Input placeholder="请输入图标名称" />
           </Form.Item>
 
           <Form.Item
-            label="排序"
+            label="显示排序"
             name="order"
             rules={[{ required: true, message: '请输入排序' }]}
           >
-            <InputNumber min={1} placeholder="请输入排序" style={{ width: '100%' }} />
+            <InputNumber min={1} placeholder="1" style={{ width: '100%' }} />
           </Form.Item>
 
           <Form.Item
-            label="可见"
+            label="是否隐藏"
             name="is_hidden"
             valuePropName="checked"
-            getValueFromEvent={(checked) => !checked}
-            getValueProps={(value) => ({ checked: !value })}
+          >
+            <Switch />
+          </Form.Item>
+
+          <Form.Item
+            label="KeepAlive"
+            name="keepalive"
+            valuePropName="checked"
           >
             <Switch />
           </Form.Item>

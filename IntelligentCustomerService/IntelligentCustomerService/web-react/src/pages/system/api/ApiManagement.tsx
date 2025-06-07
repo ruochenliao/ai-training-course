@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {App, Button, Card, Form, Input, Modal, Popconfirm, Select, Space, Table, Tag,} from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, ReloadOutlined} from '@ant-design/icons';
 import {apiApi, ApiItem, ApiQueryParams} from '@/api/api';
@@ -20,13 +20,8 @@ const ApiManagement: React.FC = () => {
     total: 0,
   });
 
-  // 加载API数据
-  useEffect(() => {
-    fetchApiList();
-  }, [queryParams]);
-
   // 获取API列表
-  const fetchApiList = async () => {
+  const fetchApiList = useCallback(async () => {
     setLoading(true);
     try {
       const response = await apiApi.getApis(queryParams);
@@ -45,32 +40,37 @@ const ApiManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [queryParams, message]);
+
+  // 加载API数据
+  useEffect(() => {
+    fetchApiList();
+  }, [fetchApiList]);
 
   // 搜索处理
-  const handleSearch = () => {
-    setQueryParams({
-      ...queryParams,
+  const handleSearch = useCallback(() => {
+    setQueryParams(prev => ({
+      ...prev,
       page: 1,
-    });
-  };
+    }));
+  }, []);
 
   // 重置搜索
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setQueryParams({
       page: 1,
       page_size: 10,
     });
-  };
+  }, []);
 
   // 分页处理
-  const handleTableChange = (page: number, pageSize: number) => {
-    setQueryParams({
-      ...queryParams,
+  const handleTableChange = useCallback((page: number, pageSize: number) => {
+    setQueryParams(prev => ({
+      ...prev,
       page,
       page_size: pageSize,
-    });
-  };
+    }));
+  }, []);
 
   // 表格列配置
   const columns = [

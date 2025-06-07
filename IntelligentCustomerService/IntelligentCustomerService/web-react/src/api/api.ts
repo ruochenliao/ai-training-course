@@ -59,12 +59,12 @@ export const apiApi = {
 
   // 创建API
   createApi: (params: CreateApiParams): Promise<ApiResponse> => {
-    return request.post('/api/v1/api/create', { api_in: params })
+    return request.post('/api/v1/api/create', params)
   },
 
   // 更新API
   updateApi: (params: UpdateApiParams): Promise<ApiResponse> => {
-    return request.post('/api/v1/api/update', { api_in: params })
+    return request.post('/api/v1/api/update', params)
   },
 
   // 删除API

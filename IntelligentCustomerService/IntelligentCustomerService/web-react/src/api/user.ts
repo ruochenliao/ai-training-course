@@ -76,12 +76,12 @@ export const userApi = {
 
   // 创建用户
   createUser: (params: CreateUserParams): Promise<ApiResponse> => {
-    return request.post('/api/v1/user/create', { user_in: params })
+    return request.post('/api/v1/user/create', params)
   },
 
   // 更新用户
   updateUser: (params: UpdateUserParams): Promise<ApiResponse> => {
-    return request.post('/api/v1/user/update', { user_in: params })
+    return request.post('/api/v1/user/update', params)
   },
 
   // 删除用户
@@ -92,7 +92,7 @@ export const userApi = {
   // 切换用户状态
   toggleUserStatus: (id: number, isActive: boolean): Promise<ApiResponse> => {
     return request.post('/api/v1/user/update', { 
-      user_in: { id, is_active: isActive } 
+      id, is_active: isActive 
     })
   },
 

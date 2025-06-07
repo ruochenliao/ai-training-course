@@ -69,12 +69,12 @@ export const roleApi = {
 
   // 创建角色
   create: (data: RoleCreateData): Promise<ApiResponse<{ msg: string }>> => {
-    return request.post('/api/v1/role/create', { role_in: data });
+    return request.post('/api/v1/role/create', data);
   },
 
   // 更新角色
   update: (data: RoleUpdateData): Promise<ApiResponse<{ msg: string }>> => {
-    return request.post('/api/v1/role/update', { role_in: data });
+    return request.post('/api/v1/role/update', data);
   },
 
   // 删除角色
@@ -89,7 +89,7 @@ export const roleApi = {
 
   // 更新角色权限
   updateAuthorized: (data: RoleUpdateMenusApis): Promise<ApiResponse<{ msg: string }>> => {
-    return request.post('/api/v1/role/authorized', { role_in: data });
+    return request.post('/api/v1/role/authorized', data);
   },
 };
 

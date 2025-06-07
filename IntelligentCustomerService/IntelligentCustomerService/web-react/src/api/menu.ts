@@ -9,7 +9,6 @@ export interface Menu {
   component: string
   icon?: string
   order: number
-  is_visible: boolean
   parent_id: number
   perms?: string
   redirect?: string
@@ -29,7 +28,6 @@ export interface CreateMenuParams {
   component: string
   icon?: string
   order: number
-  is_visible?: boolean
   is_hidden?: boolean
   parent_id: number
   perms?: string
@@ -47,7 +45,6 @@ export interface UpdateMenuParams {
   component?: string
   icon?: string
   order?: number
-  is_visible?: boolean
   is_hidden?: boolean
   parent_id?: number
   perms?: string
@@ -80,12 +77,12 @@ export const menuApi = {
 
   // 创建菜单
   createMenu: (params: CreateMenuParams): Promise<ApiResponse> => {
-    return request.post('/api/v1/menu/create', { menu_in: params })
+    return request.post('/api/v1/menu/create', params)
   },
 
   // 更新菜单
   updateMenu: (params: UpdateMenuParams): Promise<ApiResponse> => {
-    return request.post('/api/v1/menu/update', { menu_in: params })
+    return request.post('/api/v1/menu/update', params)
   },
 
   // 删除菜单
@@ -101,7 +98,7 @@ export const menuApi = {
   // 切换菜单可见状态
   toggleMenuVisibility: (id: number, isHidden: boolean): Promise<ApiResponse> => {
     return request.post('/api/v1/menu/update', { 
-      menu_in: { id, is_hidden: isHidden } 
+      id, is_hidden: isHidden 
     })
   },
 };

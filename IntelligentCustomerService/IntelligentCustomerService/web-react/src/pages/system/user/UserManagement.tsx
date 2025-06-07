@@ -1,15 +1,13 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
     Button,
     Card,
-    Col,
     Form,
     Input,
     Layout,
     message,
     Modal,
     Popconfirm,
-    Row,
     Select,
     Space,
     Switch,
@@ -17,14 +15,7 @@ import {
     Tag,
     Tree
 } from 'antd';
-import {
-    DeleteOutlined,
-    EditOutlined,
-    KeyOutlined,
-    PlusOutlined,
-    ReloadOutlined,
-    SearchOutlined
-} from '@ant-design/icons';
+import {DeleteOutlined, EditOutlined, KeyOutlined, PlusOutlined, ReloadOutlined} from '@ant-design/icons';
 
 import {type CreateUserParams, type UpdateUserParams, type User, userApi, type UserQueryParams} from '@/api/user';
 import {type Role, roleApi} from '@/api/role';
@@ -59,11 +50,11 @@ const UserManagement: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   
   // 获取角色和部门数据
-  const fetchRolesAndDepts = async () => {
+  const fetchRolesAndDepts = useCallback(async () => {
     try {
       const [rolesRes, deptsRes] = await Promise.all([
-        roleApi.list(),
-        deptApi.list()
+        roleApi.list({ page: 1, page_size: 1000 }),
+        deptApi.list({ page: 1, page_size: 1000 })
       ]);
       
       if (rolesRes.code === 200 && rolesRes.data) {
@@ -88,10 +79,10 @@ const UserManagement: React.FC = () => {
       console.error('Failed to fetch roles and departments:', error);
       message.error('获取角色和部门数据失败');
     }
-  };
+  }, []);
 
   // 获取用户数据
-  const fetchUserData = async (params?: UserQueryParams) => {
+  const fetchUserData = useCallback(async (params?: UserQueryParams) => {
     setLoading(true);
     try {
       const queryParams = {
@@ -124,7 +115,7 @@ const UserManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.current, pagination.pageSize, searchParams, selectedDeptId]);
 
   useEffect(() => {
     fetchRolesAndDepts();
@@ -156,7 +147,22 @@ const UserManagement: React.FC = () => {
 
   const handleToggleUserStatus = async (userId: number, isActive: boolean) => {
     try {
-      const response = await userApi.updateUser({ id: userId, is_active: isActive });
+      // 找到当前用户的完整信息
+      const currentUser = userData.find(user => user.id === userId);
+      if (!currentUser) {
+        message.error('用户信息不存在');
+        return;
+      }
+      
+      const response = await userApi.updateUser({ 
+        id: userId, 
+        email: currentUser.email,
+        username: currentUser.username,
+        is_active: isActive,
+        is_superuser: currentUser.is_superuser,
+        role_ids: currentUser.roles?.map(role => role.id) || [],
+        dept_id: currentUser.dept_id || currentUser.dept?.id || 0
+      });
       if (response.code === 200) {
         message.success('用户状态更新成功');
         fetchUserData();
@@ -346,6 +352,7 @@ const UserManagement: React.FC = () => {
           onChange={(checked) => handleToggleUserStatus(record.id, !checked)}
           checkedChildren="禁用"
           unCheckedChildren="启用"
+          disabled={record.is_superuser}
         />
       ),
     },
@@ -361,13 +368,15 @@ const UserManagement: React.FC = () => {
           >
             编辑
           </Button>
-          <Button
-            type="link"
-            icon={<KeyOutlined />}
-            onClick={() => handleResetPassword(record.id)}
-          >
-            重置密码
-          </Button>
+          {!record.is_superuser && (
+            <Button
+              type="link"
+              icon={<KeyOutlined />}
+              onClick={() => handleResetPassword(record.id)}
+            >
+              重置密码
+            </Button>
+          )}
           <Popconfirm
             title="确认删除"
             onConfirm={() => handleDeleteUser(record.id)}
@@ -412,49 +421,79 @@ const UserManagement: React.FC = () => {
         </Sider>
         <Content style={{ padding: '0 24px' }}>
           <Card>
-            <div className="mb-4">
-              <Row gutter={16}>
-                <Col span={6}>
+            <div className="mb-4" style={{ 
+              background: '#fafafc', 
+              minHeight: '60px', 
+              display: 'flex', 
+              alignItems: 'flex-start', 
+              justifyContent: 'space-between', 
+              border: '1px solid #ccc', 
+              borderRadius: '8px', 
+              padding: '15px' 
+            }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '35px 15px', alignItems: 'flex-start', flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ minWidth: '40px' }}>名称</span>
                   <Input 
-                    prefix={<SearchOutlined />}
+                    style={{ width: '200px' }}
                     placeholder="请输入用户名"
                     value={searchParams.username}
                     onChange={(e) => setSearchParams({ ...searchParams, username: e.target.value })}
                     onPressEnter={() => fetchUserData()}
                   />
-                </Col>
-                <Col span={6}>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ minWidth: '40px' }}>邮箱</span>
                   <Input 
-                    prefix={<SearchOutlined />}
+                    style={{ width: '200px' }}
                     placeholder="请输入邮箱"
                     value={searchParams.email}
                     onChange={(e) => setSearchParams({ ...searchParams, email: e.target.value })}
                     onPressEnter={() => fetchUserData()}
                   />
-                </Col>
-                <Col span={12} className="flex justify-end">
-                  <Space>
-                    <Button 
-                      type="primary" 
-                      icon={<PlusOutlined />}
-                      onClick={handleAddUser}
-                    >
-                      新增用户
-                    </Button>
-                    <Button 
-                      icon={<ReloadOutlined />}
-                      onClick={() => {
-                        setSearchParams({});
-                        setSelectedDeptId(null);
-                        setLastClickedNodeId(null);
-                        fetchUserData({});
-                      }}
-                    >
-                      刷新
-                    </Button>
-                  </Space>
-                </Col>
-              </Row>
+                </div>
+                <div style={{ display: 'flex', gap: '20px' }}>
+                  <Button 
+                    onClick={() => {
+                      setSearchParams({});
+                      setSelectedDeptId(null);
+                      setLastClickedNodeId(null);
+                      fetchUserData({});
+                    }}
+                  >
+                    重置
+                  </Button>
+                  <Button 
+                    type="primary"
+                    onClick={() => fetchUserData()}
+                  >
+                    搜索
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mb-4" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Space>
+                <Button 
+                  type="primary" 
+                  icon={<PlusOutlined />}
+                  onClick={handleAddUser}
+                >
+                  新增用户
+                </Button>
+                <Button 
+                  icon={<ReloadOutlined />}
+                  onClick={() => {
+                    setSearchParams({});
+                    setSelectedDeptId(null);
+                    setLastClickedNodeId(null);
+                    fetchUserData({});
+                  }}
+                >
+                  刷新
+                </Button>
+              </Space>
             </div>
             
             <Table 
