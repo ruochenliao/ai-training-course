@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Button, Card, Form, Input, InputNumber, message, Modal, Popconfirm, Space, Table, TreeSelect,} from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined} from '@ant-design/icons';
-import {type Dept, deptApi, type DeptCreate, type DeptUpdate} from '../../../api/dept';
+import {type Dept, deptApi} from '@/api/dept';
 
 // 查询参数接口
 interface QueryParams {
@@ -30,7 +30,7 @@ const DeptManagement: React.FC = () => {
   }, []);
 
   // 获取部门列表
-  const fetchDeptList = async () => {
+  const fetchDeptList = useCallback(async () => {
     setLoading(true);
     try {
       const response = await deptApi.list(queryParams);
@@ -40,7 +40,7 @@ const DeptManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [queryParams]);
 
   // 搜索部门
   const handleSearch = () => {

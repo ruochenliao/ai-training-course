@@ -47,12 +47,12 @@ export const deptApi = {
 
   // 创建部门
   create: (data: DeptCreate): Promise<ApiResponse<string>> => {
-    return request.post('/api/v1/dept/create', { dept_in: data });
+    return request.post('/api/v1/dept/create', data);
   },
 
   // 更新部门
   update: (data: DeptUpdate): Promise<ApiResponse<string>> => {
-    return request.post('/api/v1/dept/update', { dept_in: data });
+    return request.post('/api/v1/dept/update', data);
   },
 
   // 删除部门

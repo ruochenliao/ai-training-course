@@ -1,12 +1,19 @@
-import React, {useEffect, useState} from 'react';
-import {Button, Card, Drawer, Form, Input, message, Modal, Space, Table, Tabs, Tree,} from 'antd';
-import {PlusOutlined,} from '@ant-design/icons';
-import {Role, roleApi, RoleCreateData, RoleUpdateData} from '../../../api/role';
+import React, {useCallback, useEffect, useState} from 'react';
+import {Button, Card, Drawer, Form, Input, message, Modal, Space, Table, Tabs, Tree} from 'antd';
+import {PlusOutlined} from '@ant-design/icons';
+import {type Role, roleApi, type RoleCreateData, type RoleUpdateData} from '../../../api/role';
+import {type Menu, menuApi} from '../../../api/menu';
+import {apiApi, type ApiItem} from '../../../api/api';
 
-interface MenuData {
-  id: number;
-  name: string;
-  children?: MenuData[];
+// 使用从API导入的Menu类型
+type MenuTreeData = {
+  key: string;
+  title: string;
+  path?: string;
+  component?: string;
+  perms?: string;
+  remark?: string;
+  children?: MenuTreeData[];
 }
 
 interface ApiData {
@@ -39,7 +46,7 @@ const RoleManagement: React.FC = () => {
   const [drawerVisible, setDrawerVisible] = useState<boolean>(false);
   const [modalTitle, setModalTitle] = useState<string>('');
   const [currentRole, setCurrentRole] = useState<Role | null>(null);
-  const [menuData, setMenuData] = useState<MenuData[]>([]);
+  const [menuData, setMenuData] = useState<MenuTreeData[]>([]);
   const [apiData, setApiData] = useState<ApiTreeData[]>([]);
   const [selectedMenuIds, setSelectedMenuIds] = useState<number[]>([]);
   const [selectedApiIds, setSelectedApiIds] = useState<string[]>([]);
@@ -48,7 +55,7 @@ const RoleManagement: React.FC = () => {
   const [searchForm] = Form.useForm();
 
   // 获取角色数据
-  const fetchRoleData = async (params?: any) => {
+  const fetchRoleData = useCallback(async (params?: any) => {
     setLoading(true);
     try {
       const searchValues = searchForm.getFieldsValue();
@@ -71,14 +78,80 @@ const RoleManagement: React.FC = () => {
         message.error(response.msg || '获取角色列表失败');
       }
     } catch (error) {
-      message.error('获取角色列表失败');
+      console.error('获取角色数据失败:', error);
+      message.error('获取角色数据失败');
     } finally {
       setLoading(false);
     }
+  }, [pagination.current, pagination.pageSize, searchForm]);
+
+  // 构建菜单树结构
+  const buildMenuTree = (data: Menu[]): MenuTreeData[] => {
+    const convertToTreeData = (items: Menu[]): MenuTreeData[] => {
+      return items.map(item => ({
+        key: item.id.toString(),
+        title: item.name,
+        path: item.path,
+        component: item.component,
+        perms: item.perms,
+        remark: item.remark,
+        children: item.children && item.children.length > 0 ? convertToTreeData(item.children) : undefined
+      }));
+    };
+    return convertToTreeData(data);
+  };
+
+  // 过滤树数据
+  const filterTreeData = (data: MenuTreeData[], searchText: string): MenuTreeData[] => {
+    if (!searchText) return data;
+    
+    const filterNode = (node: MenuTreeData): MenuTreeData | null => {
+      const searchLower = searchText.toLowerCase();
+      const titleMatch = node.title && node.title.toLowerCase().includes(searchLower);
+      const pathMatch = node.path && node.path.toLowerCase().includes(searchLower);
+      const componentMatch = node.component && node.component.toLowerCase().includes(searchLower);
+      const permsMatch = node.perms && node.perms.toLowerCase().includes(searchLower);
+      const remarkMatch = node.remark && node.remark.toLowerCase().includes(searchLower);
+      
+      const filteredChildren = node.children ? node.children.map(filterNode).filter(Boolean) as MenuTreeData[] : [];
+      
+      if (titleMatch || pathMatch || componentMatch || permsMatch || remarkMatch || filteredChildren.length > 0) {
+        return {
+          ...node,
+          children: filteredChildren.length > 0 ? filteredChildren : undefined
+        };
+      }
+      
+      return null;
+    };
+    
+    return data.map(filterNode).filter(Boolean) as MenuTreeData[];
+  };
+
+  // 过滤API树数据
+  const filterApiTreeData = (data: ApiTreeData[], searchText: string): ApiTreeData[] => {
+    if (!searchText) return data;
+    
+    const filterApiNode = (node: ApiTreeData): ApiTreeData | null => {
+      const titleMatch = node.title.toLowerCase().includes(searchText.toLowerCase());
+      const pathMatch = node.path && node.path.toLowerCase().includes(searchText.toLowerCase());
+      const filteredChildren = node.children ? node.children.map(filterApiNode).filter(Boolean) as ApiTreeData[] : [];
+      
+      if (titleMatch || pathMatch || filteredChildren.length > 0) {
+        return {
+          ...node,
+          children: filteredChildren.length > 0 ? filteredChildren : undefined
+        };
+      }
+      
+      return null;
+    };
+    
+    return data.map(filterApiNode).filter(Boolean) as ApiTreeData[];
   };
 
   // 构建API树结构
-  const buildApiTree = (data: ApiData[]): ApiTreeData[] => {
+  const buildApiTree = (data: ApiItem[]): ApiTreeData[] => {
     const processedData: ApiTreeData[] = [];
     const groupedData: { [key: string]: ApiTreeData } = {};
 
@@ -204,22 +277,27 @@ const RoleManagement: React.FC = () => {
       
       // 同时获取菜单、API和角色权限信息
       const [menusResponse, apisResponse, roleAuthorizedResponse] = await Promise.all([
-        // 这里需要根据实际API调整
-        // api.getMenus({ page: 1, page_size: 9999 }),
-        // api.getApis({ page: 1, page_size: 9999 }),
+        menuApi.getMenuList({ page: 1, page_size: 9999 }),
+        apiApi.getApis({ page: 1, page_size: 9999 }),
         roleApi.getAuthorized(record.id),
       ]);
       
       // 处理菜单数据
-      // setMenuData(menusResponse.data || []);
+      if (menusResponse.code === 200) {
+        setMenuData(buildMenuTree(menusResponse.data || []));
+      }
       
       // 处理API数据
-      // setApiData(buildApiTree(apisResponse.data || []));
+      if (apisResponse.code === 200) {
+        setApiData(buildApiTree(apisResponse.data || []));
+      }
       
       // 处理角色权限
-      const roleAuth = roleAuthorizedResponse.data;
-      setSelectedMenuIds(roleAuth.menus.map((v: any) => v.id));
-      setSelectedApiIds(roleAuth.apis.map((v: any) => v.method.toLowerCase() + v.path));
+      if (roleAuthorizedResponse.code === 200) {
+        const roleAuth = roleAuthorizedResponse.data;
+        setSelectedMenuIds(roleAuth.menus.map((v: any) => v.id));
+        setSelectedApiIds(roleAuth.apis.map((v: any) => v.method.toLowerCase() + v.path));
+      }
       
       setDrawerVisible(true);
     } catch (error) {
@@ -420,9 +498,13 @@ const RoleManagement: React.FC = () => {
             </div>
             <Tree
               checkable
-              checkedKeys={selectedMenuIds}
-              onCheck={(checkedKeys) => setSelectedMenuIds(checkedKeys as number[])}
-              treeData={menuData}
+              checkedKeys={selectedMenuIds.map(id => id.toString())}
+              onCheck={(checkedKeys) => {
+                const keys = Array.isArray(checkedKeys) ? checkedKeys : checkedKeys.checked;
+                setSelectedMenuIds(keys.map(key => parseInt(key.toString())));
+              }}
+              treeData={filterTreeData(menuData, searchPattern)}
+              fieldNames={{ title: 'title', key: 'key', children: 'children' }}
               height={400}
             />
           </Tabs.TabPane>
@@ -438,8 +520,12 @@ const RoleManagement: React.FC = () => {
             <Tree
               checkable
               checkedKeys={selectedApiIds}
-              onCheck={(checkedKeys) => setSelectedApiIds(checkedKeys as string[])}
-              treeData={apiData}
+              onCheck={(checkedKeys) => {
+                const keys = Array.isArray(checkedKeys) ? checkedKeys : checkedKeys.checked;
+                setSelectedApiIds(keys.map(key => key.toString()));
+              }}
+              treeData={filterApiTreeData(apiData, searchPattern)}
+              fieldNames={{ title: 'title', key: 'key', children: 'children' }}
               height={400}
             />
           </Tabs.TabPane>

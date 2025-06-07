@@ -65,6 +65,11 @@ const SessionList: React.FC<SessionListProps> = ({
     }
   }, [pagination.current, pagination.pageSize, searchKeyword, statusFilter, priorityFilter])
 
+  // 稳定的加载函数引用
+  const stableLoadSessions = useCallback(() => {
+    loadSessions()
+  }, [loadSessions])
+
   // 搜索处理
   const handleSearch = useCallback((value: string) => {
     setSearchKeyword(value)
@@ -216,8 +221,8 @@ const SessionList: React.FC<SessionListProps> = ({
 
   // 初始化加载
   useEffect(() => {
-    loadSessions()
-  }, [loadSessions])
+    stableLoadSessions()
+  }, [stableLoadSessions])
 
   return (
     <div className="session-list">

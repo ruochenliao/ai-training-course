@@ -14,9 +14,7 @@ const root = createRoot(container);
 
 // 渲染应用
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <App />
 );
 
 // 如果你想开始测量应用的性能，可以传递一个函数
