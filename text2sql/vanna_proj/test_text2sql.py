@@ -2,7 +2,7 @@ import json
 
 task_template = """你是一名{db_type} 专家，需要根据用户问题回答SQL语句：
 - 数据库结构：
-```sql
+```ddl
 {db_schema}
 ```
 **值映射信息：**
@@ -33,6 +33,7 @@ mappings = {
     "ArtistId": "艺术家ID",
     "Name": "艺术家姓名"
 }
+
 
 mapping_str = json.dumps(mappings, ensure_ascii=False, indent=4)
 
