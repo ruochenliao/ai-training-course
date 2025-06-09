@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react'
-import {Button, Card, Checkbox, Divider, Form, Input, message, Space} from 'antd'
-import {EyeInvisibleOutlined, EyeTwoTone, LockOutlined, UserOutlined} from '@ant-design/icons'
+import {Button, Card, Checkbox, Divider, Form, Input, message} from 'antd'
+import {LockOutlined, UserOutlined} from '@ant-design/icons'
 import {useLocation, useNavigate} from 'react-router-dom'
 import {useAuthStore} from '../../store/auth'
-import {useAppStore} from '../../store/app'
 import {cn} from '../../utils'
+import {useTheme} from '../../contexts/ThemeContext'
 
 interface LoginForm {
   username: string
@@ -19,7 +19,7 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false)
   
   const { login, isAuthenticated } = useAuthStore()
-  const { theme } = useAppStore()
+  const { primaryColor, isDark } = useTheme()
 
   // 获取重定向路径
   const from = (location.state as any)?.from?.pathname || '/'
@@ -62,56 +62,64 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div className={cn(
-      "min-h-screen flex items-center justify-center px-4",
-      theme === 'dark' 
-        ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" 
-        : "bg-gradient-to-br from-blue-50 via-white to-blue-50"
-    )}>
-      {/* 背景装饰 */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className={cn(
-          "absolute -top-40 -right-40 w-80 h-80 rounded-full opacity-20",
-          theme === 'dark' ? "bg-blue-500" : "bg-blue-200"
-        )} />
-        <div className={cn(
-          "absolute -bottom-40 -left-40 w-80 h-80 rounded-full opacity-20",
-          theme === 'dark' ? "bg-purple-500" : "bg-purple-200"
-        )} />
+    <div 
+      className="min-h-screen flex-col-center overflow-hidden relative"
+      style={{ 
+        backgroundImage: isDark 
+          ? 'radial-gradient(circle at 20% 20%, #17183b, #0f0f1a)' 
+          : 'radial-gradient(circle at 20% 20%, #e6f7ff, #f0f5ff)',
+      }}
+    >
+      {/* 装饰背景 */}
+      <div className="absolute top-0 left-0 right-0 bottom-0">
+        <div className="absolute top-[20%] left-[10%] w-[400px] h-[400px] rounded-full opacity-10"
+          style={{ background: isDark ? '#3366ff' : '#1890ff', filter: 'blur(150px)' }}
+        ></div>
+        <div className="absolute bottom-[10%] right-[10%] w-[300px] h-[300px] rounded-full opacity-10"
+          style={{ background: isDark ? '#ff4d4f' : '#ff7a45', filter: 'blur(150px)' }}
+        ></div>
       </div>
 
-      <div className="relative z-10 w-full max-w-md">
-        {/* Logo和标题 */}
-        <div className="text-center mb-8">
-          <div className={cn(
-            "inline-flex items-center justify-center w-16 h-16 rounded-full mb-4",
-            theme === 'dark' ? "bg-blue-600" : "bg-blue-500"
-          )}>
-            <UserOutlined className="text-2xl text-white" />
+      {/* 登录内容 */}
+      <div className="relative z-10 flex-col-center w-full max-w-[900px] px-4 py-10">
+        {/* 顶部标题 */}
+        <div className="flex-col-center mb-8">
+          <div 
+            className="w-16 h-16 rounded-full flex-center mb-6"
+            style={{ background: primaryColor }}
+          >
+            <UserOutlined className="text-white text-2xl" />
           </div>
           <h1 className={cn(
             "text-3xl font-bold mb-2",
-            theme === 'dark' ? "text-white" : "text-gray-800"
-          )}>
-            智能客服系统
-          </h1>
+            isDark ? "text-white" : "text-gray-800"
+          )}>智能客服系统</h1>
           <p className={cn(
             "text-base",
-            theme === 'dark' ? "text-gray-300" : "text-gray-600"
-          )}>
-            欢迎登录管理后台
-          </p>
+            isDark ? "text-gray-300" : "text-gray-600"
+          )}>基于React+FastAPI+Ant Design的管理平台</p>
         </div>
 
         {/* 登录表单 */}
         <Card 
+          bordered={false}
           className={cn(
-            "shadow-2xl border-0",
-            theme === 'dark' 
-              ? "bg-gray-800/80 backdrop-blur-sm" 
-              : "bg-white/80 backdrop-blur-sm"
+            "w-full max-w-[420px] shadow-lg",
+            isDark ? "bg-gray-800/50 backdrop-blur" : "bg-white/80 backdrop-blur"
           )}
+          style={{ 
+            borderRadius: '12px',
+            border: isDark ? '1px solid rgba(255,255,255,0.1)' : 'none',
+          }}
+          bodyStyle={{ padding: '24px 32px' }}
         >
+          <h2 className={cn(
+            "text-xl font-bold mb-6 text-center",
+            isDark ? "text-white" : "text-gray-800"
+          )}>
+            账号登录
+          </h2>
+
           <Form
             form={form}
             name="login"
@@ -123,6 +131,7 @@ const Login: React.FC = () => {
               username: 'admin',
               password: '123456'
             }}
+            className="flex flex-col gap-4"
           >
             <Form.Item
               name="username"
@@ -132,11 +141,11 @@ const Login: React.FC = () => {
               ]}
             >
               <Input
-                prefix={<UserOutlined className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />}
+                prefix={<UserOutlined className={isDark ? 'text-gray-400' : 'text-gray-500'} />}
                 placeholder="用户名"
                 className={cn(
-                  "rounded-lg",
-                  theme === 'dark' ? "bg-gray-700 border-gray-600" : ""
+                  "py-2 rounded-lg",
+                  isDark ? "bg-gray-700 border-gray-600 text-white" : ""
                 )}
               />
             </Form.Item>
@@ -149,12 +158,11 @@ const Login: React.FC = () => {
               ]}
             >
               <Input.Password
-                prefix={<LockOutlined className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />}
+                prefix={<LockOutlined className={isDark ? 'text-gray-400' : 'text-gray-500'} />}
                 placeholder="密码"
-                iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
                 className={cn(
-                  "rounded-lg",
-                  theme === 'dark' ? "bg-gray-700 border-gray-600" : ""
+                  "py-2 rounded-lg",
+                  isDark ? "bg-gray-700 border-gray-600 text-white" : ""
                 )}
               />
             </Form.Item>
@@ -162,7 +170,7 @@ const Login: React.FC = () => {
             <Form.Item>
               <div className="flex items-center justify-between">
                 <Form.Item name="remember" valuePropName="checked" noStyle>
-                  <Checkbox className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
+                  <Checkbox className={isDark ? 'text-gray-300' : 'text-gray-600'}>
                     记住我
                   </Checkbox>
                 </Form.Item>
@@ -170,7 +178,7 @@ const Login: React.FC = () => {
                   type="link" 
                   className={cn(
                     "p-0 h-auto",
-                    theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
+                    isDark ? 'text-blue-400' : 'text-blue-600'
                   )}
                 >
                   忘记密码？
@@ -178,61 +186,63 @@ const Login: React.FC = () => {
               </div>
             </Form.Item>
 
-            <Form.Item>
+            <Form.Item className="mb-0">
               <Button
                 type="primary"
                 htmlType="submit"
                 loading={loading}
-                className="w-full h-12 rounded-lg font-medium text-base"
-                size="large"
+                block
+                style={{ 
+                  height: '44px', 
+                  borderRadius: '8px',
+                  background: primaryColor,
+                }}
               >
-                {loading ? '登录中...' : '登录'}
+                登录
               </Button>
             </Form.Item>
           </Form>
 
           {/* 演示账号 */}
-          <Divider className={theme === 'dark' ? 'border-gray-600' : 'border-gray-200'}>
-            <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>
-              演示账号
+          <Divider className={isDark ? 'border-gray-600' : 'border-gray-200'}>
+            <span className={isDark ? 'text-gray-400' : 'text-gray-500'}>
+              快速登录
             </span>
           </Divider>
 
-          <Space direction="vertical" className="w-full" size="middle">
+          <div className="grid grid-cols-2 gap-3">
             <Button
-              block
               onClick={() => handleDemoLogin('admin')}
               className={cn(
                 "h-10 rounded-lg",
-                theme === 'dark' 
+                isDark 
                   ? "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600" 
                   : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
               )}
             >
-              管理员登录 (admin/123456)
+              管理员
             </Button>
             <Button
-              block
               onClick={() => handleDemoLogin('user')}
               className={cn(
                 "h-10 rounded-lg",
-                theme === 'dark' 
+                isDark 
                   ? "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600" 
                   : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
               )}
             >
-              普通用户登录 (user/user123)
+              用户
             </Button>
-          </Space>
+          </div>
         </Card>
 
-        {/* 底部信息 */}
-        <div className="text-center mt-8">
+        {/* 底部版权 */}
+        <div className="mt-10 text-center">
           <p className={cn(
             "text-sm",
-            theme === 'dark' ? "text-gray-400" : "text-gray-500"
+            isDark ? "text-gray-400" : "text-gray-500"
           )}>
-            © 2024 智能客服系统. All rights reserved.
+            © 2024 智能客服系统 · 基于 React+FastAPI 构建
           </p>
         </div>
       </div>

@@ -7,7 +7,6 @@ interface AppState {
   keepAliveList: string[]
   language: string
   collapsed: boolean
-  theme: 'light' | 'dark'
   fullscreen: boolean
   setLoading: (loading: boolean) => void
   setReloading: (reloading: boolean) => void
@@ -17,8 +16,6 @@ interface AppState {
   setLanguage: (language: string) => void
   setCollapsed: (collapsed: boolean) => void
   toggleCollapsed: () => void
-  setTheme: (theme: 'light' | 'dark') => void
-  toggleTheme: () => void
   setFullscreen: (fullscreen: boolean) => void
   toggleFullscreen: () => void
 }
@@ -31,7 +28,6 @@ export const useAppStore = create<AppState>()(
       keepAliveList: [],
       language: 'zh-CN',
       collapsed: false,
-      theme: 'light',
       fullscreen: false,
 
       setLoading: (loading: boolean) => {
@@ -71,22 +67,6 @@ export const useAppStore = create<AppState>()(
         set({ collapsed: !collapsed })
       },
 
-      setTheme: (theme: 'light' | 'dark') => {
-        set({ theme })
-        // 更新HTML根元素的class
-        if (theme === 'dark') {
-          document.documentElement.classList.add('dark')
-        } else {
-          document.documentElement.classList.remove('dark')
-        }
-      },
-
-      toggleTheme: () => {
-        const { theme } = get()
-        const newTheme = theme === 'light' ? 'dark' : 'light'
-        get().setTheme(newTheme)
-      },
-
       setFullscreen: (fullscreen: boolean) => {
         set({ fullscreen })
       },
@@ -102,7 +82,6 @@ export const useAppStore = create<AppState>()(
         keepAliveList: state.keepAliveList,
         language: state.language,
         collapsed: state.collapsed,
-        theme: state.theme,
       }),
     }
   )

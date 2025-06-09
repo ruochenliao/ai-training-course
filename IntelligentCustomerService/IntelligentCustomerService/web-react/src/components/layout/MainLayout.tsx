@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import {Avatar, Badge, Button, Drawer, Dropdown, Layout, Menu, Space} from 'antd'
+import {Avatar, Badge, Button, Drawer, Dropdown, Layout, Menu, Tooltip} from 'antd'
 import {
     BellOutlined,
     FullscreenExitOutlined,
@@ -7,9 +7,7 @@ import {
     LogoutOutlined,
     MenuFoldOutlined,
     MenuUnfoldOutlined,
-    MoonOutlined,
     SettingOutlined,
-    SunOutlined,
     UserOutlined,
 } from '@ant-design/icons'
 import {Outlet, useLocation, useNavigate} from 'react-router-dom'
@@ -20,6 +18,8 @@ import {useTagsStore} from '../../store/tags'
 import {cn} from '../../utils'
 import TagsView from '@/components/layout/TagsView'
 import Breadcrumb from '@/components/layout/Breadcrumb'
+import {useTheme} from '../../contexts/ThemeContext'
+import ThemeSettings from '../ThemeSettings'
 
 const { Header, Sider, Content } = Layout
 
@@ -34,12 +34,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   const {
     collapsed,
-    theme,
     fullscreen,
     setCollapsed,
-    toggleTheme,
     toggleFullscreen,
   } = useAppStore()
+
+  const { isDark, primaryColor } = useTheme()
+  const theme = isDark ? 'dark' : 'light'
 
   const { user, logout } = useAuthStore()
   const { menus } = usePermissionStore()
@@ -161,7 +162,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       {/* 侧边栏 */}
       {isMobile ? (
         <Drawer
-          title="智能客服系统"
+          title={
+            <div className="flex items-center gap-2">
+              <div 
+                className="w-6 h-6 rounded-full flex-center" 
+                style={{ backgroundColor: primaryColor }}
+              >
+                <span className="text-white text-sm font-bold">智</span>
+              </div>
+              <span className={isDark ? "text-white" : "text-gray-800"}>智能客服系统</span>
+            </div>
+          }
           placement="left"
           onClose={() => setCollapsed(true)}
           open={!collapsed}
@@ -169,7 +180,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           width={256}
         >
           <Menu
-            theme={theme}
+            theme={theme as "light" | "dark"}
             mode="inline"
             selectedKeys={[location.pathname]}
             items={menuItems}
@@ -181,26 +192,48 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           trigger={null}
           collapsible
           collapsed={collapsed}
-          theme={theme}
+          theme={theme as "light" | "dark"}
           width={256}
-          className="shadow-md"
+          className={cn(
+            "shadow-md relative z-10",
+            isDark ? "bg-gray-900" : "bg-white"
+          )}
+          style={{ 
+            boxShadow: isDark ? '0 0 10px rgba(0,0,0,0.2)' : '0 0 10px rgba(0,0,0,0.05)',
+            borderRight: isDark ? '1px solid #333' : '1px solid #f0f0f0'
+          }}
         >
-          <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-700">
-            <h1 className={cn(
-              "font-bold text-lg transition-all duration-300",
-              collapsed ? "text-xs" : "text-lg",
-              theme === 'dark' ? "text-white" : "text-gray-800"
-            )}>
-              {collapsed ? "智客" : "智能客服系统"}
-            </h1>
+          <div className={cn(
+            "h-16 flex items-center px-4 border-b transition-all duration-300",
+            isDark ? "border-gray-700" : "border-gray-200"
+          )}>
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-8 h-8 rounded-full flex-center"
+                style={{ backgroundColor: primaryColor }}
+              >
+                <span className="text-white text-sm font-bold">智</span>
+              </div>
+              {!collapsed && (
+                <h1 className={cn(
+                  "font-bold transition-all duration-300 whitespace-nowrap",
+                  isDark ? "text-white" : "text-gray-800"
+                )}>
+                  智能客服系统
+                </h1>
+              )}
+            </div>
           </div>
           <Menu
-            theme={theme}
+            theme={theme as "light" | "dark"}
             mode="inline"
             selectedKeys={[location.pathname]}
             items={menuItems}
             onClick={handleMenuClick}
-            className="border-r-0"
+            className={cn(
+              "border-r-0",
+              isDark ? "bg-gray-900" : "bg-white"
+            )}
           />
         </Sider>
       )}
@@ -208,42 +241,58 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <Layout>
         {/* 头部 */}
         <Header className={cn(
-          "px-4 flex items-center justify-between shadow-sm",
-          theme === 'dark' ? "bg-gray-800" : "bg-white"
-        )}>
+          "px-4 flex items-center justify-between h-16 z-10",
+          isDark ? "bg-gray-900 border-b border-gray-700" : "bg-white border-b border-gray-200"
+        )}
+        style={{ 
+          boxShadow: isDark ? '0 2px 4px rgba(0,0,0,0.1)' : '0 2px 4px rgba(0,0,0,0.03)',
+          padding: '0 16px'
+        }}
+        >
           <div className="flex items-center">
             <Button
               type="text"
               icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
               onClick={toggleSidebar}
-              className="mr-4"
+              className={cn(
+                "mr-4 flex-center",
+                isDark ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-gray-900"
+              )}
             />
             <Breadcrumb />
           </div>
 
-          <Space size="middle">
-            {/* 主题切换 */}
-            <Button
-              type="text"
-              icon={theme === 'dark' ? <SunOutlined /> : <MoonOutlined />}
-              onClick={toggleTheme}
-            />
-
+          <div className="flex items-center gap-2">
             {/* 全屏切换 */}
-            <Button
-              type="text"
-              icon={fullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
-              onClick={handleFullscreen}
-            />
-
-            {/* 通知 */}
-            <Badge count={5} size="small">
+            <Tooltip title={fullscreen ? '退出全屏' : '全屏'}>
               <Button
                 type="text"
-                icon={<BellOutlined />}
-                onClick={() => {/* TODO: 实现通知功能 */}}
+                icon={fullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+                onClick={handleFullscreen}
+                className={cn(
+                  "flex-center",
+                  isDark ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-gray-900"
+                )}
               />
-            </Badge>
+            </Tooltip>
+
+            {/* 通知 */}
+            <Tooltip title="通知">
+              <Badge count={5} size="small">
+                <Button
+                  type="text"
+                  icon={<BellOutlined />}
+                  onClick={() => {/* TODO: 实现通知功能 */}}
+                  className={cn(
+                    "flex-center",
+                    isDark ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-gray-900"
+                  )}
+                />
+              </Badge>
+            </Tooltip>
+
+            {/* 主题设置 */}
+            <ThemeSettings />
 
             {/* 用户信息 */}
             <Dropdown
@@ -253,32 +302,54 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               }}
               placement="bottomRight"
             >
-              <Space className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1 rounded">
+              <div className={cn(
+                "flex items-center gap-2 cursor-pointer py-1 px-2 rounded-md transition-colors", 
+                isDark 
+                  ? "hover:bg-gray-800" 
+                  : "hover:bg-gray-100"
+              )}>
                 <Avatar
-                  size="small"
+                  size={32}
                   icon={<UserOutlined />}
                   src={user?.avatar}
+                  style={{ backgroundColor: primaryColor }}
                 />
                 <span className={cn(
-                  "text-sm",
-                  theme === 'dark' ? "text-white" : "text-gray-700"
+                  "text-sm hidden md:inline",
+                  isDark ? "text-gray-200" : "text-gray-700"
                 )}>
                   {user?.username || '用户'}
                 </span>
-              </Space>
+              </div>
             </Dropdown>
-          </Space>
+          </div>
         </Header>
 
         {/* 标签页 */}
         <TagsView />
 
         {/* 内容区域 */}
-        <Content className={cn(
-          "m-4 p-6 rounded-lg shadow-sm min-h-[calc(100vh-200px)]",
-          theme === 'dark' ? "bg-gray-800" : "bg-white"
-        )}>
-          {children || <Outlet />}
+        <Content 
+          className={cn(
+            "m-4 overflow-auto",
+            isDark ? "bg-gray-900" : "bg-gray-50"
+          )}
+          style={{ 
+            minHeight: 'calc(100vh - 112px)',
+            padding: '16px'
+          }}
+        >
+          <div className={cn(
+            "rounded-lg h-full",
+            isDark ? "bg-gray-800" : "bg-white"
+          )}
+          style={{ 
+            boxShadow: isDark ? '0 0 10px rgba(0,0,0,0.1)' : '0 0 10px rgba(0,0,0,0.03)',
+            padding: '16px'
+          }}
+          >
+            {children || <Outlet />}
+          </div>
         </Content>
       </Layout>
     </Layout>

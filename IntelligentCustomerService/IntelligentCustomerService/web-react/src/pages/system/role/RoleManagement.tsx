@@ -1,55 +1,54 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {Button, Card, Drawer, Form, Input, message, Modal, Space, Table, Tabs, Tree} from 'antd';
-import {PlusOutlined} from '@ant-design/icons';
+import {Button, Card, Drawer, Form, Input, message, Modal, Space, Table, Tabs, Tag, Tree, Typography} from 'antd';
+import type {DataNode} from 'antd/es/tree';
+import {
+    DeleteOutlined,
+    EditOutlined,
+    PlusOutlined,
+    ReloadOutlined,
+    SafetyCertificateOutlined,
+    SearchOutlined
+} from '@ant-design/icons';
 import {type Role, roleApi, type RoleCreateData, type RoleUpdateData} from '../../../api/role';
 import {type Menu, menuApi} from '../../../api/menu';
 import {apiApi, type ApiItem} from '../../../api/api';
+import {useTheme} from '../../../contexts/ThemeContext';
+import {cn} from '../../../utils';
+import '../menu/style.css';
+import CommonPagination from '@/components/CommonPagination';
 
-// 使用从API导入的Menu类型
-type MenuTreeData = {
-  key: string;
-  title: string;
-  path?: string;
-  component?: string;
-  perms?: string;
-  remark?: string;
-  children?: MenuTreeData[];
+const { Title } = Typography;
+
+// 扩展Ant Design的DataNode类型
+interface MenuTreeNode extends DataNode {
+  path?: string | undefined;
+  component?: string | undefined;
+  perms?: string | undefined;
+  remark?: string | undefined;
+  children?: MenuTreeNode[] | undefined;
 }
 
-interface ApiData {
-  id: number;
-  path: string;
-  method: string;
-  summary: string;
-  tags: string;
-}
-
-interface ApiTreeData {
-  key: string;
-  title: string;
-  path?: string;
-  method?: string;
-  children?: ApiTreeData[];
-}
-
-interface PermissionTreeData {
-  key: string;
-  title: string;
-  children?: PermissionTreeData[];
+interface ApiTreeNode extends DataNode {
+  path?: string | undefined;
+  method?: string | undefined;
+  children?: ApiTreeNode[] | undefined;
 }
 
 const RoleManagement: React.FC = () => {
+  const { isDark, primaryColor } = useTheme();
   const [loading, setLoading] = useState<boolean>(false);
   const [roleData, setRoleData] = useState<Role[]>([]);
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
+  const [total, setTotal] = useState<number>(0);
+  const [current, setCurrent] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [drawerVisible, setDrawerVisible] = useState<boolean>(false);
   const [modalTitle, setModalTitle] = useState<string>('');
   const [currentRole, setCurrentRole] = useState<Role | null>(null);
-  const [menuData, setMenuData] = useState<MenuTreeData[]>([]);
-  const [apiData, setApiData] = useState<ApiTreeData[]>([]);
-  const [selectedMenuIds, setSelectedMenuIds] = useState<number[]>([]);
-  const [selectedApiIds, setSelectedApiIds] = useState<string[]>([]);
+  const [menuData, setMenuData] = useState<MenuTreeNode[]>([]);
+  const [apiData, setApiData] = useState<ApiTreeNode[]>([]);
+  const [selectedMenuIds, setSelectedMenuIds] = useState<React.Key[]>([]);
+  const [selectedApiIds, setSelectedApiIds] = useState<React.Key[]>([]);
   const [searchPattern, setSearchPattern] = useState<string>('');
   const [form] = Form.useForm();
   const [searchForm] = Form.useForm();
@@ -60,20 +59,19 @@ const RoleManagement: React.FC = () => {
     try {
       const searchValues = searchForm.getFieldsValue();
       const queryParams = {
-        page: pagination.current,
-        page_size: pagination.pageSize,
+        page: current,
+        page_size: pageSize,
         role_name: searchValues.role_name,
         ...params
       };
       
       const response = await roleApi.list(queryParams);
       if (response.code === 200) {
-        // 后端返回的数据结构是 { data: [...], total: number, page: number, page_size: number }
+        // 处理数据结构
         setRoleData(response.data || []);
-        setPagination({
-          ...pagination,
-          total: response.total || 0,
-        });
+        setTotal(response.total || 0);
+        setCurrent(response.page || current);
+        setPageSize(response.page_size || pageSize);
       } else {
         message.error(response.msg || '获取角色列表失败');
       }
@@ -83,11 +81,11 @@ const RoleManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [pagination.current, pagination.pageSize, searchForm]);
+  }, [current, pageSize, searchForm]);
 
   // 构建菜单树结构
-  const buildMenuTree = (data: Menu[]): MenuTreeData[] => {
-    const convertToTreeData = (items: Menu[]): MenuTreeData[] => {
+  const buildMenuTree = (data: Menu[]): MenuTreeNode[] => {
+    const convertToTreeData = (items: Menu[]): MenuTreeNode[] => {
       return items.map(item => ({
         key: item.id.toString(),
         title: item.name,
@@ -102,18 +100,18 @@ const RoleManagement: React.FC = () => {
   };
 
   // 过滤树数据
-  const filterTreeData = (data: MenuTreeData[], searchText: string): MenuTreeData[] => {
+  const filterTreeData = (data: MenuTreeNode[], searchText: string): MenuTreeNode[] => {
     if (!searchText) return data;
     
-    const filterNode = (node: MenuTreeData): MenuTreeData | null => {
+    const filterNode = (node: MenuTreeNode): MenuTreeNode | null => {
       const searchLower = searchText.toLowerCase();
-      const titleMatch = node.title && node.title.toLowerCase().includes(searchLower);
+      const titleMatch = node.title && String(node.title).toLowerCase().includes(searchLower);
       const pathMatch = node.path && node.path.toLowerCase().includes(searchLower);
       const componentMatch = node.component && node.component.toLowerCase().includes(searchLower);
       const permsMatch = node.perms && node.perms.toLowerCase().includes(searchLower);
       const remarkMatch = node.remark && node.remark.toLowerCase().includes(searchLower);
       
-      const filteredChildren = node.children ? node.children.map(filterNode).filter(Boolean) as MenuTreeData[] : [];
+      const filteredChildren = node.children ? node.children.map(child => filterNode(child as MenuTreeNode)).filter(Boolean) as MenuTreeNode[] : [];
       
       if (titleMatch || pathMatch || componentMatch || permsMatch || remarkMatch || filteredChildren.length > 0) {
         return {
@@ -125,17 +123,18 @@ const RoleManagement: React.FC = () => {
       return null;
     };
     
-    return data.map(filterNode).filter(Boolean) as MenuTreeData[];
+    return data.map(filterNode).filter(Boolean) as MenuTreeNode[];
   };
 
   // 过滤API树数据
-  const filterApiTreeData = (data: ApiTreeData[], searchText: string): ApiTreeData[] => {
+  const filterApiTreeData = (data: ApiTreeNode[], searchText: string): ApiTreeNode[] => {
     if (!searchText) return data;
     
-    const filterApiNode = (node: ApiTreeData): ApiTreeData | null => {
-      const titleMatch = node.title.toLowerCase().includes(searchText.toLowerCase());
-      const pathMatch = node.path && node.path.toLowerCase().includes(searchText.toLowerCase());
-      const filteredChildren = node.children ? node.children.map(filterApiNode).filter(Boolean) as ApiTreeData[] : [];
+    const filterApiNode = (node: ApiTreeNode): ApiTreeNode | null => {
+      const searchLower = searchText.toLowerCase();
+      const titleMatch = node.title && String(node.title).toLowerCase().includes(searchLower);
+      const pathMatch = node.path && node.path.toLowerCase().includes(searchLower);
+      const filteredChildren = node.children ? node.children.map(child => filterApiNode(child as ApiTreeNode)).filter(Boolean) as ApiTreeNode[] : [];
       
       if (titleMatch || pathMatch || filteredChildren.length > 0) {
         return {
@@ -147,13 +146,13 @@ const RoleManagement: React.FC = () => {
       return null;
     };
     
-    return data.map(filterApiNode).filter(Boolean) as ApiTreeData[];
+    return data.map(filterApiNode).filter(Boolean) as ApiTreeNode[];
   };
 
   // 构建API树结构
-  const buildApiTree = (data: ApiItem[]): ApiTreeData[] => {
-    const processedData: ApiTreeData[] = [];
-    const groupedData: { [key: string]: ApiTreeData } = {};
+  const buildApiTree = (data: ApiItem[]): ApiTreeNode[] => {
+    const processedData: ApiTreeNode[] = [];
+    const groupedData: { [key: string]: ApiTreeNode } = {};
 
     data.forEach((item) => {
       const tags = item.tags;
@@ -170,12 +169,14 @@ const RoleManagement: React.FC = () => {
         };
       }
 
-      groupedData[path].children!.push({
-        key: unique_id,
-        title: item.summary,
-        path: item.path,
-        method: item.method
-      });
+      if (groupedData[path].children) {
+        (groupedData[path].children as ApiTreeNode[]).push({
+          key: unique_id,
+          title: item.summary,
+          path: item.path,
+          method: item.method
+        });
+      }
     });
     
     processedData.push(...Object.values(groupedData));
@@ -189,29 +190,30 @@ const RoleManagement: React.FC = () => {
 
   // 搜索角色
   const handleSearch = () => {
-    setPagination({ ...pagination, current: 1 });
+    setCurrent(1); // 重置到第一页
     fetchRoleData({ page: 1 });
   };
 
   // 重置搜索
   const handleReset = () => {
     searchForm.resetFields();
-    setPagination({ ...pagination, current: 1 });
+    setCurrent(1); // 重置到第一页
     fetchRoleData({ page: 1 });
   };
 
   const handleAddRole = () => {
-    setModalTitle('新建角色');
+    setModalTitle('新增角色');
     setCurrentRole(null);
     form.resetFields();
     setModalVisible(true);
   };
 
   const handleEditRole = (record: Role) => {
+    setModalTitle('编辑角色');
     setCurrentRole(record);
     form.setFieldsValue({
       name: record.name,
-      remark: record.desc,
+      desc: record.desc
     });
     setModalVisible(true);
   };
@@ -220,13 +222,14 @@ const RoleManagement: React.FC = () => {
     try {
       const response = await roleApi.delete(id);
       if (response.code === 200) {
-        message.success('删除成功');
+        message.success('删除角色成功');
         fetchRoleData();
       } else {
-        message.error(response.msg || '删除失败');
+        message.error(response.msg || '删除角色失败');
       }
     } catch (error) {
-      message.error('删除失败');
+      console.error('删除角色失败:', error);
+      message.error('删除角色失败');
     }
   };
 
@@ -239,128 +242,158 @@ const RoleManagement: React.FC = () => {
         const updateData: RoleUpdateData = {
           id: currentRole.id,
           name: values.name,
-          desc: values.remark,
+          desc: values.desc
         };
         
         const response = await roleApi.update(updateData);
         if (response.code === 200) {
-          message.success('更新成功');
-          fetchRoleData();
+          message.success('更新角色成功');
           setModalVisible(false);
+          fetchRoleData();
         } else {
-          message.error(response.msg || '更新失败');
+          message.error(response.msg || '更新角色失败');
         }
       } else {
-        // 添加角色
+        // 创建角色
         const createData: RoleCreateData = {
           name: values.name,
-          desc: values.remark,
+          desc: values.desc
         };
         
         const response = await roleApi.create(createData);
         if (response.code === 200) {
-          message.success('创建成功');
-          fetchRoleData();
+          message.success('创建角色成功');
           setModalVisible(false);
+          fetchRoleData();
         } else {
-          message.error(response.msg || '创建失败');
+          message.error(response.msg || '创建角色失败');
         }
       }
     } catch (error) {
-      // 表单验证失败
+      console.error('保存角色失败:', error);
     }
   };
 
   const handleConfigPermission = async (record: Role) => {
+    setCurrentRole(record);
+    setDrawerVisible(true);
+    
     try {
-      setCurrentRole(record);
+      // 获取该角色已分配的权限
+      const roleAuthResponse = await roleApi.getAuthorized(record.id);
       
-      // 同时获取菜单、API和角色权限信息
-      const [menusResponse, apisResponse, roleAuthorizedResponse] = await Promise.all([
-        menuApi.getMenuList({ page: 1, page_size: 9999 }),
-        apiApi.getApis({ page: 1, page_size: 9999 }),
-        roleApi.getAuthorized(record.id),
+      if (roleAuthResponse.code === 200 && roleAuthResponse.data) {
+        const { menus, apis } = roleAuthResponse.data;
+        setSelectedMenuIds(menus.map((menu: any) => menu.id.toString()));
+        
+        // 转换API结构以匹配树结构的key
+        const apiKeys = apis.map((api: any) => `${api.method.toLowerCase()}${api.path}`);
+        setSelectedApiIds(apiKeys);
+      } else {
+        setSelectedMenuIds([]);
+        setSelectedApiIds([]);
+      }
+      
+      // 获取所有菜单和API
+      const [menuResponse, apiResponse] = await Promise.all([
+        menuApi.getMenuTree(),
+        apiApi.getApis()
       ]);
       
-      // 处理菜单数据
-      if (menusResponse.code === 200) {
-        setMenuData(buildMenuTree(menusResponse.data || []));
+      if (menuResponse.code === 200 && menuResponse.data) {
+        const menuTree = buildMenuTree(menuResponse.data);
+        setMenuData(menuTree);
+      } else {
+        setMenuData([]);
       }
       
-      // 处理API数据
-      if (apisResponse.code === 200) {
-        setApiData(buildApiTree(apisResponse.data || []));
+      if (apiResponse.code === 200 && apiResponse.data) {
+        const apiTree = buildApiTree(apiResponse.data);
+        setApiData(apiTree);
+      } else {
+        setApiData([]);
       }
-      
-      // 处理角色权限
-      if (roleAuthorizedResponse.code === 200) {
-        const roleAuth = roleAuthorizedResponse.data;
-        setSelectedMenuIds(roleAuth.menus.map((v: any) => v.id));
-        setSelectedApiIds(roleAuth.apis.map((v: any) => v.method.toLowerCase() + v.path));
-      }
-      
-      setDrawerVisible(true);
     } catch (error) {
-      message.error('获取权限信息失败');
-      console.error('Error loading permission data:', error);
+      console.error('获取权限数据失败:', error);
+      message.error('获取权限数据失败');
     }
   };
 
   const handlePermissionOk = async () => {
     try {
-      if (currentRole) {
-        // 构建API信息
-        const apiInfos: Array<{ method: string; path: string }> = [];
+      // 将选中的API ID转换为API信息对象
+      const apiInfos: Array<{ method: string; path: string }> = [];
+      
+      // 递归查找API信息
+      const findApiInfo = (nodes: ApiTreeNode[]): Array<{ method: string; path: string }> => {
+        let results: Array<{ method: string; path: string }> = [];
         
-        // 遍历选中的API ID，提取method和path
-        selectedApiIds.forEach(apiId => {
-          // 在API树中查找对应的API信息
-          const findApiInfo = (nodes: ApiTreeData[]): { method: string; path: string } | null => {
-            for (const node of nodes) {
-              if (node.key === apiId && node.method && node.path) {
-                return { method: node.method, path: node.path };
-              }
-              if (node.children) {
-                const found = findApiInfo(node.children);
-                if (found) return found;
-              }
-            }
-            return null;
-          };
+        nodes.forEach(node => {
+          if (selectedApiIds.includes(node.key) && node.method && node.path) {
+            results.push({ 
+              method: node.method.toUpperCase(), 
+              path: node.path 
+            });
+          }
           
-          const apiInfo = findApiInfo(apiData);
-          if (apiInfo) {
-            apiInfos.push(apiInfo);
+          if (node.children && node.children.length > 0) {
+            results = [...results, ...findApiInfo(node.children as ApiTreeNode[])];
           }
         });
         
-        const updateData = {
-          id: currentRole.id,
-          menu_ids: selectedMenuIds,
-          api_infos: apiInfos,
-        };
-        
-        const response = await roleApi.updateAuthorized(updateData);
-        if (response.code === 200) {
-          message.success('设置成功');
-          setDrawerVisible(false);
-        } else {
-          message.error(response.msg || '设置失败');
-        }
+        return results;
+      };
+      
+      apiInfos.push(...findApiInfo(apiData));
+      
+      const data = {
+        id: currentRole!.id,
+        menu_ids: selectedMenuIds.map(id => Number(id.toString())),
+        api_infos: apiInfos
+      };
+      
+      const response = await roleApi.updateAuthorized(data);
+      
+      if (response.code === 200) {
+        message.success('更新权限成功');
+        setDrawerVisible(false);
+      } else {
+        message.error(response.msg || '更新权限失败');
       }
     } catch (error) {
-      message.error('设置权限失败');
+      console.error('更新权限失败:', error);
+      message.error('更新权限失败');
     }
   };
 
+  // 处理分页变化
+  const handleTableChange = (page: number, size: number) => {
+    setCurrent(page);
+    setPageSize(size);
+    fetchRoleData({
+      page: page,
+      page_size: size,
+    });
+  };
+
+  // 表格列定义
   const columns = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+      width: 80,
+    },
     {
       title: '角色名称',
       dataIndex: 'name',
       key: 'name',
+      render: (text: string) => (
+        <div className="font-medium">{text}</div>
+      )
     },
     {
-      title: '备注',
+      title: '描述',
       dataIndex: 'desc',
       key: 'desc',
     },
@@ -368,170 +401,291 @@ const RoleManagement: React.FC = () => {
       title: '创建时间',
       dataIndex: 'created_at',
       key: 'created_at',
-    },
-    {
-      title: '更新时间',
-      dataIndex: 'updated_at',
-      key: 'updated_at',
+      render: (date: string) => new Date(date).toLocaleString(),
     },
     {
       title: '操作',
       key: 'action',
-      render: (text: any, record: Role) => (
-        <Space size="middle">
-          <Button type="link" onClick={() => handleEditRole(record)}>
-            编辑
-          </Button>
-          <Button type="link" onClick={() => handleConfigPermission(record)}>
+      width: 280,
+      render: (_: any, record: Role) => (
+        <Space>
+          <Button 
+            type="link" 
+            size="small" 
+            icon={<SafetyCertificateOutlined />} 
+            onClick={() => handleConfigPermission(record)}
+            className="action-button"
+          >
             权限配置
           </Button>
-          <Button type="link" danger onClick={() => handleDeleteRole(record.id)}>
-            删除
+          <Button 
+            type="link" 
+            size="small" 
+            icon={<EditOutlined />} 
+            onClick={() => handleEditRole(record)}
+            className="action-button"
+          >
+            编辑
           </Button>
+          {record.name !== 'admin' && (
+            <Button 
+              type="link" 
+              danger 
+              size="small" 
+              icon={<DeleteOutlined />} 
+              onClick={() => handleDeleteRole(record.id)}
+              className="action-button delete-button"
+            >
+              删除
+            </Button>
+          )}
         </Space>
       ),
     },
   ];
 
-  return (
-    <Card
-      title="角色管理"
+  // 角色表单内容
+  const roleFormContent = (
+    <Form
+      form={form}
+      layout="vertical"
+      requiredMark={false}
+      className="system-form"
     >
-      {/* 搜索表单 */}
-      <div style={{ marginBottom: 16 }}>
-        <Form
-          form={searchForm}
-          layout="inline"
-          onFinish={handleSearch}
-        >
-          <Form.Item name="name" label="角色名称">
-            <Input placeholder="请输入角色名称" allowClear />
-          </Form.Item>
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit">
-                查询
-              </Button>
-              <Button onClick={handleReset}>
-                重置
-              </Button>
-              <Button type="primary" icon={<PlusOutlined />} onClick={handleAddRole}>
-                新增
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </div>
+      <Form.Item
+        name="name"
+        label="角色名称"
+        rules={[
+          { required: true, message: '请输入角色名称' },
+          { min: 2, message: '角色名称至少2个字符' },
+          { max: 50, message: '角色名称最多50个字符' }
+        ]}
+      >
+        <Input placeholder="请输入角色名称" />
+      </Form.Item>
+      
+      <Form.Item
+        name="desc"
+        label="角色描述"
+      >
+        <Input.TextArea 
+          placeholder="请输入角色描述"
+          rows={4}
+          maxLength={200}
+          showCount 
+        />
+      </Form.Item>
+    </Form>
+  );
 
-      <Table
-        columns={columns}
-        dataSource={roleData}
-        rowKey="id"
-        pagination={pagination}
-        loading={loading}
-        onChange={(tablePagination) => {
-          setPagination({
-            ...pagination,
-            current: tablePagination.current || 1,
-          });
-        }}
-      />
+  // 渲染API树方法节点
+  const renderApiTreeTitle = (node: ApiTreeNode) => {
+    if (node.method) {
+      const methodColors: Record<string, string> = {
+        get: 'green',
+        post: 'blue',
+        put: 'orange',
+        delete: 'red',
+        patch: 'purple'
+      };
+      
+      const method = node.method.toLowerCase();
+      const color = methodColors[method] || 'default';
+      
+      return (
+        <div className="flex items-center">
+          <Tag color={color} className="mr-2 uppercase">
+            {method}
+          </Tag>
+          <span>{String(node.title)}</span>
+          {node.path && <span className="ml-2 text-gray-400 text-xs">{node.path}</span>}
+        </div>
+      );
+    }
+    
+    return <span>{String(node.title)}</span>;
+  };
 
-      {/* 添加/编辑角色对话框 */}
+  return (
+    <div className="role-management" style={{ padding: '24px' }}>
+      {/* 角色列表卡片 */}
+      <Card 
+        title={<Title level={4}>角色管理</Title>}
+        style={{ borderRadius: '4px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+        className={cn(
+          "system-card",
+          isDark ? "bg-gray-800 border-gray-700" : "bg-white"
+        )}
+        bordered={false}
+      >
+        {/* 搜索表单 */}
+        <div className="mb-4">
+          <Form
+            form={searchForm}
+            layout="inline"
+            onFinish={handleSearch}
+            className="gap-4 flex-wrap system-form"
+            style={{ rowGap: '12px' }}
+          >
+            <Form.Item name="role_name" label="角色名称">
+              <Input placeholder="请输入角色名称" allowClear />
+            </Form.Item>
+            <Form.Item>
+              <Space>
+                <Button 
+                  type="primary" 
+                  htmlType="submit" 
+                  icon={<SearchOutlined />}
+                  className="search-button"
+                  style={{ backgroundColor: primaryColor }}
+                >
+                  搜索
+                </Button>
+                <Button 
+                  icon={<ReloadOutlined />} 
+                  onClick={handleReset}
+                  className="reset-button"
+                >
+                  重置
+                </Button>
+              </Space>
+            </Form.Item>
+          </Form>
+        </div>
+        
+        {/* 工具栏 */}
+        <div className="mb-4 flex justify-between">
+          <div className={cn(
+            isDark ? "text-white" : "text-gray-800"
+          )}>
+            角色列表
+          </div>
+          <Space>
+            <Button 
+              type="primary" 
+              icon={<PlusOutlined />} 
+              onClick={handleAddRole}
+              className="add-button"
+              style={{ backgroundColor: primaryColor }}
+            >
+              新增角色
+            </Button>
+            <Button 
+              icon={<ReloadOutlined />} 
+              onClick={() => fetchRoleData()}
+              className="reset-button"
+            >
+              刷新
+            </Button>
+          </Space>
+        </div>
+        
+        {/* 角色表格 */}
+        <Table
+          columns={columns}
+          dataSource={roleData}
+          rowKey="id"
+          pagination={CommonPagination({
+            current,
+            pageSize,
+            total,
+            onChange: handleTableChange
+          })}
+          loading={loading}
+          className={cn("system-table", isDark ? "ant-table-dark" : "")}
+          bordered
+          size="middle"
+        />
+      </Card>
+
+      {/* 角色表单弹窗 */}
       <Modal
         title={modalTitle}
         open={modalVisible}
         onOk={handleModalOk}
         onCancel={() => setModalVisible(false)}
-        destroyOnClose
+        width={550}
+        className="system-modal"
       >
-        <Form
-          form={form}
-          layout="vertical"
-        >
-          <Form.Item
-            name="name"
-            label="角色名称"
-            rules={[{ required: true, message: '请输入角色名称' }]}
-          >
-            <Input placeholder="请输入角色名称" />
-          </Form.Item>
-          
-          <Form.Item
-            name="remark"
-            label="备注"
-          >
-            <Input.TextArea 
-              rows={4} 
-              placeholder="请输入备注" 
-            />
-          </Form.Item>
-        </Form>
+        {roleFormContent}
       </Modal>
 
-      {/* 分配权限对话框 */}
+      {/* 权限配置抽屉 */}
       <Drawer
-        title="权限配置"
+        title={`配置权限: ${currentRole?.name || ''}`}
+        width={700}
         open={drawerVisible}
         onClose={() => setDrawerVisible(false)}
-        width={800}
+        maskClosable={false}
         footer={
           <div style={{ textAlign: 'right' }}>
-            <Button onClick={() => setDrawerVisible(false)} style={{ marginRight: 8 }}>
+            <Button style={{ marginRight: 8 }} onClick={() => setDrawerVisible(false)}>
               取消
             </Button>
-            <Button type="primary" onClick={handlePermissionOk}>
-              确定
+            <Button 
+              type="primary" 
+              onClick={handlePermissionOk}
+              style={{ backgroundColor: primaryColor }}
+            >
+              保存
             </Button>
           </div>
         }
+        className="system-drawer"
       >
-        <Tabs defaultActiveKey="menu">
-          <Tabs.TabPane tab="菜单权限" key="menu">
-            <div style={{ marginBottom: 16 }}>
-              <Input.Search
-                placeholder="搜索菜单"
-                value={searchPattern}
-                onChange={(e) => setSearchPattern(e.target.value)}
-                style={{ width: 200 }}
-              />
-            </div>
-            <Tree
-              checkable
-              checkedKeys={selectedMenuIds.map(id => id.toString())}
-              onCheck={(checkedKeys) => {
-                const keys = Array.isArray(checkedKeys) ? checkedKeys : checkedKeys.checked;
-                setSelectedMenuIds(keys.map(key => parseInt(key.toString())));
-              }}
-              treeData={filterTreeData(menuData, searchPattern)}
-              fieldNames={{ title: 'title', key: 'key', children: 'children' }}
-              height={400}
-            />
-          </Tabs.TabPane>
-          <Tabs.TabPane tab="接口权限" key="api">
-            <div style={{ marginBottom: 16 }}>
-              <Input.Search
-                placeholder="搜索接口"
-                value={searchPattern}
-                onChange={(e) => setSearchPattern(e.target.value)}
-                style={{ width: 200 }}
-              />
-            </div>
-            <Tree
-              checkable
-              checkedKeys={selectedApiIds}
-              onCheck={(checkedKeys) => {
-                const keys = Array.isArray(checkedKeys) ? checkedKeys : checkedKeys.checked;
-                setSelectedApiIds(keys.map(key => key.toString()));
-              }}
-              treeData={filterApiTreeData(apiData, searchPattern)}
-              fieldNames={{ title: 'title', key: 'key', children: 'children' }}
-              height={400}
-            />
-          </Tabs.TabPane>
-        </Tabs>
+        <Input.Search 
+          placeholder="搜索权限" 
+          allowClear 
+          onChange={(e) => setSearchPattern(e.target.value)}
+          className="mb-4"
+        />
+        
+        <Tabs
+          defaultActiveKey="menu"
+          items={[
+            {
+              key: 'menu',
+              label: '菜单权限',
+              children: (
+                <div className={cn(
+                  "border rounded-lg p-4",
+                  isDark ? "border-gray-700" : "border-gray-200"
+                )}>
+                  <Tree
+                    checkable
+                    defaultExpandAll
+                    onCheck={(checked) => setSelectedMenuIds(checked as React.Key[])}
+                    checkedKeys={selectedMenuIds}
+                    treeData={filterTreeData(menuData, searchPattern)}
+                    className={isDark ? "ant-tree-dark" : ""}
+                  />
+                </div>
+              ),
+            },
+            {
+              key: 'api',
+              label: 'API权限',
+              children: (
+                <div className={cn(
+                  "border rounded-lg p-4",
+                  isDark ? "border-gray-700" : "border-gray-200"
+                )}>
+                  <Tree
+                    checkable
+                    defaultExpandAll
+                    onCheck={(checked) => setSelectedApiIds(checked as React.Key[])}
+                    checkedKeys={selectedApiIds}
+                    treeData={filterApiTreeData(apiData, searchPattern)}
+                    titleRender={renderApiTreeTitle}
+                    className={isDark ? "ant-tree-dark" : ""}
+                  />
+                </div>
+              ),
+            },
+          ]}
+        />
       </Drawer>
-    </Card>
+    </div>
   );
 };
 
