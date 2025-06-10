@@ -59,7 +59,7 @@ export const useAuthStore = create<AuthState>()(
           })
           
           return
-        } catch (error: any) {
+        } catch (error: unknown) {
           // 清除可能已设置的token
           localStorage.removeItem('token')
           set({ loading: false })

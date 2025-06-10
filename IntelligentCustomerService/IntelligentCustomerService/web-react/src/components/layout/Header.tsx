@@ -12,7 +12,7 @@ const { Text } = Typography
 const Header: React.FC = () => {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
-  const { sidebarCollapsed, toggleSidebar, isDark, toggleTheme } = useThemeStore()
+  const { sidebarCollapsed, toggleSidebar } = useThemeStore()
 
   const handleLogout = () => {
     logout()

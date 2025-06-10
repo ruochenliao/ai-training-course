@@ -90,11 +90,12 @@ const createAxiosInstance = (): AxiosInstance => {
           case 400:
             message.error(data?.msg || '请求参数错误')
             break
-          case 401:
+          case 401: {
             const { clearAuth } = useAuthStore.getState()
             clearAuth()
             window.location.href = '/login'
             break
+          }
           case 403:
             message.error('没有权限访问该资源')
             window.location.href = '/403'

@@ -4,7 +4,6 @@ import {useThemeStore} from '@/store/theme'
 import Header from './Header'
 import Sidebar from './Sidebar'
 import {Outlet} from 'react-router-dom'
-import './Layout.css'
 
 const { Content } = AntdLayout
 

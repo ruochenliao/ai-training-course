@@ -128,7 +128,7 @@ function useRequest<T = any, P = any>(
   const mutate = useCallback(
     (mutateData: T | ((oldData: T) => T)) => {
       if (typeof mutateData === 'function') {
-        setData((oldData) => (mutateData as Function)(oldData));
+        setData((oldData) => (mutateData as (oldData: T) => T)(oldData));
       } else {
         setData(mutateData);
       }
@@ -171,4 +171,4 @@ function useRequest<T = any, P = any>(
   };
 }
 
-export default useRequest; 
+export default useRequest;

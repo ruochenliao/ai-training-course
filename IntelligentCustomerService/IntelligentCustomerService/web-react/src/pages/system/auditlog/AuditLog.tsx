@@ -19,7 +19,6 @@ import type { ColumnsType } from 'antd/es/table';
 import {EyeOutlined, SearchOutlined, ReloadOutlined} from '@ant-design/icons';
 import {type AuditLog, auditLogApi, type AuditLogQueryParams} from '@/api/auditlog';
 import dayjs from 'dayjs';
-import '../menu/style.css';
 import CommonPagination from '@/components/CommonPagination';
 
 const { Title } = Typography;
@@ -317,16 +316,15 @@ const AuditLog: React.FC = () => {
   ];
 
   return (
-    <div className="audit-log" style={{ padding: '24px' }}>
+    <div className="audit-log-container">
       <Card 
         title={<Title level={4}>审计日志</Title>}
-        style={{ borderRadius: '4px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
         className="system-card"
       >
         <Form
           form={form}
           layout="horizontal"
-          className="system-form mb-5"
+          className="system-form mb-4"
         >
           <Row gutter={16}>
             <Col span={6}>
@@ -358,58 +356,54 @@ const AuditLog: React.FC = () => {
             </Col>
             <Col span={6}>
               <Form.Item name="method" label="请求方法" labelCol={{ span: 8 }}>
-                <Select placeholder="请选择请求方法" allowClear>
-                  <Select.Option value="GET">GET</Select.Option>
-                  <Select.Option value="POST">POST</Select.Option>
-                  <Select.Option value="PUT">PUT</Select.Option>
-                  <Select.Option value="DELETE">DELETE</Select.Option>
-                  <Select.Option value="PATCH">PATCH</Select.Option>
-                </Select>
+                <Select 
+                  placeholder="请选择方法" 
+                  allowClear
+                  options={[
+                    { value: 'GET', label: 'GET' },
+                    { value: 'POST', label: 'POST' },
+                    { value: 'PUT', label: 'PUT' },
+                    { value: 'DELETE', label: 'DELETE' },
+                    { value: 'PATCH', label: 'PATCH' },
+                  ]}
+                />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={16}>
-            <Col span={6}>
-              <Form.Item name="path" label="请求路径" labelCol={{ span: 8 }}>
-                <Input 
-                  placeholder="请输入请求路径" 
-                  onPressEnter={handleSearch}
-                  allowClear
-                />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item name="status" label="状态码" labelCol={{ span: 8 }}>
-                <Input 
-                  placeholder="请输入状态码" 
-                  onPressEnter={handleSearch}
-                  allowClear
-                />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item name="dateRange" label="操作时间" labelCol={{ span: 6 }}>
+            <Col span={12}>
+              <Form.Item name="dateRange" label="时间范围" labelCol={{ span: 4 }}>
                 <RangePicker 
                   showTime 
                   style={{ width: '100%' }} 
-                  placeholder={['开始时间', '结束时间']}
+                  format="YYYY-MM-DD HH:mm:ss" 
                 />
               </Form.Item>
             </Col>
-            <Col span={4} style={{ textAlign: 'right' }}>
-              <Space>
-                <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch} className="search-button">
-                  搜索
-                </Button>
-                <Button icon={<ReloadOutlined />} onClick={handleReset} className="reset-button">重置</Button>
-              </Space>
+            <Col span={12} style={{ textAlign: 'right' }}>
+              <Button 
+                type="primary" 
+                icon={<SearchOutlined />} 
+                onClick={handleSearch}
+                className="search-button mr-2"
+              >
+                搜索
+              </Button>
+              <Button 
+                icon={<ReloadOutlined />} 
+                onClick={handleReset}
+                className="reset-button"
+              >
+                重置
+              </Button>
             </Col>
           </Row>
         </Form>
-
-        <Table
-          columns={columns}
+        
+        <Table 
+          className="system-table"
           dataSource={logList}
+          columns={columns}
           rowKey="id"
           loading={loading}
           pagination={CommonPagination({
@@ -418,10 +412,8 @@ const AuditLog: React.FC = () => {
             total,
             onChange: handleTableChange
           })}
-          scroll={{ x: 1400 }}
+          scroll={{ x: 1200 }}
           size="middle"
-          bordered
-          className="system-table"
         />
       </Card>
     </div>

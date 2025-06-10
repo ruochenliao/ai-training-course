@@ -5,7 +5,6 @@ import {
     ApartmentOutlined,
     ApiOutlined,
     AppstoreOutlined,
-    CustomerServiceOutlined,
     DashboardOutlined,
     FileSearchOutlined,
     MenuOutlined,
@@ -24,29 +23,22 @@ type MenuItem = Required<MenuProps>['items'][number]
 const Sidebar: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { t } = useTranslation()
   const { sidebarCollapsed } = useThemeStore()
   
   // 默认展开的子菜单
   const [openKeys, setOpenKeys] = useState<string[]>(() => {
     const pathname = location.pathname;
-    if (pathname.startsWith('/system')) return ['system'];
-    if (pathname.startsWith('/error')) return ['error'];
-    if (pathname.startsWith('/customer-service')) return [];
+    if (pathname.startsWith('/dashboard/system')) return ['system'];
+    if (pathname.startsWith('/dashboard/error')) return ['error'];
     return [];
   });
 
   // 菜单项
   const menuItems: MenuItem[] = [
     {
-      key: '/workbench',
+      key: '/dashboard/workbench',
       icon: <DashboardOutlined />,
       label: '工作台',
-    },
-    {
-      key: '/customer-service',
-      icon: <CustomerServiceOutlined />,
-      label: '智能客服',
     },
     {
       key: 'system',
@@ -54,39 +46,39 @@ const Sidebar: React.FC = () => {
       label: '系统管理',
       children: [
         {
-          key: '/system/user',
+          key: '/dashboard/system/user',
           icon: <UserOutlined />,
           label: '用户管理',
         },
         {
-          key: '/system/role',
+          key: '/dashboard/system/role',
           icon: <TeamOutlined />,
           label: '角色管理',
         },
         {
-          key: '/system/menu',
+          key: '/dashboard/system/menu',
           icon: <MenuOutlined />,
           label: '菜单管理',
         },
         {
-          key: '/system/api',
+          key: '/dashboard/system/api',
           icon: <ApiOutlined />,
           label: 'API管理',
         },
         {
-          key: '/system/dept',
+          key: '/dashboard/system/dept',
           icon: <ApartmentOutlined />,
           label: '部门管理',
         },
         {
-          key: '/system/auditlog',
+          key: '/dashboard/system/auditlog',
           icon: <FileSearchOutlined />,
           label: '审计日志',
         },
       ],
     },
     {
-      key: '/menu',
+      key: '/dashboard/menu',
       icon: <AppstoreOutlined />,
       label: '一级菜单',
     },
@@ -96,19 +88,19 @@ const Sidebar: React.FC = () => {
       label: '错误页',
       children: [
         {
-          key: '/error/401',
+          key: '/dashboard/error/401',
           label: '401',
         },
         {
-          key: '/error/403',
+          key: '/dashboard/error/403',
           label: '403',
         },
         {
-          key: '/error/404',
+          key: '/dashboard/error/404',
           label: '404',
         },
         {
-          key: '/error/500',
+          key: '/dashboard/error/500',
           label: '500',
         },
       ],
@@ -128,8 +120,7 @@ const Sidebar: React.FC = () => {
 
   // 获取当前选中的菜单项
   const getSelectedKeys = () => {
-    let pathname = location.pathname;
-    if (pathname === '/') pathname = '/workbench';
+    const pathname = location.pathname;
     return [pathname];
   }
 

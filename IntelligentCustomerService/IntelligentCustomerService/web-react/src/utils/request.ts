@@ -43,7 +43,6 @@ request.interceptors.response.use(
     }
     
     // 处理业务错误 - 不在拦截器中显示错误消息，让组件自己处理
-    console.warn('API business error:', data.message || '请求失败')
     return data // 返回数据而不是reject，让组件处理错误
   },
   (error) => {

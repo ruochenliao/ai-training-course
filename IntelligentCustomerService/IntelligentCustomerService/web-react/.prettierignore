@@ -1,0 +1,16 @@
+# Ignore artifacts:
+build
+coverage
+dist
+node_modules
+
+# Ignore config files:
+*.config.js
+*.config.ts
+
+# Ignore all HTML files:
+*.html
+
+# Ignore other files:
+*.md
+*.sh

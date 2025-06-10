@@ -184,8 +184,6 @@ export const StateWrapper: React.FC<StateWrapperProps> = ({
   errorProps,
   onRetry,
 }) => {
-  const { t } = useTranslation();
-  
   // 自动判断空状态
   const isEmpty = empty || 
     (Array.isArray(data) && data.length === 0) ||

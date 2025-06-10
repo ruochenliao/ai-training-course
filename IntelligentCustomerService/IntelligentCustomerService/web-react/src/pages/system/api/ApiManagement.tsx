@@ -11,7 +11,6 @@ import {
 import {apiApi, ApiItem, ApiQueryParams, ApiListResponse} from '@/api/api';
 import {useTheme} from '@/contexts/ThemeContext';
 import {cn} from '@/utils';
-import '../menu/style.css';
 import CommonPagination from '@/components/CommonPagination';
 
 const { Option } = Select;

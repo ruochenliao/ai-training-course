@@ -55,7 +55,6 @@ const ThemeSettings: React.FC<ThemeSettingsProps> = ({ children }) => {
     warningColor,
     errorColor,
     infoColor,
-    setPrimaryColor,
     setThemeColor,
     activePreset,
     presets,
@@ -375,4 +374,4 @@ const ThemeSettings: React.FC<ThemeSettingsProps> = ({ children }) => {
   );
 };
 
-export default ThemeSettings; 
+export default ThemeSettings;

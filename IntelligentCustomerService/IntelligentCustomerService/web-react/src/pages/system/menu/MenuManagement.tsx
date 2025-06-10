@@ -19,7 +19,6 @@ import {
 } from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SettingOutlined, FolderOutlined, FileOutlined} from '@ant-design/icons';
 import {type Menu, menuApi} from '@/api/menu';
-import './style.css';
 
 const { Title } = Typography;
 

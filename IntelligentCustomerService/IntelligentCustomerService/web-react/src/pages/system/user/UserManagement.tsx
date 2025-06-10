@@ -33,7 +33,6 @@ import {type Role, roleApi} from '@/api/role';
 import {type Dept, deptApi} from '@/api/dept';
 import {useTheme} from '@/contexts/ThemeContext';
 import {cn} from '@/utils';
-import '../menu/style.css';
 import CommonPagination from '@/components/CommonPagination';
 
 const { Sider, Content } = Layout;

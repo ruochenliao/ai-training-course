@@ -1,10 +1,8 @@
 import React, {useCallback, useState} from 'react';
-import {Button, Collapse, FormInstance} from 'antd';
+import {Button, FormInstance} from 'antd';
 import {DownOutlined, ReloadOutlined, SearchOutlined, UpOutlined} from '@ant-design/icons';
 import {useTranslation} from 'react-i18next';
 import DynamicForm, {DynamicFormRef, FormItemConfig} from './DynamicForm';
-
-const { Panel } = Collapse;
 
 export interface QueryBarProps {
   items: FormItemConfig[];
@@ -49,7 +47,7 @@ const QueryBar = React.forwardRef<QueryBarRef, QueryBarProps>(
     const formRef = React.useRef<DynamicFormRef>(null);
 
     React.useImperativeHandle(ref, () => ({
-      form: formRef.current?.form!,
+      form: formRef.current?.form || ({} as FormInstance),
       search: () => handleSearch(),
       reset: () => handleReset(),
       getFieldsValue: () => formRef.current?.getFieldsValue() || {},
@@ -71,7 +69,7 @@ const QueryBar = React.forwardRef<QueryBarRef, QueryBarProps>(
         
         onSearch?.(filteredValues);
       } catch (error) {
-        console.error('Search validation failed:', error);
+        // Search validation failed
       }
     }, [onSearch]);
 
@@ -80,7 +78,7 @@ const QueryBar = React.forwardRef<QueryBarRef, QueryBarProps>(
       onReset?.();
     }, [onReset]);
 
-    const handleFinish = (values: any) => {
+    const handleFinish = (_values: any) => {
       handleSearch();
     };
 

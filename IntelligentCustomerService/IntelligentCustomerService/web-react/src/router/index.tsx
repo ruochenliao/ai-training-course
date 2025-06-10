@@ -19,8 +19,7 @@ const Unauthorized = React.lazy(() => import('../pages/error/Unauthorized'));
 // 一级菜单
 const SimpleMenu = React.lazy(() => import('../pages/menu/SimpleMenu'));
 
-// 智能客服页面
-const CustomerService = React.lazy(() => import('../pages/CustomerService'));
+// 智能客服页面已删除
 
 // 系统管理页面
 const UserManagement = React.lazy(() => import('../pages/system/user/UserManagement'));
@@ -53,6 +52,12 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: (
+      <Navigate to="/dashboard" replace />
+    ),
+  },
+  {
+    path: '/dashboard',
+    element: (
       <AuthGuard>
         <Layout />
       </AuthGuard>
@@ -60,7 +65,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/workbench" replace />,
+        element: <Navigate to="/dashboard/workbench" replace />,
       },
       {
         path: 'workbench',
@@ -86,14 +91,7 @@ export const router = createBrowserRouter([
           </SuspenseWrapper>
         ),
       },
-      {
-        path: 'customer-service',
-        element: (
-          <SuspenseWrapper>
-            <CustomerService />
-          </SuspenseWrapper>
-        ),
-      },
+
       {
         path: 'system',
         children: [

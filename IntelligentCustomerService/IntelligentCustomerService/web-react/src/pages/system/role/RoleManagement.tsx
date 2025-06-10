@@ -14,7 +14,6 @@ import {type Menu, menuApi} from '../../../api/menu';
 import {apiApi, type ApiItem} from '../../../api/api';
 import {useTheme} from '../../../contexts/ThemeContext';
 import {cn} from '../../../utils';
-import '../menu/style.css';
 import CommonPagination from '@/components/CommonPagination';
 
 const { Title } = Typography;

@@ -50,7 +50,6 @@ const Profile: React.FC = () => {
     try {
       // 这里应该调用API更新用户信息
       // await api.updateUser({ ...values, id: mockUser.userId });
-      console.log('更新个人信息:', values);
       message.success('个人信息更新成功');
     } catch (error) {
       message.error('更新失败，请重试');
@@ -65,7 +64,6 @@ const Profile: React.FC = () => {
     try {
       // 这里应该调用API更新密码
       // await api.updatePassword({ ...values, id: mockUser.userId });
-      console.log('更新密码:', values);
       message.success('密码更新成功');
       passwordForm.resetFields();
     } catch (error) {
@@ -76,7 +74,7 @@ const Profile: React.FC = () => {
   };
 
   // 密码确认验证
-  const validateConfirmPassword = (_: any, value: string) => {
+  const validateConfirmPassword = (_: unknown, value: string) => {
     const newPassword = passwordForm.getFieldValue('new_password');
     if (value && value !== newPassword) {
       return Promise.reject(new Error('两次输入的密码不一致'));

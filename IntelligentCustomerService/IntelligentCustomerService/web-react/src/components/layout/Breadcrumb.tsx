@@ -100,7 +100,7 @@ const Breadcrumb: React.FC = () => {
       )}
       separator={<span className={cn(
         theme === 'dark' ? "text-gray-500" : "text-gray-400"
-      )}>></span>}
+      )}>{'>'}</span>}
     />
   )
 }

@@ -33,7 +33,7 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
 
       try {
         // 允许值是一个函数，类似于useState
-        const valueToStore = value instanceof Function ? value(storedValue) : value;
+        const valueToStore = typeof value === 'function' ? (value as (val: T) => T)(storedValue) : value;
         
         // 保存到state
         setStoredValue(valueToStore);

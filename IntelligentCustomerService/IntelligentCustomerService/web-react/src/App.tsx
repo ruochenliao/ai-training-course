@@ -1,6 +1,6 @@
 import React from 'react';
 import {RouterProvider} from 'react-router-dom';
-import {App as AntdApp} from 'antd';
+import {App as AntdApp, ConfigProvider, theme} from 'antd';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {ReactQueryDevtools} from '@tanstack/react-query-devtools';
 import dayjs from 'dayjs';
@@ -11,8 +11,7 @@ import {AuthProvider} from './contexts/AuthContext';
 import {ThemeProvider} from './contexts/ThemeContext';
 import {useTranslation} from 'react-i18next';
 import './i18n';
-import './styles/index.css';
-import './App.css';
+import './styles/global.css';
 
 // 配置 dayjs
 dayjs.locale('zh-cn');
@@ -42,11 +41,25 @@ const InnerApp: React.FC = () => {
   }, [i18n.language]);
 
   return (
-    <AntdApp>
-      <AuthProvider>
-        <RouterProvider router={router} />
-      </AuthProvider>
-    </AntdApp>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#2080f0',
+          colorSuccess: '#18a058',
+          colorWarning: '#f0a020',
+          colorError: '#d03050',
+          colorInfo: '#2080f0',
+          borderRadius: 4,
+        },
+        algorithm: theme.defaultAlgorithm,
+      }}
+    >
+      <AntdApp>
+        <AuthProvider>
+          <RouterProvider router={router} />
+        </AuthProvider>
+      </AntdApp>
+    </ConfigProvider>
   );
 };
 

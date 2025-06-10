@@ -65,14 +65,13 @@
   },
   "menu": {
     "dashboard": "Dashboard",
-    "customerService": "Customer Service",
-    "conversation": "Conversation",
+    "conversation": "Conversations",
     "knowledge": "Knowledge Base",
     "analytics": "Analytics",
     "system": "System",
-    "user": "User Management",
-    "role": "Role Management",
-    "permission": "Permission Management",
+    "user": "Users",
+    "role": "Roles",
+    "permission": "Permissions",
     "settings": "Settings"
   },
   "header": {

@@ -11,7 +11,7 @@ const TagsView: React.FC = () => {
   const location = useLocation()
   const scrollRef = useRef<HTMLDivElement>(null)
   
-  const { tags, activeTag, removeTag, setActiveTag, removeOtherTags, removeAllTags } = useTagsStore()
+  const { tags, removeTag, setActiveTag, removeOtherTags, removeAllTags } = useTagsStore()
   const { theme } = useAppStore()
 
   // 当前激活的标签

@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI开发实战训练营 - 课程大纲</title>
+    <style>
+        /* @font-face removed to fix xhtml2pdf compatibility */
+        
+        body {
+            font-family: 'Microsoft YaHei', 'SimSun', Arial, sans-serif !important;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            font-size: 14px;
+        }
+        
+        h1, h2, h3, h4 {
+            font-family: 'Microsoft YaHei', 'SimSun', Arial, sans-serif !important;
+            color: #4361ee;
+            margin-top: 1.5em;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.2em;
+            margin-bottom: 1em;
+            border-bottom: 2px solid #4361ee;
+            padding-bottom: 10px;
+        }
+        
+        h2 {
+            font-size: 1.8em;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        
+        h3 {
+            font-size: 1.5em;
+        }
+        
+        .module {
+            margin-bottom: 30px;
+            padding: 15px;
+            border-left: 5px solid #4361ee;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .module:nth-child(4n+1) {
+            border-left-color: #4361ee;
+        }
+        
+        .module:nth-child(4n+2) {
+            border-left-color: #3bc9db;
+        }
+        
+        .module:nth-child(4n+3) {
+            border-left-color: #7209b7;
+        }
+        
+        .module:nth-child(4n+4) {
+            border-left-color: #2ecc71;
+        }
+        
+        .module-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .module-number {
+            background: linear-gradient(135deg, #4361ee, #7209b7);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 1.2em;
+        }
+        
+        .module-objective {
+            background-color: rgba(67, 97, 238, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            color: #4361ee;
+            font-weight: 500;
+            margin: 10px 0;
+            display: inline-block;
+        }
+        
+        .module-topics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .topic {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #4361ee;
+        }
+        
+        .module-project {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(46, 204, 113, 0.1);
+            border-radius: 5px;
+            border-left: 3px solid #2ecc71;
+        }
+        
+        .project-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .learning-path {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #7209b7;
+        }
+        
+        .learning-path h3 {
+            color: #7209b7;
+            margin-bottom: 15px;
+        }
+        
+        .stages {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .stage {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #4361ee;
+            text-align: center;
+        }
+        
+        .stage:nth-child(2) {
+            border-top-color: #3bc9db;
+        }
+        
+        .stage:nth-child(3) {
+            border-top-color: #7209b7;
+        }
+        
+        .stage:nth-child(4) {
+            border-top-color: #2ecc71;
+        }
+        
+        .stage-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .path-description ol {
+            margin-left: 20px;
+        }
+        
+        .path-description li {
+            margin-bottom: 10px;
+        }
+        
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+
+        * {
+            font-family: 'Microsoft YaHei', 'SimSun', Arial, sans-serif !important;
+        }
+        
+        /* 确保中文字符正确显示 */
+        .module, .topic, .project-title, .project-desc {
+            font-family: 'Microsoft YaHei', 'SimSun', Arial, sans-serif !important;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI开发实战训练营 - 课程大纲</h1>
+    
+    <p>全面系统的AI开发课程，从零基础到专家级，循序渐进掌握AI应用开发技能</p>
+    
+    <div class="stages">
+        <div class="stage">
+            <div class="stage-title">基础阶段</div>
+            <div>模块1-3</div>
+            <p>掌握开发环境、编程基础和数据存储，为AI开发打下坚实基础</p>
+        </div>
+        
+        <div class="stage">
+            <div class="stage-title">进阶阶段</div>
+            <div>模块4-8</div>
+            <p>学习智能客服、API开发、Function Call和RAG知识库技术</p>
+        </div>
+        
+        <div class="stage">
+            <div class="stage-title">高级阶段</div>
+            <div>模块9-12</div>
+            <p>掌握多智能体协作、多模态应用、数据分析和知识图谱</p>
+        </div>
+        
+        <div class="stage">
+            <div class="stage-title">专家阶段</div>
+            <div>模块13-14</div>
+            <p>深入学习大模型微调技术和企业级应用部署与优化</p>
+        </div>
+    </div>
+    
+    <h2>详细课程内容</h2>
+    
+    <div class="module">
+        <div class="module-header">
+            <div class="module-number">1</div>
+            <h3>AI开发环境搭建与提示词工程</h3>
+        </div>
+        <div class="module-objective">模块目标：搭建AI开发环境并掌握提示词工程技术</div>
+        <p>本模块将帮助学员搭建完整的AI开发环境，并深入学习提示词工程，掌握与大模型高效沟通的技巧，通过实践实现用提示词生成完整网页应用。</p>
+        <div class="module-topics">
+            <div class="topic">开发环境搭建(Python、NodeJS、IDE工具)</div>
+            <div class="topic">AI提示词工程基础与实践技巧</div>
+            <div class="topic">DeepSeek、Qwen、ChatGPT等模型对比与应用</div>
+            <div class="topic">高效提示词设计与优化策略</div>
+            <div class="topic">提示词模板设计与复用方法</div>
+            <div class="topic">上下文管理与多轮对话技巧</div>
+        </div>
+        <div class="module-project">
+            <div class="project-title">实战项目：提示词驱动的电商首页开发</div>
+            <div class="project-desc">使用30个精心设计的提示词，指导AI生成一个完整的电商网站首页，包含HTML、CSS和基础交互功能。</div>
+        </div>
+    </div>
+    
+    <div class="module">
+        <div class="module-header">
+            <div class="module-number">2</div>
+            <h3>Python基础与数据处理</h3>
+        </div>
+        <div class="module-objective">模块目标：掌握Python核心编程技能，为AI开发打下基础</div>
+        <p>本模块系统讲解Python编程基础，包括语法规则、数据结构、函数设计和面向对象编程，帮助零基础学员快速掌握Python开发能力，为后续AI开发奠定基础。</p>
+        <div class="module-topics">
+            <div class="topic">Python语法基础与编程规范</div>
+            <div class="topic">数据类型与结构(列表、字典、集合)</div>
+            <div class="topic">条件语句与循环结构</div>
+            <div class="topic">函数设计与模块化编程</div>
+            <div class="topic">面向对象编程与设计模式</div>
+            <div class="topic">文件操作与数据处理</div>
+        </div>
+        <div class="module-project">
+            <div class="project-title">实战项目：AI对话历史管理系统</div>
+            <div class="project-desc">开发一个Python应用，能够记录、管理和分析用户与AI的对话历史，支持对话导出和简单统计分析功能。</div>
+        </div>
+    </div>
+    
+    <div class="module">
+        <div class="module-header">
+            <div class="module-number">3</div>
+            <h3>数据库与存储系统</h3>
+        </div>
+        <div class="module-objective">模块目标：设计和实现数据持久化方案</div>
+        <p>本模块介绍数据库基础知识和设计原则，包括SQL数据库和NoSQL数据库，以及新兴的向量数据库技术，学习如何设计高效的数据存储方案，为AI应用提供数据支持。</p>
+        <div class="module-topics">
+            <div class="topic">SQL基础与MySQL数据库应用</div>
+            <div class="topic">数据库设计原则与ER图绘制</div>
+            <div class="topic">SQL高级查询与性能优化</div>
+            <div class="topic">Python与MySQL集成(SQLAlchemy)</div>
+            <div class="topic">NoSQL数据库应用(MongoDB)</div>
+            <div class="topic">向量数据库基础(Milvus/Chroma)</div>
+        </div>
+        <div class="module-project">
+            <div class="project-title">实战项目：电商数据库设计与实现</div>
+            <div class="project-desc">设计并实现一个完整的电商系统数据库，包含用户、商品、订单、支付等核心模块，并实现基本的CRUD操作接口。</div>
+        </div>
+    </div>
+    
+    <div class="module">
+        <div class="module-header">
+            <div class="module-number">4</div>
+            <h3>智能客服系统开发</h3>
+        </div>
+        <div class="module-objective">模块目标：构建企业级智能客服应用</div>
+        <p>本模块介绍智能客服系统的架构设计和实现方法，学习多智能体系统设计、流式对话实现和意图识别等技术，开发一个完整的企业知识库智能客服系统。</p>
+        <div class="module-topics">
+            <div class="topic">AutoGen框架架构与原理</div>
+            <div class="topic">多智能体系统设计与实现</div>
+            <div class="topic">流式对话实现与历史会话管理</div>
+            <div class="topic">CrawlAI技术与网页内容抓取</div>
+            <div class="topic">意图识别与实体提取技术</div>
+            <div class="topic">智能客服多轮对话设计</div>
+        </div>
+        <div class="module-project">
+            <div class="project-title">实战项目：电商智能客服系统</div>
+            <div class="project-desc">基于AutoGen框架开发一个电商平台智能客服系统，能够回答商品信息、订单查询、退换货政策等常见问题。</div>
+        </div>
+    </div>
+    
+    <div class="module">
+        <div class="module-header">
+            <div class="module-number">5</div>
+            <h3>FastAPI后端开发</h3>
+        </div>
+        <div class="module-objective">模块目标：掌握现代化Python后端开发技术</div>
+        <p>本模块深入学习FastAPI框架，掌握高性能API开发技术，包括RESTful API设计、数据验证、依赖注入、异步编程等，为AI应用构建强大的后端支持。</p>
+        <div class="module-topics">
+            <div class="topic">FastAPI框架基础与架构</div>
+            <div class="topic">RESTful API设计规范与实现</div>
+            <div class="topic">Pydantic数据验证与模型定义</div>
+            <div class="topic">依赖注入系统与权限控制</div>
+            <div class="topic">异步编程(Async/Await)实现</div>
+            <div class="topic">认证与授权(OAuth2/JWT)</div>
+        </div>
+        <div class="module-project">
+            <div class="project-title">实战项目：电商系统API开发</div>
+            <div class="project-desc">基于FastAPI开发电商系统后端API，实现用户认证、商品管理、购物车、订单处理等核心功能，对接智能客服系统。</div>
+        </div>
+    </div>
+    
+    <div class="module">
+        <div class="module-header">
+            <div class="module-number">6</div>
+            <h3>AI Function Call与电商系统开发</h3>
+        </div>
+        <div class="module-objective">模块目标：开发AI驱动的电商购物系统</div>
+        <p>本模块介绍AI Function Call机制与原理，学习如何设计和实现AI函数调用，通过Function Call技术使AI能够与电商系统API交互，实现智能购物体验。</p>
+        <div class="module-topics">
+            <div class="topic">AI Function Call机制与原理</div>
+            <div class="topic">JSON Schema设计与验证</div>
+            <div class="topic">函数调用状态管理与错误处理</div>
+            <div class="topic">高级函数设计模式与最佳实践</div>
+            <div class="topic">电商系统架构设计与实现</div>
+            <div class="topic">商品推荐与搜索功能开发</div>
+        </div>
+        <div class="module-project">
+            <div class="project-title">实战项目：AI驱动的电商购物系统</div>
+            <div class="project-desc">开发一个支持自然语言交互的电商购物系统，用户可以通过对话方式搜索商品、比较价格、添加购物车和完成订单。</div>
+        </div>
+    </div>
+    
+    <div class="module">
+        <div class="module-header">
+            <div class="module-number">7</div>
+            <h3>RAG技术与知识库构建</h3>
+        </div>
+        <div class="module-objective">模块目标：掌握RAG架构与知识库开发</div>
+        <p>本模块深入讲解检索增强生成(RAG)技术，包括文档处理、向量表示、知识库构建和检索优化等内容，帮助学员掌握构建企业级知识库系统的核心技能。</p>
+        <div class="module-topics">
+            <div class="topic">RAG技术原理与架构设计</div>
+            <div class="topic">文档解析与分块策略</div>
+            <div class="topic">Embedding模型与向量表示</div>
+            <div class="topic">向量数据库设计与查询优化</div>
+            <div class="topic">LamaIndex核心功能实现</div>
+            <div class="topic">LangChain框架应用开发</div>
+        </div>
+        <div class="module-project">
+            <div class="project-title">实战项目：电商产品知识库</div>
+            <div class="project-desc">开发一个电商产品知识库系统，能够从产品说明书、用户手册和常见问题中提取信息，并支持用户自然语言查询。</div>
+        </div>
+    </div>
+    
+    <div class="module">
+        <div class="module-header">
+            <div class="module-number">8</div>
+            <h3>LangGraph工作流开发</h3>
+        </div>
+        <div class="module-objective">模块目标：构建复杂AI工作流系统</div>
+        <p>本模块讲解LangGraph框架应用和工作流开发技术，帮助学员掌握构建复杂AI工作流的方法，包括工作流状态管理、节点设计与交互等，提升AI应用的复杂性和实用性。</p>
+        <div class="module-topics">
+            <div class="topic">LangGraph框架基础与架构</div>
+            <div class="topic">工作流状态管理与持久化</div>
+            <div class="topic">节点设计与交互实现</div>
+            <div class="topic">工作流分支与条件控制</div>
+            <div class="topic">多智能体工作流协作机制</div>
+            <div class="topic">错误处理与回退策略</div>
+        </div>
+        <div class="module-project">
+            <div class="project-title">实战项目：电商客服智能工作流</div>
+            <div class="project-desc">开发一个电商客服智能工作流系统，能够处理订单查询、退换货申请、商品推荐等复杂场景，支持多轮对话和状态管理。</div>
+        </div>
+    </div>
+    
+    <div class="module">
+        <div class="module-header">
+            <div class="module-number">9</div>
+            <h3>MCP应用开发</h3>
+        </div>
+        <div class="module-objective">模块目标：掌握MCP多智能体协作系统开发</div>
+        <p>本模块介绍MCP多智能体协作系统开发技术，学习如何设计和实现多个AI智能体协同工作的系统，解决复杂任务分解、角色设计和协作机制等问题。</p>
+        <div class="module-topics">
+            <div class="topic">MCP架构设计与原理</div>
+            <div class="topic">多智能体协作系统实现</div>
+            <div class="topic">MCP核心API与功能应用</div>
+            <div class="topic">自定义工具开发与集成</div>
+            <div class="topic">智能体角色设计与交互</div>
+            <div class="topic">复杂任务分解与协作处理</div>
+        </div>
+        <div class="module-project">
+            <div class="project-title">实战项目：智能电商助手系统</div>
+            <div class="project-desc">基于MCP框架开发一个多智能体电商助手系统，包含商品推荐专家、价格分析师、评价分析师等角色，协同为用户提供购物决策支持。</div>
+        </div>
+    </div>
+    
+    <div class="module">
+        <div class="module-header">
+            <div class="module-number">10</div>
+            <h3>多模态AI应用开发</h3>
+        </div>
+        <div class="module-objective">模块目标：实现图文互动AI应用</div>
+        <p>本模块介绍多模态AI技术的原理和应用方法，学习如何开发能够处理图像、文本等多种模态数据的AI应用，为电商系统增加图像识别和搜索功能。</p>
+        <div class="module-topics">
+            <div class="topic">多模态AI模型原理与应用</div>
+            <div class="topic">图像处理与识别技术</div>
+            <div class="topic">OCR文字识别应用开发</div>
+            <div class="topic">视觉问答系统实现</div>
+            <div class="topic">商品图像识别与属性提取</div>
+            <div class="topic">图像生成与编辑技术</div>
+        </div>
+        <div class="module-project">
+            <div class="project-title">实战项目：电商图像搜索系统</div>
+            <div class="project-desc">开发一个支持图像搜索的电商应用，用户可以上传产品图片，系统能够识别产品、提取特征并找到相似商品，支持多模态查询。</div>
+        </div>
+    </div>
+    
+    <div class="module">
+        <div class="module-header">
+            <div class="module-number">11</div>
+            <h3>Text2SQL与ChatBI系统</h3>
+        </div>
+        <div class="module-objective">模块目标：构建智能数据分析平台</div>
+        <p>本模块讲解Text2SQL技术原理和应用，学习如何将自然语言转换为SQL查询，开发能够通过对话方式进行数据分析的ChatBI系统，支持电商数据的智能分析和可视化。</p>
+        <div class="module-topics">
+            <div class="topic">Text2SQL技术原理与架构</div>
+            <div class="topic">SQL语法解析与验证</div>
+            <div class="topic">Vanna框架应用与前端开发</div>
+            <div class="topic">SQL查询优化与执行安全</div>
+            <div class="topic">数据可视化与趋势图生成</div>
+            <div class="topic">BI报表与仪表盘开发</div>
+        </div>
+        <div class="module-project">
+            <div class="project-title">实战项目：电商销售分析ChatBI系统</div>
+            <div class="project-desc">开发一个对话式销售数据分析系统，能够通过自然语言查询分析销售趋势、商品表现、用户行为等数据，并生成可视化报表。</div>
+        </div>
+    </div>
+    
+    <div class="module">
+        <div class="module-header">
+            <div class="module-number">12</div>
+            <h3>图数据库与知识图谱</h3>
+        </div>
+        <div class="module-objective">模块目标：构建企业知识图谱系统</div>
+        <p>本模块介绍图数据库技术和知识图谱构建方法，学习如何使用Neo4j/Nebula等图数据库，构建电商领域知识图谱，实现复杂关系查询和智能推荐功能。</p>
+        <div class="module-topics">
+            <div class="topic">图数据库原理与应用场景</div>
+            <div class="topic">Neo4j/Nebula实践与优化</div>
+            <div class="topic">图数据建模与查询语言</div>
+            <div class="topic">关系分析与路径查询</div>
+            <div class="topic">图可视化技术与工具应用</div>
+            <div class="topic">知识图谱构建与智能推荐</div>
+        </div>
+        <div class="module-project">
+            <div class="project-title">实战项目：电商产品知识图谱</div>
+            <div class="project-desc">构建一个电商产品知识图谱系统，包含产品、品牌、类别、特性等实体及其关系，实现基于图的智能商品推荐和关联分析。</div>
+        </div>
+    </div>
+    
+    <div class="module">
+        <div class="module-header">
+            <div class="module-number">13</div>
+            <h3>AI进阶技术与大模型微调</h3>
+        </div>
+        <div class="module-objective">模块目标：掌握AI前沿技术与原理</div>
+        <p>本模块介绍AI进阶技术和大模型微调方法，深入学习Transformer架构、注意力机制、自监督学习等原理，以及LoRA/QLoRA等大模型微调技术，开发垂直领域AI助手。</p>
+        <div class="module-topics">
+            <div class="topic">Text2DSL决策系统开发</div>
+            <div class="topic">大模型微调技术(LoRA/QLoRA)</div>
+            <div class="topic">Transformer架构解析</div>
+            <div class="topic">注意力机制与自监督学习</div>
+            <div class="topic">Embedding技术与应用优化</div>
+            <div class="topic">垂直领域模型训练与评估</div>
+        </div>
+        <div class="module-project">
+            <div class="project-title">实战项目：电商垂直领域AI助手</div>
+            <div class="project-desc">基于开源模型进行微调，训练一个专注于电商领域的垂直AI助手，能够精准理解和回答电商专业术语和问题。</div>
+        </div>
+    </div>
+    
+    <div class="module">
+        <div class="module-header">
+            <div class="module-number">14</div>
+            <h3>企业级应用部署与优化</h3>
+        </div>
+        <div class="module-objective">模块目标：掌握AI应用上线与运维技术</div>
+        <p>本模块介绍企业级AI应用的部署与优化技术，学习Docker容器化、云服务部署、CI/CD自动化、监控与优化等内容，确保AI应用稳定高效地运行在生产环境中。</p>
+        <div class="module-topics">
+            <div class="topic">Docker容器化部署实践</div>
+            <div class="topic">云服务部署策略与实现</div>
+            <div class="topic">CI/CD自动化流程构建</div>
+            <div class="topic">性能监控与问题诊断</div>
+            <div class="topic">安全防护与数据加密</div>
+            <div class="topic">高并发处理与负载均衡</div>
+        </div>
+        <div class="module-project">
+            <div class="project-title">实战项目：完整电商AI系统上线</div>
+            <div class="project-desc">将课程中开发的电商AI系统进行整合和优化，通过Docker容器化和云服务部署，实现完整系统的生产环境上线。</div>
+        </div>
+    </div>
+    
+    <div class="learning-path">
+        <h3>学习路径：从零到精通的AI工程师成长之旅</h3>
+        <div class="path-description">
+            <p>本课程设计为循序渐进的学习路径，从基础编程到AI高级应用，最终完成一个完整的AI驱动电商系统：</p>
+            <ol>
+                <li><strong>基础阶段（模块1-3）</strong>：掌握开发环境、Python编程和数据库知识，建立电商系统的基础架构</li>
+                <li><strong>进阶阶段（模块4-8）</strong>：学习智能客服、API开发、Function Call和RAG技术，开发电商核心功能</li>
+                <li><strong>高级阶段（模块9-12）</strong>：掌握多智能体、多模态、数据分析和知识图谱，增强电商系统智能化水平</li>
+                <li><strong>专家阶段（模块13-14）</strong>：深入学习模型微调和企业级部署，将电商AI系统推向生产环境</li>
+            </ol>
+            <p>通过这个系统化的学习路径，您将逐步构建一个包含智能客服、RAG知识库、多模态搜索、数据分析和知识图谱的完整AI电商系统，掌握全栈AI开发能力。</p>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2024 AI开发实战训练营. 保留所有权利.</p>
+    </footer>
+</body>
+</html>
