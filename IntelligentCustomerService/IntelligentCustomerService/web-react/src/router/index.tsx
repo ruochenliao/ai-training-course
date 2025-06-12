@@ -1,6 +1,6 @@
 import React, {Suspense} from 'react';
 import {createBrowserRouter, Navigate} from 'react-router-dom';
-import Layout from '../components/layout/Layout';
+import MainLayout from '../components/layout/MainLayout';
 import {AuthGuard} from '../components/auth/RouteGuard';
 import {Loading} from '../components/common/LoadingEmpty';
 
@@ -18,6 +18,7 @@ const Unauthorized = React.lazy(() => import('../pages/error/Unauthorized'));
 
 // 一级菜单
 const SimpleMenu = React.lazy(() => import('../pages/menu/SimpleMenu'));
+const TopMenu = React.lazy(() => import('../pages/menu/TopMenu'));
 
 // 智能客服页面已删除
 
@@ -31,6 +32,12 @@ const AuditLog = React.lazy(() => import('../pages/system/auditlog/AuditLog'));
 
 // 个人资料页面
 const Profile = React.lazy(() => import('../pages/profile/Profile'));
+
+// 测试页面
+const DynamicMenuTest = React.lazy(() => import('../pages/test/DynamicMenuTest'));
+
+// 帮助页面
+const Help = React.lazy(() => import('../pages/help/Help'));
 
 // 加载组件包装器
 const SuspenseWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -52,14 +59,32 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: (
-      <Navigate to="/dashboard" replace />
+      <Navigate to="/workbench" replace />
     ),
+  },
+  {
+    path: '/workbench',
+    element: (
+      <AuthGuard>
+        <MainLayout />
+      </AuthGuard>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <SuspenseWrapper>
+            <Workbench />
+          </SuspenseWrapper>
+        ),
+      },
+    ],
   },
   {
     path: '/dashboard',
     element: (
       <AuthGuard>
-        <Layout />
+        <MainLayout />
       </AuthGuard>
     ),
     children: [
@@ -91,13 +116,37 @@ export const router = createBrowserRouter([
           </SuspenseWrapper>
         ),
       },
+      {
+        path: 'test/dynamic-menu',
+        element: (
+          <SuspenseWrapper>
+            <DynamicMenuTest />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: 'top-menu',
+        element: (
+          <SuspenseWrapper>
+            <TopMenu />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: 'help',
+        element: (
+          <SuspenseWrapper>
+            <Help />
+          </SuspenseWrapper>
+        ),
+      },
 
       {
         path: 'system',
         children: [
           {
             index: true,
-            element: <Navigate to="/system/user" replace />,
+            element: <Navigate to="/dashboard/system/user" replace />,
           },
           {
             path: 'user',

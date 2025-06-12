@@ -90,7 +90,7 @@ src/
 │   ├── storage.ts        # 存储工具
 │   └── constants.ts      # 常量定义
 ├── App.tsx               # 应用根组件
-├── index.tsx             # 应用入口
+├── main.tsx              # 应用入口
 └── vite-env.d.ts         # Vite 类型定义
 ```
 

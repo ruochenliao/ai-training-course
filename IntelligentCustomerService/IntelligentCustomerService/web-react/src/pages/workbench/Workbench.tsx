@@ -1,320 +1,208 @@
-import React from 'react';
-import {Avatar, Button, Card, Col, Progress, Row, Space, Statistic, Table, Tag, Typography} from 'antd';
+import React, { useMemo } from 'react';
+import { Avatar, Button, Card, Space, Statistic, Row, Col, Progress, Badge } from 'antd';
 import {
-    AppstoreOutlined,
-    BellOutlined,
-    CheckCircleOutlined,
-    ClockCircleOutlined,
-    FileTextOutlined,
-    LineChartOutlined,
-    TeamOutlined,
-    UserOutlined
+  UserOutlined,
+  TeamOutlined,
+  MessageOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  ExclamationCircleOutlined,
+  TrophyOutlined,
+  RiseOutlined,
+  FallOutlined,
+  ArrowRightOutlined
 } from '@ant-design/icons';
-import {useTranslation} from 'react-i18next';
-import {useTheme} from '../../contexts/ThemeContext';
-import {cn} from '../../utils';
+import { useTranslation } from 'react-i18next';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useAuthStore } from '../../store/auth';
+import { cn } from '../../utils';
 
-const { Title, Text } = Typography;
+// 企业级项目描述文本
+const projectDescription = '基于 React + TypeScript + Ant Design 的现代化企业级管理平台';
 
-// 模拟用户数据
-const mockUser = {
-  name: '管理员',
-  avatar: 'https://api.dicebear.com/7.x/miniavs/svg?seed=1'
-};
 
-// 模拟统计数据
-const statisticData = [
-  {
-    id: 1,
-    title: '项目数量',
-    value: 25,
-    icon: <AppstoreOutlined />,
-    color: '#1890ff',
-  },
-  {
-    id: 2,
-    title: '待办事项',
-    value: 8,
-    icon: <FileTextOutlined />,
-    color: '#52c41a',
-  },
-  {
-    id: 3,
-    title: '消息通知',
-    value: 12,
-    icon: <BellOutlined />,
-    color: '#faad14',
-  },
-  {
-    id: 4,
-    title: '团队成员',
-    value: 18,
-    icon: <TeamOutlined />,
-    color: '#722ed1',
-  },
-];
-
-// 模拟项目数据
-const projectData = [
-  {
-    id: 1,
-    name: '智能客服系统',
-    desc: '基于FastAPI和React的智能客服系统',
-    progress: 85,
-    status: 'active',
-  },
-  {
-    id: 2,
-    name: 'Vue FastAPI Admin',
-    desc: '一个基于Vue3.0、FastAPI的轻量级后台管理模板',
-    progress: 65,
-    status: 'active',
-  },
-  {
-    id: 3,
-    name: '数据分析平台',
-    desc: '企业级数据分析和可视化平台',
-    progress: 32,
-    status: 'pending',
-  },
-  {
-    id: 4,
-    name: '内容管理系统',
-    desc: '高性能的内容管理系统，支持多语言',
-    progress: 100,
-    status: 'complete',
-  },
-  {
-    id: 5,
-    name: '电子商务平台',
-    desc: '全功能电子商务平台，包含订单管理、库存管理等',
-    progress: 76,
-    status: 'active',
-  },
-  {
-    id: 6,
-    name: '客户关系管理系统',
-    desc: '企业级CRM系统，帮助企业管理客户关系',
-    progress: 54,
-    status: 'active',
-  },
-];
-
-// 模拟待办事项
-const todoData = [
-  {
-    id: 1,
-    title: '完成用户管理模块',
-    status: 'in-progress',
-    priority: 'high',
-    deadline: '2024-12-20',
-  },
-  {
-    id: 2,
-    title: '优化登录页面UI',
-    status: 'done',
-    priority: 'medium',
-    deadline: '2024-12-15',
-  },
-  {
-    id: 3,
-    title: '修复权限控制Bug',
-    status: 'pending',
-    priority: 'urgent',
-    deadline: '2024-12-18',
-  },
-  {
-    id: 4,
-    title: '更新API文档',
-    status: 'in-progress',
-    priority: 'low',
-    deadline: '2024-12-25',
-  },
-  {
-    id: 5,
-    title: '部署生产环境',
-    status: 'pending',
-    priority: 'high',
-    deadline: '2024-12-28',
-  },
-];
 
 const Workbench: React.FC = () => {
   const { t } = useTranslation();
   const { isDark, primaryColor } = useTheme();
+  const { user } = useAuthStore();
 
-  // 状态标签映射
-  const statusMap = {
-    'pending': { color: 'orange', text: '待处理', icon: <ClockCircleOutlined /> },
-    'in-progress': { color: 'blue', text: '进行中', icon: <LineChartOutlined /> },
-    'done': { color: 'green', text: '已完成', icon: <CheckCircleOutlined /> },
-  };
+  // 企业级统计数据
+  const statisticData = useMemo(() => [
+    {
+      id: 0,
+      title: '今日咨询',
+      value: 1234,
+      icon: <MessageOutlined style={{ color: '#1890ff' }} />,
+      trend: 'up',
+      trendValue: '12.5%',
+      suffix: '次',
+    },
+    {
+      id: 1,
+      title: '处理完成',
+      value: 987,
+      icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
+      trend: 'up',
+      trendValue: '8.2%',
+      suffix: '次',
+    },
+    {
+      id: 2,
+      title: '待处理',
+      value: 156,
+      icon: <ClockCircleOutlined style={{ color: '#faad14' }} />,
+      trend: 'down',
+      trendValue: '3.1%',
+      suffix: '次',
+    },
+    {
+      id: 3,
+      title: '客户满意度',
+      value: 98.5,
+      icon: <TrophyOutlined style={{ color: '#722ed1' }} />,
+      trend: 'up',
+      trendValue: '2.3%',
+      suffix: '%',
+    },
+  ], []);
 
-  // 优先级标签映射
-  const priorityMap = {
-    'low': { color: 'green', text: '低' },
-    'medium': { color: 'blue', text: '中' },
-    'high': { color: 'orange', text: '高' },
-    'urgent': { color: 'red', text: '紧急' },
-  };
+  // 快捷操作数据
+  const quickActions = useMemo(() => [
+    { title: '新建工单', icon: <MessageOutlined />, color: '#1890ff' },
+    { title: '客户管理', icon: <TeamOutlined />, color: '#52c41a' },
+    { title: '数据报表', icon: <TrophyOutlined />, color: '#faad14' },
+    { title: '系统设置', icon: <UserOutlined />, color: '#722ed1' },
+  ], []);
 
-  // 表格列配置
-  const todoColumns = [
-    {
-      title: '任务名称',
-      dataIndex: 'title',
-      key: 'title',
-      render: (text: string) => <Text strong>{text}</Text>,
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => (
-        <Tag icon={statusMap[status as keyof typeof statusMap]?.icon} color={statusMap[status as keyof typeof statusMap]?.color}>
-          {statusMap[status as keyof typeof statusMap]?.text}
-        </Tag>
-      ),
-    },
-    {
-      title: '优先级',
-      dataIndex: 'priority',
-      key: 'priority',
-      render: (priority: string) => (
-        <Tag color={priorityMap[priority as keyof typeof priorityMap]?.color}>
-          {priorityMap[priority as keyof typeof priorityMap]?.text}
-        </Tag>
-      ),
-    },
-    {
-      title: '截止日期',
-      dataIndex: 'deadline',
-      key: 'deadline',
-    },
-    {
-      title: '操作',
-      key: 'action',
-      render: () => (
-        <Space size="small">
-          <Button type="link" size="small">查看</Button>
-          <Button type="link" size="small">编辑</Button>
-        </Space>
-      ),
-    },
-  ];
+  // 用户头像 - 如果没有头像则使用默认头像
+  const userAvatar = user?.avatar || 'https://api.dicebear.com/7.x/miniavs/svg?seed=1';
+  const userName = user?.username || 'admin';
 
   return (
-    <div className="workbench">
-      {/* 欢迎卡片 */}
-      <Card 
+    <div className="enterprise-workbench">
+      {/* 欢迎横幅 */}
+      <Card
         bordered={false}
-        className={cn(
-          "mb-6 overflow-hidden",
-          isDark ? "bg-gray-800" : "bg-white"
-        )}
-        style={{ borderRadius: '8px' }}
+        className="enterprise-welcome-card"
+        style={{
+          marginBottom: '24px',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          borderRadius: '12px',
+          overflow: 'hidden',
+        }}
       >
-        <div className="flex items-center justify-between flex-wrap">
-          <div className="flex items-center gap-4">
-            <Avatar 
-              size={64} 
-              src={mockUser.avatar}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          {/* 左侧用户信息 */}
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Avatar
+              size={64}
+              src={userAvatar}
               icon={<UserOutlined />}
-              style={{ backgroundColor: primaryColor }}
+              style={{
+                border: '3px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              }}
             />
-            <div>
-              <Title level={4} className={cn(
-                "!mb-1",
-                isDark ? "text-white" : "text-gray-800"
-              )}>
-                欢迎回来，{mockUser.name}
-              </Title>
-              <Text className={cn(
-                isDark ? "text-gray-300" : "text-gray-500"
-              )}>
-                今天是 {new Date().toLocaleDateString()} {['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'][new Date().getDay()]}，祝您工作愉快！
-              </Text>
+            <div style={{ marginLeft: '20px', color: '#ffffff' }}>
+              <h2 style={{
+                fontSize: '24px',
+                fontWeight: 600,
+                margin: 0,
+                color: '#ffffff',
+                textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+              }}>
+                {t('workbench.text_hello', { username: userName })}
+              </h2>
+              <p style={{
+                fontSize: '16px',
+                margin: '8px 0 0 0',
+                color: 'rgba(255, 255, 255, 0.8)',
+                textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+              }}>
+                {t('workbench.text_welcome')}
+              </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-4 mt-4 sm:mt-0">
-            <Card 
-              size="small" 
-              className={cn(
-                "!border-0",
-                isDark ? "bg-gray-700" : "bg-gray-50"
-              )}
-              style={{ borderRadius: '6px' }}
-            >
-              <Statistic 
-                title={<span className={isDark ? "text-gray-300" : "text-gray-500"}>今日工单</span>}
-                value={28}
-                valueStyle={{ color: primaryColor }}
-              />
-            </Card>
-            <Card 
-              size="small" 
-              className={cn(
-                "!border-0",
-                isDark ? "bg-gray-700" : "bg-gray-50"
-              )}
-              style={{ borderRadius: '6px' }}
-            >
-              <Statistic 
-                title={<span className={isDark ? "text-gray-300" : "text-gray-500"}>待处理</span>}
-                value={12}
-                valueStyle={{ color: '#ff4d4f' }}
-              />
-            </Card>
-            <Card 
-              size="small" 
-              className={cn(
-                "!border-0",
-                isDark ? "bg-gray-700" : "bg-gray-50"
-              )}
-              style={{ borderRadius: '6px' }}
-            >
-              <Statistic 
-                title={<span className={isDark ? "text-gray-300" : "text-gray-500"}>已完成</span>}
-                value={16}
-                valueStyle={{ color: '#52c41a' }}
-              />
-            </Card>
+          {/* 右侧快捷操作 */}
+          <div style={{ display: 'flex', gap: '12px' }}>
+            {quickActions.map((action, index) => (
+              <Button
+                key={index}
+                type="primary"
+                ghost
+                icon={action.icon}
+                style={{
+                  borderColor: 'rgba(255, 255, 255, 0.4)',
+                  color: '#ffffff',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(10px)',
+                }}
+              >
+                {action.title}
+              </Button>
+            ))}
           </div>
         </div>
       </Card>
 
-      {/* 统计卡片 */}
-      <Row gutter={[16, 16]} className="mb-6">
-        {statisticData.map(item => (
-          <Col xs={24} sm={12} md={6} key={item.id}>
-            <Card 
+      {/* 数据统计卡片 */}
+      <Row gutter={[24, 24]} style={{ marginBottom: '24px' }}>
+        {statisticData.map((item) => (
+          <Col xs={24} sm={12} lg={6} key={item.id}>
+            <Card
               bordered={false}
-              className={cn(
-                "h-full",
-                isDark ? "bg-gray-800" : "bg-white"
-              )}
-              style={{ borderRadius: '8px' }}
+              className="enterprise-stat-card"
+              style={{
+                borderRadius: '12px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+                transition: 'all 0.3s ease',
+              }}
+              bodyStyle={{ padding: '24px' }}
             >
-              <div className="flex items-center gap-4">
-                <div 
-                  className="w-12 h-12 rounded-full flex-center"
-                  style={{ backgroundColor: item.color + '15' }}
-                >
-                  <span style={{ color: item.color, fontSize: '20px' }}>
-                    {item.icon}
-                  </span>
-                </div>
-                <div>
-                  <div className={cn(
-                    "text-sm mb-1",
-                    isDark ? "text-gray-300" : "text-gray-500"
-                  )}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ flex: 1 }}>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#8c8c8c',
+                    margin: '0 0 8px 0',
+                    fontWeight: 500,
+                  }}>
                     {item.title}
-                  </div>
-                  <div className="text-2xl font-semibold" style={{ color: item.color }}>
+                  </p>
+                  <h3 style={{
+                    fontSize: '28px',
+                    fontWeight: 600,
+                    margin: '0 0 8px 0',
+                    color: '#262626',
+                  }}>
                     {item.value}
+                    <span style={{ fontSize: '16px', fontWeight: 400 }}>{item.suffix}</span>
+                  </h3>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {item.trend === 'up' ? (
+                      <RiseOutlined style={{ color: '#52c41a', marginRight: '4px' }} />
+                    ) : (
+                      <FallOutlined style={{ color: '#ff4d4f', marginRight: '4px' }} />
+                    )}
+                    <span style={{
+                      fontSize: '12px',
+                      color: item.trend === 'up' ? '#52c41a' : '#ff4d4f',
+                      fontWeight: 500,
+                    }}>
+                      {item.trendValue}
+                    </span>
+                    <span style={{ fontSize: '12px', color: '#8c8c8c', marginLeft: '4px' }}>
+                      vs 昨日
+                    </span>
                   </div>
+                </div>
+                <div style={{
+                  fontSize: '32px',
+                  opacity: 0.8,
+                }}>
+                  {item.icon}
                 </div>
               </div>
             </Card>
@@ -322,109 +210,94 @@ const Workbench: React.FC = () => {
         ))}
       </Row>
 
-      {/* 项目和待办任务 */}
-      <Row gutter={[16, 16]}>
-        {/* 项目列表 */}
-        <Col xs={24} lg={12}>
-          <Card 
-            title={
-              <div className="flex items-center gap-2">
-                <AppstoreOutlined className="text-lg" style={{ color: primaryColor }} />
-                <span>项目列表</span>
-              </div>
-            }
-            bordered={false}
-            className={cn(
-              "h-full",
-              isDark ? "bg-gray-800" : "bg-white"
-            )}
-            style={{ borderRadius: '8px' }}
-            extra={
-              <Button type="link" icon={<AppstoreOutlined />}>
-                查看全部
-              </Button>
-            }
-          >
-            <div className="grid gap-4">
-              {projectData.slice(0, 4).map(project => (
-                <Card 
-                  key={project.id}
-                  size="small"
-                  className={cn(
-                    "cursor-pointer hover:shadow-md transition-shadow",
-                    isDark ? "bg-gray-700 border-gray-600" : "bg-white"
-                  )}
-                  style={{ borderRadius: '6px' }}
-                >
-                  <div className="flex flex-col">
-                    <div className="flex justify-between items-center mb-2">
-                      <Text strong className={isDark ? "text-white" : ""}>
-                        {project.name}
-                      </Text>
-                      <Tag color={
-                        project.status === 'complete' ? 'success' : 
-                        project.status === 'active' ? 'processing' : 'warning'
-                      }>
-                        {project.status === 'complete' ? '已完成' : 
-                         project.status === 'active' ? '进行中' : '待开始'}
-                      </Tag>
-                    </div>
-                    <Text type="secondary" className="mb-2 text-xs">
-                      {project.desc}
-                    </Text>
-                    <div className="flex justify-between items-center">
-                      <Progress 
-                        percent={project.progress} 
-                        size="small" 
-                        status={
-                          project.progress === 100 ? 'success' : 
-                          project.status === 'active' ? 'active' : 'normal'
-                        }
-                        className="w-3/4" 
-                      />
-                      <Text type="secondary" className="text-xs">
-                        {project.progress}%
-                      </Text>
-                    </div>
+      {/* 项目展示区域 */}
+      <Card
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '18px', fontWeight: 600 }}>
+              {t('workbench.label_project')}
+            </span>
+            <Button type="link" icon={<ArrowRightOutlined />}>
+              {t('workbench.label_more')}
+            </Button>
+          </div>
+        }
+        bordered={false}
+        style={{ borderRadius: '12px' }}
+        bodyStyle={{ padding: '24px' }}
+      >
+        <Row gutter={[24, 24]}>
+          {Array.from({ length: 6 }, (_, i) => (
+            <Col xs={24} sm={12} lg={8} key={i + 1}>
+              <Card
+                hoverable
+                className="enterprise-project-card"
+                style={{
+                  borderRadius: '8px',
+                  border: '1px solid #f0f0f0',
+                  transition: 'all 0.3s ease',
+                }}
+                bodyStyle={{ padding: '20px' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '16px' }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '8px',
+                    background: `linear-gradient(135deg, ${['#1890ff', '#52c41a', '#faad14', '#722ed1', '#eb2f96', '#13c2c2'][i % 6]} 0%, ${['#096dd9', '#389e0d', '#d48806', '#531dab', '#c41d7f', '#08979c'][i % 6]} 100%)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: '12px',
+                    flexShrink: 0,
+                  }}>
+                    <span style={{ color: '#ffffff', fontSize: '18px', fontWeight: 600 }}>
+                      {String.fromCharCode(65 + i)}
+                    </span>
                   </div>
-                </Card>
-              ))}
-            </div>
-          </Card>
-        </Col>
-
-        {/* 待办任务 */}
-        <Col xs={24} lg={12}>
-          <Card 
-            title={
-              <div className="flex items-center gap-2">
-                <FileTextOutlined className="text-lg" style={{ color: primaryColor }} />
-                <span>待办任务</span>
-              </div>
-            }
-            bordered={false}
-            className={cn(
-              "h-full",
-              isDark ? "bg-gray-800" : "bg-white"
-            )}
-            style={{ borderRadius: '8px' }}
-            extra={
-              <Button type="link" icon={<FileTextOutlined />}>
-                添加任务
-              </Button>
-            }
-          >
-            <Table 
-              dataSource={todoData} 
-              columns={todoColumns} 
-              rowKey="id"
-              size="small"
-              pagination={false}
-              className={isDark ? "ant-table-dark" : ""}
-            />
-          </Card>
-        </Col>
-      </Row>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <h4 style={{
+                      fontSize: '16px',
+                      fontWeight: 600,
+                      margin: '0 0 4px 0',
+                      color: '#262626',
+                    }}>
+                      智能客服系统 v{i + 1}.0
+                    </h4>
+                    <Badge
+                      status={i % 3 === 0 ? 'success' : i % 3 === 1 ? 'processing' : 'warning'}
+                      text={i % 3 === 0 ? '运行中' : i % 3 === 1 ? '开发中' : '测试中'}
+                      style={{ fontSize: '12px' }}
+                    />
+                  </div>
+                </div>
+                <p style={{
+                  fontSize: '14px',
+                  color: '#8c8c8c',
+                  margin: '0 0 16px 0',
+                  lineHeight: '20px',
+                }}>
+                  {projectDescription}
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ fontSize: '12px', color: '#8c8c8c' }}>
+                    更新于 2024-01-{String(15 + i).padStart(2, '0')}
+                  </div>
+                  <Progress
+                    percent={Math.floor(Math.random() * 40) + 60}
+                    size="small"
+                    style={{ width: '80px' }}
+                    strokeColor={{
+                      '0%': '#1890ff',
+                      '100%': '#096dd9',
+                    }}
+                  />
+                </div>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </Card>
     </div>
   );
 };

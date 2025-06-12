@@ -1,5 +1,6 @@
 import React, {createContext, ReactNode, useContext, useEffect} from 'react';
 import {useAuthStore} from '../store/auth';
+import {usePermissionStore} from '../store/permission';
 import {User} from '../types/auth';
 
 interface AuthContextType {
@@ -26,12 +27,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAuth,
   } = useAuthStore();
 
+  const { generateRoutes, clearPermissions } = usePermissionStore();
+
   const isAuthenticated = !!token && !!user;
 
   useEffect(() => {
     // 检查本地存储中的认证信息
     checkAuth();
   }, [checkAuth]);
+
+  // 当用户认证状态改变时，处理菜单权限
+  useEffect(() => {
+    if (isAuthenticated) {
+      // 用户已认证，获取动态菜单
+      generateRoutes().catch(error => {
+        console.error('获取用户菜单失败:', error);
+      });
+    } else {
+      // 用户未认证，清除权限信息
+      clearPermissions();
+    }
+  }, [isAuthenticated, generateRoutes, clearPermissions]);
 
   const value: AuthContextType = {
     user,

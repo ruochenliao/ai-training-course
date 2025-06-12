@@ -5,6 +5,7 @@ import usePermission from './usePermission';
 import useTheme from './useTheme';
 import useWindowSize from './useWindowSize';
 import useWebSocket from './useWebSocket';
+import useCRUD from './useCRUD';
 
 export {
   useRequest,
@@ -14,6 +15,7 @@ export {
   useTheme,
   useWindowSize,
   useWebSocket,
+  useCRUD,
 };
 
 // 默认导出
@@ -25,4 +27,5 @@ export default {
   useTheme,
   useWindowSize,
   useWebSocket,
+  useCRUD,
 };

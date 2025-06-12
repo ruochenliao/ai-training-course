@@ -13,6 +13,15 @@ export type ThemePreset = {
 
 export const defaultThemePresets: ThemePreset[] = [
   {
+    name: 'Vue版本主题',
+    primaryColor: '#F4511E',
+    secondaryColor: '#2080F0',
+    successColor: '#18A058',
+    warningColor: '#F0A020',
+    errorColor: '#D03050',
+    infoColor: '#2080F0',
+  },
+  {
     name: '默认蓝',
     primaryColor: '#1890ff',
     secondaryColor: '#722ed1',
@@ -86,14 +95,15 @@ export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
       isDark: false,
-      primaryColor: '#1890ff',
-      secondaryColor: '#722ed1',
-      successColor: '#52c41a',
-      warningColor: '#faad14',
-      errorColor: '#f5222d',
-      infoColor: '#1890ff',
+      // 使用Vue版本的默认主题色
+      primaryColor: '#F4511E',
+      secondaryColor: '#2080F0',
+      successColor: '#18A058',
+      warningColor: '#F0A020',
+      errorColor: '#D03050',
+      infoColor: '#2080F0',
       sidebarCollapsed: false,
-      activePreset: '默认蓝',
+      activePreset: 'Vue版本主题',
       customPresets: [],
 
       toggleTheme: () => {

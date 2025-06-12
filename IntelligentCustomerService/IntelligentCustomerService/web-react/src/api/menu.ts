@@ -1,7 +1,7 @@
 import {request} from './index'
-import type {ApiResponse, PaginatedResponse} from '@/types/api'
+import type {ApiResponse, PageResponse} from './index'
 
-// 菜单项接口类型定义
+// 菜单项接口类型定义 - 对应后端Menu模型
 export interface Menu {
   id: number
   name: string
@@ -10,15 +10,33 @@ export interface Menu {
   icon?: string
   order: number
   parent_id: number
-  perms?: string
   redirect?: string
   menu_type?: 'catalog' | 'menu'
   is_hidden?: boolean
   keepalive?: boolean
   created_at?: string
   updated_at?: string
-  remark?: string
+  remark?: any
   children?: Menu[]
+}
+
+// 用户菜单接口类型 - 对应API返回的数据结构
+export interface UserMenu {
+  id: number
+  name: string
+  path: string
+  component: string
+  icon?: string
+  order: number
+  parent_id: number
+  redirect?: string
+  menu_type: 'catalog' | 'menu'
+  is_hidden: boolean
+  keepalive: boolean
+  created_at: string
+  updated_at: string
+  remark?: any
+  children: UserMenu[]
 }
 
 // 菜单创建参数接口
@@ -61,6 +79,19 @@ export interface MenuQueryParams {
   name?: string
   menu_type?: 'catalog' | 'menu'
   parent_id?: number
+}
+
+// 用户菜单API - 获取当前用户的动态菜单
+export const userMenuApi = {
+  // 获取当前用户的菜单
+  getUserMenu: (): Promise<ApiResponse<UserMenu[]>> => {
+    return request.get('/api/v1/base/usermenu')
+  },
+
+  // 获取当前用户的API权限
+  getUserApi: (): Promise<ApiResponse<string[]>> => {
+    return request.get('/api/v1/base/userapi')
+  },
 }
 
 // 菜单管理API

@@ -8,6 +8,7 @@ interface AppState {
   language: string
   collapsed: boolean
   fullscreen: boolean
+  aliveKeys: Record<string, string>
   setLoading: (loading: boolean) => void
   setReloading: (reloading: boolean) => void
   addKeepAlive: (name: string) => void
@@ -18,6 +19,9 @@ interface AppState {
   toggleCollapsed: () => void
   setFullscreen: (fullscreen: boolean) => void
   toggleFullscreen: () => void
+  setFullScreen: (fullscreen: boolean) => void
+  setAliveKeys: (key: string, val: string) => void
+  reloadPage: () => void
 }
 
 export const useAppStore = create<AppState>()(
@@ -29,6 +33,7 @@ export const useAppStore = create<AppState>()(
       language: 'zh-CN',
       collapsed: false,
       fullscreen: false,
+      aliveKeys: {},
 
       setLoading: (loading: boolean) => {
         set({ loading })
@@ -74,6 +79,26 @@ export const useAppStore = create<AppState>()(
       toggleFullscreen: () => {
         const { fullscreen } = get()
         set({ fullscreen: !fullscreen })
+      },
+
+      // 对应Vue版本的 setFullScreen
+      setFullScreen: (fullscreen: boolean) => {
+        set({ fullscreen })
+      },
+
+      // 对应Vue版本的 setAliveKeys
+      setAliveKeys: (key: string, val: string) => {
+        const { aliveKeys } = get()
+        set({ aliveKeys: { ...aliveKeys, [key]: val } })
+      },
+
+      // 对应Vue版本的 reloadPage
+      reloadPage: () => {
+        set({ reloading: true })
+        setTimeout(() => {
+          set({ reloading: false })
+          document.documentElement.scrollTo({ left: 0, top: 0 })
+        }, 100)
       },
     }),
     {

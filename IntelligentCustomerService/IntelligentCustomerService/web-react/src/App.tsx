@@ -34,7 +34,7 @@ const queryClient = new QueryClient({
 // 内部应用组件
 const InnerApp: React.FC = () => {
   const { i18n } = useTranslation();
-  
+
   // 根据语言设置 dayjs 国际化
   React.useEffect(() => {
     dayjs.locale(i18n.language === 'en' ? 'en' : 'zh-cn');
@@ -44,14 +44,51 @@ const InnerApp: React.FC = () => {
     <ConfigProvider
       theme={{
         token: {
-          colorPrimary: '#2080f0',
-          colorSuccess: '#18a058',
-          colorWarning: '#f0a020',
-          colorError: '#d03050',
-          colorInfo: '#2080f0',
-          borderRadius: 4,
+          // 企业级产品配色方案 - 参考vue-fastapi-admin
+          colorPrimary: '#1890ff',
+          colorSuccess: '#52c41a',
+          colorWarning: '#faad14',
+          colorError: '#ff4d4f',
+          colorInfo: '#1890ff',
+          borderRadius: 6,
+          // 优化字体和间距
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif',
+          fontSize: 14,
+          lineHeight: 1.5715,
+          // 阴影优化
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+          boxShadowSecondary: '0 4px 12px rgba(0, 0, 0, 0.15)',
         },
         algorithm: theme.defaultAlgorithm,
+        components: {
+          Layout: {
+            bodyBg: '#f0f2f5',
+            headerBg: '#ffffff',
+            siderBg: '#ffffff',
+            headerHeight: 64,
+            headerPadding: '0 24px',
+          },
+          Menu: {
+            itemBg: 'transparent',
+            itemSelectedBg: '#e6f7ff',
+            itemSelectedColor: '#1890ff',
+            itemHoverBg: '#f5f5f5',
+            itemHoverColor: '#1890ff',
+            subMenuItemBg: 'transparent',
+            itemBorderRadius: 6,
+            itemMarginBlock: 4,
+            itemMarginInline: 8,
+            itemPaddingInline: 12,
+          },
+          Card: {
+            borderRadiusLG: 8,
+            paddingLG: 24,
+          },
+          Button: {
+            borderRadius: 6,
+            controlHeight: 36,
+          },
+        },
       }}
     >
       <AntdApp>

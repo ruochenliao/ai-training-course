@@ -1,5 +1,31 @@
 /* global.css - 统一全局样式文件 */
 
+/* ================ Vue版本样式配置 ================ */
+/* 全局尺寸设置 - 对应Vue版本的global.scss */
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+html {
+  font-size: 4px; /* 1rem = 4px 方便原子化CSS计算：在原子化CSS中 1字体单位 = 0.25rem，相当于 1等份 = 1px */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol';
+}
+
+body {
+  font-size: 16px;
+  line-height: 1.5715;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
 /* ================ 基础样式重置 ================ */
 * {
   margin: 0;
@@ -7,27 +33,37 @@
   box-sizing: border-box;
 }
 
-html, body {
-  height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
-    'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif, 'Apple Color Emoji',
-    'Segoe UI Emoji', 'Segoe UI Symbol';
-  font-size: 14px;
-  line-height: 1.5715;
-}
-
-#root {
-  height: 100%;
-}
-
-/* ================ 主题变量 ================ */
+/* ================ 主题变量 - 对应Vue版本theme.json ================ */
 :root {
-  /* 颜色变量 - 亮色模式 */
-  --primary-color: #2080f0;
-  --success-color: #18a058;
-  --warning-color: #f0a020;
-  --error-color: #d03050;
-  --info-color: #2080f0;
+  /* 主色调 - 对应Vue版本的#F4511E */
+  --primary-color: #2080F0;
+  --primary-color-hover: #4098FC;
+  --primary-color-pressed: #1060C9;
+  --primary-color-active: #4098FC;
+
+  /* 信息色 - 对应Vue版本的#2080F0 */
+  --info-color: #2080F0;
+  --info-color-hover: #4098FC;
+  --info-color-pressed: #1060C9;
+  --info-color-active: #4098FC;
+
+  /* 成功色 - 对应Vue版本的#18A058 */
+  --success-color: #18A058;
+  --success-color-hover: #36ad6a;
+  --success-color-pressed: #0C7A43;
+  --success-color-active: #36ad6a;
+
+  /* 警告色 - 对应Vue版本的#F0A020 */
+  --warning-color: #F0A020;
+  --warning-color-hover: #FCB040;
+  --warning-color-pressed: #C97C10;
+  --warning-color-active: #FCB040;
+
+  /* 错误色 - 对应Vue版本的#D03050 */
+  --error-color: #D03050;
+  --error-color-hover: #DE576D;
+  --error-color-pressed: #AB1F3F;
+  --error-color-active: #DE576D;
   
   --text-color: rgba(0, 0, 0, 0.85);
   --text-color-secondary: rgba(0, 0, 0, 0.45);
@@ -306,36 +342,40 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* 添加渐变背景，模拟Vue版本的背景图片效果 */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .login-page-light {
-  background-color: #f5f7fa;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .login-page-dark {
-  background-color: #141414;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
 }
 
-/* 登录页面装饰元素 */
+/* 登录页面装饰元素 - 模拟Vue版本的设计 */
 .login-decoration {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 200px;
-  background: var(--primary-color);
+  height: 300px;
+  background: rgba(255, 255, 255, 0.1);
   z-index: 0;
+  transform: translateY(-25px);
 }
 
 .login-decoration::after {
   content: '';
   position: absolute;
-  bottom: -60px;
+  bottom: -80px;
   left: 0;
   right: 0;
-  height: 60px;
-  background: var(--primary-color);
+  height: 80px;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 0 0 50% 50%;
+  transform: scale(1.5);
 }
 
 /* Logo容器 */
@@ -355,16 +395,454 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* 登录卡片 */
+/* 登录卡片 - 模拟Vue版本的毛玻璃效果 */
 .login-card {
   width: 400px;
   max-width: 90%;
-  background-color: var(--component-bg);
-  border-radius: 8px;
-  box-shadow: var(--shadow-2);
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   padding: 40px 30px;
   position: relative;
   z-index: 1;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 暗色模式下的登录卡片 */
+.dark .login-card {
+  background-color: rgba(31, 31, 31, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* 工作台样式 - 对应Vue版本的UnoCSS类 */
+.workbench {
+  padding: 16px;
+}
+
+/* 对应UnoCSS的flex-1 */
+.flex-1 {
+  flex: 1;
+}
+
+/* 对应UnoCSS的text-20 */
+.text-20 {
+  font-size: 20px;
+}
+
+/* 对应UnoCSS的text-14 */
+.text-14 {
+  font-size: 14px;
+}
+
+/* 对应UnoCSS的mt-5 */
+.mt-5 {
+  margin-top: 5px;
+}
+
+/* 对应UnoCSS的ml-10 */
+.ml-10 {
+  margin-left: 10px;
+}
+
+/* 对应UnoCSS的mt-15 */
+.mt-15 {
+  margin-top: 15px;
+}
+
+/* 对应UnoCSS的mb-10 */
+.mb-10 {
+  margin-bottom: 10px;
+}
+
+/* 对应UnoCSS的mt-10 */
+.mt-10 {
+  margin-top: 10px;
+}
+
+/* 对应UnoCSS的w-300 */
+.w-300 {
+  width: 300px;
+}
+
+/* 对应UnoCSS的opacity-60 */
+.opacity-60 {
+  opacity: 0.6;
+}
+
+/* 对应UnoCSS的rounded-10 */
+.rounded-10 {
+  border-radius: 10px;
+}
+
+/* 对应Vue版本的hover:card-shadow效果 */
+.hover-card-shadow:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 0.3s ease;
+}
+
+/* 页面切换动画 - 对应Vue版本的fade-slide */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+}
+
+/* 自定义滚动条样式 - 对应Vue版本的cus-scroll */
+.custom-scroll-y {
+  overflow-y: auto;
+}
+
+.custom-scroll-x {
+  overflow-x: auto;
+}
+
+.custom-scroll-light::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scroll-light::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scroll-light::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.custom-scroll-light::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.custom-scroll-dark::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scroll-dark::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scroll-dark::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.custom-scroll-dark::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* 隐藏滚动条 */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* 暗色模式模态框样式 */
+.dark-modal .ant-modal-content {
+  background-color: #1f1f1f;
+  color: white;
+}
+
+.dark-modal .ant-modal-header {
+  background-color: #1f1f1f;
+  border-bottom: 1px solid #303030;
+}
+
+.dark-modal .ant-modal-title {
+  color: white;
+}
+
+.dark-modal .ant-modal-close {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.dark-modal .ant-modal-close:hover {
+  color: white;
+}
+
+/* 对应UnoCSS的wh-full */
+.wh-full {
+  width: 100%;
+  height: 100%;
+}
+
+/* 对应UnoCSS的flex-center */
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Layout相关样式 - 对应Vue版本的Layout布局 */
+/* 对应UnoCSS的h-60 */
+.h-60 {
+  height: 60px;
+}
+
+/* 对应UnoCSS的px-15 */
+.px-15 {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+/* 对应UnoCSS的ml-15 */
+.ml-15 {
+  margin-left: 15px;
+}
+
+/* 对应UnoCSS的mx-5 */
+.mx-5 {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+/* 对应UnoCSS的rounded-4 */
+.rounded-4 {
+  border-radius: 4px;
+}
+
+/* 对应UnoCSS的color-primary */
+.color-primary {
+  color: var(--primary-color);
+}
+
+/* 对应UnoCSS的text-36 */
+.text-36 {
+  font-size: 36px;
+}
+
+/* 对应UnoCSS的text-16 */
+.text-16 {
+  font-size: 16px;
+}
+
+/* 对应UnoCSS的max-w-150 */
+.max-w-150 {
+  max-width: 150px;
+}
+
+/* 对应UnoCSS的flex-shrink-0 */
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+/* 对应UnoCSS的mr-8 */
+.mr-8 {
+  margin-right: 8px;
+}
+
+/* 对应UnoCSS的mr-10 */
+.mr-10 {
+  margin-right: 10px;
+}
+
+/* 对应UnoCSS的bg-hex-f5f6fb */
+.bg-hex-f5f6fb {
+  background-color: #f5f6fb;
+}
+
+/* 对应UnoCSS的bg-hex-101014 */
+.bg-hex-101014 {
+  background-color: #101014;
+}
+
+/* 对应UnoCSS的bc-eee */
+.bc-eee {
+  border-color: #eee;
+}
+
+/* 对应UnoCSS的bg-dark */
+.bg-dark {
+  background-color: #1f1f1f;
+}
+
+/* 侧边栏菜单样式 - 对应Vue版本的SideMenu */
+.side-menu .ant-menu-item {
+  border-radius: 4px;
+  margin: 0 5px;
+  height: auto;
+  line-height: 1.5;
+  padding: 8px 12px;
+}
+
+.side-menu .ant-menu-item-selected {
+  border-left: 4px solid var(--primary-color);
+  background-color: rgba(244, 81, 30, 0.1);
+}
+
+.side-menu .ant-menu-submenu {
+  border-radius: 4px;
+  margin: 0 5px;
+}
+
+.side-menu .ant-menu-submenu-title {
+  border-radius: 4px;
+  padding: 8px 12px;
+}
+
+/* 标签页样式 - 对应Vue版本的Tags */
+.ant-tag {
+  border-radius: 4px;
+  padding: 4px 15px;
+  margin: 0 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.ant-tag:hover {
+  color: var(--primary-color);
+}
+
+/* 响应式隐藏 - 对应Vue版本的hidden sm:block */
+@media (max-width: 640px) {
+  .hidden {
+    display: none;
+  }
+}
+
+@media (min-width: 640px) {
+  .sm\\:block {
+    display: block;
+  }
+}
+
+/* ================ 页面切换动画 - 对应Vue版本的fade-slide ================ */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+/* React版本的页面切换动画 */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+}
+
+.page-transition-enter {
+  animation: fadeSlideIn 0.3s ease-out;
+}
+
+.page-transition-exit {
+  animation: fadeSlideOut 0.3s ease-out;
+}
+
+/* ================ UnoCSS快捷方式对应 - 对应Vue版本的shortcuts ================ */
+/* wh-full: w-full h-full（全宽高） */
+.wh-full {
+  width: 100%;
+  height: 100%;
+}
+
+/* f-c-c: flex justify-center items-center（居中布局） */
+.f-c-c {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* flex-col: flex flex-col（垂直布局） */
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 绝对定位到四个角 */
+.absolute-lt {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.absolute-lb {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+.absolute-rt {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.absolute-rb {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+/* absolute-center: 绝对居中 */
+.absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* text-ellipsis: truncate（文本省略） */
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 卡片阴影效果 - 对应Vue版本的card-shadow */
+.card-shadow {
+  box-shadow: 0 1px 2px -2px rgba(0, 0, 0, 0.08),
+              0 3px 6px 0 rgba(0, 0, 0, 0.06),
+              0 5px 12px 4px rgba(0, 0, 0, 0.04);
 }
 
 .login-card-light {
@@ -686,4 +1164,696 @@ body,
 .ant-modal-content,
 .ant-drawer-content {
   transition: var(--transition-base);
+}
+
+/* ================ 企业级UI优化样式 ================ */
+
+/* 企业级布局样式 */
+.enterprise-layout {
+  background: #f0f2f5;
+}
+
+.enterprise-sidebar {
+  background: #ffffff !important;
+  border-right: 1px solid #f0f0f0 !important;
+  box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05) !important;
+}
+
+.enterprise-main-layout {
+  background: #f0f2f5;
+}
+
+.enterprise-header {
+  background: #ffffff;
+  border-bottom: 1px solid #f0f0f0;
+  box-shadow: 0 2px 8px 0 rgba(29, 35, 41, 0.05);
+}
+
+.enterprise-content {
+  background: #f0f2f5;
+}
+
+.enterprise-page-container {
+  background: transparent;
+}
+
+/* 企业级Logo样式 */
+.enterprise-logo-container:hover {
+  background-color: rgba(24, 144, 255, 0.04) !important;
+}
+
+.enterprise-logo-icon {
+  transition: all 0.3s ease;
+}
+
+.enterprise-logo-container:hover .enterprise-logo-icon {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3) !important;
+}
+
+/* 企业级侧边栏菜单样式 - 参考vue-fastapi-admin设计 */
+.enterprise-side-menu-container {
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 0;
+}
+
+.enterprise-side-menu {
+  border-right: 0 !important;
+  background: transparent !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+/* 菜单项基础样式 */
+.enterprise-side-menu .ant-menu-item {
+  margin: 2px 12px !important;
+  padding: 0 16px !important;
+  border-radius: 6px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.enterprise-side-menu .ant-menu-submenu-title {
+  margin: 2px 12px !important;
+  padding: 0 16px !important;
+  border-radius: 6px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* 悬停效果 - 参考vue-fastapi-admin的渐变效果 */
+.enterprise-side-menu .ant-menu-item:hover,
+.enterprise-side-menu .ant-menu-submenu-title:hover {
+  color: #1890ff !important;
+  background: linear-gradient(135deg, #e6f7ff 0%, #f0f9ff 100%) !important;
+  transform: translateX(2px) !important;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1) !important;
+}
+
+/* 选中状态 - 现代渐变设计 */
+.enterprise-side-menu .ant-menu-item-selected {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%) !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3) !important;
+  transform: translateX(2px) !important;
+}
+
+.enterprise-side-menu .ant-menu-item-selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #ffffff;
+  border-radius: 0 2px 2px 0;
+}
+
+.enterprise-side-menu .ant-menu-item-selected:hover {
+  background: linear-gradient(135deg, #40a9ff 0%, #1890ff 100%) !important;
+  color: #ffffff !important;
+  transform: translateX(2px) !important;
+}
+
+/* 子菜单选中状态 */
+.enterprise-side-menu .ant-menu-submenu-selected > .ant-menu-submenu-title {
+  color: #1890ff !important;
+  background: linear-gradient(135deg, #e6f7ff 0%, #f0f9ff 100%) !important;
+  font-weight: 600 !important;
+}
+
+/* 图标样式优化 */
+.enterprise-side-menu .ant-menu-item-icon,
+.enterprise-side-menu .ant-menu-submenu-title .ant-menu-item-icon {
+  font-size: 16px !important;
+  margin-right: 12px !important;
+  transition: all 0.2s ease !important;
+}
+
+.enterprise-side-menu .ant-menu-item-selected .ant-menu-item-icon {
+  color: #ffffff !important;
+}
+
+/* 子菜单容器样式 */
+.enterprise-side-menu .ant-menu-sub {
+  background: rgba(248, 249, 250, 0.8) !important;
+  border-radius: 0 0 6px 6px !important;
+  margin: 0 12px !important;
+  padding: 4px 0 !important;
+}
+
+.dark .enterprise-side-menu .ant-menu-sub {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* 子菜单项样式 */
+.enterprise-side-menu .ant-menu-sub .ant-menu-item {
+  margin: 1px 8px !important;
+  padding-left: 32px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  font-size: 13px !important;
+  border-radius: 4px !important;
+}
+
+/* 菜单项内容样式 */
+.enterprise-menu-item-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.enterprise-menu-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.enterprise-menu-badge {
+  margin-left: 8px;
+  font-size: 10px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+/* 折叠状态优化 */
+.enterprise-side-menu.ant-menu-inline-collapsed .ant-menu-item,
+.enterprise-side-menu.ant-menu-inline-collapsed .ant-menu-submenu-title {
+  padding: 0 calc(50% - 8px) !important;
+  text-align: center !important;
+}
+
+.enterprise-side-menu.ant-menu-inline-collapsed .enterprise-menu-badge {
+  display: none !important;
+}
+
+/* 展开/折叠动画 */
+.enterprise-side-menu .ant-menu-submenu-arrow {
+  transition: transform 0.2s ease !important;
+  color: #8c8c8c !important;
+}
+
+.enterprise-side-menu .ant-menu-submenu-open > .ant-menu-submenu-title .ant-menu-submenu-arrow {
+  transform: rotate(180deg) !important;
+}
+
+/* 分割线样式 */
+.enterprise-side-menu .ant-menu-item-divider {
+  margin: 8px 12px !important;
+  background-color: #f0f0f0 !important;
+  height: 1px !important;
+}
+
+.dark .enterprise-side-menu .ant-menu-item-divider {
+  background-color: #303030 !important;
+}
+
+/* 菜单加载动画 */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 菜单项进入动画 */
+@keyframes menuItemFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.enterprise-side-menu .ant-menu-item,
+.enterprise-side-menu .ant-menu-submenu {
+  animation: menuItemFadeIn 0.3s ease-out;
+}
+
+/* 菜单项延迟动画 */
+.enterprise-side-menu .ant-menu-item:nth-child(1) { animation-delay: 0.1s; }
+.enterprise-side-menu .ant-menu-item:nth-child(2) { animation-delay: 0.15s; }
+.enterprise-side-menu .ant-menu-item:nth-child(3) { animation-delay: 0.2s; }
+.enterprise-side-menu .ant-menu-item:nth-child(4) { animation-delay: 0.25s; }
+.enterprise-side-menu .ant-menu-item:nth-child(5) { animation-delay: 0.3s; }
+
+/* 菜单容器样式优化 */
+.enterprise-side-menu-container {
+  position: relative;
+  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  border-right: 1px solid #f0f0f0;
+}
+
+.dark .enterprise-side-menu-container {
+  background: linear-gradient(180deg, #001529 0%, #000c17 100%);
+  border-right: 1px solid #303030;
+}
+
+/* 菜单标题样式 */
+.enterprise-menu-title {
+  position: relative;
+  overflow: hidden;
+}
+
+.enterprise-menu-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #1890ff 50%, transparent 100%);
+}
+
+/* 菜单底部信息样式 */
+.enterprise-menu-footer {
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.enterprise-menu-footer:hover {
+  background: rgba(24, 144, 255, 0.1) !important;
+  border-color: rgba(24, 144, 255, 0.2) !important;
+}
+
+/* 企业级工作台样式 */
+.enterprise-workbench {
+  padding: 0;
+}
+
+.enterprise-welcome-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.enterprise-welcome-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="20" cy="80" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  pointer-events: none;
+}
+
+.enterprise-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+.enterprise-project-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  border-color: #1890ff !important;
+}
+
+/* 企业级头部样式 */
+.enterprise-header-content {
+  height: 100%;
+  padding: 0;
+}
+
+.enterprise-breadcrumb {
+  transition: all 0.3s ease;
+}
+
+.enterprise-header-actions .ant-btn {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  color: #595959;
+  transition: all 0.2s ease;
+}
+
+.enterprise-header-actions .ant-btn:hover {
+  color: #1890ff;
+  background-color: #f0f7ff;
+}
+
+.enterprise-user-section {
+  transition: all 0.3s ease;
+}
+
+/* 响应式头部样式 */
+@media (max-width: 768px) {
+  .enterprise-breadcrumb {
+    display: none !important;
+  }
+
+  .enterprise-header-actions {
+    gap: 8px !important;
+  }
+
+  .enterprise-user-section {
+    margin-left: 16px !important;
+    padding-left: 16px !important;
+  }
+}
+
+/* 暗色模式适配 */
+.dark .enterprise-sidebar {
+  background: #001529 !important;
+  border-right: 1px solid #303030 !important;
+}
+
+.dark .enterprise-header {
+  background: #001529 !important;
+  border-bottom: 1px solid #303030 !important;
+}
+
+.dark .enterprise-content {
+  background: #141414 !important;
+}
+
+.dark .enterprise-logo-container:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .enterprise-side-menu .ant-menu-item:hover,
+.dark .enterprise-side-menu .ant-menu-submenu-title:hover {
+  color: #1890ff !important;
+  background-color: rgba(24, 144, 255, 0.15) !important;
+}
+
+.dark .enterprise-side-menu .ant-menu-submenu-selected > .ant-menu-submenu-title {
+  color: #1890ff !important;
+  background-color: rgba(24, 144, 255, 0.15) !important;
+}
+
+.dark .enterprise-header-actions .ant-btn {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.dark .enterprise-header-actions .ant-btn:hover {
+  color: #1890ff;
+  background-color: rgba(24, 144, 255, 0.15);
+}
+
+.dark .enterprise-user-section {
+  border-left: 1px solid #303030;
+}
+
+/* 主布局样式优化 */
+.h-screen {
+  height: 100vh;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.border-r {
+  border-right: 1px solid;
+}
+
+.border-b {
+  border-bottom: 1px solid;
+}
+
+.border-gray-200 {
+  border-color: #e5e7eb;
+}
+
+.dark .border-gray-800 {
+  border-color: #1f2937;
+}
+
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.z-10 {
+  z-index: 10;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-auto {
+  overflow: auto;
+}
+
+.transition-all {
+  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+.duration-300 {
+  transition-duration: 300ms;
+}
+
+.bg-white {
+  background-color: #ffffff;
+}
+
+.bg-gray-50 {
+  background-color: #f9fafb;
+}
+
+.dark .bg-gray-900 {
+  background-color: #111827;
+}
+
+.dark .bg-gray-950 {
+  background-color: #030712;
+}
+
+.p-4 {
+  padding: 16px;
+}
+
+.px-4 {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.py-4 {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.text-lg {
+  font-size: 18px;
+}
+
+.text-2xl {
+  font-size: 24px;
+}
+
+.text-primary {
+  color: var(--primary-color);
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transition-opacity {
+  transition-property: opacity;
+}
+
+/* 标签视图优化 */
+.app-tags {
+  height: 40px;
+  background-color: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.dark .app-tags {
+  background-color: #1f1f1f;
+  border-bottom: 1px solid #303030;
+}
+
+.app-tag {
+  cursor: pointer;
+  height: 28px;
+  padding: 0 10px;
+  margin-right: 6px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: var(--transition-base);
+  user-select: none;
+  color: var(--text-color);
+}
+
+.dark .app-tag {
+  background-color: #262626;
+}
+
+.app-tag.active {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+.app-tag:hover:not(.active) {
+  background-color: #e6e6e6;
+}
+
+.dark .app-tag:hover:not(.active) {
+  background-color: #303030;
+}
+
+.app-tag-close {
+  margin-left: 6px;
+  font-size: 12px;
+  height: 12px;
+  width: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.app-tag-close:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.app-tag.active .app-tag-close:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* 页面容器样式 */
+.page-container {
+  background-color: #fff;
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-1);
+}
+
+.dark .page-container {
+  background-color: #1f1f1f;
+}
+
+.page-header {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 16px;
+}
+
+.dark .page-header {
+  border-bottom-color: #303030;
+}
+
+.page-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 8px;
+}
+
+.page-description {
+  font-size: 14px;
+  color: var(--text-color-secondary);
+}
+
+/* 操作按钮样式 */
+.action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 工作台卡片样式 */
+.stat-card {
+  display: flex;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: var(--shadow-1);
+  transition: var(--transition-base);
+  height: 100%;
+}
+
+.dark .stat-card {
+  background-color: #1f1f1f;
+}
+
+.stat-card:hover {
+  box-shadow: var(--shadow-2);
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  font-size: 36px;
+  color: var(--primary-color);
+  margin-right: 16px;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-title {
+  font-size: 14px;
+  color: var(--text-color-secondary);
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.stat-footer {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-color-secondary);
+}
+
+/* 动画效果 */
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 300ms;
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 300ms;
 } 

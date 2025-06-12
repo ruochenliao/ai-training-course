@@ -187,6 +187,13 @@ export function isValidIdCard(idCard: string): boolean {
 }
 
 /**
+ * 检查是否为外链 - 对应Vue版本的 isExternal
+ */
+export function isExternal(path: string): boolean {
+  return /^(https?:|mailto:|tel:)/.test(path)
+}
+
+/**
  * 树形数据转换为扁平数组
  */
 export function treeToFlat<T extends { children?: T[] }>(tree: T[]): T[] {

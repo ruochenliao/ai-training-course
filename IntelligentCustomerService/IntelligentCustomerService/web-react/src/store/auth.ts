@@ -2,6 +2,7 @@ import {create} from 'zustand'
 import {persist} from 'zustand/middleware'
 import {authApi} from '@/api/auth'
 import type {LoginParams, User} from '@/types/auth'
+import {usePermissionStore} from './permission'
 
 interface AuthState {
   user: User | null
@@ -57,7 +58,11 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true,
             loading: false
           })
-          
+
+          // 初始化权限
+          const permissionStore = usePermissionStore.getState()
+          await permissionStore.generateRoutes(apis || [])
+
           return
         } catch (error: unknown) {
           // 清除可能已设置的token
@@ -120,7 +125,11 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true,
             loading: false
           })
-          
+
+          // 初始化权限
+          const permissionStore = usePermissionStore.getState()
+          await permissionStore.generateRoutes(apis || [])
+
           return true
         } catch (error) {
           localStorage.removeItem('token')

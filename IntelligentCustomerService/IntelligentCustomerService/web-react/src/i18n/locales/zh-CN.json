@@ -28,9 +28,17 @@
     "rememberMe": "记住我",
     "forgotPassword": "忘记密码？",
     "loginSuccess": "登录成功",
-    "loginFailed": "登录失败",
+    "loginFailed": "登录失败，请检查用户名和密码",
     "usernameRequired": "请输入用户名",
-    "passwordRequired": "请输入密码"
+    "passwordRequired": "请输入密码",
+    "usernameMinLength": "用户名至少3个字符",
+    "usernameMaxLength": "用户名最多20个字符",
+    "passwordMinLength": "密码至少6个字符",
+    "passwordMaxLength": "密码最多20个字符",
+    "loginLoading": "登录中...",
+    "demoAccount": "演示账号",
+    "adminAccount": "管理员",
+    "userAccount": "普通用户"
   },
   "theme": {
     "settings": "主题设置",
@@ -104,6 +112,16 @@
     "stopped": "已停止",
     "maintenance": "维护中",
     "createTime": "创建时间"
+  },
+  "workbench": {
+    "label_workbench": "工作台",
+    "text_hello": "hello, {username}",
+    "text_welcome": "今天又是元气满满的一天!",
+    "label_number_of_items": "项目数",
+    "label_upcoming": "待办",
+    "label_information": "消息",
+    "label_project": "项目",
+    "label_more": "更多"
   },
   "users": {
     "title": "用户管理",

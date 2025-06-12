@@ -21,9 +21,7 @@ i18n
     // 调试模式
     debug: import.meta.env.DEV,
     
-    // 命名空间
-    defaultNS: 'common',
-    ns: ['common', 'auth', 'menu', 'form', 'table', 'message'],
+    // 不使用命名空间，直接使用扁平结构
     
     // 插值配置
     interpolation: {
@@ -39,8 +37,12 @@ i18n
     
     // 资源配置
     resources: {
-      'zh-CN': zhCN,
-      'en-US': enUS,
+      'zh-CN': {
+        translation: zhCN,
+      },
+      'en-US': {
+        translation: enUS,
+      },
     },
     
     // React 配置

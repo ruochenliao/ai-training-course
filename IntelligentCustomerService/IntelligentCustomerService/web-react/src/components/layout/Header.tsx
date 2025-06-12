@@ -1,73 +1,71 @@
 import React from 'react'
-import type {MenuProps} from 'antd'
-import {Avatar, Button, Dropdown, Layout, Typography} from 'antd'
-import {GithubOutlined, MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined,} from '@ant-design/icons'
-import {useNavigate} from 'react-router-dom'
-import {useAuthStore} from '@/store/auth'
-import {useThemeStore} from '@/store/theme'
+import { Space } from 'antd'
+import MenuCollapse from './MenuCollapse'
+import BreadCrumb from './Breadcrumb'
+import Languages from './Languages'
+import ThemeMode from './ThemeMode'
+import FullScreen from './FullScreen'
+import GithubSite from './GithubSite'
+import UserAvatar from './UserAvatar'
+import { useAppStore } from '@/store/app.ts'
 
-const { Header: AntdHeader } = Layout
-const { Text } = Typography
+/**
+ * 顶部导航栏组件 - 对应Vue版本的header/index.vue
+ *
+ * 布局特性：
+ * - 左侧：菜单折叠按钮 + 面包屑导航
+ * - 右侧：功能按钮组 + 用户头像
+ * - 响应式隐藏（面包屑在小屏幕隐藏）
+ */
 
 const Header: React.FC = () => {
-  const navigate = useNavigate()
-  const { user, logout } = useAuthStore()
-  const { sidebarCollapsed, toggleSidebar } = useThemeStore()
-
-  const handleLogout = () => {
-    logout()
-    navigate('/login')
-  }
-
-  const userMenuItems: MenuProps['items'] = [
-    {
-      key: 'profile',
-      icon: <UserOutlined />,
-      label: '个人资料',
-      onClick: () => navigate('/profile'),
-    },
-    {
-      type: 'divider',
-    },
-    {
-      key: 'logout',
-      label: '退出登录',
-      onClick: handleLogout,
-    },
-  ]
+  const { collapsed } = useAppStore()
 
   return (
-    <AntdHeader className="flex-between px-4 h-14 bg-white border-b border-gray-200" style={{ padding: '0 16px' }}>
-      <div className="flex items-center">
-        <Button
-          type="text"
-          icon={sidebarCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-          onClick={toggleSidebar}
-          className="text-lg"
-        />
+    <div
+      className="enterprise-header-content"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
+        height: '100%',
+      }}
+    >
+      {/* 左侧区域：菜单折叠和面包屑导航 */}
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <MenuCollapse />
+        <div
+          className="enterprise-breadcrumb"
+          style={{
+            marginLeft: '16px',
+            display: window.innerWidth > 768 ? 'block' : 'none',
+          }}
+        >
+          <BreadCrumb />
+        </div>
       </div>
 
-      <div className="flex items-center space-x-4">
-        <Button
-          type="text"
-          icon={<GithubOutlined />}
-          href="https://github.com/"
-          target="_blank"
-          className="text-lg"
-        />
-
-        {/* 用户菜单 */}
-        <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-          <div className="flex items-center cursor-pointer">
-            <Avatar
-              size="small"
-              icon={<UserOutlined />}
-            />
-            <Text className="ml-2">{user?.username || 'admin'}</Text>
-          </div>
-        </Dropdown>
+      {/* 右侧区域：功能区和用户信息 */}
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <Space size="large" className="enterprise-header-actions">
+          <Languages />
+          <ThemeMode />
+          <FullScreen />
+          <GithubSite />
+        </Space>
+        <div
+          className="enterprise-user-section"
+          style={{
+            marginLeft: '24px',
+            paddingLeft: '24px',
+            borderLeft: '1px solid #f0f0f0',
+          }}
+        >
+          <UserAvatar />
+        </div>
       </div>
-    </AntdHeader>
+    </div>
   )
 }
 
