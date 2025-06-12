@@ -2,18 +2,28 @@ import {create} from 'zustand'
 import type {RouteObject} from 'react-router-dom'
 
 export interface MenuItem {
-  id: string
-  title: string
+  id?: string
+  name: string
+  title?: string
   path?: string
   icon?: string
   children?: MenuItem[]
-  type: 'directory' | 'menu'
+  type?: 'directory' | 'menu'
   hidden?: boolean
+  isHidden?: boolean
   keepAlive?: boolean
   order?: number
   component?: string
   redirect?: string
   permissions?: string[]
+  meta?: {
+    title?: string
+    icon?: string
+    customIcon?: string
+    order?: number
+    keepAlive?: boolean
+    activeMenu?: string
+  }
 }
 
 interface PermissionState {
@@ -60,66 +70,75 @@ export const usePermissionStore = create<PermissionState>()((set, get) => ({
       // 暂时使用静态数据
       const staticMenus: MenuItem[] = [
         {
-          id: '1',
-          title: '工作台',
+          name: 'workbench',
           path: '/workbench',
-          icon: 'mdi:view-dashboard',
-          type: 'menu',
-          order: 1,
+          meta: {
+            title: '工作台',
+            icon: 'mdi:view-dashboard',
+            order: 1,
+          },
         },
         {
-          id: '2',
-          title: '系统管理',
-          icon: 'mdi:cog',
-          type: 'directory',
-          order: 2,
+          name: 'system',
+          path: '/system',
+          meta: {
+            title: '系统管理',
+            icon: 'mdi:cog',
+            order: 2,
+          },
           children: [
             {
-              id: '2-1',
-              title: '用户管理',
+              name: 'system-user',
               path: '/system/user',
-              icon: 'mdi:account-multiple',
-              type: 'menu',
+              meta: {
+                title: '用户管理',
+                icon: 'mdi:account-multiple',
+              },
               permissions: ['system:user:list'],
             },
             {
-              id: '2-2',
-              title: '角色管理',
+              name: 'system-role',
               path: '/system/role',
-              icon: 'mdi:account-key',
-              type: 'menu',
+              meta: {
+                title: '角色管理',
+                icon: 'mdi:account-key',
+              },
               permissions: ['system:role:list'],
             },
             {
-              id: '2-3',
-              title: '菜单管理',
+              name: 'system-menu',
               path: '/system/menu',
-              icon: 'mdi:menu',
-              type: 'menu',
+              meta: {
+                title: '菜单管理',
+                icon: 'mdi:menu',
+              },
               permissions: ['system:menu:list'],
             },
             {
-              id: '2-4',
-              title: '部门管理',
+              name: 'system-dept',
               path: '/system/dept',
-              icon: 'mdi:office-building',
-              type: 'menu',
+              meta: {
+                title: '部门管理',
+                icon: 'mdi:office-building',
+              },
               permissions: ['system:dept:list'],
             },
             {
-              id: '2-5',
-              title: 'API管理',
+              name: 'system-api',
               path: '/system/api',
-              icon: 'mdi:api',
-              type: 'menu',
+              meta: {
+                title: 'API管理',
+                icon: 'mdi:api',
+              },
               permissions: ['system:api:list'],
             },
             {
-              id: '2-6',
-              title: '审计日志',
+              name: 'system-auditlog',
               path: '/system/auditlog',
-              icon: 'mdi:file-document-outline',
-              type: 'menu',
+              meta: {
+                title: '审计日志',
+                icon: 'mdi:file-document-outline',
+              },
               permissions: ['system:auditlog:list'],
             },
           ],

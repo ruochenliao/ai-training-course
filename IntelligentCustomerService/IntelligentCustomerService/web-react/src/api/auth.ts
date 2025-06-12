@@ -3,7 +3,7 @@ import {request} from './index'
 import type {ChangePasswordParams, LoginParams, LoginResponse, User,} from '@/types/auth'
 
 export const authApi = {
-  // 登录获取token
+  // 登录获取token - 正确的API路径
   login: (params: LoginParams): Promise<ApiResponse<LoginResponse>> => {
     return request.post('/api/v1/base/access_token', params)
   },

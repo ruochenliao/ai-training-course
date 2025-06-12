@@ -1,6 +1,6 @@
 import React, {Suspense} from 'react';
 import {createBrowserRouter, Navigate} from 'react-router-dom';
-import Layout from '../components/layout/Layout';
+import MainLayout from '../components/layout/MainLayout';
 import {AuthGuard} from '../components/auth/RouteGuard';
 import {Loading} from '../components/common/LoadingEmpty';
 
@@ -52,14 +52,32 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: (
-      <Navigate to="/dashboard" replace />
+      <Navigate to="/workbench" replace />
     ),
+  },
+  {
+    path: '/workbench',
+    element: (
+      <AuthGuard>
+        <MainLayout />
+      </AuthGuard>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <SuspenseWrapper>
+            <Workbench />
+          </SuspenseWrapper>
+        ),
+      },
+    ],
   },
   {
     path: '/dashboard',
     element: (
       <AuthGuard>
-        <Layout />
+        <MainLayout />
       </AuthGuard>
     ),
     children: [

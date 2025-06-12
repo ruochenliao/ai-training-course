@@ -28,9 +28,17 @@
     "rememberMe": "Remember Me",
     "forgotPassword": "Forgot Password?",
     "loginSuccess": "Login Success",
-    "loginFailed": "Login Failed",
+    "loginFailed": "Login failed, please check username and password",
     "usernameRequired": "Please enter username",
-    "passwordRequired": "Please enter password"
+    "passwordRequired": "Please enter password",
+    "usernameMinLength": "Username must be at least 3 characters",
+    "usernameMaxLength": "Username must be at most 20 characters",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "passwordMaxLength": "Password must be at most 20 characters",
+    "loginLoading": "Logging in...",
+    "demoAccount": "Demo Account",
+    "adminAccount": "Administrator",
+    "userAccount": "Regular User"
   },
   "theme": {
     "settings": "Theme Settings",
@@ -104,6 +112,16 @@
     "stopped": "Stopped",
     "maintenance": "Maintenance",
     "createTime": "Create Time"
+  },
+  "workbench": {
+    "label_workbench": "Workbench",
+    "text_hello": "hello, {username}",
+    "text_welcome": "Have a great day!",
+    "label_number_of_items": "Projects",
+    "label_upcoming": "Pending",
+    "label_information": "Messages",
+    "label_project": "Projects",
+    "label_more": "More"
   },
   "error": {
     "404": "Page Not Found",

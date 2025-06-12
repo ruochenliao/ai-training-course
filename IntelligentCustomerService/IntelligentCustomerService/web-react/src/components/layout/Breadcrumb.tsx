@@ -1,9 +1,8 @@
 import React from 'react'
-import {Breadcrumb as AntBreadcrumb} from 'antd'
-import {HomeOutlined} from '@ant-design/icons'
-import {Link, useLocation} from 'react-router-dom'
-import {useAppStore} from '../../store/app'
-import {cn} from '../../utils'
+import { Breadcrumb as AntBreadcrumb } from 'antd'
+import { HomeOutlined } from '@ant-design/icons'
+import { Link, useLocation } from 'react-router-dom'
+import { useTheme } from '../../contexts/ThemeContext'
 
 interface BreadcrumbItem {
   title: string
@@ -11,9 +10,19 @@ interface BreadcrumbItem {
   icon?: React.ReactNode
 }
 
+/**
+ * 面包屑导航组件 - 对应Vue版本的BreadCrumb.vue
+ *
+ * 功能特性：
+ * 1. 基于当前路由自动生成
+ * 2. 支持路由跳转
+ * 3. 小屏幕隐藏（hidden sm:block）
+ * 4. 左边距15px
+ */
+
 const Breadcrumb: React.FC = () => {
   const location = useLocation()
-  const { theme } = useAppStore()
+  const { isDark } = useTheme()
 
   // 路径映射配置
   const pathMap: Record<string, BreadcrumbItem> = {
@@ -37,10 +46,9 @@ const Breadcrumb: React.FC = () => {
     // 添加首页
     items.push({
       title: (
-        <Link to="/dashboard" className={cn(
-          "flex items-center",
-          theme === 'dark' ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-blue-600"
-        )}>
+        <Link to="/dashboard" className={
+          isDark ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-blue-600"
+        }>
           <HomeOutlined className="mr-1" />
           工作台
         </Link>
@@ -58,20 +66,18 @@ const Breadcrumb: React.FC = () => {
         
         items.push({
           title: isLast ? (
-            <span className={cn(
-              "font-medium",
-              theme === 'dark' ? "text-white" : "text-gray-800"
-            )}>
+            <span className={
+              isDark ? "text-white font-medium" : "text-gray-800 font-medium"
+            }>
               {pathInfo.icon && <span className="mr-1">{pathInfo.icon}</span>}
               {pathInfo.title}
             </span>
           ) : (
-            <Link 
-              to={currentPath} 
-              className={cn(
-                "flex items-center",
-                theme === 'dark' ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-blue-600"
-              )}
+            <Link
+              to={currentPath}
+              className={
+                isDark ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-blue-600"
+              }
             >
               {pathInfo.icon && <span className="mr-1">{pathInfo.icon}</span>}
               {pathInfo.title}
@@ -94,13 +100,12 @@ const Breadcrumb: React.FC = () => {
   return (
     <AntBreadcrumb
       items={breadcrumbItems}
-      className={cn(
-        "text-sm",
-        theme === 'dark' ? "text-gray-300" : "text-gray-600"
-      )}
-      separator={<span className={cn(
-        theme === 'dark' ? "text-gray-500" : "text-gray-400"
-      )}>{'>'}</span>}
+      className={
+        isDark ? "text-gray-300 text-sm" : "text-gray-600 text-sm"
+      }
+      separator={<span className={
+        isDark ? "text-gray-500" : "text-gray-400"
+      }>{'>'}</span>}
     />
   )
 }

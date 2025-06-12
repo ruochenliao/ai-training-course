@@ -15,12 +15,14 @@ interface TagsState {
   addTag: (tag: TagItem) => void
   removeTag: (path: string) => void
   removeOtherTags: (path: string) => void
+  removeLeftTags: (path: string) => void
+  removeRightTags: (path: string) => void
   removeAllTags: () => void
   setActiveTag: (path: string) => void
   updateTag: (path: string, updates: Partial<TagItem>) => void
 }
 
-export const useTagsStore = create<TagsState>()()
+export const useTagsStore = create<TagsState>()(
   persist(
     (set, get) => ({
       tags: [
@@ -65,9 +67,27 @@ export const useTagsStore = create<TagsState>()()
         const { tags } = get()
         const currentTag = tags.find(tag => tag.path === path)
         const homeTag = tags.find(tag => tag.path === '/workbench')
-        
+
         const newTags = [homeTag, currentTag].filter(Boolean) as TagItem[]
         set({ tags: newTags, activeTag: path })
+      },
+
+      removeLeftTags: (path: string) => {
+        const { tags } = get()
+        const currentIndex = tags.findIndex(tag => tag.path === path)
+        if (currentIndex > 0) {
+          const newTags = tags.slice(currentIndex)
+          set({ tags: newTags })
+        }
+      },
+
+      removeRightTags: (path: string) => {
+        const { tags } = get()
+        const currentIndex = tags.findIndex(tag => tag.path === path)
+        if (currentIndex >= 0 && currentIndex < tags.length - 1) {
+          const newTags = tags.slice(0, currentIndex + 1)
+          set({ tags: newTags })
+        }
       },
 
       removeAllTags: () => {

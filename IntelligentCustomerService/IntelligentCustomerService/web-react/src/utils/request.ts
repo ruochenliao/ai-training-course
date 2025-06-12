@@ -5,7 +5,7 @@ import type {ApiResponse} from '@/types/api'
 
 // 创建axios实例
 const request: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:9999',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -15,10 +15,12 @@ const request: AxiosInstance = axios.create({
 // 请求拦截器
 request.interceptors.request.use(
   (config: AxiosRequestConfig) => {
-    // 添加token
-    const token = localStorage.getItem('token')
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`
+    // 添加token（登录接口除外）
+    if (!config.url?.includes('/access_token')) {
+      const token = localStorage.getItem('token')
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
     }
     return config
   },
@@ -37,13 +39,14 @@ request.interceptors.response.use(
       return response
     }
     
-    // 检查业务状态码
-    if (data.code === 200 || data.success) {
+    // 检查业务状态码 - 匹配后端返回格式 {code: 200, msg: "OK", data: {...}}
+    if (data.code === 200) {
       return data
     }
-    
-    // 处理业务错误 - 不在拦截器中显示错误消息，让组件自己处理
-    return data // 返回数据而不是reject，让组件处理错误
+
+    // 处理业务错误
+    const errorMessage = data.msg || '请求失败'
+    return Promise.reject(new Error(errorMessage))
   },
   (error) => {
     // 处理HTTP错误

@@ -1,205 +1,110 @@
-import React, {useEffect, useRef} from 'react'
-import {Dropdown} from 'antd'
-import {CloseCircleOutlined, CloseOutlined, ReloadOutlined} from '@ant-design/icons'
-import {useLocation, useNavigate} from 'react-router-dom'
-import {useTagsStore} from '../../store/tags'
-import {useAppStore} from '../../store/app'
-import {cn} from '../../utils'
+import React, { useEffect, useRef, useState } from 'react'
+import { Tag } from 'antd'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useTagsStore } from '../../store/tags'
+import { useAppStore } from '../../store/app'
+import ScrollX from '../common/ScrollX'
+import ContextMenu from './ContextMenu'
+
+/**
+ * 标签页组件 - 对应Vue版本的tags/index.vue
+ *
+ * 功能特性：
+ * 1. 基于路由的标签生成
+ * 2. 标签可关闭（至少保留一个）
+ * 3. 水平滚动支持
+ * 4. 右键菜单操作
+ * 5. 当前标签高亮
+ * 6. 标签点击切换路由
+ */
 
 const TagsView: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const scrollRef = useRef<HTMLDivElement>(null)
-  
-  const { tags, removeTag, setActiveTag, removeOtherTags, removeAllTags } = useTagsStore()
-  const { theme } = useAppStore()
+  const scrollXRef = useRef<any>(null)
+  const tabRefs = useRef<(HTMLElement | null)[]>([])
 
-  // 当前激活的标签
-  const currentPath = location.pathname
+  const { tags, activeTag, removeTag, setActiveTag } = useTagsStore()
+  const { setReloading } = useAppStore()
 
-  // 滚动到激活的标签
+  // 右键菜单状态 - 对应Vue版本的 contextMenuOption
+  const [contextMenuOption, setContextMenuOption] = useState({
+    show: false,
+    x: 0,
+    y: 0,
+    currentPath: '',
+  })
+
+  // 监听激活标签变化，自动滚动 - 对应Vue版本的 watch(() => tagsStore.activeIndex)
   useEffect(() => {
-    if (scrollRef.current) {
-      const activeElement = scrollRef.current.querySelector(`[data-path="${currentPath}"]`) as HTMLElement
-      if (activeElement) {
-        activeElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest',
-          inline: 'center'
-        })
+    const activeIndex = tags.findIndex(tag => tag.path === activeTag)
+    if (activeIndex >= 0 && tabRefs.current[activeIndex] && scrollXRef.current) {
+      const activeTabElement = tabRefs.current[activeIndex]
+      if (activeTabElement) {
+        const { offsetLeft: x, offsetWidth: width } = activeTabElement
+        scrollXRef.current.handleScroll(x + width, width)
       }
     }
-  }, [currentPath])
+  }, [activeTag, tags])
 
-  // 处理标签点击
-  const handleTagClick = (tag: any) => {
-    setActiveTag(tag.key)
-    navigate(tag.path)
+  // 处理标签点击 - 对应Vue版本的 handleTagClick
+  const handleTagClick = (path: string) => {
+    setActiveTag(path)
+    navigate(path)
   }
 
-  // 处理标签关闭
-  const handleTagClose = (e: React.MouseEvent, tag: any) => {
-    e.stopPropagation()
-    
-    if (!tag.closable) return
-    
-    const tagIndex = tags.findIndex(t => t.key === tag.key)
-    removeTag(tag.key)
-    
-    // 如果关闭的是当前激活的标签，需要跳转到其他标签
-    if (tag.key === currentPath && tags.length > 1) {
-      const nextTag = tags[tagIndex] || tags[tagIndex - 1]
-      if (nextTag) {
-        navigate(nextTag.path)
-      }
-    }
+  // 处理标签关闭 - 对应Vue版本的 @close.stop
+  const handleTagClose = (path: string) => {
+    removeTag(path)
   }
 
-  // 右键菜单项
-  const getContextMenuItems = (tag: any) => [
-    {
-      key: 'refresh',
-      icon: <ReloadOutlined />,
-      label: '刷新',
-      onClick: () => {
-        // 刷新当前页面
-        window.location.reload()
-      }
-    },
-    {
-      key: 'close',
-      icon: <CloseOutlined />,
-      label: '关闭',
-      disabled: !tag.closable,
-      onClick: () => handleTagClose({} as React.MouseEvent, tag)
-    },
-    {
-      key: 'closeOthers',
-      icon: <CloseCircleOutlined />,
-      label: '关闭其他',
-      onClick: () => {
-        removeOtherTags(tag.key)
-        if (tag.key !== currentPath) {
-          navigate(tag.path)
-        }
-      }
-    },
-    {
-      key: 'closeAll',
-      icon: <CloseCircleOutlined />,
-      label: '关闭所有',
-      onClick: () => {
-        removeAllTags()
-        // 跳转到首页
-        navigate('/dashboard')
-      }
-    }
-  ]
-
-  if (tags.length === 0) {
-    return null
+  // 右键菜单处理 - 对应Vue版本的 handleContextMenu
+  const handleContextMenu = (e: React.MouseEvent, tag: any) => {
+    e.preventDefault()
+    const { clientX, clientY } = e
+    setContextMenuOption({
+      show: false,
+      x: clientX,
+      y: clientY,
+      currentPath: tag.path,
+    })
+    // 使用 setTimeout 确保先隐藏再显示
+    setTimeout(() => {
+      setContextMenuOption(prev => ({ ...prev, show: true }))
+    }, 0)
   }
 
   return (
-    <div className={cn(
-      "flex items-center px-4 py-2 border-b overflow-x-auto",
-      theme === 'dark' 
-        ? "bg-gray-800 border-gray-700" 
-        : "bg-gray-50 border-gray-200"
-    )}>
-      <div 
-        ref={scrollRef}
-        className="flex items-center space-x-2 min-w-0 flex-1"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {tags.map((tag) => {
-          const isActive = tag.path === currentPath
-          
-          return (
-            <Dropdown
-              key={tag.key}
-              menu={{
-                items: getContextMenuItems(tag)
-              }}
-              trigger={['contextMenu']}
-            >
-              <div
-                data-path={tag.path}
-                className={cn(
-                  "flex items-center px-3 py-1 rounded cursor-pointer transition-all duration-200 whitespace-nowrap",
-                  "hover:bg-blue-50 dark:hover:bg-blue-900/20",
-                  isActive
-                    ? "bg-blue-500 text-white shadow-sm"
-                    : theme === 'dark'
-                    ? "bg-gray-700 text-gray-300 hover:text-white"
-                    : "bg-white text-gray-700 shadow-sm border border-gray-200"
-                )}
-                onClick={() => handleTagClick(tag)}
-              >
-                <span className="text-sm font-medium mr-1">
-                  {tag.title}
-                </span>
-                {tag.closable && (
-                  <CloseOutlined
-                    className={cn(
-                      "text-xs ml-1 hover:bg-black/10 rounded p-0.5 transition-colors",
-                      isActive ? "text-white/80 hover:text-white" : ""
-                    )}
-                    onClick={(e) => handleTagClose(e, tag)}
-                  />
-                )}
-              </div>
-            </Dropdown>
-          )
-        })}
-      </div>
-      
-      {/* 操作按钮 */}
-      <div className="flex items-center ml-4 space-x-2">
-        <Dropdown
-          menu={{
-            items: [
-              {
-                key: 'refresh',
-                icon: <ReloadOutlined />,
-                label: '刷新当前页',
-                onClick: () => window.location.reload()
-              },
-              {
-                key: 'closeOthers',
-                icon: <CloseCircleOutlined />,
-                label: '关闭其他标签',
-                onClick: () => {
-                  const currentTag = tags.find(tag => tag.path === currentPath)
-                  if (currentTag) {
-                    removeOtherTags(currentTag.key)
-                  }
-                }
-              },
-              {
-                key: 'closeAll',
-                icon: <CloseCircleOutlined />,
-                label: '关闭所有标签',
-                onClick: () => {
-                  removeAllTags()
-                  navigate('/dashboard')
-                }
-              }
-            ]
-          }}
-          placement="bottomRight"
+    <ScrollX
+      ref={scrollXRef}
+      className="bg-white dark:bg-dark"
+    >
+      {tags.map((tag, index) => (
+        <Tag
+          key={tag.path}
+          ref={(el) => (tabRefs.current[index] = el)}
+          className="mx-5 cursor-pointer rounded-4 px-15 hover:color-primary"
+          color={activeTag === tag.path ? 'blue' : 'default'}
+          closable={tags.length > 1}
+          onClick={() => handleTagClick(tag.path)}
+          onClose={() => handleTagClose(tag.path)}
+          onContextMenu={(e) => handleContextMenu(e, tag)}
         >
-          <div className={cn(
-            "p-1 rounded cursor-pointer transition-colors",
-            theme === 'dark'
-              ? "hover:bg-gray-700 text-gray-400"
-              : "hover:bg-gray-200 text-gray-600"
-          )}>
-            <CloseCircleOutlined className="text-sm" />
-          </div>
-        </Dropdown>
-      </div>
-    </div>
+          {tag.title}
+        </Tag>
+      ))}
+
+      {/* 右键菜单 - 对应Vue版本的 ContextMenu */}
+      {contextMenuOption.show && (
+        <ContextMenu
+          show={contextMenuOption.show}
+          currentPath={contextMenuOption.currentPath}
+          x={contextMenuOption.x}
+          y={contextMenuOption.y}
+          onClose={() => setContextMenuOption(prev => ({ ...prev, show: false }))}
+        />
+      )}
+    </ScrollX>
   )
 }
 
