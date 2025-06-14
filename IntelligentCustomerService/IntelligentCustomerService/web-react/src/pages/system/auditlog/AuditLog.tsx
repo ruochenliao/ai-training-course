@@ -1,161 +1,141 @@
-import React, {useEffect, useState} from 'react';
-import {
-  Button, 
-  Card, 
-  Col, 
-  DatePicker, 
-  Form, 
-  Input, 
-  App, 
-  Popover, 
-  Row, 
-  Select, 
-  Space, 
-  Table, 
-  Tag,
-  Typography
-} from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import {EyeOutlined, SearchOutlined, ReloadOutlined} from '@ant-design/icons';
-import {type AuditLog, auditLogApi, type AuditLogQueryParams} from '@/api/auditlog';
-import dayjs from 'dayjs';
-import CommonPagination from '@/components/CommonPagination';
+import React, {useEffect, useState} from 'react'
+import {App, Button, Card, Col, DatePicker, Form, Input, Popover, Row, Select, Table, Tag, Typography} from 'antd'
+import type {ColumnsType} from 'antd/es/table'
+import {EyeOutlined, ReloadOutlined, SearchOutlined} from '@ant-design/icons'
+import {type AuditLog, auditLogApi, type AuditLogQueryParams} from '@/api/auditlog'
+import dayjs from 'dayjs'
+import CommonPagination from '@/components/CommonPagination'
 
-const { Title } = Typography;
-const { RangePicker } = DatePicker;
+const { Title } = Typography
+const { RangePicker } = DatePicker
 
 // 查询参数接口
 interface QueryParams extends AuditLogQueryParams {
-  dateRange?: [dayjs.Dayjs, dayjs.Dayjs] | null;
-  start_time?: string;
-  end_time?: string;
+  dateRange?: [dayjs.Dayjs, dayjs.Dayjs] | null
+  start_time?: string
+  end_time?: string
 }
 
 const AuditLog: React.FC = () => {
-  const { message } = App.useApp();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [logList, setLogList] = useState<AuditLog[]>([]);
-  const [total, setTotal] = useState<number>(0);
-  const [current, setCurrent] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
-  const [queryParams, setQueryParams] = useState<QueryParams>({});
-  const [form] = Form.useForm();
+  const { message } = App.useApp()
+  const [loading, setLoading] = useState<boolean>(false)
+  const [logList, setLogList] = useState<AuditLog[]>([])
+  const [total, setTotal] = useState<number>(0)
+  const [current, setCurrent] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(10)
+  const [queryParams, setQueryParams] = useState<QueryParams>({})
+  const [form] = Form.useForm()
 
   // 格式化JSON数据
   const formatJSON = (data: any): string => {
     try {
-      return typeof data === 'string' 
-        ? JSON.stringify(JSON.parse(data), null, 2)
-        : JSON.stringify(data, null, 2);
+      return typeof data === 'string' ? JSON.stringify(JSON.parse(data), null, 2) : JSON.stringify(data, null, 2)
     } catch (e) {
-      return data || '无数据';
+      return data || '无数据'
     }
-  };
+  }
 
   // 获取当天的开始和结束时间
   const getDefaultDateRange = (): [dayjs.Dayjs, dayjs.Dayjs] => {
-    const today = dayjs();
-    return [
-      today.startOf('day'),
-      today.endOf('day')
-    ];
-  };
+    const today = dayjs()
+    return [today.startOf('day'), today.endOf('day')]
+  }
 
   // 初始化查询参数
   useEffect(() => {
-    const defaultRange = getDefaultDateRange();
+    const defaultRange = getDefaultDateRange()
     const initialParams = {
       dateRange: defaultRange,
       start_time: defaultRange[0].format('YYYY-MM-DD HH:mm:ss'),
-      end_time: defaultRange[1].format('YYYY-MM-DD HH:mm:ss')
-    };
-    setQueryParams(initialParams);
-    form.setFieldsValue({ dateRange: defaultRange });
-  }, [form]);
+      end_time: defaultRange[1].format('YYYY-MM-DD HH:mm:ss'),
+    }
+    setQueryParams(initialParams)
+    form.setFieldsValue({ dateRange: defaultRange })
+  }, [form])
 
   // 加载审计日志数据
   useEffect(() => {
     if (queryParams.start_time && queryParams.end_time) {
-      fetchLogList();
+      fetchLogList()
     }
-  }, [queryParams, current, pageSize]);
+  }, [queryParams, current, pageSize])
 
   // 获取日志列表
   const fetchLogList = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
       const params = {
         ...queryParams,
         page: current,
         page_size: pageSize,
-      };
+      }
       // 移除dateRange字段，因为API不需要这个字段
-      delete params.dateRange;
-      
-      const response = await auditLogApi.list(params);
-      
+      delete params.dateRange
+
+      const response = await auditLogApi.list(params)
+
       // 根据API响应结构处理数据
       if (response && response.data) {
         // 如果返回的是分页数据
         if (Array.isArray(response.data.items)) {
-          setLogList(response.data.items);
-          setTotal(response.data.total || response.data.items.length);
-        } 
+          setLogList(response.data.items)
+          setTotal(response.data.total || response.data.items.length)
+        }
         // 如果直接返回数组数据
         else if (Array.isArray(response.data)) {
-          setLogList(response.data);
-          setTotal(response.data.length);
+          setLogList(response.data)
+          setTotal(response.data.length)
         }
       }
     } catch (error) {
-      message.error('获取审计日志失败');
+      message.error('获取审计日志失败')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // 处理搜索
   const handleSearch = async () => {
     try {
-      const values = await form.validateFields();
-      const newParams: QueryParams = { ...values };
-      
+      const values = await form.validateFields()
+      const newParams: QueryParams = { ...values }
+
       // 处理时间范围
       if (values.dateRange) {
-        newParams.start_time = values.dateRange[0].format('YYYY-MM-DD HH:mm:ss');
-        newParams.end_time = values.dateRange[1].format('YYYY-MM-DD HH:mm:ss');
+        newParams.start_time = values.dateRange[0].format('YYYY-MM-DD HH:mm:ss')
+        newParams.end_time = values.dateRange[1].format('YYYY-MM-DD HH:mm:ss')
       } else {
         // 使用空字符串代替undefined
-        newParams.start_time = '';
-        newParams.end_time = '';
+        newParams.start_time = ''
+        newParams.end_time = ''
       }
-      
-      setQueryParams(newParams);
-      setCurrent(1); // 重置到第一页
+
+      setQueryParams(newParams)
+      setCurrent(1) // 重置到第一页
     } catch (error) {
-      console.error('表单验证失败:', error);
+      console.error('表单验证失败:', error)
     }
-  };
+  }
 
   // 重置表单
   const handleReset = () => {
-    form.resetFields();
-    const defaultRange = getDefaultDateRange();
+    form.resetFields()
+    const defaultRange = getDefaultDateRange()
     const resetParams = {
       dateRange: defaultRange,
       start_time: defaultRange[0].format('YYYY-MM-DD HH:mm:ss'),
-      end_time: defaultRange[1].format('YYYY-MM-DD HH:mm:ss')
-    };
-    setQueryParams(resetParams);
-    form.setFieldsValue({ dateRange: defaultRange });
-    setCurrent(1);
-  };
+      end_time: defaultRange[1].format('YYYY-MM-DD HH:mm:ss'),
+    }
+    setQueryParams(resetParams)
+    form.setFieldsValue({ dateRange: defaultRange })
+    setCurrent(1)
+  }
 
   // 处理分页变化
   const handleTableChange = (page: number, size: number) => {
-    setCurrent(page);
-    setPageSize(size);
-  };
+    setCurrent(page)
+    setPageSize(size)
+  }
 
   // 表格列配置
   const columns: ColumnsType<AuditLog> = [
@@ -190,27 +170,27 @@ const AuditLog: React.FC = () => {
       align: 'center',
       width: 90,
       render: (method: string) => {
-        let color = 'default';
+        let color = 'default'
         switch (method) {
           case 'GET':
-            color = 'blue';
-            break;
+            color = 'blue'
+            break
           case 'POST':
-            color = 'green';
-            break;
+            color = 'green'
+            break
           case 'DELETE':
-            color = 'red';
-            break;
+            color = 'red'
+            break
           case 'PUT':
-            color = 'orange';
-            break;
+            color = 'orange'
+            break
           case 'PATCH':
-            color = 'purple';
-            break;
+            color = 'purple'
+            break
           default:
-            color = 'default';
+            color = 'default'
         }
-        return <Tag color={color}>{method}</Tag>;
+        return <Tag color={color}>{method}</Tag>
       },
     },
     {
@@ -228,13 +208,13 @@ const AuditLog: React.FC = () => {
       align: 'center',
       width: 80,
       render: (status: number) => {
-        let color = 'green';
+        let color = 'green'
         if (status >= 400) {
-          color = 'red';
+          color = 'red'
         } else if (status >= 300) {
-          color = 'orange';
+          color = 'orange'
         }
-        return <Tag color={color}>{status}</Tag>;
+        return <Tag color={color}>{status}</Tag>
       },
     },
     {
@@ -245,8 +225,8 @@ const AuditLog: React.FC = () => {
       width: 80,
       render: (params: any) => (
         <Popover
-          trigger="hover"
-          placement="right"
+          trigger='hover'
+          placement='right'
           content={
             <pre
               style={{
@@ -263,7 +243,7 @@ const AuditLog: React.FC = () => {
             </pre>
           }
         >
-          <Button type="link" size="small" icon={<EyeOutlined />} className="action-button" />
+          <Button type='link' size='small' icon={<EyeOutlined />} className='action-button' />
         </Popover>
       ),
     },
@@ -275,8 +255,8 @@ const AuditLog: React.FC = () => {
       width: 80,
       render: (response: any) => (
         <Popover
-          trigger="hover"
-          placement="right"
+          trigger='hover'
+          placement='right'
           content={
             <pre
               style={{
@@ -293,7 +273,7 @@ const AuditLog: React.FC = () => {
             </pre>
           }
         >
-          <Button type="link" size="small" icon={<EyeOutlined />} className="action-button" />
+          <Button type='link' size='small' icon={<EyeOutlined />} className='action-button' />
         </Popover>
       ),
     },
@@ -313,51 +293,32 @@ const AuditLog: React.FC = () => {
       width: 160,
       ellipsis: true,
     },
-  ];
+  ]
 
   return (
-    <div className="audit-log-container">
-      <Card 
-        title={<Title level={4}>审计日志</Title>}
-        className="system-card"
-      >
-        <Form
-          form={form}
-          layout="horizontal"
-          className="system-form mb-4"
-        >
+    <div className='audit-log-container'>
+      <Card title={<Title level={4}>审计日志</Title>} className='system-card'>
+        <Form form={form} layout='horizontal' className='system-form mb-4'>
           <Row gutter={16}>
             <Col span={6}>
-              <Form.Item name="username" label="用户名称" labelCol={{ span: 8 }}>
-                <Input 
-                  placeholder="请输入用户名称" 
-                  onPressEnter={handleSearch}
-                  allowClear
-                />
+              <Form.Item name='username' label='用户名称' labelCol={{ span: 8 }}>
+                <Input placeholder='请输入用户名称' onPressEnter={handleSearch} allowClear />
               </Form.Item>
             </Col>
             <Col span={6}>
-              <Form.Item name="module" label="功能模块" labelCol={{ span: 8 }}>
-                <Input 
-                  placeholder="请输入功能模块" 
-                  onPressEnter={handleSearch}
-                  allowClear
-                />
+              <Form.Item name='module' label='功能模块' labelCol={{ span: 8 }}>
+                <Input placeholder='请输入功能模块' onPressEnter={handleSearch} allowClear />
               </Form.Item>
             </Col>
             <Col span={6}>
-              <Form.Item name="summary" label="接口概要" labelCol={{ span: 8 }}>
-                <Input 
-                  placeholder="请输入接口概要" 
-                  onPressEnter={handleSearch}
-                  allowClear
-                />
+              <Form.Item name='summary' label='接口概要' labelCol={{ span: 8 }}>
+                <Input placeholder='请输入接口概要' onPressEnter={handleSearch} allowClear />
               </Form.Item>
             </Col>
             <Col span={6}>
-              <Form.Item name="method" label="请求方法" labelCol={{ span: 8 }}>
-                <Select 
-                  placeholder="请选择方法" 
+              <Form.Item name='method' label='请求方法' labelCol={{ span: 8 }}>
+                <Select
+                  placeholder='请选择方法'
                   allowClear
                   options={[
                     { value: 'GET', label: 'GET' },
@@ -372,52 +333,39 @@ const AuditLog: React.FC = () => {
           </Row>
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="dateRange" label="时间范围" labelCol={{ span: 4 }}>
-                <RangePicker 
-                  showTime 
-                  style={{ width: '100%' }} 
-                  format="YYYY-MM-DD HH:mm:ss" 
-                />
+              <Form.Item name='dateRange' label='时间范围' labelCol={{ span: 4 }}>
+                <RangePicker showTime style={{ width: '100%' }} format='YYYY-MM-DD HH:mm:ss' />
               </Form.Item>
             </Col>
             <Col span={12} style={{ textAlign: 'right' }}>
-              <Button 
-                type="primary" 
-                icon={<SearchOutlined />} 
-                onClick={handleSearch}
-                className="search-button mr-2"
-              >
+              <Button type='primary' icon={<SearchOutlined />} onClick={handleSearch} className='search-button mr-2'>
                 搜索
               </Button>
-              <Button 
-                icon={<ReloadOutlined />} 
-                onClick={handleReset}
-                className="reset-button"
-              >
+              <Button icon={<ReloadOutlined />} onClick={handleReset} className='reset-button'>
                 重置
               </Button>
             </Col>
           </Row>
         </Form>
-        
-        <Table 
-          className="system-table"
+
+        <Table
+          className='system-table'
           dataSource={logList}
           columns={columns}
-          rowKey="id"
+          rowKey='id'
           loading={loading}
           pagination={CommonPagination({
             current,
             pageSize,
             total,
-            onChange: handleTableChange
+            onChange: handleTableChange,
           })}
           scroll={{ x: 1200 }}
-          size="middle"
+          size='middle'
         />
       </Card>
     </div>
-  );
-};
+  )
+}
 
-export default AuditLog;
+export default AuditLog

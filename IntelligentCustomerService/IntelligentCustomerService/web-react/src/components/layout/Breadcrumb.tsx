@@ -1,8 +1,8 @@
 import React from 'react'
-import { Breadcrumb as AntBreadcrumb } from 'antd'
-import { HomeOutlined } from '@ant-design/icons'
-import { Link, useLocation } from 'react-router-dom'
-import { useTheme } from '../../contexts/ThemeContext'
+import {Breadcrumb as AntBreadcrumb} from 'antd'
+import {HomeOutlined} from '@ant-design/icons'
+import {Link, useLocation} from 'react-router-dom'
+import {useTheme} from '../../contexts/ThemeContext'
 
 interface BreadcrumbItem {
   title: string
@@ -46,13 +46,11 @@ const Breadcrumb: React.FC = () => {
     // 添加首页
     items.push({
       title: (
-        <Link to="/dashboard" className={
-          isDark ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-blue-600"
-        }>
-          <HomeOutlined className="mr-1" />
+        <Link to='/dashboard' className={isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-blue-600'}>
+          <HomeOutlined className='mr-1' />
           工作台
         </Link>
-      )
+      ),
     })
 
     // 构建路径
@@ -60,29 +58,22 @@ const Breadcrumb: React.FC = () => {
     pathSegments.forEach((segment, index) => {
       currentPath += `/${segment}`
       const pathInfo = pathMap[currentPath]
-      
+
       if (pathInfo) {
         const isLast = index === pathSegments.length - 1
-        
+
         items.push({
           title: isLast ? (
-            <span className={
-              isDark ? "text-white font-medium" : "text-gray-800 font-medium"
-            }>
-              {pathInfo.icon && <span className="mr-1">{pathInfo.icon}</span>}
+            <span className={isDark ? 'text-white font-medium' : 'text-gray-800 font-medium'}>
+              {pathInfo.icon && <span className='mr-1'>{pathInfo.icon}</span>}
               {pathInfo.title}
             </span>
           ) : (
-            <Link
-              to={currentPath}
-              className={
-                isDark ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-blue-600"
-              }
-            >
-              {pathInfo.icon && <span className="mr-1">{pathInfo.icon}</span>}
+            <Link to={currentPath} className={isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-blue-600'}>
+              {pathInfo.icon && <span className='mr-1'>{pathInfo.icon}</span>}
               {pathInfo.title}
             </Link>
-          )
+          ),
         })
       }
     })
@@ -100,12 +91,8 @@ const Breadcrumb: React.FC = () => {
   return (
     <AntBreadcrumb
       items={breadcrumbItems}
-      className={
-        isDark ? "text-gray-300 text-sm" : "text-gray-600 text-sm"
-      }
-      separator={<span className={
-        isDark ? "text-gray-500" : "text-gray-400"
-      }>{'>'}</span>}
+      className={isDark ? 'text-gray-300 text-sm' : 'text-gray-600 text-sm'}
+      separator={<span className={isDark ? 'text-gray-500' : 'text-gray-400'}>{'>'}</span>}
     />
   )
 }

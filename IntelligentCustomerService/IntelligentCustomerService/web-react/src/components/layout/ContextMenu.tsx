@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react'
-import { Menu } from 'antd'
-import { useNavigate } from 'react-router-dom'
-import { useTagsStore } from '../../store/tags'
-import { useAppStore } from '../../store/app'
+import React, {useEffect} from 'react'
+import {Menu} from 'antd'
+import {useNavigate} from 'react-router-dom'
+import {useTagsStore} from '../../store/tags'
+import {useAppStore} from '../../store/app'
 
 interface ContextMenuProps {
   show: boolean
@@ -14,7 +14,7 @@ interface ContextMenuProps {
 
 /**
  * 右键菜单组件 - 对应Vue版本的ContextMenu.vue
- * 
+ *
  * 功能特性：
  * 1. 关闭当前标签
  * 2. 关闭其他标签
@@ -22,13 +22,7 @@ interface ContextMenuProps {
  * 4. 关闭右侧标签
  * 5. 关闭所有标签
  */
-const ContextMenu: React.FC<ContextMenuProps> = ({
-  show,
-  currentPath,
-  x,
-  y,
-  onClose,
-}) => {
+const ContextMenu: React.FC<ContextMenuProps> = ({ show, currentPath, x, y, onClose }) => {
   const navigate = useNavigate()
   const { tags, removeTag, removeOtherTags, removeLeftTags, removeRightTags, removeAllTags } = useTagsStore()
   const { setReloading } = useAppStore()
@@ -49,8 +43,8 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
 
   if (!show) return null
 
-  const currentTag = tags.find(tag => tag.path === currentPath)
-  const currentIndex = tags.findIndex(tag => tag.path === currentPath)
+  const currentTag = tags.find((tag) => tag.path === currentPath)
+  const currentIndex = tags.findIndex((tag) => tag.path === currentPath)
 
   const menuItems = [
     {
@@ -60,7 +54,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
         setReloading(true)
         setTimeout(() => setReloading(false), 100)
         onClose()
-      }
+      },
     },
     {
       key: 'close',
@@ -71,7 +65,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
           removeTag(currentPath)
         }
         onClose()
-      }
+      },
     },
     {
       key: 'closeOthers',
@@ -81,7 +75,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
         removeOtherTags(currentPath)
         navigate(currentPath)
         onClose()
-      }
+      },
     },
     {
       key: 'closeLeft',
@@ -90,7 +84,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
       onClick: () => {
         removeLeftTags(currentPath)
         onClose()
-      }
+      },
     },
     {
       key: 'closeRight',
@@ -99,7 +93,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
       onClick: () => {
         removeRightTags(currentPath)
         onClose()
-      }
+      },
     },
     {
       key: 'closeAll',
@@ -108,24 +102,20 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
         removeAllTags()
         navigate('/dashboard')
         onClose()
-      }
-    }
+      },
+    },
   ]
 
   return (
     <div
-      className="fixed z-50"
+      className='fixed z-50'
       style={{
         left: x,
         top: y,
       }}
       onClick={(e) => e.stopPropagation()}
     >
-      <Menu
-        items={menuItems}
-        className="shadow-lg border rounded"
-        style={{ minWidth: 120 }}
-      />
+      <Menu items={menuItems} className='shadow-lg border rounded' style={{ minWidth: 120 }} />
     </div>
   )
 }

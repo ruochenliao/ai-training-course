@@ -1,11 +1,11 @@
-import {useCallback} from 'react';
-import {usePermissionStore} from '@/store/permission';
+import {useCallback} from 'react'
+import {usePermissionStore} from '@/store/permission'
 
 /**
  * 权限验证Hook
  */
 function usePermission() {
-  const { permissions, hasPermission, hasAnyPermission } = usePermissionStore();
+  const { permissions, hasPermission, hasAnyPermission } = usePermissionStore()
 
   /**
    * 检查是否拥有指定权限
@@ -14,10 +14,10 @@ function usePermission() {
    */
   const checkPermission = useCallback(
     (permission: string): boolean => {
-      return hasPermission(permission);
+      return hasPermission(permission)
     },
-    [hasPermission]
-  );
+    [hasPermission],
+  )
 
   /**
    * 检查是否拥有指定权限中的任意一个
@@ -26,10 +26,10 @@ function usePermission() {
    */
   const checkAnyPermission = useCallback(
     (permissionList: string[]): boolean => {
-      return hasAnyPermission(permissionList);
+      return hasAnyPermission(permissionList)
     },
-    [hasAnyPermission]
-  );
+    [hasAnyPermission],
+  )
 
   /**
    * 检查是否拥有指定权限中的所有权限
@@ -38,10 +38,10 @@ function usePermission() {
    */
   const checkAllPermissions = useCallback(
     (permissionList: string[]): boolean => {
-      return permissionList.every(permission => hasPermission(permission));
+      return permissionList.every((permission) => hasPermission(permission))
     },
-    [hasPermission]
-  );
+    [hasPermission],
+  )
 
   /**
    * 过滤出有权限的项目
@@ -51,19 +51,19 @@ function usePermission() {
    */
   const filterByPermission = useCallback(
     <T>(items: T[], getPermission: (item: T) => string | string[] | undefined): T[] => {
-      return items.filter(item => {
-        const permission = getPermission(item);
-        if (!permission) return true;
-        
+      return items.filter((item) => {
+        const permission = getPermission(item)
+        if (!permission) return true
+
         if (Array.isArray(permission)) {
-          return hasAnyPermission(permission);
+          return hasAnyPermission(permission)
         }
-        
-        return hasPermission(permission);
-      });
+
+        return hasPermission(permission)
+      })
     },
-    [hasPermission, hasAnyPermission]
-  );
+    [hasPermission, hasAnyPermission],
+  )
 
   return {
     permissions,
@@ -71,7 +71,7 @@ function usePermission() {
     checkAnyPermission,
     checkAllPermissions,
     filterByPermission,
-  };
+  }
 }
 
-export default usePermission; 
+export default usePermission

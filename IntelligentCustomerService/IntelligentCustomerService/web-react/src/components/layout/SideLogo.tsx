@@ -1,7 +1,7 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
-import { Icon } from '@iconify/react'
-import { useAppStore } from '../../store/app'
+import {Link} from 'react-router-dom'
+import {Icon} from '@iconify/react'
+import {useAppStore} from '../../store/app'
 
 /**
  * 企业级侧边栏Logo组件
@@ -14,8 +14,8 @@ const SideLogo: React.FC = () => {
 
   return (
     <Link
-      to="/"
-      className="enterprise-logo-container"
+      to='/'
+      className='enterprise-logo-container'
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -31,7 +31,7 @@ const SideLogo: React.FC = () => {
     >
       {/* 企业级Logo图标 */}
       <div
-        className="enterprise-logo-icon"
+        className='enterprise-logo-icon'
         style={{
           width: '32px',
           height: '32px',
@@ -45,7 +45,7 @@ const SideLogo: React.FC = () => {
         }}
       >
         <Icon
-          icon="mdi:customer-service"
+          icon='mdi:customer-service'
           style={{
             fontSize: '18px',
             color: '#ffffff',
@@ -56,7 +56,7 @@ const SideLogo: React.FC = () => {
       {/* 企业级标题 */}
       {!collapsed && (
         <div
-          className="enterprise-logo-text"
+          className='enterprise-logo-text'
           style={{
             marginLeft: '12px',
             overflow: 'hidden',

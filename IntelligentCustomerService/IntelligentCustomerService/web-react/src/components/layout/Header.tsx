@@ -1,5 +1,5 @@
 import React from 'react'
-import { Space } from 'antd'
+import {Space} from 'antd'
 import MenuCollapse from './MenuCollapse'
 import BreadCrumb from './Breadcrumb'
 import Languages from './Languages'
@@ -7,7 +7,6 @@ import ThemeMode from './ThemeMode'
 import FullScreen from './FullScreen'
 import GithubSite from './GithubSite'
 import UserAvatar from './UserAvatar'
-import { useAppStore } from '@/store/app.ts'
 
 /**
  * 顶部导航栏组件 - 对应Vue版本的header/index.vue
@@ -19,11 +18,9 @@ import { useAppStore } from '@/store/app.ts'
  */
 
 const Header: React.FC = () => {
-  const { collapsed } = useAppStore()
-
   return (
     <div
-      className="enterprise-header-content"
+      className='enterprise-header-content'
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -36,7 +33,7 @@ const Header: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <MenuCollapse />
         <div
-          className="enterprise-breadcrumb"
+          className='enterprise-breadcrumb'
           style={{
             marginLeft: '16px',
             display: window.innerWidth > 768 ? 'block' : 'none',
@@ -48,14 +45,14 @@ const Header: React.FC = () => {
 
       {/* 右侧区域：功能区和用户信息 */}
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <Space size="large" className="enterprise-header-actions">
+        <Space size='large' className='enterprise-header-actions'>
           <Languages />
           <ThemeMode />
           <FullScreen />
           <GithubSite />
         </Space>
         <div
-          className="enterprise-user-section"
+          className='enterprise-user-section'
           style={{
             marginLeft: '24px',
             paddingLeft: '24px',

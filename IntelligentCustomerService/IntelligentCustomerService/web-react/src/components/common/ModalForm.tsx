@@ -1,64 +1,53 @@
-import React, {forwardRef, useEffect, useImperativeHandle} from 'react';
-import {Modal, ModalProps} from 'antd';
-import {useTranslation} from 'react-i18next';
-import DynamicForm, {DynamicFormProps, DynamicFormRef, FormItemConfig} from './DynamicForm';
+import React, {forwardRef, useEffect, useImperativeHandle} from 'react'
+import {Modal, ModalProps} from 'antd'
+import {useTranslation} from 'react-i18next'
+import DynamicForm, {DynamicFormProps, DynamicFormRef, FormItemConfig} from './DynamicForm'
 
 export interface ModalFormProps extends Omit<ModalProps, 'onOk' | 'onCancel'> {
-  formItems: FormItemConfig[];
-  formProps?: Omit<DynamicFormProps, 'items' | 'onFinish' | 'showSubmit' | 'showReset'>;
-  initialValues?: Record<string, any>;
-  onSubmit?: (values: any) => Promise<void> | void;
-  onCancel?: () => void;
-  submitText?: string;
-  cancelText?: string;
-  loading?: boolean;
-  destroyOnClose?: boolean;
+  formItems: FormItemConfig[]
+  formProps?: Omit<DynamicFormProps, 'items' | 'onFinish' | 'showSubmit' | 'showReset'>
+  initialValues?: Record<string, any>
+  onSubmit?: (values: any) => Promise<void> | void
+  onCancel?: () => void
+  submitText?: string
+  cancelText?: string
+  loading?: boolean
+  destroyOnClose?: boolean
 }
 
 export interface ModalFormRef {
-  open: (initialValues?: Record<string, any>) => void;
-  close: () => void;
-  submit: () => void;
-  reset: () => void;
-  getFieldsValue: () => any;
-  setFieldsValue: (values: any) => void;
-  validateFields: () => Promise<any>;
+  open: (initialValues?: Record<string, any>) => void
+  close: () => void
+  submit: () => void
+  reset: () => void
+  getFieldsValue: () => any
+  setFieldsValue: (values: any) => void
+  validateFields: () => Promise<any>
 }
 
 const ModalForm = forwardRef<ModalFormRef, ModalFormProps>(
   (
-    {
-      formItems,
-      formProps,
-      initialValues,
-      onSubmit,
-      onCancel,
-      submitText,
-      cancelText,
-      loading = false,
-      destroyOnClose = true,
-      ...modalProps
-    },
-    ref
+    { formItems, formProps, initialValues, onSubmit, onCancel, submitText, cancelText, loading = false, destroyOnClose = true, ...modalProps },
+    ref,
   ) => {
-    const { t } = useTranslation();
-    const [visible, setVisible] = React.useState(false);
-    const [submitLoading, setSubmitLoading] = React.useState(false);
-    const formRef = React.useRef<DynamicFormRef>(null);
+    const { t } = useTranslation()
+    const [visible, setVisible] = React.useState(false)
+    const [submitLoading, setSubmitLoading] = React.useState(false)
+    const formRef = React.useRef<DynamicFormRef>(null)
 
     useImperativeHandle(ref, () => ({
       open: (values?: Record<string, any>) => {
-        setVisible(true);
+        setVisible(true)
         if (values && formRef.current) {
           setTimeout(() => {
-            formRef.current?.setFieldsValue(values);
-          }, 100);
+            formRef.current?.setFieldsValue(values)
+          }, 100)
         }
       },
       close: () => {
-        setVisible(false);
+        setVisible(false)
         if (destroyOnClose) {
-          formRef.current?.reset();
+          formRef.current?.reset()
         }
       },
       submit: () => formRef.current?.submit(),
@@ -66,47 +55,41 @@ const ModalForm = forwardRef<ModalFormRef, ModalFormProps>(
       getFieldsValue: () => formRef.current?.getFieldsValue() || {},
       setFieldsValue: (values) => formRef.current?.setFieldsValue(values),
       validateFields: () => formRef.current?.validateFields() || Promise.resolve({}),
-    }));
+    }))
 
     useEffect(() => {
       if (visible && initialValues && formRef.current) {
-        formRef.current.setFieldsValue(initialValues);
+        formRef.current.setFieldsValue(initialValues)
       }
-    }, [visible, initialValues]);
+    }, [visible, initialValues])
 
     const handleSubmit = async (values: any) => {
-      if (!onSubmit) return;
+      if (!onSubmit) return
 
-      setSubmitLoading(true);
+      setSubmitLoading(true)
       try {
-        await onSubmit(values);
-        setVisible(false);
+        await onSubmit(values)
+        setVisible(false)
         if (destroyOnClose) {
-          formRef.current?.reset();
+          formRef.current?.reset()
         }
       } catch (error) {
-        console.error('Form submit failed:', error);
+        console.error('Form submit failed:', error)
       } finally {
-        setSubmitLoading(false);
+        setSubmitLoading(false)
       }
-    };
+    }
 
     const handleCancel = () => {
-      setVisible(false);
+      setVisible(false)
       if (destroyOnClose) {
-        formRef.current?.reset();
+        formRef.current?.reset()
       }
-      onCancel?.();
-    };
+      onCancel?.()
+    }
 
     return (
-      <Modal
-        {...modalProps}
-        open={visible}
-        onCancel={handleCancel}
-        footer={null}
-        destroyOnClose={destroyOnClose}
-      >
+      <Modal {...modalProps} open={visible} onCancel={handleCancel} footer={null} destroyOnClose={destroyOnClose}>
         <DynamicForm
           {...formProps}
           ref={formRef}
@@ -119,13 +102,13 @@ const ModalForm = forwardRef<ModalFormRef, ModalFormProps>(
           showReset={true}
         />
       </Modal>
-    );
-  }
-);
+    )
+  },
+)
 
-ModalForm.displayName = 'ModalForm';
+ModalForm.displayName = 'ModalForm'
 
-export default ModalForm;
+export default ModalForm
 
 // 导出类型
-export type { ModalFormProps, ModalFormRef };
+export type { ModalFormProps, ModalFormRef }

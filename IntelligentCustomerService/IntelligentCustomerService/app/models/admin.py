@@ -1,7 +1,6 @@
 from tortoise import fields
 
 from app.schemas.menus import MenuType
-
 from .base import BaseModel, TimestampMixin
 from .enums import MethodType
 
@@ -87,3 +86,30 @@ class AuditLog(BaseModel, TimestampMixin):
     response_time = fields.IntField(default=0, description="响应时间(单位ms)", index=True)
     request_args = fields.JSONField(null=True, description="请求参数")
     response_body = fields.JSONField(null=True, description="返回数据")
+
+
+class ChatConversation(BaseModel, TimestampMixin):
+    """聊天对话表"""
+    conversation_id = fields.CharField(max_length=100, unique=True, description="对话ID", index=True)
+    user_id = fields.IntField(description="用户ID", index=True)
+    title = fields.CharField(max_length=200, default="", description="对话标题")
+    is_active = fields.BooleanField(default=True, description="是否活跃", index=True)
+    last_message_at = fields.DatetimeField(null=True, description="最后消息时间", index=True)
+
+    class Meta:
+        table = "chat_conversation"
+
+
+class ChatMessage(BaseModel, TimestampMixin):
+    """聊天消息表"""
+    conversation_id = fields.CharField(max_length=100, description="对话ID", index=True)
+    message_id = fields.CharField(max_length=100, unique=True, description="消息ID", index=True)
+    user_id = fields.IntField(description="用户ID", index=True)
+    sender = fields.CharField(max_length=20, description="发送者类型(user/assistant)", index=True)
+    content = fields.TextField(description="消息内容")
+    message_type = fields.CharField(max_length=20, default="text", description="消息类型", index=True)
+    tokens_used = fields.IntField(default=0, description="使用的token数量")
+    response_time = fields.IntField(default=0, description="响应时间(毫秒)")
+
+    class Meta:
+        table = "chat_message"

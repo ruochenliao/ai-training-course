@@ -1,0 +1,842 @@
+/* 智能客服聊天页面样式 - 基于 RICH 设计范式 */
+
+/* 聊天容器 */
+.chat-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  position: relative;
+}
+
+.chat-container.dark {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+/* 现代化渐变背景 */
+.chat-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.chat-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* 聊天头部 - 现代化设计 */
+.chat-header {
+  height: 64px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(240, 240, 240, 0.8);
+  box-shadow:
+    0 4px 20px 0 rgba(29, 35, 41, 0.08),
+    0 1px 3px 0 rgba(29, 35, 41, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+
+.chat-header.dark {
+  background: rgba(31, 31, 31, 0.95);
+  border-bottom-color: rgba(48, 48, 48, 0.8);
+  box-shadow:
+    0 4px 20px 0 rgba(0, 0, 0, 0.3),
+    0 1px 3px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* 头部按钮动画 */
+.chat-header .ant-btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
+}
+
+.chat-header .ant-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 消息区域 */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: #f5f5f5;
+}
+
+.chat-messages.dark {
+  background: #1f1f1f;
+}
+
+/* 滚动条样式 - 增强滚动条可见性 */
+.scrollbar-visible::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-visible::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.scrollbar-visible::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.scrollbar-visible::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.scrollbar-visible.dark::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.scrollbar-visible.dark::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.scrollbar-visible.dark::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* 全局滚动条美化 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 对话列表样式 */
+.conversation-item {
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.conversation-item:hover {
+  background-color: #f5f5f5;
+  transform: translateX(2px);
+}
+
+.conversation-item.active {
+  background-color: #e6f7ff;
+  border: 1px solid #91d5ff;
+}
+
+.conversation-item.dark:hover {
+  background-color: #262626;
+}
+
+.conversation-item.dark.active {
+  background-color: #111b26;
+  border-color: #1890ff;
+}
+
+/* 对话标题 */
+.conversation-title {
+  font-weight: 500;
+  color: #262626;
+  margin-bottom: 4px;
+}
+
+.conversation-title.active {
+  color: #1890ff;
+  font-weight: 600;
+}
+
+.conversation-title.dark {
+  color: #f0f0f0;
+}
+
+.conversation-title.dark.active {
+  color: #40a9ff;
+}
+
+/* 对话时间 */
+.conversation-time {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.conversation-time.dark {
+  color: #595959;
+}
+
+/* 侧边栏样式 */
+.dark-drawer .ant-drawer-content {
+  background-color: #1f1f1f;
+}
+
+.dark-drawer .ant-drawer-header {
+  background-color: #1f1f1f;
+  border-bottom-color: #303030;
+}
+
+.dark-drawer .ant-drawer-title {
+  color: #f0f0f0;
+}
+
+.dark-drawer .ant-drawer-close {
+  color: #f0f0f0;
+}
+
+/* 消息气泡动画 */
+.message-bubble {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 加载动画 */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #d9d9d9;
+  animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes typing {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .chat-header {
+    padding: 0 16px;
+  }
+
+  .chat-messages {
+    padding: 16px;
+  }
+
+  .conversation-item {
+    padding: 12px;
+  }
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #bfbfbf;
+}
+
+.chat-messages.dark::-webkit-scrollbar-thumb {
+  background: #434343;
+}
+
+.chat-messages.dark::-webkit-scrollbar-thumb:hover {
+  background: #595959;
+}
+
+/* 消息容器 */
+.message-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* 消息项 */
+.message-item {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.message-item.user {
+  flex-direction: row-reverse;
+}
+
+.message-item.assistant {
+  flex-direction: row;
+}
+
+/* 消息头像 */
+.message-avatar {
+  flex-shrink: 0;
+  margin: 0 12px;
+}
+
+/* 消息气泡 */
+.message-bubble {
+  max-width: 70%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  position: relative;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.message-bubble.user {
+  background: #1890ff;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.message-bubble.assistant {
+  background: white;
+  color: #333;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.message-bubble.assistant.dark {
+  background: #2f2f2f;
+  color: #e6e6e6;
+}
+
+/* 消息时间 */
+.message-time {
+  font-size: 12px;
+  margin-top: 6px;
+  opacity: 0.7;
+}
+
+/* 输入区域 */
+.chat-input-area {
+  background: white;
+  border-top: 1px solid #f0f0f0;
+  padding: 20px;
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+}
+
+.chat-input-area.dark {
+  background: #1f1f1f;
+  border-top-color: #303030;
+}
+
+.chat-input-container {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.chat-input {
+  flex: 1;
+}
+
+.chat-send-button {
+  height: auto;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 输入提示 */
+.chat-input-hint {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 12px;
+  color: #999;
+}
+
+/* 加载动画 */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.typing-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #999;
+  animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes typing {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .chat-header {
+    padding: 0 16px;
+  }
+
+  .chat-messages {
+    padding: 16px;
+  }
+
+  .message-container {
+    padding: 0 8px;
+  }
+
+  .message-bubble {
+    max-width: 85%;
+  }
+
+  .chat-input-area {
+    padding: 16px;
+  }
+
+  .chat-input-container {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .message-bubble {
+    max-width: 90%;
+    padding: 10px 14px;
+  }
+
+  .message-avatar {
+    margin: 0 8px;
+  }
+}
+
+/* 企业级主题适配 */
+.enterprise-chat-theme {
+  --primary-color: #1890ff;
+  --success-color: #52c41a;
+  --warning-color: #faad14;
+  --error-color: #ff4d4f;
+  --text-color: #333333;
+  --text-color-secondary: #666666;
+  --border-color: #f0f0f0;
+  --background-color: #ffffff;
+  --background-color-light: #f5f5f5;
+}
+
+.enterprise-chat-theme.dark {
+  --text-color: #e6e6e6;
+  --text-color-secondary: #999999;
+  --border-color: #303030;
+  --background-color: #1f1f1f;
+  --background-color-light: #141414;
+}
+
+/* 动画效果 */
+.message-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* 新增：RICH 设计范式相关样式 */
+
+/* Welcome 组件增强 */
+.ant-x-welcome {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .ant-x-welcome {
+  background: rgba(31, 31, 31, 0.8);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Bubble 组件增强 */
+.ant-x-bubble {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ant-x-bubble:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Sender 组件增强 */
+.ant-x-sender {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(240, 240, 240, 0.8);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.dark .ant-x-sender {
+  background: rgba(31, 31, 31, 0.95);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.ant-x-sender:focus-within {
+  border-color: #1890ff;
+  box-shadow:
+    0 0 0 2px rgba(24, 144, 255, 0.2),
+    0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Conversations 组件增强 */
+.ant-x-conversations {
+  background: transparent;
+}
+
+.ant-x-conversations .ant-x-conversations-item {
+  border-radius: 12px;
+  margin-bottom: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .ant-x-conversations .ant-x-conversations-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.ant-x-conversations .ant-x-conversations-item:hover {
+  transform: translateX(4px);
+  background: rgba(24, 144, 255, 0.1);
+  border-color: rgba(24, 144, 255, 0.3);
+}
+
+.ant-x-conversations .ant-x-conversations-item.ant-x-conversations-item-active {
+  background: linear-gradient(135deg, #1890ff 0%, #52c41a 100%);
+  color: white;
+  transform: translateX(8px);
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.3);
+}
+
+/* Prompts 组件增强 */
+.ant-x-prompts .ant-x-prompts-item {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(240, 240, 240, 0.8);
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.dark .ant-x-prompts .ant-x-prompts-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.ant-x-prompts .ant-x-prompts-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.5s ease;
+}
+
+.ant-x-prompts .ant-x-prompts-item:hover::before {
+  left: 100%;
+}
+
+.ant-x-prompts .ant-x-prompts-item:hover {
+  transform: translateY(-2px);
+  border-color: #1890ff;
+  box-shadow: 0 8px 24px rgba(24, 144, 255, 0.2);
+}
+
+/* Actions 组件增强 */
+.ant-x-actions {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 4px;
+  border: 1px solid rgba(240, 240, 240, 0.8);
+}
+
+.dark .ant-x-actions {
+  background: rgba(31, 31, 31, 0.9);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.ant-x-actions .ant-x-actions-item {
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.ant-x-actions .ant-x-actions-item:hover {
+  background: rgba(24, 144, 255, 0.1);
+  transform: scale(1.05);
+}
+
+/* ThoughtChain 组件增强 */
+.ant-x-thought-chain {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(240, 240, 240, 0.8);
+  padding: 16px;
+}
+
+.dark .ant-x-thought-chain {
+  background: rgba(31, 31, 31, 0.8);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 加载动画增强 */
+@keyframes thinking {
+  0%, 20% { opacity: 0.3; }
+  50% { opacity: 1; }
+  80%, 100% { opacity: 0.3; }
+}
+
+.thinking-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.thinking-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #1890ff;
+  animation: thinking 1.4s infinite;
+}
+
+.thinking-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.thinking-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* 响应式设计增强 */
+@media (max-width: 768px) {
+  .chat-container::before {
+    opacity: 0.5;
+  }
+
+  .ant-x-welcome {
+    padding: 24px 16px;
+    margin: 16px;
+  }
+
+  .ant-x-sender {
+    margin: 8px;
+    border-radius: 12px;
+  }
+
+  .chat-header {
+    padding: 0 16px;
+  }
+}
+
+.message-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 300ms,
+    transform 300ms;
+}
+
+.message-exit {
+  opacity: 1;
+}
+
+.message-exit-active {
+  opacity: 0;
+  transition: opacity 300ms;
+}
+
+/* 滚动到底部按钮 */
+.scroll-to-bottom {
+  position: fixed;
+  bottom: 120px;
+  right: 30px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #1890ff;
+  color: white;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  z-index: 1000;
+}
+
+.scroll-to-bottom:hover {
+  background: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.scroll-to-bottom.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 触摸滚动优化 */
+.scrollbar-visible {
+  -webkit-overflow-scrolling: touch;  /* 使iOS上滚动更流畅 */
+  scroll-behavior: smooth;  /* 平滑滚动 */
+  overscroll-behavior: contain;  /* 防止滚动链接到父元素 */
+}
+
+/* 滚动容器通用样式 */
+.scroll-container {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;  /* Firefox滚动条 */
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;  /* Firefox滚动条颜色 */
+}
+
+.dark .scroll-container {
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* 渐变边缘效果 - 顶部和底部的渐变阴影 */
+.scroll-fade-edges {
+  position: relative;
+}
+
+.scroll-fade-edges::before,
+.scroll-fade-edges::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 20px;
+  z-index: 10;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.scroll-fade-edges::before {
+  top: 0;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0));
+}
+
+.scroll-fade-edges::after {
+  bottom: 0;
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0));
+}
+
+.dark .scroll-fade-edges::before {
+  background: linear-gradient(to bottom, rgba(31, 31, 31, 0.8), rgba(31, 31, 31, 0));
+}
+
+.dark .scroll-fade-edges::after {
+  background: linear-gradient(to top, rgba(31, 31, 31, 0.8), rgba(31, 31, 31, 0));
+}

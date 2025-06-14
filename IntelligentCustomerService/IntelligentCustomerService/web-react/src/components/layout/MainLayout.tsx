@@ -1,14 +1,14 @@
-import React, { useEffect } from 'react'
-import { Layout } from 'antd'
-import { Outlet, useLocation } from 'react-router-dom'
-import { useResponsive } from 'ahooks'
-import { useAppStore } from '@/store/app.ts'
-import { useTagsStore } from '@/store/tags.ts'
+import React, {useEffect} from 'react'
+import {Layout} from 'antd'
+import {Outlet, useLocation} from 'react-router-dom'
+import {useResponsive} from 'ahooks'
+import {useAppStore} from '@/store/app.ts'
+import {useTagsStore} from '@/store/tags.ts'
 import SideBar from './Sidebar'
 import AppHeader from './Header'
 import AppTags from './TagsView'
 import AppMain from './AppMain'
-import { layoutSettings } from '@/settings'
+import {layoutSettings} from '@/settings'
 
 const { Sider, Content } = Layout
 
@@ -78,7 +78,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   }
 
   return (
-    <Layout className="h-screen w-full enterprise-layout">
+    <Layout className='h-screen w-full enterprise-layout'>
       {/* 企业级侧边栏 */}
       <Sider
         trigger={null}
@@ -86,7 +86,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         collapsed={collapsed}
         collapsedWidth={64}
         width={240}
-        className="enterprise-sidebar"
+        className='enterprise-sidebar'
         style={{
           height: '100vh',
           position: 'fixed',
@@ -104,7 +104,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
       {/* 主内容区域 */}
       <Layout
-        className="enterprise-main-layout"
+        className='enterprise-main-layout'
         style={{
           marginLeft: collapsed ? '64px' : '240px',
           transition: 'margin-left 0.2s ease-in-out',
@@ -112,7 +112,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       >
         {/* 企业级顶部导航栏 */}
         <div
-          className="enterprise-header"
+          className='enterprise-header'
           style={{
             height: `${layoutSettings.header.height}px`,
             background: '#ffffff',
@@ -135,7 +135,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
         {/* 主体内容区 */}
         <Content
-          className="enterprise-content"
+          className='enterprise-content'
           style={{
             marginTop: `${layoutSettings.header.height}px`,
             minHeight: `calc(100vh - ${layoutSettings.header.height}px)`,
@@ -145,7 +145,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           {/* 标签页（可选） */}
           {layoutSettings.tags.visible && (
             <div
-              className="enterprise-tags"
+              className='enterprise-tags'
               style={{
                 height: `${layoutSettings.tags.height}px`,
                 background: '#ffffff',
@@ -161,7 +161,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
           {/* 主内容容器 */}
           <div
-            className="enterprise-page-container"
+            className='enterprise-page-container'
             style={{
               padding: '24px',
               minHeight: layoutSettings.tags.visible
@@ -169,9 +169,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 : `calc(100vh - ${layoutSettings.header.height}px)`,
             }}
           >
-            <AppMain>
-              {children || <Outlet />}
-            </AppMain>
+            <AppMain>{children || <Outlet />}</AppMain>
           </div>
         </Content>
       </Layout>

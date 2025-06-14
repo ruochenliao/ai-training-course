@@ -25,7 +25,6 @@ from app.log import logger
 from app.models.admin import Api, Menu, Role
 from app.schemas.menus import MenuType
 from app.settings.config import settings
-
 from .middlewares import BackGroundTaskMiddleware, HttpAuditLogMiddleware
 
 

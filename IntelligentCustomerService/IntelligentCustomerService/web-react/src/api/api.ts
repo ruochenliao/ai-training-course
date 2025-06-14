@@ -37,19 +37,19 @@ export interface ApiQueryParams {
 
 // API接口响应类型
 export interface ApiListResponse {
-  code: number;
-  msg: string | null;
-  data: ApiItem[];
-  total: number;
-  page: number;
-  page_size: number;
+  code: number
+  msg: string | null
+  data: ApiItem[]
+  total: number
+  page: number
+  page_size: number
 }
 
 // API接口定义
 export const apiApi = {
   // 获取API列表
   getApis: (params?: ApiQueryParams): Promise<ApiListResponse> => {
-    return request.get('/api/v1/api/list', { params });
+    return request.get('/api/v1/api/list', { params })
   },
 
   // 获取API详情

@@ -34,15 +34,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   // 显示加载状态
   if (loading || verifying) {
     return (
-      <div className="flex-center h-screen">
-        <Spin size="large" />
+      <div className='flex-center h-screen'>
+        <Spin size='large' />
       </div>
     )
   }
 
   // 未认证则跳转到登录页
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />
+    return <Navigate to='/login' state={{ from: location }} replace />
   }
 
   return <>{children}</>

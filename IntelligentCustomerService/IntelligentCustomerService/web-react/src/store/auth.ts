@@ -19,7 +19,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       token: null,
       menus: null,
@@ -33,30 +33,30 @@ export const useAuthStore = create<AuthState>()(
           // 1. 获取token
           const tokenResponse = await authApi.login(params)
           const { access_token } = tokenResponse.data
-          
+
           // 设置token
           localStorage.setItem('token', access_token)
           set({ token: access_token })
-          
+
           // 2. 获取用户信息
           const userResponse = await authApi.getUserInfo()
           const user = userResponse.data
-          
+
           // 3. 获取用户菜单
           const menuResponse = await authApi.getUserMenu()
           const menus = menuResponse.data
-          
+
           // 4. 获取用户API权限
           const apiResponse = await authApi.getUserApi()
           const apis = apiResponse.data
-          
+
           // 设置认证状态
           set({
             user,
             menus,
             apis,
             isAuthenticated: true,
-            loading: false
+            loading: false,
           })
 
           // 初始化权限
@@ -108,22 +108,22 @@ export const useAuthStore = create<AuthState>()(
           // 1. 获取用户信息
           const userResponse = await authApi.getUserInfo()
           const user = userResponse.data
-          
+
           // 2. 获取用户菜单
           const menuResponse = await authApi.getUserMenu()
           const menus = menuResponse.data
-          
+
           // 3. 获取用户API权限
           const apiResponse = await authApi.getUserApi()
           const apis = apiResponse.data
-          
+
           // 设置认证状态
           set({
             user,
             menus,
             apis,
             isAuthenticated: true,
-            loading: false
+            loading: false,
           })
 
           // 初始化权限
@@ -154,6 +154,6 @@ export const useAuthStore = create<AuthState>()(
         apis: state.apis,
         isAuthenticated: state.isAuthenticated,
       }),
-    }
-  )
+    },
+  ),
 )

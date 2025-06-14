@@ -1,139 +1,348 @@
 /* UnoCSS风格的工具类 - 对应Vue版本的UnoCSS配置 */
 
 /* ================ 边框颜色规则 - 对应Vue版本的bc-(.+) ================ */
-.bc-primary { border-color: var(--primary-color); }
-.bc-info { border-color: var(--info-color); }
-.bc-success { border-color: var(--success-color); }
-.bc-warning { border-color: var(--warning-color); }
-.bc-error { border-color: var(--error-color); }
+.bc-primary {
+  border-color: var(--primary-color);
+}
+.bc-info {
+  border-color: var(--info-color);
+}
+.bc-success {
+  border-color: var(--success-color);
+}
+.bc-warning {
+  border-color: var(--warning-color);
+}
+.bc-error {
+  border-color: var(--error-color);
+}
 
 /* ================ 文本颜色 ================ */
-.text-primary { color: var(--primary-color); }
-.text-info { color: var(--info-color); }
-.text-success { color: var(--success-color); }
-.text-warning { color: var(--warning-color); }
-.text-error { color: var(--error-color); }
+.text-primary {
+  color: var(--primary-color);
+}
+.text-info {
+  color: var(--info-color);
+}
+.text-success {
+  color: var(--success-color);
+}
+.text-warning {
+  color: var(--warning-color);
+}
+.text-error {
+  color: var(--error-color);
+}
 
 /* ================ 背景颜色 ================ */
-.bg-primary { background-color: var(--primary-color); }
-.bg-info { background-color: var(--info-color); }
-.bg-success { background-color: var(--success-color); }
-.bg-warning { background-color: var(--warning-color); }
-.bg-error { background-color: var(--error-color); }
+.bg-primary {
+  background-color: var(--primary-color);
+}
+.bg-info {
+  background-color: var(--info-color);
+}
+.bg-success {
+  background-color: var(--success-color);
+}
+.bg-warning {
+  background-color: var(--warning-color);
+}
+.bg-error {
+  background-color: var(--error-color);
+}
 
 /* ================ 间距工具类 ================ */
 /* 对应Vue版本的p-15, m-15等 */
-.p-15 { padding: 15px; }
-.m-15 { margin: 15px; }
-.mt-15 { margin-top: 15px; }
-.mb-15 { margin-bottom: 15px; }
-.ml-15 { margin-left: 15px; }
-.mr-15 { margin-right: 15px; }
+.p-15 {
+  padding: 15px;
+}
+.m-15 {
+  margin: 15px;
+}
+.mt-15 {
+  margin-top: 15px;
+}
+.mb-15 {
+  margin-bottom: 15px;
+}
+.ml-15 {
+  margin-left: 15px;
+}
+.mr-15 {
+  margin-right: 15px;
+}
 
-.p-10 { padding: 10px; }
-.m-10 { margin: 10px; }
-.mt-10 { margin-top: 10px; }
-.mb-10 { margin-bottom: 10px; }
-.ml-10 { margin-left: 10px; }
-.mr-10 { margin-right: 10px; }
+.p-10 {
+  padding: 10px;
+}
+.m-10 {
+  margin: 10px;
+}
+.mt-10 {
+  margin-top: 10px;
+}
+.mb-10 {
+  margin-bottom: 10px;
+}
+.ml-10 {
+  margin-left: 10px;
+}
+.mr-10 {
+  margin-right: 10px;
+}
 
-.p-5 { padding: 5px; }
-.m-5 { margin: 5px; }
-.mt-5 { margin-top: 5px; }
-.mb-5 { margin-bottom: 5px; }
-.ml-5 { margin-left: 5px; }
-.mr-5 { margin-right: 5px; }
+.p-5 {
+  padding: 5px;
+}
+.m-5 {
+  margin: 5px;
+}
+.mt-5 {
+  margin-top: 5px;
+}
+.mb-5 {
+  margin-bottom: 5px;
+}
+.ml-5 {
+  margin-left: 5px;
+}
+.mr-5 {
+  margin-right: 5px;
+}
 
 /* ================ 字体大小 ================ */
-.text-12 { font-size: 12px; }
-.text-14 { font-size: 14px; }
-.text-16 { font-size: 16px; }
-.text-18 { font-size: 18px; }
-.text-20 { font-size: 20px; }
-.text-24 { font-size: 24px; }
+.text-12 {
+  font-size: 12px;
+}
+.text-14 {
+  font-size: 14px;
+}
+.text-16 {
+  font-size: 16px;
+}
+.text-18 {
+  font-size: 18px;
+}
+.text-20 {
+  font-size: 20px;
+}
+.text-24 {
+  font-size: 24px;
+}
 
 /* ================ 圆角 ================ */
-.rounded-4 { border-radius: 4px; }
-.rounded-6 { border-radius: 6px; }
-.rounded-8 { border-radius: 8px; }
-.rounded-10 { border-radius: 10px; }
-.rounded-12 { border-radius: 12px; }
+.rounded-4 {
+  border-radius: 4px;
+}
+.rounded-6 {
+  border-radius: 6px;
+}
+.rounded-8 {
+  border-radius: 8px;
+}
+.rounded-10 {
+  border-radius: 10px;
+}
+.rounded-12 {
+  border-radius: 12px;
+}
 
 /* ================ 宽度高度 ================ */
-.w-300 { width: 300px; }
-.w-400 { width: 400px; }
-.w-500 { width: 500px; }
-.h-300 { height: 300px; }
-.h-400 { height: 400px; }
-.h-500 { height: 500px; }
+.w-300 {
+  width: 300px;
+}
+.w-400 {
+  width: 400px;
+}
+.w-500 {
+  width: 500px;
+}
+.h-300 {
+  height: 300px;
+}
+.h-400 {
+  height: 400px;
+}
+.h-500 {
+  height: 500px;
+}
 
 /* ================ 透明度 ================ */
-.opacity-10 { opacity: 0.1; }
-.opacity-20 { opacity: 0.2; }
-.opacity-30 { opacity: 0.3; }
-.opacity-40 { opacity: 0.4; }
-.opacity-50 { opacity: 0.5; }
-.opacity-60 { opacity: 0.6; }
-.opacity-70 { opacity: 0.7; }
-.opacity-80 { opacity: 0.8; }
-.opacity-90 { opacity: 0.9; }
+.opacity-10 {
+  opacity: 0.1;
+}
+.opacity-20 {
+  opacity: 0.2;
+}
+.opacity-30 {
+  opacity: 0.3;
+}
+.opacity-40 {
+  opacity: 0.4;
+}
+.opacity-50 {
+  opacity: 0.5;
+}
+.opacity-60 {
+  opacity: 0.6;
+}
+.opacity-70 {
+  opacity: 0.7;
+}
+.opacity-80 {
+  opacity: 0.8;
+}
+.opacity-90 {
+  opacity: 0.9;
+}
 
 /* ================ 显示隐藏 ================ */
-.hidden { display: none; }
-.block { display: block; }
-.inline { display: inline; }
-.inline-block { display: inline-block; }
-.flex { display: flex; }
-.inline-flex { display: inline-flex; }
-.grid { display: grid; }
+.hidden {
+  display: none;
+}
+.block {
+  display: block;
+}
+.inline {
+  display: inline;
+}
+.inline-block {
+  display: inline-block;
+}
+.flex {
+  display: flex;
+}
+.inline-flex {
+  display: inline-flex;
+}
+.grid {
+  display: grid;
+}
 
 /* ================ Flex布局 ================ */
-.flex-1 { flex: 1; }
-.flex-auto { flex: auto; }
-.flex-none { flex: none; }
-.flex-wrap { flex-wrap: wrap; }
-.flex-nowrap { flex-wrap: nowrap; }
-.justify-start { justify-content: flex-start; }
-.justify-end { justify-content: flex-end; }
-.justify-center { justify-content: center; }
-.justify-between { justify-content: space-between; }
-.justify-around { justify-content: space-around; }
-.items-start { align-items: flex-start; }
-.items-end { align-items: flex-end; }
-.items-center { align-items: center; }
-.items-stretch { align-items: stretch; }
+.flex-1 {
+  flex: 1;
+}
+.flex-auto {
+  flex: auto;
+}
+.flex-none {
+  flex: none;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+.flex-nowrap {
+  flex-wrap: nowrap;
+}
+.justify-start {
+  justify-content: flex-start;
+}
+.justify-end {
+  justify-content: flex-end;
+}
+.justify-center {
+  justify-content: center;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.justify-around {
+  justify-content: space-around;
+}
+.items-start {
+  align-items: flex-start;
+}
+.items-end {
+  align-items: flex-end;
+}
+.items-center {
+  align-items: center;
+}
+.items-stretch {
+  align-items: stretch;
+}
 
 /* ================ 定位 ================ */
-.relative { position: relative; }
-.absolute { position: absolute; }
-.fixed { position: fixed; }
-.sticky { position: sticky; }
+.relative {
+  position: relative;
+}
+.absolute {
+  position: absolute;
+}
+.fixed {
+  position: fixed;
+}
+.sticky {
+  position: sticky;
+}
 
 /* ================ 层级 ================ */
-.z-1 { z-index: 1; }
-.z-10 { z-index: 10; }
-.z-50 { z-index: 50; }
-.z-100 { z-index: 100; }
-.z-999 { z-index: 999; }
-.z-9999 { z-index: 9999; }
+.z-1 {
+  z-index: 1;
+}
+.z-10 {
+  z-index: 10;
+}
+.z-50 {
+  z-index: 50;
+}
+.z-100 {
+  z-index: 100;
+}
+.z-999 {
+  z-index: 999;
+}
+.z-9999 {
+  z-index: 9999;
+}
 
 /* ================ 光标 ================ */
-.cursor-pointer { cursor: pointer; }
-.cursor-default { cursor: default; }
-.cursor-not-allowed { cursor: not-allowed; }
+.cursor-pointer {
+  cursor: pointer;
+}
+.cursor-default {
+  cursor: default;
+}
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
 
 /* ================ 用户选择 ================ */
-.select-none { user-select: none; }
-.select-text { user-select: text; }
-.select-all { user-select: all; }
+.select-none {
+  user-select: none;
+}
+.select-text {
+  user-select: text;
+}
+.select-all {
+  user-select: all;
+}
 
 /* ================ 过渡动画 ================ */
-.transition { transition: all 0.3s ease; }
-.transition-colors { transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease; }
-.transition-opacity { transition: opacity 0.3s ease; }
-.transition-transform { transition: transform 0.3s ease; }
+.transition {
+  transition: all 0.3s ease;
+}
+.transition-colors {
+  transition:
+    color 0.3s ease,
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+.transition-opacity {
+  transition: opacity 0.3s ease;
+}
+.transition-transform {
+  transition: transform 0.3s ease;
+}
 
 /* ================ 悬停效果 ================ */
-.hover-opacity:hover { opacity: 0.8; }
-.hover-scale:hover { transform: scale(1.05); }
-.hover-shadow:hover { box-shadow: var(--shadow-2); }
+.hover-opacity:hover {
+  opacity: 0.8;
+}
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+.hover-shadow:hover {
+  box-shadow: var(--shadow-2);
+}

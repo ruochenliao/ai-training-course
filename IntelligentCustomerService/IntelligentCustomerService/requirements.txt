@@ -58,3 +58,9 @@ uvicorn==0.34.0
 uvloop==0.21.0; sys_platform != 'win32'
 watchfiles==1.0.4
 websockets==14.1
+
+# Autogen dependencies for LLM integration
+autogen-agentchat==0.4.9.3
+autogen-core==0.4.9.3
+autogen-ext==0.4.9.3
+openai>=1.0.0

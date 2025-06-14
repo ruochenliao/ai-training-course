@@ -1,90 +1,91 @@
-import React, { useMemo } from 'react';
-import { Avatar, Button, Card, Space, Statistic, Row, Col, Progress, Badge } from 'antd';
+import React, {useMemo} from 'react'
+import {Avatar, Badge, Button, Card, Col, Progress, Row} from 'antd'
 import {
-  UserOutlined,
-  TeamOutlined,
-  MessageOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-  ExclamationCircleOutlined,
-  TrophyOutlined,
-  RiseOutlined,
-  FallOutlined,
-  ArrowRightOutlined
-} from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useAuthStore } from '../../store/auth';
-import { cn } from '../../utils';
+    ArrowRightOutlined,
+    CheckCircleOutlined,
+    ClockCircleOutlined,
+    FallOutlined,
+    MessageOutlined,
+    RiseOutlined,
+    TeamOutlined,
+    TrophyOutlined,
+    UserOutlined,
+} from '@ant-design/icons'
+import {useTranslation} from 'react-i18next'
+import {useAuthStore} from '../../store/auth'
 
 // 企业级项目描述文本
-const projectDescription = '基于 React + TypeScript + Ant Design 的现代化企业级管理平台';
-
-
+const projectDescription = '基于 React + TypeScript + Ant Design 的现代化企业级管理平台'
 
 const Workbench: React.FC = () => {
-  const { t } = useTranslation();
-  const { isDark, primaryColor } = useTheme();
-  const { user } = useAuthStore();
+  const { t } = useTranslation()
+
+  const { user } = useAuthStore()
 
   // 企业级统计数据
-  const statisticData = useMemo(() => [
-    {
-      id: 0,
-      title: '今日咨询',
-      value: 1234,
-      icon: <MessageOutlined style={{ color: '#1890ff' }} />,
-      trend: 'up',
-      trendValue: '12.5%',
-      suffix: '次',
-    },
-    {
-      id: 1,
-      title: '处理完成',
-      value: 987,
-      icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
-      trend: 'up',
-      trendValue: '8.2%',
-      suffix: '次',
-    },
-    {
-      id: 2,
-      title: '待处理',
-      value: 156,
-      icon: <ClockCircleOutlined style={{ color: '#faad14' }} />,
-      trend: 'down',
-      trendValue: '3.1%',
-      suffix: '次',
-    },
-    {
-      id: 3,
-      title: '客户满意度',
-      value: 98.5,
-      icon: <TrophyOutlined style={{ color: '#722ed1' }} />,
-      trend: 'up',
-      trendValue: '2.3%',
-      suffix: '%',
-    },
-  ], []);
+  const statisticData = useMemo(
+    () => [
+      {
+        id: 0,
+        title: '今日咨询',
+        value: 1234,
+        icon: <MessageOutlined style={{ color: '#1890ff' }} />,
+        trend: 'up',
+        trendValue: '12.5%',
+        suffix: '次',
+      },
+      {
+        id: 1,
+        title: '处理完成',
+        value: 987,
+        icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
+        trend: 'up',
+        trendValue: '8.2%',
+        suffix: '次',
+      },
+      {
+        id: 2,
+        title: '待处理',
+        value: 156,
+        icon: <ClockCircleOutlined style={{ color: '#faad14' }} />,
+        trend: 'down',
+        trendValue: '3.1%',
+        suffix: '次',
+      },
+      {
+        id: 3,
+        title: '客户满意度',
+        value: 98.5,
+        icon: <TrophyOutlined style={{ color: '#722ed1' }} />,
+        trend: 'up',
+        trendValue: '2.3%',
+        suffix: '%',
+      },
+    ],
+    [],
+  )
 
   // 快捷操作数据
-  const quickActions = useMemo(() => [
-    { title: '新建工单', icon: <MessageOutlined />, color: '#1890ff' },
-    { title: '客户管理', icon: <TeamOutlined />, color: '#52c41a' },
-    { title: '数据报表', icon: <TrophyOutlined />, color: '#faad14' },
-    { title: '系统设置', icon: <UserOutlined />, color: '#722ed1' },
-  ], []);
+  const quickActions = useMemo(
+    () => [
+      { title: '新建工单', icon: <MessageOutlined />, color: '#1890ff' },
+      { title: '客户管理', icon: <TeamOutlined />, color: '#52c41a' },
+      { title: '数据报表', icon: <TrophyOutlined />, color: '#faad14' },
+      { title: '系统设置', icon: <UserOutlined />, color: '#722ed1' },
+    ],
+    [],
+  )
 
   // 用户头像 - 如果没有头像则使用默认头像
-  const userAvatar = user?.avatar || 'https://api.dicebear.com/7.x/miniavs/svg?seed=1';
-  const userName = user?.username || 'admin';
+  const userAvatar = user?.avatar || 'https://api.dicebear.com/7.x/miniavs/svg?seed=1'
+  const userName = user?.username || 'admin'
 
   return (
-    <div className="enterprise-workbench">
+    <div className='enterprise-workbench'>
       {/* 欢迎横幅 */}
       <Card
         bordered={false}
-        className="enterprise-welcome-card"
+        className='enterprise-welcome-card'
         style={{
           marginBottom: '24px',
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -105,21 +106,25 @@ const Workbench: React.FC = () => {
               }}
             />
             <div style={{ marginLeft: '20px', color: '#ffffff' }}>
-              <h2 style={{
-                fontSize: '24px',
-                fontWeight: 600,
-                margin: 0,
-                color: '#ffffff',
-                textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-              }}>
+              <h2
+                style={{
+                  fontSize: '24px',
+                  fontWeight: 600,
+                  margin: 0,
+                  color: '#ffffff',
+                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                }}
+              >
                 {t('workbench.text_hello', { username: userName })}
               </h2>
-              <p style={{
-                fontSize: '16px',
-                margin: '8px 0 0 0',
-                color: 'rgba(255, 255, 255, 0.8)',
-                textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-              }}>
+              <p
+                style={{
+                  fontSize: '16px',
+                  margin: '8px 0 0 0',
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                }}
+              >
                 {t('workbench.text_welcome')}
               </p>
             </div>
@@ -130,7 +135,7 @@ const Workbench: React.FC = () => {
             {quickActions.map((action, index) => (
               <Button
                 key={index}
-                type="primary"
+                type='primary'
                 ghost
                 icon={action.icon}
                 style={{
@@ -153,7 +158,7 @@ const Workbench: React.FC = () => {
           <Col xs={24} sm={12} lg={6} key={item.id}>
             <Card
               bordered={false}
-              className="enterprise-stat-card"
+              className='enterprise-stat-card'
               style={{
                 borderRadius: '12px',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
@@ -163,20 +168,24 @@ const Workbench: React.FC = () => {
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ flex: 1 }}>
-                  <p style={{
-                    fontSize: '14px',
-                    color: '#8c8c8c',
-                    margin: '0 0 8px 0',
-                    fontWeight: 500,
-                  }}>
+                  <p
+                    style={{
+                      fontSize: '14px',
+                      color: '#8c8c8c',
+                      margin: '0 0 8px 0',
+                      fontWeight: 500,
+                    }}
+                  >
                     {item.title}
                   </p>
-                  <h3 style={{
-                    fontSize: '28px',
-                    fontWeight: 600,
-                    margin: '0 0 8px 0',
-                    color: '#262626',
-                  }}>
+                  <h3
+                    style={{
+                      fontSize: '28px',
+                      fontWeight: 600,
+                      margin: '0 0 8px 0',
+                      color: '#262626',
+                    }}
+                  >
                     {item.value}
                     <span style={{ fontSize: '16px', fontWeight: 400 }}>{item.suffix}</span>
                   </h3>
@@ -186,22 +195,24 @@ const Workbench: React.FC = () => {
                     ) : (
                       <FallOutlined style={{ color: '#ff4d4f', marginRight: '4px' }} />
                     )}
-                    <span style={{
-                      fontSize: '12px',
-                      color: item.trend === 'up' ? '#52c41a' : '#ff4d4f',
-                      fontWeight: 500,
-                    }}>
+                    <span
+                      style={{
+                        fontSize: '12px',
+                        color: item.trend === 'up' ? '#52c41a' : '#ff4d4f',
+                        fontWeight: 500,
+                      }}
+                    >
                       {item.trendValue}
                     </span>
-                    <span style={{ fontSize: '12px', color: '#8c8c8c', marginLeft: '4px' }}>
-                      vs 昨日
-                    </span>
+                    <span style={{ fontSize: '12px', color: '#8c8c8c', marginLeft: '4px' }}>vs 昨日</span>
                   </div>
                 </div>
-                <div style={{
-                  fontSize: '32px',
-                  opacity: 0.8,
-                }}>
+                <div
+                  style={{
+                    fontSize: '32px',
+                    opacity: 0.8,
+                  }}
+                >
                   {item.icon}
                 </div>
               </div>
@@ -214,10 +225,8 @@ const Workbench: React.FC = () => {
       <Card
         title={
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '18px', fontWeight: 600 }}>
-              {t('workbench.label_project')}
-            </span>
-            <Button type="link" icon={<ArrowRightOutlined />}>
+            <span style={{ fontSize: '18px', fontWeight: 600 }}>{t('workbench.label_project')}</span>
+            <Button type='link' icon={<ArrowRightOutlined />}>
               {t('workbench.label_more')}
             </Button>
           </div>
@@ -231,7 +240,7 @@ const Workbench: React.FC = () => {
             <Col xs={24} sm={12} lg={8} key={i + 1}>
               <Card
                 hoverable
-                className="enterprise-project-card"
+                className='enterprise-project-card'
                 style={{
                   borderRadius: '8px',
                   border: '1px solid #f0f0f0',
@@ -240,28 +249,30 @@ const Workbench: React.FC = () => {
                 bodyStyle={{ padding: '20px' }}
               >
                 <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '16px' }}>
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '8px',
-                    background: `linear-gradient(135deg, ${['#1890ff', '#52c41a', '#faad14', '#722ed1', '#eb2f96', '#13c2c2'][i % 6]} 0%, ${['#096dd9', '#389e0d', '#d48806', '#531dab', '#c41d7f', '#08979c'][i % 6]} 100%)`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: '12px',
-                    flexShrink: 0,
-                  }}>
-                    <span style={{ color: '#ffffff', fontSize: '18px', fontWeight: 600 }}>
-                      {String.fromCharCode(65 + i)}
-                    </span>
+                  <div
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '8px',
+                      background: `linear-gradient(135deg, ${['#1890ff', '#52c41a', '#faad14', '#722ed1', '#eb2f96', '#13c2c2'][i % 6]} 0%, ${['#096dd9', '#389e0d', '#d48806', '#531dab', '#c41d7f', '#08979c'][i % 6]} 100%)`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginRight: '12px',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <span style={{ color: '#ffffff', fontSize: '18px', fontWeight: 600 }}>{String.fromCharCode(65 + i)}</span>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <h4 style={{
-                      fontSize: '16px',
-                      fontWeight: 600,
-                      margin: '0 0 4px 0',
-                      color: '#262626',
-                    }}>
+                    <h4
+                      style={{
+                        fontSize: '16px',
+                        fontWeight: 600,
+                        margin: '0 0 4px 0',
+                        color: '#262626',
+                      }}
+                    >
                       智能客服系统 v{i + 1}.0
                     </h4>
                     <Badge
@@ -271,21 +282,21 @@ const Workbench: React.FC = () => {
                     />
                   </div>
                 </div>
-                <p style={{
-                  fontSize: '14px',
-                  color: '#8c8c8c',
-                  margin: '0 0 16px 0',
-                  lineHeight: '20px',
-                }}>
+                <p
+                  style={{
+                    fontSize: '14px',
+                    color: '#8c8c8c',
+                    margin: '0 0 16px 0',
+                    lineHeight: '20px',
+                  }}
+                >
                   {projectDescription}
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ fontSize: '12px', color: '#8c8c8c' }}>
-                    更新于 2024-01-{String(15 + i).padStart(2, '0')}
-                  </div>
+                  <div style={{ fontSize: '12px', color: '#8c8c8c' }}>更新于 2024-01-{String(15 + i).padStart(2, '0')}</div>
                   <Progress
                     percent={Math.floor(Math.random() * 40) + 60}
-                    size="small"
+                    size='small'
                     style={{ width: '80px' }}
                     strokeColor={{
                       '0%': '#1890ff',
@@ -299,7 +310,7 @@ const Workbench: React.FC = () => {
         </Row>
       </Card>
     </div>
-  );
-};
+  )
+}
 
-export default Workbench;
+export default Workbench

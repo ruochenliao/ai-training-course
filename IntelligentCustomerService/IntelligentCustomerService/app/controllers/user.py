@@ -8,7 +8,6 @@ from app.models.admin import User
 from app.schemas.login import CredentialsSchema
 from app.schemas.users import UserCreate, UserUpdate
 from app.utils.password import get_password_hash, verify_password
-
 from .role import role_controller
 
 

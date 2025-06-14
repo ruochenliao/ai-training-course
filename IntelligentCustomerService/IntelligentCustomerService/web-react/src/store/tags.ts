@@ -38,12 +38,12 @@ export const useTagsStore = create<TagsState>()(
 
       addTag: (tag: TagItem) => {
         const { tags } = get()
-        const existingTag = tags.find(t => t.path === tag.path)
-        
+        const existingTag = tags.find((t) => t.path === tag.path)
+
         if (!existingTag) {
-          set({ 
+          set({
             tags: [...tags, { ...tag, closable: tag.closable ?? true }],
-            activeTag: tag.path 
+            activeTag: tag.path,
           })
         } else {
           set({ activeTag: tag.path })
@@ -52,21 +52,21 @@ export const useTagsStore = create<TagsState>()(
 
       removeTag: (path: string) => {
         const { tags, activeTag } = get()
-        const newTags = tags.filter(tag => tag.path !== path)
-        
+        const newTags = tags.filter((tag) => tag.path !== path)
+
         let newActiveTag = activeTag
         if (activeTag === path && newTags.length > 0) {
           // 如果删除的是当前激活的标签，激活最后一个标签
           newActiveTag = newTags[newTags.length - 1].path
         }
-        
+
         set({ tags: newTags, activeTag: newActiveTag })
       },
 
       removeOtherTags: (path: string) => {
         const { tags } = get()
-        const currentTag = tags.find(tag => tag.path === path)
-        const homeTag = tags.find(tag => tag.path === '/workbench')
+        const currentTag = tags.find((tag) => tag.path === path)
+        const homeTag = tags.find((tag) => tag.path === '/workbench')
 
         const newTags = [homeTag, currentTag].filter(Boolean) as TagItem[]
         set({ tags: newTags, activeTag: path })
@@ -74,7 +74,7 @@ export const useTagsStore = create<TagsState>()(
 
       removeLeftTags: (path: string) => {
         const { tags } = get()
-        const currentIndex = tags.findIndex(tag => tag.path === path)
+        const currentIndex = tags.findIndex((tag) => tag.path === path)
         if (currentIndex > 0) {
           const newTags = tags.slice(currentIndex)
           set({ tags: newTags })
@@ -83,7 +83,7 @@ export const useTagsStore = create<TagsState>()(
 
       removeRightTags: (path: string) => {
         const { tags } = get()
-        const currentIndex = tags.findIndex(tag => tag.path === path)
+        const currentIndex = tags.findIndex((tag) => tag.path === path)
         if (currentIndex >= 0 && currentIndex < tags.length - 1) {
           const newTags = tags.slice(0, currentIndex + 1)
           set({ tags: newTags })
@@ -107,9 +107,7 @@ export const useTagsStore = create<TagsState>()(
 
       updateTag: (path: string, updates: Partial<TagItem>) => {
         const { tags } = get()
-        const newTags = tags.map(tag => 
-          tag.path === path ? { ...tag, ...updates } : tag
-        )
+        const newTags = tags.map((tag) => (tag.path === path ? { ...tag, ...updates } : tag))
         set({ tags: newTags })
       },
     }),
@@ -119,6 +117,6 @@ export const useTagsStore = create<TagsState>()(
         tags: state.tags,
         activeTag: state.activeTag,
       }),
-    }
-  )
+    },
+  ),
 )

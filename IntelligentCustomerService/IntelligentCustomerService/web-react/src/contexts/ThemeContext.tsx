@@ -1,31 +1,31 @@
-import React, {createContext, ReactNode, useContext, useEffect} from 'react';
-import {ConfigProvider, theme} from 'antd';
-import {defaultThemePresets, ThemePreset, useThemeStore} from '../store/theme';
+import React, {createContext, ReactNode, useContext, useEffect} from 'react'
+import {ConfigProvider, theme} from 'antd'
+import {defaultThemePresets, ThemePreset, useThemeStore} from '../store/theme'
 
 interface ThemeContextType {
-  isDark: boolean;
-  toggleTheme: () => void;
-  primaryColor: string;
-  secondaryColor: string;
-  successColor: string;
-  warningColor: string;
-  errorColor: string;
-  infoColor: string;
-  setPrimaryColor: (color: string) => void;
-  setThemeColor: (colorKey: string, color: string) => void;
-  activePreset: string;
-  setActivePreset: (presetName: string) => void;
-  applyPreset: (presetName: string) => void;
-  presets: ThemePreset[];
-  customPresets: ThemePreset[];
-  addCustomPreset: (preset: ThemePreset) => void;
-  removeCustomPreset: (presetName: string) => void;
+  isDark: boolean
+  toggleTheme: () => void
+  primaryColor: string
+  secondaryColor: string
+  successColor: string
+  warningColor: string
+  errorColor: string
+  infoColor: string
+  setPrimaryColor: (color: string) => void
+  setThemeColor: (colorKey: string, color: string) => void
+  activePreset: string
+  setActivePreset: (presetName: string) => void
+  applyPreset: (presetName: string) => void
+  presets: ThemePreset[]
+  customPresets: ThemePreset[]
+  addCustomPreset: (preset: ThemePreset) => void
+  removeCustomPreset: (presetName: string) => void
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 interface ThemeProviderProps {
-  children: ReactNode;
+  children: ReactNode
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
@@ -46,16 +46,16 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     customPresets,
     addCustomPreset,
     removeCustomPreset,
-  } = useThemeStore();
+  } = useThemeStore()
 
   // 处理深色模式切换时的类名
   useEffect(() => {
     if (isDark) {
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add('dark')
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove('dark')
     }
-  }, [isDark]);
+  }, [isDark])
 
   const value: ThemeContextType = {
     isDark,
@@ -75,7 +75,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     customPresets,
     addCustomPreset,
     removeCustomPreset,
-  };
+  }
 
   const antdTheme = {
     algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
@@ -111,23 +111,21 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         colorBgContainer: isDark ? '#1f1f1f' : '#ffffff',
       },
     },
-  };
+  }
 
   return (
     <ThemeContext.Provider value={value}>
-      <ConfigProvider theme={antdTheme}>
-        {children}
-      </ConfigProvider>
+      <ConfigProvider theme={antdTheme}>{children}</ConfigProvider>
     </ThemeContext.Provider>
-  );
-};
+  )
+}
 
 export const useTheme = (): ThemeContextType => {
-  const context = useContext(ThemeContext);
+  const context = useContext(ThemeContext)
   if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    throw new Error('useTheme must be used within a ThemeProvider')
   }
-  return context;
-};
+  return context
+}
 
-export default ThemeContext;
+export default ThemeContext

@@ -1,15 +1,14 @@
-import React from 'react';
-import { Card, Typography, Collapse, Tag, Alert, Space, Button } from 'antd';
-import { 
-  QuestionCircleOutlined, 
-  BookOutlined, 
-  CustomerServiceOutlined,
-  SafetyOutlined,
-  ToolOutlined
-} from '@ant-design/icons';
+import React from 'react'
+import {Alert, Button, Card, Collapse, Space, Tag, Typography} from 'antd'
+import {
+    BookOutlined,
+    CustomerServiceOutlined,
+    QuestionCircleOutlined,
+    SafetyOutlined,
+    ToolOutlined
+} from '@ant-design/icons'
 
-const { Title, Paragraph, Text } = Typography;
-const { Panel } = Collapse;
+const { Title, Paragraph, Text } = Typography
 
 /**
  * 帮助文档页面
@@ -21,15 +20,9 @@ const Help: React.FC = () => {
       label: '如何重置密码？',
       children: (
         <div>
-          <Paragraph>
-            1. 点击右上角用户头像，选择"个人中心"
-          </Paragraph>
-          <Paragraph>
-            2. 在个人信息页面中找到"修改密码"选项
-          </Paragraph>
-          <Paragraph>
-            3. 输入当前密码和新密码，点击确认即可
-          </Paragraph>
+          <Paragraph>1. 点击右上角用户头像，选择&quot;个人中心&quot;</Paragraph>
+          <Paragraph>2. 在个人信息页面中找到&quot;修改密码&quot;选项</Paragraph>
+          <Paragraph>3. 输入当前密码和新密码，点击确认即可</Paragraph>
         </div>
       ),
     },
@@ -38,15 +31,9 @@ const Help: React.FC = () => {
       label: '如何管理用户权限？',
       children: (
         <div>
-          <Paragraph>
-            1. 进入"系统管理" → "用户管理"
-          </Paragraph>
-          <Paragraph>
-            2. 选择要修改的用户，点击"编辑"
-          </Paragraph>
-          <Paragraph>
-            3. 在角色选择中分配相应的角色权限
-          </Paragraph>
+          <Paragraph>1. 进入&quot;系统管理&quot; → &quot;用户管理&quot;</Paragraph>
+          <Paragraph>2. 选择要修改的用户，点击&quot;编辑&quot;</Paragraph>
+          <Paragraph>3. 在角色选择中分配相应的角色权限</Paragraph>
         </div>
       ),
     },
@@ -55,18 +42,10 @@ const Help: React.FC = () => {
       label: '如何添加新的菜单？',
       children: (
         <div>
-          <Paragraph>
-            1. 进入"系统管理" → "菜单管理"
-          </Paragraph>
-          <Paragraph>
-            2. 点击"新增菜单"按钮
-          </Paragraph>
-          <Paragraph>
-            3. 填写菜单信息，包括名称、路径、图标等
-          </Paragraph>
-          <Paragraph>
-            4. 设置菜单权限和显示顺序
-          </Paragraph>
+          <Paragraph>1. 进入&quot;系统管理&quot; → &quot;菜单管理&quot;</Paragraph>
+          <Paragraph>2. 点击&quot;新增菜单&quot;按钮</Paragraph>
+          <Paragraph>3. 填写菜单信息，包括名称、路径、图标等</Paragraph>
+          <Paragraph>4. 设置菜单权限和显示顺序</Paragraph>
         </div>
       ),
     },
@@ -75,22 +54,14 @@ const Help: React.FC = () => {
       label: '系统运行缓慢怎么办？',
       children: (
         <div>
-          <Paragraph>
-            1. 检查网络连接是否正常
-          </Paragraph>
-          <Paragraph>
-            2. 清除浏览器缓存和Cookie
-          </Paragraph>
-          <Paragraph>
-            3. 关闭不必要的浏览器标签页
-          </Paragraph>
-          <Paragraph>
-            4. 如问题持续，请联系系统管理员
-          </Paragraph>
+          <Paragraph>1. 检查网络连接是否正常</Paragraph>
+          <Paragraph>2. 清除浏览器缓存和Cookie</Paragraph>
+          <Paragraph>3. 关闭不必要的浏览器标签页</Paragraph>
+          <Paragraph>4. 如问题持续，请联系系统管理员</Paragraph>
         </div>
       ),
     },
-  ];
+  ]
 
   const quickGuides = [
     {
@@ -117,7 +88,7 @@ const Help: React.FC = () => {
       icon: <SafetyOutlined style={{ color: '#f5222d' }} />,
       tags: ['安全防护', '数据保护'],
     },
-  ];
+  ]
 
   return (
     <div style={{ padding: '24px' }}>
@@ -127,25 +98,25 @@ const Help: React.FC = () => {
           <QuestionCircleOutlined style={{ marginRight: '12px', color: '#1890ff' }} />
           帮助文档
         </Title>
-        <Paragraph style={{ fontSize: '16px', color: '#666' }}>
-          系统使用指南和常见问题解答
-        </Paragraph>
+        <Paragraph style={{ fontSize: '16px', color: '#666' }}>系统使用指南和常见问题解答</Paragraph>
       </div>
 
       {/* 联系支持 */}
       <Alert
-        message="需要帮助？"
+        message='需要帮助？'
         description={
-          <Space direction="vertical" size="small">
+          <Space direction='vertical' size='small'>
             <Text>如果您在使用过程中遇到问题，可以通过以下方式获取帮助：</Text>
             <Space>
-              <Button type="primary" size="small">在线客服</Button>
-              <Button size="small">提交工单</Button>
-              <Button size="small">查看文档</Button>
+              <Button type='primary' size='small'>
+                在线客服
+              </Button>
+              <Button size='small'>提交工单</Button>
+              <Button size='small'>查看文档</Button>
             </Space>
           </Space>
         }
-        type="info"
+        type='info'
         showIcon
         style={{ marginBottom: '32px' }}
       />
@@ -156,40 +127,33 @@ const Help: React.FC = () => {
         快速指南
       </Title>
 
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-        gap: '16px',
-        marginBottom: '48px'
-      }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '16px',
+          marginBottom: '48px',
+        }}
+      >
         {quickGuides.map((guide, index) => (
-          <Card
-            key={index}
-            hoverable
-            style={{ borderRadius: '8px' }}
-            bodyStyle={{ padding: '20px' }}
-          >
+          <Card key={index} hoverable style={{ borderRadius: '8px' }} bodyStyle={{ padding: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '12px' }}>
-              <div style={{ fontSize: '24px', marginRight: '12px' }}>
-                {guide.icon}
-              </div>
+              <div style={{ fontSize: '24px', marginRight: '12px' }}>{guide.icon}</div>
               <div style={{ flex: 1 }}>
                 <Title level={4} style={{ margin: '0 0 8px 0' }}>
                   {guide.title}
                 </Title>
-                <Paragraph style={{ margin: '0 0 12px 0', color: '#666' }}>
-                  {guide.description}
-                </Paragraph>
+                <Paragraph style={{ margin: '0 0 12px 0', color: '#666' }}>{guide.description}</Paragraph>
                 <Space size={[0, 4]} wrap>
                   {guide.tags.map((tag, idx) => (
-                    <Tag key={idx} color="blue" style={{ fontSize: '11px' }}>
+                    <Tag key={idx} color='blue' style={{ fontSize: '11px' }}>
                       {tag}
                     </Tag>
                   ))}
                 </Space>
               </div>
             </div>
-            <Button type="link" style={{ padding: 0 }}>
+            <Button type='link' style={{ padding: 0 }}>
               查看详情 →
             </Button>
           </Card>
@@ -203,23 +167,18 @@ const Help: React.FC = () => {
       </Title>
 
       <Card style={{ borderRadius: '8px' }}>
-        <Collapse 
-          items={faqData}
-          size="large"
-          ghost
-        />
+        <Collapse items={faqData} size='large' ghost />
       </Card>
 
       {/* 系统信息 */}
-      <Card 
-        title="系统信息" 
-        style={{ marginTop: '32px', borderRadius: '8px' }}
-      >
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-          gap: '16px' 
-        }}>
+      <Card title='系统信息' style={{ marginTop: '32px', borderRadius: '8px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '16px',
+          }}
+        >
           <div>
             <Text strong>系统版本：</Text>
             <Text>v1.0.0</Text>
@@ -239,7 +198,7 @@ const Help: React.FC = () => {
         </div>
       </Card>
     </div>
-  );
-};
+  )
+}
 
-export default Help;
+export default Help

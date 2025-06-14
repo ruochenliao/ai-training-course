@@ -1,7 +1,7 @@
 import {create} from 'zustand'
 import type {RouteObject} from 'react-router-dom'
-import { userMenuApi, type UserMenu } from '../api/menu'
-import { Icon } from '@iconify/react'
+import {userMenuApi} from '../api/menu'
+import {Icon} from '@iconify/react'
 import React from 'react'
 
 // Ant Design Menu 菜单项接口
@@ -70,9 +70,9 @@ const buildFullPath = (menu: RawMenuItem, parentPath = ''): string => {
 // 菜单数据转换函数 - 将后端数据转换为企业级Ant Design Menu格式
 const transformMenuData = (rawMenus: RawMenuItem[], parentPath = ''): MenuItem[] => {
   return rawMenus
-    .filter(menu => !menu.is_hidden) // 过滤隐藏菜单
+    .filter((menu) => !menu.is_hidden) // 过滤隐藏菜单
     .sort((a, b) => a.order - b.order) // 按order排序
-    .map(menu => {
+    .map((menu) => {
       // 构建完整路径
       const fullPath = buildFullPath(menu, parentPath)
 
@@ -103,7 +103,7 @@ const transformMenuData = (rawMenus: RawMenuItem[], parentPath = ''): MenuItem[]
             alignItems: 'center',
             width: '100%',
             overflow: 'hidden',
-          }
+          },
         },
         [
           // 菜单文字
@@ -119,53 +119,56 @@ const transformMenuData = (rawMenus: RawMenuItem[], parentPath = ''): MenuItem[]
                 whiteSpace: 'nowrap',
                 fontSize: '14px',
                 fontWeight: menu.menu_type === 'catalog' ? 500 : 400,
-              }
+              },
             },
-            menu.name
+            menu.name,
           ),
           // 菜单类型标识（可选）
-          menu.menu_type === 'catalog' && React.createElement(
-            'span',
-            {
-              key: 'badge',
-              className: 'enterprise-menu-badge',
-              style: {
-                marginLeft: '8px',
-                fontSize: '10px',
-                color: '#1890ff',
-                opacity: 0.7,
-              }
-            },
-            '📁'
-          )
-        ]
+          menu.menu_type === 'catalog' &&
+            React.createElement(
+              'span',
+              {
+                key: 'badge',
+                className: 'enterprise-menu-badge',
+                style: {
+                  marginLeft: '8px',
+                  fontSize: '10px',
+                  color: '#1890ff',
+                  opacity: 0.7,
+                },
+              },
+              '📁',
+            ),
+        ],
       )
 
       const menuItem: MenuItem = {
         key: routePath,
         label: menuLabel,
-        icon: menu.icon ? React.createElement(Icon, {
-          icon: menu.icon,
-          style: {
-            fontSize: '16px',
-            color: menu.menu_type === 'catalog' ? '#1890ff' : '#666',
-            transition: 'color 0.2s ease',
-          }
-        }) : React.createElement(Icon, {
-          icon: menu.menu_type === 'catalog' ? 'mdi:folder-outline' : 'mdi:circle-small',
-          style: {
-            fontSize: '16px',
-            color: menu.menu_type === 'catalog' ? '#1890ff' : '#999',
-            transition: 'color 0.2s ease',
-          }
-        }),
+        icon: menu.icon
+          ? React.createElement(Icon, {
+              icon: menu.icon,
+              style: {
+                fontSize: '16px',
+                color: menu.menu_type === 'catalog' ? '#1890ff' : '#666',
+                transition: 'color 0.2s ease',
+              },
+            })
+          : React.createElement(Icon, {
+              icon: menu.menu_type === 'catalog' ? 'mdi:folder-outline' : 'mdi:circle-small',
+              style: {
+                fontSize: '16px',
+                color: menu.menu_type === 'catalog' ? '#1890ff' : '#999',
+                transition: 'color 0.2s ease',
+              },
+            }),
         path: routePath,
         order: menu.order,
       }
 
       // 处理子菜单
       if (menu.children && menu.children.length > 0) {
-        const visibleChildren = menu.children.filter(child => !child.is_hidden)
+        const visibleChildren = menu.children.filter((child) => !child.is_hidden)
         if (visibleChildren.length > 0) {
           menuItem.children = transformMenuData(visibleChildren, fullPath)
         }
@@ -206,10 +209,7 @@ export const usePermissionStore = create<PermissionState>()((set, get) => ({
     set({ menuLoading: true })
     try {
       // 调用API获取用户菜单和权限
-      const [menuResponse, apiResponse] = await Promise.all([
-        userMenuApi.getUserMenu(),
-        userMenuApi.getUserApi()
-      ])
+      const [menuResponse, apiResponse] = await Promise.all([userMenuApi.getUserMenu(), userMenuApi.getUserApi()])
 
       const rawMenus = menuResponse.data as RawMenuItem[]
       const userApis = apiResponse.data
@@ -223,21 +223,17 @@ export const usePermissionStore = create<PermissionState>()((set, get) => ({
       const transformedMenus = transformMenuData(rawMenus)
 
       // 添加默认工作台菜单（如果不存在）
-      const hasWorkbench = transformedMenus.some(menu => menu.key === '/workbench')
+      const hasWorkbench = transformedMenus.some((menu) => menu.key === '/workbench')
       if (!hasWorkbench) {
         const workbenchMenu: MenuItem = {
           key: '/workbench',
-          label: React.createElement(
-            'div',
-            { className: 'enterprise-menu-item-content' },
-            [
-              React.createElement('span', { key: 'text', className: 'enterprise-menu-text' }, '工作台'),
-              React.createElement('span', { key: 'badge', className: 'enterprise-menu-badge' }, '🏠')
-            ]
-          ),
+          label: React.createElement('div', { className: 'enterprise-menu-item-content' }, [
+            React.createElement('span', { key: 'text', className: 'enterprise-menu-text' }, '工作台'),
+            React.createElement('span', { key: 'badge', className: 'enterprise-menu-badge' }, '🏠'),
+          ]),
           icon: React.createElement(Icon, {
             icon: 'mdi:view-dashboard',
-            style: { fontSize: '16px', color: '#1890ff' }
+            style: { fontSize: '16px', color: '#1890ff' },
           }),
           path: '/workbench',
           order: 0,
@@ -252,7 +248,7 @@ export const usePermissionStore = create<PermissionState>()((set, get) => ({
         permissions: userApis,
         menus: transformedMenus,
         rawMenus: rawMenus,
-        menuLoading: false
+        menuLoading: false,
       })
 
       console.log('🎉 动态菜单加载成功:', {
@@ -263,13 +259,15 @@ export const usePermissionStore = create<PermissionState>()((set, get) => ({
       })
 
       // 存储到localStorage作为缓存
-      localStorage.setItem('user_menus_cache', JSON.stringify({
-        menus: transformedMenus,
-        rawMenus: rawMenus,
-        permissions: userApis,
-        timestamp: Date.now()
-      }))
-
+      localStorage.setItem(
+        'user_menus_cache',
+        JSON.stringify({
+          menus: transformedMenus,
+          rawMenus: rawMenus,
+          permissions: userApis,
+          timestamp: Date.now(),
+        }),
+      )
     } catch (error) {
       console.error('❌ 获取用户菜单失败:', error)
 
@@ -285,7 +283,7 @@ export const usePermissionStore = create<PermissionState>()((set, get) => ({
               menus: cacheData.menus || [],
               rawMenus: cacheData.rawMenus || [],
               permissions: cacheData.permissions || [],
-              menuLoading: false
+              menuLoading: false,
             })
             console.log('📦 从缓存恢复菜单数据')
             return
@@ -299,28 +297,24 @@ export const usePermissionStore = create<PermissionState>()((set, get) => ({
       const defaultMenus: MenuItem[] = [
         {
           key: '/workbench',
-          label: React.createElement(
-            'div',
-            { className: 'enterprise-menu-item-content' },
-            [
-              React.createElement('span', { key: 'text', className: 'enterprise-menu-text' }, '工作台'),
-              React.createElement('span', { key: 'badge', className: 'enterprise-menu-badge' }, '🏠')
-            ]
-          ),
+          label: React.createElement('div', { className: 'enterprise-menu-item-content' }, [
+            React.createElement('span', { key: 'text', className: 'enterprise-menu-text' }, '工作台'),
+            React.createElement('span', { key: 'badge', className: 'enterprise-menu-badge' }, '🏠'),
+          ]),
           icon: React.createElement(Icon, {
             icon: 'mdi:view-dashboard',
-            style: { fontSize: '16px', color: '#1890ff' }
+            style: { fontSize: '16px', color: '#1890ff' },
           }),
           path: '/workbench',
           order: 1,
-        }
+        },
       ]
 
       set({
         menus: defaultMenus,
         rawMenus: [],
         permissions: [],
-        menuLoading: false
+        menuLoading: false,
       })
     }
   },
@@ -332,15 +326,15 @@ export const usePermissionStore = create<PermissionState>()((set, get) => ({
 
   hasAnyPermission: (permissions: string[]) => {
     const { permissions: userPermissions } = get()
-    return permissions.some(permission => userPermissions.includes(permission))
+    return permissions.some((permission) => userPermissions.includes(permission))
   },
 
   clearPermissions: () => {
-    set({ 
+    set({
       permissions: [],
       routes: [],
       menus: [],
-      menuLoading: false 
+      menuLoading: false,
     })
   },
 }))
