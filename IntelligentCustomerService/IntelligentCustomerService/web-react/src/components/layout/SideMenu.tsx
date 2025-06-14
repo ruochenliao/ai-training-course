@@ -1,9 +1,7 @@
-import React, { useMemo, useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { Menu } from 'antd'
-import type { MenuProps } from 'antd'
-import { useNavigate, useLocation } from 'react-router-dom'
-import { Icon } from '@iconify/react'
-import { usePermissionStore, type MenuItem } from '../../store/permission'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { usePermissionStore } from '../../store/permission'
 import { useAppStore } from '../../store/app'
 import { isExternal } from '../../utils'
 import MenuStats from './MenuStats'
@@ -24,7 +22,7 @@ const SideMenu: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { menus, menuLoading, generateRoutes } = usePermissionStore()
-  const { reloading, setReloading, collapsed } = useAppStore()
+  const { setReloading, collapsed } = useAppStore()
 
   // 组件挂载时获取动态菜单
   useEffect(() => {
@@ -67,7 +65,7 @@ const SideMenu: React.FC = () => {
       clickedKey: key,
       targetPath: path,
       currentPath: location.pathname,
-      isExternal: isExternal(path)
+      isExternal: isExternal(path),
     })
 
     if (isExternal(path)) {
@@ -92,24 +90,28 @@ const SideMenu: React.FC = () => {
   // 菜单加载状态
   if (menuLoading) {
     return (
-      <div className="enterprise-side-menu-container">
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '200px',
-          color: '#8c8c8c'
-        }}>
-          <div style={{
-            width: '32px',
-            height: '32px',
-            border: '2px solid #f0f0f0',
-            borderTop: '2px solid #1890ff',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            marginBottom: '12px'
-          }} />
+      <div className='enterprise-side-menu-container'>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '200px',
+            color: '#8c8c8c',
+          }}
+        >
+          <div
+            style={{
+              width: '32px',
+              height: '32px',
+              border: '2px solid #f0f0f0',
+              borderTop: '2px solid #1890ff',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+              marginBottom: '12px',
+            }}
+          />
           <span style={{ fontSize: '12px' }}>加载菜单中...</span>
         </div>
       </div>
@@ -117,26 +119,28 @@ const SideMenu: React.FC = () => {
   }
 
   return (
-    <div className="enterprise-side-menu-container">
+    <div className='enterprise-side-menu-container'>
       {/* 菜单标题 */}
       {!collapsed && (
-        <div style={{
-          padding: '12px 24px 8px',
-          fontSize: '12px',
-          color: '#8c8c8c',
-          fontWeight: 500,
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px',
-          borderBottom: '1px solid #f0f0f0',
-          marginBottom: '8px',
-        }}>
+        <div
+          style={{
+            padding: '12px 24px 8px',
+            fontSize: '12px',
+            color: '#8c8c8c',
+            fontWeight: 500,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            borderBottom: '1px solid #f0f0f0',
+            marginBottom: '8px',
+          }}
+        >
           导航菜单
         </div>
       )}
 
       <Menu
         className={`enterprise-side-menu ${collapsed ? 'ant-menu-inline-collapsed' : ''}`}
-        mode="inline"
+        mode='inline'
         selectedKeys={[activeKey]}
         defaultOpenKeys={defaultOpenKeys}
         items={menuOptions as any}
@@ -148,17 +152,19 @@ const SideMenu: React.FC = () => {
           background: 'transparent',
           fontSize: '14px',
         }}
-        theme="light"
+        theme='light'
       />
 
       {/* 菜单统计信息 */}
       {!collapsed && (
-        <div style={{
-          position: 'absolute',
-          bottom: '16px',
-          left: '0',
-          right: '0',
-        }}>
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '16px',
+            left: '0',
+            right: '0',
+          }}
+        >
           <MenuStats />
         </div>
       )}

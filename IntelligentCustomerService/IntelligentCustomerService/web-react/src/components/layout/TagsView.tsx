@@ -1,10 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Tag, Button } from 'antd'
 import { CloseOutlined } from '@ant-design/icons'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { useTagsStore } from '../../store/tags'
-import { useAppStore } from '../../store/app'
-import ScrollX from '../common/ScrollX'
+import { useNavigate } from 'react-router-dom'
+import { useTagsStore, type TagItem } from '../../store/tags'
+import ScrollX, { type ScrollXRef } from '../common/ScrollX'
 import ContextMenu from './ContextMenu'
 
 /**
@@ -21,12 +19,10 @@ import ContextMenu from './ContextMenu'
 
 const TagsView: React.FC = () => {
   const navigate = useNavigate()
-  const location = useLocation()
-  const scrollXRef = useRef<any>(null)
+  const scrollXRef = useRef<ScrollXRef>(null)
   const tabRefs = useRef<(HTMLElement | null)[]>([])
 
   const { tags, activeTag, removeTag, setActiveTag } = useTagsStore()
-  const { setReloading } = useAppStore()
 
   // 右键菜单状态 - 对应Vue版本的 contextMenuOption
   const [contextMenuOption, setContextMenuOption] = useState({
@@ -38,7 +34,7 @@ const TagsView: React.FC = () => {
 
   // 监听激活标签变化，自动滚动 - 对应Vue版本的 watch(() => tagsStore.activeIndex)
   useEffect(() => {
-    const activeIndex = tags.findIndex(tag => tag.path === activeTag)
+    const activeIndex = tags.findIndex((tag) => tag.path === activeTag)
     if (activeIndex >= 0 && tabRefs.current[activeIndex] && scrollXRef.current) {
       const activeTabElement = tabRefs.current[activeIndex]
       if (activeTabElement) {
@@ -61,7 +57,7 @@ const TagsView: React.FC = () => {
   }
 
   // 右键菜单处理 - 对应Vue版本的 handleContextMenu
-  const handleContextMenu = (e: React.MouseEvent, tag: any) => {
+  const handleContextMenu = (e: React.MouseEvent, tag: TagItem) => {
     e.preventDefault()
     const { clientX, clientY } = e
     setContextMenuOption({
@@ -72,16 +68,13 @@ const TagsView: React.FC = () => {
     })
     // 使用 setTimeout 确保先隐藏再显示
     setTimeout(() => {
-      setContextMenuOption(prev => ({ ...prev, show: true }))
+      setContextMenuOption((prev) => ({ ...prev, show: true }))
     }, 0)
   }
 
   return (
-    <div className="app-tags">
-      <ScrollX
-        ref={scrollXRef}
-        className="h-full"
-      >
+    <div className='app-tags'>
+      <ScrollX ref={scrollXRef} className='h-full'>
         {tags.map((tag, index) => (
           <div
             key={tag.path}
@@ -92,10 +85,7 @@ const TagsView: React.FC = () => {
           >
             <span>{tag.title}</span>
             {tags.length > 1 && tag.closable && (
-              <span 
-                className="app-tag-close"
-                onClick={(e) => handleTagClose(e, tag.path)}
-              >
+              <span className='app-tag-close' onClick={(e) => handleTagClose(e, tag.path)}>
                 <CloseOutlined style={{ fontSize: '10px' }} />
               </span>
             )}
@@ -110,7 +100,7 @@ const TagsView: React.FC = () => {
           currentPath={contextMenuOption.currentPath}
           x={contextMenuOption.x}
           y={contextMenuOption.y}
-          onClose={() => setContextMenuOption(prev => ({ ...prev, show: false }))}
+          onClose={() => setContextMenuOption((prev) => ({ ...prev, show: false }))}
         />
       )}
     </div>

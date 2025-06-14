@@ -1,5 +1,5 @@
-import {create} from 'zustand'
-import {persist} from 'zustand/middleware'
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 interface AppState {
   loading: boolean
@@ -52,7 +52,7 @@ export const useAppStore = create<AppState>()(
 
       removeKeepAlive: (name: string) => {
         const { keepAliveList } = get()
-        set({ keepAliveList: keepAliveList.filter(item => item !== name) })
+        set({ keepAliveList: keepAliveList.filter((item) => item !== name) })
       },
 
       clearKeepAlive: () => {
@@ -108,6 +108,6 @@ export const useAppStore = create<AppState>()(
         language: state.language,
         collapsed: state.collapsed,
       }),
-    }
-  )
+    },
+  ),
 )

@@ -1,10 +1,10 @@
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import 'dayjs/locale/zh-cn';
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import 'dayjs/locale/zh-cn'
 
 // 扩展dayjs插件
-dayjs.extend(relativeTime);
-dayjs.locale('zh-cn');
+dayjs.extend(relativeTime)
+dayjs.locale('zh-cn')
 
 /**
  * 格式化时间
@@ -13,7 +13,7 @@ dayjs.locale('zh-cn');
  * @returns 格式化后的时间字符串
  */
 export function formatTime(time: string | Date | number, format = 'YYYY-MM-DD HH:mm:ss'): string {
-  return dayjs(time).format(format);
+  return dayjs(time).format(format)
 }
 
 /**
@@ -22,7 +22,7 @@ export function formatTime(time: string | Date | number, format = 'YYYY-MM-DD HH
  * @returns 相对时间字符串
  */
 export function formatRelativeTime(time: string | Date | number): string {
-  return dayjs(time).fromNow();
+  return dayjs(time).fromNow()
 }
 
 /**
@@ -32,7 +32,7 @@ export function formatRelativeTime(time: string | Date | number): string {
  * @returns 格式化后的日期字符串
  */
 export function formatDate(time: string | Date | number, format = 'YYYY-MM-DD'): string {
-  return dayjs(time).format(format);
+  return dayjs(time).format(format)
 }
 
 /**
@@ -42,7 +42,7 @@ export function formatDate(time: string | Date | number, format = 'YYYY-MM-DD'):
  * @returns 格式化后的时间字符串
  */
 export function formatTimestamp(timestamp: number, format = 'YYYY-MM-DD HH:mm:ss'): string {
-  return dayjs(timestamp).format(format);
+  return dayjs(timestamp).format(format)
 }
 
 /**
@@ -50,7 +50,7 @@ export function formatTimestamp(timestamp: number, format = 'YYYY-MM-DD HH:mm:ss
  * @returns 当前时间戳（毫秒）
  */
 export function getCurrentTimestamp(): number {
-  return Date.now();
+  return Date.now()
 }
 
 /**
@@ -58,7 +58,7 @@ export function getCurrentTimestamp(): number {
  * @returns 今天开始时间戳（毫秒）
  */
 export function getStartOfDayTimestamp(): number {
-  return dayjs().startOf('day').valueOf();
+  return dayjs().startOf('day').valueOf()
 }
 
 /**
@@ -66,7 +66,7 @@ export function getStartOfDayTimestamp(): number {
  * @returns 今天结束时间戳（毫秒）
  */
 export function getEndOfDayTimestamp(): number {
-  return dayjs().endOf('day').valueOf();
+  return dayjs().endOf('day').valueOf()
 }
 
 /**
@@ -76,15 +76,15 @@ export function getEndOfDayTimestamp(): number {
  */
 export function formatDuration(duration: number): string {
   if (duration < 60) {
-    return `${Math.round(duration)}秒`;
+    return `${Math.round(duration)}秒`
   } else if (duration < 3600) {
-    const minutes = Math.floor(duration / 60);
-    const seconds = Math.round(duration % 60);
-    return `${minutes}分${seconds}秒`;
+    const minutes = Math.floor(duration / 60)
+    const seconds = Math.round(duration % 60)
+    return `${minutes}分${seconds}秒`
   } else {
-    const hours = Math.floor(duration / 3600);
-    const minutes = Math.floor((duration % 3600) / 60);
-    return `${hours}小时${minutes}分钟`;
+    const hours = Math.floor(duration / 3600)
+    const minutes = Math.floor((duration % 3600) / 60)
+    return `${hours}小时${minutes}分钟`
   }
 }
 
@@ -94,7 +94,7 @@ export function formatDuration(duration: number): string {
  * @returns 是否为今天
  */
 export function isToday(time: string | Date | number): boolean {
-  return dayjs(time).isSame(dayjs(), 'day');
+  return dayjs(time).isSame(dayjs(), 'day')
 }
 
 /**
@@ -103,7 +103,7 @@ export function isToday(time: string | Date | number): boolean {
  * @returns 是否为昨天
  */
 export function isYesterday(time: string | Date | number): boolean {
-  return dayjs(time).isSame(dayjs().subtract(1, 'day'), 'day');
+  return dayjs(time).isSame(dayjs().subtract(1, 'day'), 'day')
 }
 
 /**
@@ -116,9 +116,9 @@ export function isYesterday(time: string | Date | number): boolean {
 export function getTimeDiff(
   startTime: string | Date | number,
   endTime: string | Date | number,
-  unit: 'millisecond' | 'second' | 'minute' | 'hour' | 'day' = 'second'
+  unit: 'millisecond' | 'second' | 'minute' | 'hour' | 'day' = 'second',
 ): number {
-  return dayjs(endTime).diff(dayjs(startTime), unit);
+  return dayjs(endTime).diff(dayjs(startTime), unit)
 }
 
 /**
@@ -127,21 +127,21 @@ export function getTimeDiff(
  * @returns 格式化后的聊天时间字符串
  */
 export function formatChatTime(time: string | Date | number): string {
-  const now = dayjs();
-  const messageTime = dayjs(time);
-  
+  const now = dayjs()
+  const messageTime = dayjs(time)
+
   if (messageTime.isSame(now, 'day')) {
     // 今天：显示时间
-    return messageTime.format('HH:mm');
+    return messageTime.format('HH:mm')
   } else if (messageTime.isSame(now.subtract(1, 'day'), 'day')) {
     // 昨天：显示"昨天 时间"
-    return `昨天 ${messageTime.format('HH:mm')}`;
+    return `昨天 ${messageTime.format('HH:mm')}`
   } else if (messageTime.isSame(now, 'year')) {
     // 今年：显示月日时间
-    return messageTime.format('MM-DD HH:mm');
+    return messageTime.format('MM-DD HH:mm')
   } else {
     // 其他年份：显示完整日期时间
-    return messageTime.format('YYYY-MM-DD HH:mm');
+    return messageTime.format('YYYY-MM-DD HH:mm')
   }
 }
 
@@ -151,21 +151,21 @@ export function formatChatTime(time: string | Date | number): string {
  * @returns 格式化后的会话时间字符串
  */
 export function formatSessionTime(time: string | Date | number): string {
-  const now = dayjs();
-  const sessionTime = dayjs(time);
-  
+  const now = dayjs()
+  const sessionTime = dayjs(time)
+
   if (sessionTime.isSame(now, 'day')) {
     // 今天：显示时间
-    return sessionTime.format('HH:mm');
+    return sessionTime.format('HH:mm')
   } else if (sessionTime.isSame(now.subtract(1, 'day'), 'day')) {
     // 昨天：显示"昨天"
-    return '昨天';
+    return '昨天'
   } else if (sessionTime.isSame(now, 'year')) {
     // 今年：显示月日
-    return sessionTime.format('MM-DD');
+    return sessionTime.format('MM-DD')
   } else {
     // 其他年份：显示年月日
-    return sessionTime.format('YYYY-MM-DD');
+    return sessionTime.format('YYYY-MM-DD')
   }
 }
 
@@ -175,7 +175,7 @@ export function formatSessionTime(time: string | Date | number): string {
  * @returns 相对时间字符串
  */
 export function getTimeAgo(time: string | Date | number): string {
-  return dayjs(time).fromNow();
+  return dayjs(time).fromNow()
 }
 
 export default {
@@ -193,4 +193,4 @@ export default {
   formatChatTime,
   formatSessionTime,
   getTimeAgo,
-};
+}

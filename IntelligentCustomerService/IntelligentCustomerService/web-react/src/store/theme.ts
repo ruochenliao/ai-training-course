@@ -1,15 +1,15 @@
-import {create} from 'zustand'
-import {persist} from 'zustand/middleware'
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 export type ThemePreset = {
-  name: string;
-  primaryColor: string;
-  secondaryColor?: string;
-  successColor?: string;
-  warningColor?: string;
-  errorColor?: string;
-  infoColor?: string;
-};
+  name: string
+  primaryColor: string
+  secondaryColor?: string
+  successColor?: string
+  warningColor?: string
+  errorColor?: string
+  infoColor?: string
+}
 
 export const defaultThemePresets: ThemePreset[] = [
   {
@@ -66,29 +66,29 @@ export const defaultThemePresets: ThemePreset[] = [
     errorColor: '#f5222d',
     infoColor: '#1890ff',
   },
-];
+]
 
 interface ThemeState {
-  isDark: boolean;
-  primaryColor: string;
-  secondaryColor: string;
-  successColor: string;
-  warningColor: string;
-  errorColor: string;
-  infoColor: string;
-  sidebarCollapsed: boolean;
-  activePreset: string;
-  customPresets: ThemePreset[];
-  
-  toggleTheme: () => void;
-  setPrimaryColor: (color: string) => void;
-  setThemeColor: (colorKey: string, color: string) => void;
-  toggleSidebar: () => void;
-  setSidebarCollapsed: (collapsed: boolean) => void;
-  setActivePreset: (presetName: string) => void;
-  addCustomPreset: (preset: ThemePreset) => void;
-  removeCustomPreset: (presetName: string) => void;
-  applyPreset: (presetName: string) => void;
+  isDark: boolean
+  primaryColor: string
+  secondaryColor: string
+  successColor: string
+  warningColor: string
+  errorColor: string
+  infoColor: string
+  sidebarCollapsed: boolean
+  activePreset: string
+  customPresets: ThemePreset[]
+
+  toggleTheme: () => void
+  setPrimaryColor: (color: string) => void
+  setThemeColor: (colorKey: string, color: string) => void
+  toggleSidebar: () => void
+  setSidebarCollapsed: (collapsed: boolean) => void
+  setActivePreset: (presetName: string) => void
+  addCustomPreset: (preset: ThemePreset) => void
+  removeCustomPreset: (presetName: string) => void
+  applyPreset: (presetName: string) => void
 }
 
 export const useThemeStore = create<ThemeState>()(
@@ -113,7 +113,7 @@ export const useThemeStore = create<ThemeState>()(
       setPrimaryColor: (color: string) => {
         set({ primaryColor: color })
       },
-      
+
       setThemeColor: (colorKey: string, color: string) => {
         set({ [colorKey]: color } as any)
       },
@@ -125,38 +125,38 @@ export const useThemeStore = create<ThemeState>()(
       setSidebarCollapsed: (collapsed: boolean) => {
         set({ sidebarCollapsed: collapsed })
       },
-      
+
       setActivePreset: (presetName: string) => {
         set({ activePreset: presetName })
       },
-      
+
       addCustomPreset: (preset: ThemePreset) => {
-        const { customPresets } = get();
+        const { customPresets } = get()
         // 检查是否已存在同名预设
-        const exists = customPresets.some(p => p.name === preset.name);
+        const exists = customPresets.some((p) => p.name === preset.name)
         if (!exists) {
-          set({ customPresets: [...customPresets, preset] });
+          set({ customPresets: [...customPresets, preset] })
         }
       },
-      
+
       removeCustomPreset: (presetName: string) => {
-        const { customPresets } = get();
-        set({ 
-          customPresets: customPresets.filter(p => p.name !== presetName) 
-        });
+        const { customPresets } = get()
+        set({
+          customPresets: customPresets.filter((p) => p.name !== presetName),
+        })
       },
-      
+
       applyPreset: (presetName: string) => {
-        const { customPresets } = get();
+        const { customPresets } = get()
         // 查找系统预设
-        const systemPreset = defaultThemePresets.find(p => p.name === presetName);
+        const systemPreset = defaultThemePresets.find((p) => p.name === presetName)
         // 查找自定义预设
-        const customPreset = customPresets.find(p => p.name === presetName);
-        
-        const preset = systemPreset || customPreset;
-        
+        const customPreset = customPresets.find((p) => p.name === presetName)
+
+        const preset = systemPreset || customPreset
+
         if (preset) {
-          set({ 
+          set({
             activePreset: presetName,
             primaryColor: preset.primaryColor,
             secondaryColor: preset.secondaryColor || '#722ed1',
@@ -164,12 +164,12 @@ export const useThemeStore = create<ThemeState>()(
             warningColor: preset.warningColor || '#faad14',
             errorColor: preset.errorColor || '#f5222d',
             infoColor: preset.infoColor || '#1890ff',
-          });
+          })
         }
-      }
+      },
     }),
     {
       name: 'theme-storage',
-    }
-  )
+    },
+  ),
 )

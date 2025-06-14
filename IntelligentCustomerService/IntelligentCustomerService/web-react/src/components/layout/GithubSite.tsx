@@ -4,7 +4,7 @@ import { Icon } from '@iconify/react'
 
 /**
  * GitHub链接组件 - 对应Vue版本的GithubSite.vue
- * 
+ *
  * 功能特性：
  * 1. GitHub链接按钮
  * 2. 新窗口打开
@@ -17,16 +17,11 @@ const GithubSite: React.FC = () => {
 
   return (
     <Button
-      type="text"
-      icon={
-        <Icon 
-          icon="mdi:github" 
-          style={{ fontSize: '16px' }} 
-        />
-      }
+      type='text'
+      icon={<Icon icon='mdi:github' style={{ fontSize: '16px' }} />}
       onClick={handleGithubClick}
-      className="flex-center"
-      title="GitHub"
+      className='flex-center'
+      title='GitHub'
     />
   )
 }

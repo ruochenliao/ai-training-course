@@ -4,7 +4,7 @@ import { useAppStore } from '../../store/app'
 
 /**
  * 菜单折叠按钮组件 - 对应Vue版本的MenuCollapse.vue
- * 
+ *
  * 功能特性：
  * 1. 图标大小20px，鼠标指针样式
  * 2. 折叠状态显示展开图标（format-indent-increase）

@@ -1,5 +1,5 @@
-import {request} from './index'
-import type {ApiResponse, PaginatedResponse} from '@/types/api'
+import { request } from './index'
+import type { ApiResponse, PaginatedResponse } from '@/types/api'
 
 // 用户接口类型定义
 export interface User {
@@ -91,8 +91,9 @@ export const userApi = {
 
   // 切换用户状态
   toggleUserStatus: (id: number, isActive: boolean): Promise<ApiResponse> => {
-    return request.post('/api/v1/user/update', { 
-      id, is_active: isActive 
+    return request.post('/api/v1/user/update', {
+      id,
+      is_active: isActive,
     })
   },
 
@@ -105,5 +106,4 @@ export const userApi = {
   changePassword: (params: ChangePasswordParams): Promise<ApiResponse> => {
     return request.post('/api/v1/base/update_password', { req_in: params })
   },
-
 }

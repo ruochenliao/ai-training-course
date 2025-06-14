@@ -1,18 +1,18 @@
-import React from 'react';
-import * as AntdIcons from '@ant-design/icons';
-import {IconProps} from '@ant-design/icons/lib/components/Icon';
+import React from 'react'
+import * as AntdIcons from '@ant-design/icons'
+import { IconProps } from '@ant-design/icons/lib/components/Icon'
 
 interface CustomIconProps extends Omit<IconProps, 'component'> {
-  name: string;
-  size?: number | string;
+  name: string
+  size?: number | string
 }
 
 const Icon: React.FC<CustomIconProps> = ({ name, size, style, ...props }) => {
   // 动态获取图标组件
-  const IconComponent = (AntdIcons as any)[name];
-  
+  const IconComponent = (AntdIcons as any)[name]
+
   if (!IconComponent) {
-    return <AntdIcons.QuestionCircleOutlined {...props} style={{ fontSize: size, ...style }} />;
+    return <AntdIcons.QuestionCircleOutlined {...props} style={{ fontSize: size, ...style }} />
   }
 
   return (
@@ -23,10 +23,10 @@ const Icon: React.FC<CustomIconProps> = ({ name, size, style, ...props }) => {
         ...style,
       }}
     />
-  );
-};
+  )
+}
 
-export default Icon;
+export default Icon
 
 // 常用图标名称导出
 export const IconNames = {
@@ -37,7 +37,7 @@ export const IconNames = {
   SETTING: 'SettingOutlined',
   MENU: 'MenuOutlined',
   HOME: 'HomeOutlined',
-  
+
   // 操作图标
   EDIT: 'EditOutlined',
   DELETE: 'DeleteOutlined',
@@ -46,20 +46,20 @@ export const IconNames = {
   REFRESH: 'ReloadOutlined',
   SAVE: 'SaveOutlined',
   CANCEL: 'CloseOutlined',
-  
+
   // 状态图标
   SUCCESS: 'CheckCircleOutlined',
   ERROR: 'CloseCircleOutlined',
   WARNING: 'ExclamationCircleOutlined',
   INFO: 'InfoCircleOutlined',
   LOADING: 'LoadingOutlined',
-  
+
   // 文件图标
   FILE: 'FileOutlined',
   FOLDER: 'FolderOutlined',
   DOWNLOAD: 'DownloadOutlined',
   UPLOAD: 'UploadOutlined',
-  
+
   // 其他图标
   EYE: 'EyeOutlined',
   EYE_INVISIBLE: 'EyeInvisibleOutlined',
@@ -104,6 +104,6 @@ export const IconNames = {
   CARET_DOWN: 'CaretDownOutlined',
   CARET_LEFT: 'CaretLeftOutlined',
   CARET_RIGHT: 'CaretRightOutlined',
-} as const;
+} as const
 
-export type IconName = typeof IconNames[keyof typeof IconNames];
+export type IconName = (typeof IconNames)[keyof typeof IconNames]

@@ -1,7 +1,7 @@
-import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios'
-import {message} from 'antd'
-import {useAuthStore} from '@/store/auth'
-import type {ApiResponse} from '@/types/api'
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import { message } from 'antd'
+import { useAuthStore } from '@/store/auth'
+import type { ApiResponse } from '@/types/api'
 
 // 创建axios实例
 const request: AxiosInstance = axios.create({
@@ -26,19 +26,19 @@ request.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error)
-  }
+  },
 )
 
 // 响应拦截器
 request.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
     const { data } = response
-    
+
     // 如果是下载文件等特殊情况，直接返回
     if (response.config.responseType === 'blob') {
       return response
     }
-    
+
     // 检查业务状态码 - 匹配后端返回格式 {code: 200, msg: "OK", data: {...}}
     if (data.code === 200) {
       return data
@@ -52,7 +52,7 @@ request.interceptors.response.use(
     // 处理HTTP错误
     if (error.response) {
       const { status, data } = error.response
-      
+
       switch (status) {
         case 401:
           message.error('登录已过期，请重新登录')
@@ -76,9 +76,9 @@ request.interceptors.response.use(
     } else {
       message.error('请求配置错误')
     }
-    
+
     return Promise.reject(error)
-  }
+  },
 )
 
 export default request

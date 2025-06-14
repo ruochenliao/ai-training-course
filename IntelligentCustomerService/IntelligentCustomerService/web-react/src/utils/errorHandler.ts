@@ -1,4 +1,4 @@
-import {message} from 'antd';
+import { message } from 'antd'
 
 /**
  * 错误类型
@@ -18,16 +18,16 @@ export enum ErrorType {
  * 自定义错误类
  */
 export class AppError extends Error {
-  type: ErrorType;
-  code?: string | number;
-  data?: any;
+  type: ErrorType
+  code?: string | number
+  data?: any
 
   constructor(message: string, type: ErrorType = ErrorType.UNKNOWN, code?: string | number, data?: any) {
-    super(message);
-    this.name = 'AppError';
-    this.type = type;
-    this.code = code;
-    this.data = data;
+    super(message)
+    this.name = 'AppError'
+    this.type = type
+    this.code = code
+    this.data = data
   }
 }
 
@@ -36,8 +36,8 @@ export class AppError extends Error {
  */
 export class ApiError extends AppError {
   constructor(message: string, code: string | number | undefined = undefined, data?: any) {
-    super(message, ErrorType.API, code, data);
-    this.name = 'ApiError';
+    super(message, ErrorType.API, code, data)
+    this.name = 'ApiError'
   }
 }
 
@@ -46,8 +46,8 @@ export class ApiError extends AppError {
  */
 export class NetworkError extends AppError {
   constructor(message = '网络连接错误，请检查网络设置') {
-    super(message, ErrorType.NETWORK);
-    this.name = 'NetworkError';
+    super(message, ErrorType.NETWORK)
+    this.name = 'NetworkError'
   }
 }
 
@@ -56,8 +56,8 @@ export class NetworkError extends AppError {
  */
 export class ValidationError extends AppError {
   constructor(message: string, data?: any) {
-    super(message, ErrorType.VALIDATION, undefined, data);
-    this.name = 'ValidationError';
+    super(message, ErrorType.VALIDATION, undefined, data)
+    this.name = 'ValidationError'
   }
 }
 
@@ -66,8 +66,8 @@ export class ValidationError extends AppError {
  */
 export class AuthenticationError extends AppError {
   constructor(message = '用户未登录或登录已过期') {
-    super(message, ErrorType.AUTHENTICATION);
-    this.name = 'AuthenticationError';
+    super(message, ErrorType.AUTHENTICATION)
+    this.name = 'AuthenticationError'
   }
 }
 
@@ -76,8 +76,8 @@ export class AuthenticationError extends AppError {
  */
 export class AuthorizationError extends AppError {
   constructor(message = '没有权限执行此操作') {
-    super(message, ErrorType.AUTHORIZATION);
-    this.name = 'AuthorizationError';
+    super(message, ErrorType.AUTHORIZATION)
+    this.name = 'AuthorizationError'
   }
 }
 
@@ -85,17 +85,17 @@ export class AuthorizationError extends AppError {
  * 错误处理服务
  */
 class ErrorHandler {
-  private static instance: ErrorHandler;
+  private static instance: ErrorHandler
 
   // 错误监听器列表
-  private listeners: Array<(error: Error) => void> = [];
+  private listeners: Array<(error: Error) => void> = []
 
   // 单例模式
   public static getInstance(): ErrorHandler {
     if (!ErrorHandler.instance) {
-      ErrorHandler.instance = new ErrorHandler();
+      ErrorHandler.instance = new ErrorHandler()
     }
-    return ErrorHandler.instance;
+    return ErrorHandler.instance
   }
 
   /**
@@ -104,26 +104,26 @@ class ErrorHandler {
    * @param showMessage 是否显示错误消息
    */
   public handleError(error: Error, showMessage = true): void {
-    console.error('Error caught:', error);
+    console.error('Error caught:', error)
 
     // 通知所有监听器
-    this.notifyListeners(error);
+    this.notifyListeners(error)
 
     // 显示错误消息
     if (showMessage) {
-      this.showErrorMessage(error);
+      this.showErrorMessage(error)
     }
 
     // 根据错误类型处理
     if (error instanceof AppError) {
-      this.handleAppError(error);
+      this.handleAppError(error)
     } else {
       // 处理未知错误
-      this.handleUnknownError(error);
+      this.handleUnknownError(error)
     }
 
     // 可以在这里添加错误上报逻辑
-    this.reportError(error);
+    this.reportError(error)
   }
 
   /**
@@ -134,36 +134,36 @@ class ErrorHandler {
     switch (error.type) {
       case ErrorType.AUTHENTICATION:
         // 处理认证错误，如跳转到登录页
-        this.handleAuthenticationError(error as AuthenticationError);
-        break;
+        this.handleAuthenticationError(error as AuthenticationError)
+        break
       case ErrorType.AUTHORIZATION:
         // 处理授权错误，如跳转到403页面
-        this.handleAuthorizationError(error as AuthorizationError);
-        break;
+        this.handleAuthorizationError(error as AuthorizationError)
+        break
       case ErrorType.API:
         // 处理API错误
-        this.handleApiError(error as ApiError);
-        break;
+        this.handleApiError(error as ApiError)
+        break
       case ErrorType.NETWORK:
         // 处理网络错误
-        this.handleNetworkError(error as NetworkError);
-        break;
+        this.handleNetworkError(error as NetworkError)
+        break
       case ErrorType.VALIDATION:
         // 处理验证错误
-        this.handleValidationError(error as ValidationError);
-        break;
+        this.handleValidationError(error as ValidationError)
+        break
       case ErrorType.BUSINESS:
         // 处理业务错误
-        this.handleBusinessError(error);
-        break;
+        this.handleBusinessError(error)
+        break
       case ErrorType.SYSTEM:
         // 处理系统错误
-        this.handleSystemError(error);
-        break;
+        this.handleSystemError(error)
+        break
       default:
         // 处理未知错误
-        this.handleUnknownError(error);
-        break;
+        this.handleUnknownError(error)
+        break
     }
   }
 
@@ -171,10 +171,10 @@ class ErrorHandler {
    * 处理认证错误
    * @param error 认证错误对象
    */
-  private handleAuthenticationError(error: AuthenticationError): void {
+  private handleAuthenticationError(): void {
     // 跳转到登录页
     if (window.location.pathname !== '/login') {
-      window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+      window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`
     }
   }
 
@@ -182,10 +182,10 @@ class ErrorHandler {
    * 处理授权错误
    * @param error 授权错误对象
    */
-  private handleAuthorizationError(error: AuthorizationError): void {
+  private handleAuthorizationError(): void {
     // 跳转到403页面
     if (window.location.pathname !== '/403') {
-      window.location.href = '/403';
+      window.location.href = '/403'
     }
   }
 
@@ -196,9 +196,9 @@ class ErrorHandler {
   private handleApiError(error: ApiError): void {
     // 根据错误码处理
     if (error.code === 401) {
-      this.handleAuthenticationError(new AuthenticationError());
+      this.handleAuthenticationError(new AuthenticationError())
     } else if (error.code === 403) {
-      this.handleAuthorizationError(new AuthorizationError());
+      this.handleAuthorizationError(new AuthorizationError())
     }
   }
 
@@ -208,7 +208,7 @@ class ErrorHandler {
    */
   private handleNetworkError(error: NetworkError): void {
     // 可以在这里添加网络错误处理逻辑
-    console.log('Network error:', error);
+    console.log('Network error:', error)
   }
 
   /**
@@ -217,7 +217,7 @@ class ErrorHandler {
    */
   private handleValidationError(error: ValidationError): void {
     // 可以在这里添加验证错误处理逻辑
-    console.log('Validation error:', error);
+    console.log('Validation error:', error)
   }
 
   /**
@@ -226,7 +226,7 @@ class ErrorHandler {
    */
   private handleBusinessError(error: AppError): void {
     // 可以在这里添加业务错误处理逻辑
-    console.log('Business error:', error);
+    console.log('Business error:', error)
   }
 
   /**
@@ -235,7 +235,7 @@ class ErrorHandler {
    */
   private handleSystemError(error: AppError): void {
     // 可以在这里添加系统错误处理逻辑
-    console.log('System error:', error);
+    console.log('System error:', error)
   }
 
   /**
@@ -244,7 +244,7 @@ class ErrorHandler {
    */
   private handleUnknownError(error: Error): void {
     // 可以在这里添加未知错误处理逻辑
-    console.log('Unknown error:', error);
+    console.log('Unknown error:', error)
   }
 
   /**
@@ -252,26 +252,26 @@ class ErrorHandler {
    * @param error 错误对象
    */
   private showErrorMessage(error: Error): void {
-    const errorMessage = error.message || '发生了未知错误';
-    
+    const errorMessage = error.message || '发生了未知错误'
+
     // 根据错误类型显示不同的消息
     if (error instanceof AppError) {
       switch (error.type) {
         case ErrorType.NETWORK:
-          message.error('网络连接错误，请检查网络设置');
-          break;
+          message.error('网络连接错误，请检查网络设置')
+          break
         case ErrorType.AUTHENTICATION:
-          message.error('用户未登录或登录已过期');
-          break;
+          message.error('用户未登录或登录已过期')
+          break
         case ErrorType.AUTHORIZATION:
-          message.error('没有权限执行此操作');
-          break;
+          message.error('没有权限执行此操作')
+          break
         default:
-          message.error(errorMessage);
-          break;
+          message.error(errorMessage)
+          break
       }
     } else {
-      message.error(errorMessage);
+      message.error(errorMessage)
     }
   }
 
@@ -282,7 +282,7 @@ class ErrorHandler {
   private reportError(error: Error): void {
     // 可以在这里添加错误上报逻辑，如发送到服务器
     // 例如使用Sentry等工具
-    console.log('Error reported:', error);
+    console.log('Error reported:', error)
   }
 
   /**
@@ -290,7 +290,7 @@ class ErrorHandler {
    * @param listener 错误监听器
    */
   public addListener(listener: (error: Error) => void): void {
-    this.listeners.push(listener);
+    this.listeners.push(listener)
   }
 
   /**
@@ -298,9 +298,9 @@ class ErrorHandler {
    * @param listener 错误监听器
    */
   public removeListener(listener: (error: Error) => void): void {
-    const index = this.listeners.indexOf(listener);
+    const index = this.listeners.indexOf(listener)
     if (index !== -1) {
-      this.listeners.splice(index, 1);
+      this.listeners.splice(index, 1)
     }
   }
 
@@ -309,33 +309,31 @@ class ErrorHandler {
    * @param error 错误对象
    */
   private notifyListeners(error: Error): void {
-    this.listeners.forEach(listener => {
+    this.listeners.forEach((listener) => {
       try {
-        listener(error);
+        listener(error)
       } catch (e) {
-        console.error('Error in error listener:', e);
+        console.error('Error in error listener:', e)
       }
-    });
+    })
   }
 }
 
 // 创建全局错误处理器实例
-const errorHandler = ErrorHandler.getInstance();
+const errorHandler = ErrorHandler.getInstance()
 
 // 设置全局错误处理
 if (typeof window !== 'undefined') {
   // 处理未捕获的Promise错误
   window.addEventListener('unhandledrejection', (event) => {
-    const error = event.reason instanceof Error 
-      ? event.reason 
-      : new Error(String(event.reason));
-    errorHandler.handleError(error);
-  });
+    const error = event.reason instanceof Error ? event.reason : new Error(String(event.reason))
+    errorHandler.handleError(error)
+  })
 
   // 处理未捕获的JS错误
   window.addEventListener('error', (event) => {
-    errorHandler.handleError(event.error || new Error(event.message));
-  });
+    errorHandler.handleError(event.error || new Error(event.message))
+  })
 }
 
-export default errorHandler; 
+export default errorHandler

@@ -1,17 +1,17 @@
-import React from 'react';
-import { TablePaginationConfig } from 'antd';
+import React from 'react'
+import { TablePaginationConfig } from 'antd'
 
 export interface PaginationProps {
-  current: number;
-  pageSize: number;
-  total: number;
-  onChange: (page: number, pageSize: number) => void;
-  onShowSizeChange?: (current: number, size: number) => void;
-  showQuickJumper?: boolean;
-  showSizeChanger?: boolean;
-  pageSizeOptions?: string[];
-  className?: string;
-  style?: React.CSSProperties;
+  current: number
+  pageSize: number
+  total: number
+  onChange: (page: number, pageSize: number) => void
+  onShowSizeChange?: (current: number, size: number) => void
+  showQuickJumper?: boolean
+  showSizeChanger?: boolean
+  pageSizeOptions?: string[]
+  className?: string
+  style?: React.CSSProperties
 }
 
 /**
@@ -30,8 +30,8 @@ export const CommonPagination = (props: PaginationProps): TablePaginationConfig 
     showSizeChanger = true,
     pageSizeOptions = ['10', '20', '50', '100'],
     className,
-    style
-  } = props;
+    style,
+  } = props
 
   const config: TablePaginationConfig = {
     current,
@@ -41,24 +41,26 @@ export const CommonPagination = (props: PaginationProps): TablePaginationConfig 
     showSizeChanger,
     pageSizeOptions,
     onChange: (page, size) => {
-      onChange(page, size);
+      onChange(page, size)
     },
-    onShowSizeChange: onShowSizeChange || ((current, size) => {
-      onChange(current, size);
-    }),
+    onShowSizeChange:
+      onShowSizeChange ||
+      ((current, size) => {
+        onChange(current, size)
+      }),
     showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/总共 ${total} 条`,
-  };
+  }
 
   // 仅当值存在时才添加样式和类名
   if (className) {
-    config.className = className;
+    config.className = className
   }
 
   if (style) {
-    config.style = style;
+    config.style = style
   }
 
-  return config;
-};
+  return config
+}
 
-export default CommonPagination; 
+export default CommonPagination

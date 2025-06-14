@@ -1,6 +1,6 @@
-import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios'
-import {message} from 'antd'
-import {useAuthStore} from '../store/auth'
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import { message } from 'antd'
+import { useAuthStore } from '../store/auth'
 
 // API响应接口
 export interface ApiResponse<T = any> {
@@ -49,7 +49,7 @@ const createAxiosInstance = (): AxiosInstance => {
     },
     (error) => {
       return Promise.reject(error)
-    }
+    },
   )
 
   // 响应拦截器
@@ -85,7 +85,7 @@ const createAxiosInstance = (): AxiosInstance => {
       // 网络错误处理
       if (error.response) {
         const { status, data } = error.response
-        
+
         switch (status) {
           case 400:
             message.error(data?.msg || '请求参数错误')
@@ -117,7 +117,7 @@ const createAxiosInstance = (): AxiosInstance => {
       }
 
       return Promise.reject(error)
-    }
+    },
   )
 
   return instance
@@ -129,23 +129,23 @@ export const api = createAxiosInstance()
 // 通用请求方法
 export const request = {
   get: <T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> => {
-    return api.get(url, config).then(res => res.data)
+    return api.get(url, config).then((res) => res.data)
   },
 
   post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> => {
-    return api.post(url, data, config).then(res => res.data)
+    return api.post(url, data, config).then((res) => res.data)
   },
 
   put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> => {
-    return api.put(url, data, config).then(res => res.data)
+    return api.put(url, data, config).then((res) => res.data)
   },
 
   delete: <T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> => {
-    return api.delete(url, config).then(res => res.data)
+    return api.delete(url, config).then((res) => res.data)
   },
 
   patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> => {
-    return api.patch(url, data, config).then(res => res.data)
+    return api.patch(url, data, config).then((res) => res.data)
   },
 }
 
@@ -154,34 +154,38 @@ export const uploadFile = (url: string, file: File, onProgress?: (progress: numb
   const formData = new FormData()
   formData.append('file', file)
 
-  return api.post(url, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-    onUploadProgress: (progressEvent) => {
-      if (onProgress && progressEvent.total) {
-        const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-        onProgress(progress)
-      }
-    },
-  }).then(res => res.data)
+  return api
+    .post(url, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          onProgress(progress)
+        }
+      },
+    })
+    .then((res) => res.data)
 }
 
 // 文件下载
 export const downloadFile = (url: string, filename?: string): Promise<void> => {
-  return api.get(url, {
-    responseType: 'blob',
-  }).then(response => {
-    const blob = new Blob([response.data])
-    const downloadUrl = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = downloadUrl
-    link.download = filename || 'download'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    window.URL.revokeObjectURL(downloadUrl)
-  })
+  return api
+    .get(url, {
+      responseType: 'blob',
+    })
+    .then((response) => {
+      const blob = new Blob([response.data])
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = downloadUrl
+      link.download = filename || 'download'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(downloadUrl)
+    })
 }
 
 export default api

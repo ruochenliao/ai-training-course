@@ -1,4 +1,4 @@
-import {type ApiResponse, type PageResponse, request} from './index'
+import { type ApiResponse, type PageResponse, request } from './index'
 
 // 用户管理接口
 export interface User {
@@ -427,19 +427,21 @@ export const auditLogApi = {
 
   // 导出审计日志
   exportAuditLogs: (params?: AuditLogQueryParams): Promise<void> => {
-    return request.get('/system/audit-logs/export', {
-      params,
-      responseType: 'blob',
-    }).then(response => {
-      const blob = new Blob([response.data])
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `audit-logs-${new Date().toISOString().split('T')[0]}.xlsx`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-    })
+    return request
+      .get('/system/audit-logs/export', {
+        params,
+        responseType: 'blob',
+      })
+      .then((response) => {
+        const blob = new Blob([response.data])
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `audit-logs-${new Date().toISOString().split('T')[0]}.xlsx`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      })
   },
 }

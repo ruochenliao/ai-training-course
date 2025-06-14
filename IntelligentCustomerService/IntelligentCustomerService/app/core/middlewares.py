@@ -75,6 +75,10 @@ class HttpAuditLogMiddleware(BaseHTTPMiddleware):
         return args
 
     async def get_response_body(self, request: Request, response: Response) -> Any:
+        # 检查是否为流式响应
+        if response.headers.get("X-Response-Type") == "stream":
+            return {"message": "Streaming response - content not logged"}
+            
         # 检查Content-Length
         content_length = response.headers.get("content-length")
         if content_length and int(content_length) > self.max_body_size:
@@ -160,7 +164,11 @@ class HttpAuditLogMiddleware(BaseHTTPMiddleware):
             data["response_time"] = process_time
 
             data["request_args"] = request.state.request_args
-            data["response_body"] = await self.get_response_body(request, response)
+            # 检查是否为流式响应
+            if response.headers.get("X-Response-Type") == "stream":
+                data["response_body"] = {"message": "Streaming response - content not logged"}
+            else:
+                data["response_body"] = await self.get_response_body(request, response)
             await AuditLog.create(**data)
 
         return response

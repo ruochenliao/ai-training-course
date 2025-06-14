@@ -1,5 +1,5 @@
-import {request} from './index'
-import type {ApiResponse, PageResponse} from './index'
+import type { ApiResponse, PageResponse } from './index'
+import { request } from './index'
 
 // 菜单项接口类型定义 - 对应后端Menu模型
 export interface Menu {
@@ -97,7 +97,7 @@ export const userMenuApi = {
 // 菜单管理API
 export const menuApi = {
   // 获取菜单列表
-  getMenuList: (params?: MenuQueryParams): Promise<ApiResponse<PaginatedResponse<Menu>>> => {
+  getMenuList: (params?: MenuQueryParams): Promise<ApiResponse<PageResponse<Menu>>> => {
     return request.get('/api/v1/menu/list', { params })
   },
 
@@ -128,10 +128,11 @@ export const menuApi = {
 
   // 切换菜单可见状态
   toggleMenuVisibility: (id: number, isHidden: boolean): Promise<ApiResponse> => {
-    return request.post('/api/v1/menu/update', { 
-      id, is_hidden: isHidden 
+    return request.post('/api/v1/menu/update', {
+      id,
+      is_hidden: isHidden,
     })
   },
-};
+}
 
-export default menuApi;
+export default menuApi

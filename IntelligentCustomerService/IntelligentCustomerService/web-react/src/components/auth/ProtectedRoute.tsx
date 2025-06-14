@@ -1,8 +1,8 @@
-import React, {useEffect} from 'react'
-import {Navigate, useLocation} from 'react-router-dom'
-import {Spin} from 'antd'
-import {useAuthStore} from '@/store/auth'
-import {authApi} from '@/api/auth'
+import React, { useEffect } from 'react'
+import { Navigate, useLocation } from 'react-router-dom'
+import { Spin } from 'antd'
+import { useAuthStore } from '@/store/auth'
+import { authApi } from '@/api/auth'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -34,15 +34,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   // 显示加载状态
   if (loading || verifying) {
     return (
-      <div className="flex-center h-screen">
-        <Spin size="large" />
+      <div className='flex-center h-screen'>
+        <Spin size='large' />
       </div>
     )
   }
 
   // 未认证则跳转到登录页
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />
+    return <Navigate to='/login' state={{ from: location }} replace />
   }
 
   return <>{children}</>
