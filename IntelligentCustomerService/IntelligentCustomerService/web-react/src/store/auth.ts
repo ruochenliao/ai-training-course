@@ -1,8 +1,8 @@
-import {create} from 'zustand'
-import {persist} from 'zustand/middleware'
-import {authApi} from '@/api/auth'
-import type {LoginParams, User} from '@/types/auth'
-import {usePermissionStore} from './permission'
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+import { authApi } from '@/api/auth'
+import type { LoginParams, User } from '@/types/auth'
+import { usePermissionStore } from './permission'
 
 interface AuthState {
   user: User | null

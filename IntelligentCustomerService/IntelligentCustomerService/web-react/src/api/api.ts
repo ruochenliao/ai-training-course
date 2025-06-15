@@ -1,5 +1,5 @@
-import {request} from './index'
-import type {ApiResponse} from '@/types/api'
+import { request } from './index'
+import type { ApiResponse } from '@/types/api'
 
 // API接口类型定义
 export interface ApiItem {

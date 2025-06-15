@@ -1,5 +1,5 @@
-import {request} from './index'
-import type {ApiResponse, PaginatedResponse} from '@/types/api'
+import { request } from './index'
+import type { ApiResponse, PaginatedResponse } from '@/types/api'
 
 // 用户接口类型定义
 export interface User {

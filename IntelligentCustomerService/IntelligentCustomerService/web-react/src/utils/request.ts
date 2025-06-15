@@ -1,7 +1,7 @@
-import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios'
-import {message} from 'antd'
-import {useAuthStore} from '@/store/auth'
-import type {ApiResponse} from '@/types/api'
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import { message } from 'antd'
+import { useAuthStore } from '@/store/auth'
+import type { ApiResponse } from '@/types/api'
 
 // 创建axios实例
 const request: AxiosInstance = axios.create({

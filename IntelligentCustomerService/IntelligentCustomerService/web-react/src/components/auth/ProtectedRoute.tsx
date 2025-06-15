@@ -1,8 +1,8 @@
-import React, {useEffect} from 'react'
-import {Navigate, useLocation} from 'react-router-dom'
-import {Spin} from 'antd'
-import {useAuthStore} from '@/store/auth'
-import {authApi} from '@/api/auth'
+import React, { useEffect } from 'react'
+import { Navigate, useLocation } from 'react-router-dom'
+import { Spin } from 'antd'
+import { useAuthStore } from '@/store/auth'
+import { authApi } from '@/api/auth'
 
 interface ProtectedRouteProps {
   children: React.ReactNode

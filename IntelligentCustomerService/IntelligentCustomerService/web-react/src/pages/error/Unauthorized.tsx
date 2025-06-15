@@ -1,8 +1,8 @@
 import React from 'react'
-import {Button, Result} from 'antd'
-import {useNavigate} from 'react-router-dom'
-import {useThemeStore} from '@/store/theme'
-import {cn} from '@/utils'
+import { Button, Result } from 'antd'
+import { useNavigate } from 'react-router-dom'
+import { useThemeStore } from '@/store/theme'
+import { cn } from '@/utils'
 
 // 401 未授权页面
 const Unauthorized: React.FC = () => {

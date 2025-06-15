@@ -1,6 +1,6 @@
-import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios'
-import {message} from 'antd'
-import {useAuthStore} from '../store/auth'
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import { message } from 'antd'
+import { useAuthStore } from '../store/auth'
 
 // API响应接口
 export interface ApiResponse<T = any> {
