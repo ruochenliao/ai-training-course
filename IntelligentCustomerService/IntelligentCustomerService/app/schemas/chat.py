@@ -79,6 +79,7 @@ class StreamMessageChunk(BaseModel):
     content: str = Field(..., description="消息内容片段")
     is_complete: bool = Field(False, description="是否完成")
     timestamp: datetime = Field(..., description="时间戳")
+    sender: Optional[str] = Field("assistant", description="发送者类型：user/assistant")
 
 
 class ConversationListResponse(BaseModel):
