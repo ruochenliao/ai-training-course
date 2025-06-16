@@ -146,7 +146,7 @@ class ChatController:
                 raise HTTPException(status_code=404, detail="对话不存在")
         else:
             conversation = await self.create_conversation(user_id)
-        
+
         # 准备对话历史
         await self._prepare_conversation_history(conversation.conversation_id, user_id)
 
@@ -166,35 +166,83 @@ class ChatController:
             "content": request.message
         })
 
-        # 发送用户消息的回声响应
-        yield StreamMessageChunk(
-            conversation_id=conversation.conversation_id,
-            message_id=user_message.message_id,
-            content=request.message,
-            is_complete=False,
-            timestamp=datetime.now()
-        )
+        # 不发送用户消息回显，避免重复显示
 
         # 创建用户消息对象
         user_task = TextMessage(source="user", content=request.message)
-        
-        # 生成消息ID
-        message_id = f"msg_{int(time.time())}_{uuid.uuid4().hex[:8]}"
+
+        # 生成助手消息ID
+        assistant_message_id = f"msg_{int(time.time())}_{uuid.uuid4().hex[:8]}"
+
+        # 流式响应处理变量
         response_content = ""
         total_tokens_used = 0
+        tool_call_status_sent = False
+
+        # 内容缓冲区，用于优化分块
+        content_buffer = ""
+        buffer_size_threshold = 10  # 缓冲区大小阈值（字符数）
+        word_boundary_chars = {' ', '，', '。', '！', '？', '；', '：', '\n', '\t'}  # 词语边界字符
         
+        async def flush_buffer():
+            """刷新缓冲区，发送累积的内容"""
+            nonlocal content_buffer
+            if content_buffer:
+                yield StreamMessageChunk(
+                    conversation_id=conversation.conversation_id,
+                    message_id=assistant_message_id,
+                    content=content_buffer,
+                    is_complete=False,
+                    timestamp=datetime.now(),
+                    sender="assistant"
+                )
+                content_buffer = ""
+
+        async def add_to_buffer(text: str):
+            """添加文本到缓冲区，智能分块"""
+            nonlocal content_buffer
+            content_buffer += text
+
+            # 检查是否应该刷新缓冲区
+            should_flush = False
+
+            # 条件1: 缓冲区达到大小阈值
+            if len(content_buffer) >= buffer_size_threshold:
+                should_flush = True
+
+            # 条件2: 遇到词语边界字符
+            if text and text[-1] in word_boundary_chars:
+                should_flush = True
+
+            # 条件3: 遇到完整的句子结束
+            if any(char in text for char in {'。', '！', '？', '\n'}):
+                should_flush = True
+
+            if should_flush:
+                async for chunk in flush_buffer():
+                    yield chunk
+
         try:
             # 获取流式响应
             stream = self.assistant.run_stream(task=user_task)
-            
+
             # 处理流式响应
             async for event in stream:
                 try:
+                    # 通用过滤：跳过任何包含用户消息内容的事件
+                    if hasattr(event, 'content') and isinstance(event.content, str):
+                        if event.content.strip() == request.message.strip():
+                            continue
+                    
                     # 检查是否为最终结果
                     if isinstance(event, TaskResult):
+                        # 刷新剩余缓冲区内容
+                        async for chunk in flush_buffer():
+                            yield chunk
+
                         # 计算响应时间
                         response_time = int((time.time() - start_time) * 1000)
-                        
+
                         # 保存完整的助手回复
                         await self.save_message(
                             conversation_id=conversation.conversation_id,
@@ -204,88 +252,91 @@ class ChatController:
                             response_time=response_time,
                             tokens_used=total_tokens_used
                         )
-                        
+
                         # 更新会话历史
                         self.conversation_history[conversation.conversation_id].append({
                             "role": "assistant",
                             "content": response_content
                         })
-                        
+
                         # 发送完成标志
                         yield StreamMessageChunk(
                             conversation_id=conversation.conversation_id,
-                            message_id=message_id,
+                            message_id=assistant_message_id,
                             content="",
                             is_complete=True,
-                            timestamp=datetime.now()
+                            timestamp=datetime.now(),
+                            sender="assistant"
                         )
-                    
+
                     elif isinstance(event, ModelClientStreamingChunkEvent):
-                        # 流式输出文本块
+                        # 流式输出文本块 - 这是主要的流式内容
                         chunk_content = event.content
-                        response_content += chunk_content
-                        
-                        yield StreamMessageChunk(
-                            conversation_id=conversation.conversation_id,
-                            message_id=message_id,
-                            content=chunk_content,
-                            is_complete=False,
-                            timestamp=datetime.now()
-                        )
-                    
+                        if chunk_content:  # 只处理非空内容
+                            response_content += chunk_content
+                            # 使用智能缓冲区处理
+                            async for buffered_chunk in add_to_buffer(chunk_content):
+                                yield buffered_chunk
+
                     elif isinstance(event, TextMessage):
-                        # 完整文本消息
+                        # 完整文本消息 - 通常在工具调用后出现
+                        # 严格过滤：只处理来自助手的消息，避免用户消息回显
+                        if hasattr(event, 'source') and event.source == 'user':
+                            # 跳过用户消息，避免回显
+                            continue
+                            
                         msg_content = event.content
-                        response_content = msg_content  # 覆盖之前累积的内容
-                        
-                        if event.models_usage and hasattr(event.models_usage, 'prompt_tokens'):
-                            total_tokens_used += event.models_usage.prompt_tokens + (event.models_usage.completion_tokens or 0)
-                        
-                        yield StreamMessageChunk(
-                            conversation_id=conversation.conversation_id,
-                            message_id=message_id,
-                            content=msg_content,
-                            is_complete=False,
-                            timestamp=datetime.now()
-                        )
+                        if msg_content:
+                            # 检查内容是否与用户输入相同，如果相同则跳过
+                            if msg_content.strip() == request.message.strip():
+                                continue
+                                
+                            # 如果已经有流式内容，不再发送完整消息，避免重复
+                            if not response_content:
+                                response_content = msg_content
+                                # 使用智能缓冲区处理完整消息
+                                async for buffered_chunk in add_to_buffer(msg_content):
+                                    yield buffered_chunk
+
+                        # 处理token使用统计
+                        if hasattr(event, 'models_usage') and event.models_usage:
+                            if hasattr(event.models_usage, 'prompt_tokens'):
+                                total_tokens_used += event.models_usage.prompt_tokens + (event.models_usage.completion_tokens or 0)
                     
                     elif isinstance(event, ToolCallRequestEvent):
-                        # 工具调用请求
-                        tool_calls = event.content
-                        tool_call_msg = "正在查询相关信息..."
-                        
-                        yield StreamMessageChunk(
-                            conversation_id=conversation.conversation_id,
-                            message_id=message_id,
-                            content=tool_call_msg,
-                            is_complete=False,
-                            timestamp=datetime.now()
-                        )
-                    
+                        # 工具调用请求 - 只发送一次状态提示
+                        if not tool_call_status_sent:
+                            tool_calls = event.content
+                            tool_names = []
+                            for call in tool_calls:
+                                if hasattr(call, 'name'):
+                                    tool_names.append(call.name)
+
+                            if tool_names:
+                                tool_call_msg = f"🔍 正在查询相关信息（{', '.join(tool_names)}）..."
+                            else:
+                                tool_call_msg = "🔍 正在查询相关信息..."
+
+                            # 工具调用状态作为独立的chunk发送
+                            yield StreamMessageChunk(
+                                conversation_id=conversation.conversation_id,
+                                message_id=assistant_message_id,
+                                content=tool_call_msg,
+                                is_complete=False,
+                                timestamp=datetime.now(),
+                                sender="assistant"
+                            )
+                            tool_call_status_sent = True
+
                     elif isinstance(event, ToolCallExecutionEvent):
-                        # 工具调用结果
-                        execution_results = event.content
-                        result_msg = "获取到信息，正在为您整理回复..."
-                        
-                        yield StreamMessageChunk(
-                            conversation_id=conversation.conversation_id,
-                            message_id=message_id,
-                            content=result_msg,
-                            is_complete=False,
-                            timestamp=datetime.now()
-                        )
-                    
+                        # 工具调用结果 - 不再发送执行结果概要，避免重复内容
+                        # 让AI在最终回复中整合所有信息
+                        pass
+
                     elif isinstance(event, ToolCallSummaryMessage):
-                        # 工具调用摘要
-                        summary_content = event.content
-                        
-                        yield StreamMessageChunk(
-                            conversation_id=conversation.conversation_id,
-                            message_id=message_id,
-                            content=f"找到相关信息：{summary_content}",
-                            is_complete=False,
-                            timestamp=datetime.now()
-                        )
+                        # 工具调用摘要 - 通常包含工具调用的汇总信息
+                        # 这里不再单独发送摘要，让AI在最终回复中整合信息
+                        pass
                         
                 except asyncio.TimeoutError:
                     raise Exception("单步处理超时。")
@@ -293,8 +344,15 @@ class ChatController:
                     raise Exception(f"处理事件时出错: {str(e)}")
                     
         except Exception as e:
+            # 刷新任何剩余的缓冲区内容
+            try:
+                async for chunk in flush_buffer():
+                    yield chunk
+            except:
+                pass
+
             # 错误处理
-            error_message = f"抱歉，我遇到了一些技术问题，请稍后重试或联系人工客服。错误详情：{str(e)}"
+            error_message = f"😔 抱歉，我遇到了一些技术问题，请稍后重试或联系人工客服。\n\n错误详情：{str(e)}"
 
             await self.save_message(
                 conversation_id=conversation.conversation_id,
@@ -309,7 +367,8 @@ class ChatController:
                 message_id=f"error_{int(time.time())}",
                 content=error_message,
                 is_complete=True,
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
+                sender="assistant"
             )
 
     async def delete_conversation(self, conversation_id: str, user_id: int) -> bool:

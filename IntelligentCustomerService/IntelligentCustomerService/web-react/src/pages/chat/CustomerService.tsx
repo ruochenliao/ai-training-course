@@ -293,6 +293,9 @@ const CustomerService: React.FC = () => {
   const handleSendMessage = async (messageContent: string) => {
     if (!messageContent.trim() || !currentConversationId) return
 
+    // 清空输入框
+    setInputValue('')
+
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       content: messageContent.trim(),
@@ -350,8 +353,14 @@ const CustomerService: React.FC = () => {
               }
 
               if (parsed.content) {
-                // 更新助手消息内容
-                setMessages((prev) => prev.map((msg) => (msg.id === assistantMessageId ? { ...msg, content: msg.content + parsed.content } : msg)))
+                // 根据发送者类型处理消息内容
+                if (parsed.sender === 'user') {
+                  // 用户消息：不处理，因为前端已经添加了
+                  return
+                } else {
+                  // 助手消息：累积内容
+                  setMessages((prev) => prev.map((msg) => (msg.id === assistantMessageId ? { ...msg, content: msg.content + parsed.content } : msg)))
+                }
               }
 
               // 如果是完成标志，停止加载
