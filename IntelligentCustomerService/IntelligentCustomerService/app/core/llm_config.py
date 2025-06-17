@@ -127,7 +127,7 @@ CUSTOMER_SERVICE_SYSTEM_PROMPT = """
 class DeepseekConfig:
     """Deepseek配置类"""
 
-    def get_assistant(self):
+    def get_assistant(self, memory_adapters=None):
         """获取助手实例"""
         # 获取电商工具集
         tools = create_ecommerce_tools(base_url="http://localhost:8001")
@@ -136,15 +136,23 @@ class DeepseekConfig:
         for tool in tools[:3]:  # 打印前3个工具信息
             print(f"[DEBUG] 工具: {tool.name} - {tool.description}")
 
+        # 创建助手参数
+        assistant_params = {
+            "name": "ecommerce_assistant",
+            "system_message": CUSTOMER_SERVICE_SYSTEM_PROMPT,
+            "model_client": model_client,
+            "tools": tools,
+            "reflect_on_tool_use": True,  # 启用工具使用反思
+            "model_client_stream": True,  # 启用流式输出
+        }
+
+        # 如果提供了记忆适配器，则添加到助手配置中
+        if memory_adapters:
+            assistant_params["memory"] = memory_adapters
+            print(f"[DEBUG] 记忆服务已启用，适配器数量: {len(memory_adapters)}")
+
         # 创建助手
-        assistant = AssistantAgent(
-            name="ecommerce_assistant",
-            system_message=CUSTOMER_SERVICE_SYSTEM_PROMPT,
-            model_client=model_client,
-            tools=tools,
-            reflect_on_tool_use=True,  # 启用工具使用反思
-            model_client_stream=True,  # 启用流式输出
-        )
+        assistant = AssistantAgent(**assistant_params)
 
         print(f"[DEBUG] 助手创建成功，工具已注册: {len(assistant.tools) if hasattr(assistant, 'tools') else 0}")
         return assistant

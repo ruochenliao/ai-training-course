@@ -1,6 +1,7 @@
 """
 聊天控制器
 基于autogen 0.6.1和Deepseek模型实现智能客服功能
+集成记忆服务提供上下文感知能力
 """
 import asyncio
 import time
@@ -19,18 +20,35 @@ from app.schemas.chat import (
     SendMessageRequest,
     StreamMessageChunk
 )
+from app.services.memory import ConversationMemoryAdapter
 
 
 class ChatController:
     """聊天控制器"""
 
     def __init__(self):
-        # 初始化Deepseek助手
-        self.assistant = deepseek_config.get_assistant()
         # 对话历史缓存: {conversation_id: message_list}
         self.conversation_history: Dict[str, List[Dict[str, Any]]] = {}
+        # 记忆适配器缓存: {conversation_id: memory_adapter}
+        self.memory_adapters: Dict[str, ConversationMemoryAdapter] = {}
         # 设置模型请求超时时间（秒）
         self.model_timeout = 120
+
+    def get_assistant_with_memory(self, user_id: int, conversation_id: str):
+        """获取带记忆功能的助手实例"""
+        # 创建或获取记忆适配器
+        if conversation_id not in self.memory_adapters:
+            self.memory_adapters[conversation_id] = ConversationMemoryAdapter(
+                user_id=str(user_id),
+                session_id=conversation_id
+            )
+
+        memory_adapter = self.memory_adapters[conversation_id]
+
+        # 创建带记忆功能的助手
+        assistant = deepseek_config.get_assistant(memory_adapters=[memory_adapter])
+
+        return assistant, memory_adapter
 
     async def create_conversation(self, user_id: int, title: str = "") -> ChatConversation:
         """创建新对话"""
@@ -136,7 +154,7 @@ class ChatController:
             request: SendMessageRequest,
             user_id: int
     ) -> AsyncGenerator[StreamMessageChunk, None]:
-        """发送消息并返回流式响应（使用Deepseek模型）"""
+        """发送消息并返回流式响应（使用Deepseek模型和记忆服务）"""
         start_time = time.time()
 
         # 获取或创建对话
@@ -147,6 +165,9 @@ class ChatController:
         else:
             conversation = await self.create_conversation(user_id)
 
+        # 获取带记忆功能的助手
+        assistant, memory_adapter = self.get_assistant_with_memory(user_id, conversation.conversation_id)
+
         # 准备对话历史
         await self._prepare_conversation_history(conversation.conversation_id, user_id)
 
@@ -156,6 +177,13 @@ class ChatController:
             user_id=user_id,
             content=request.message,
             sender="user"
+        )
+
+        # 添加用户消息到记忆服务
+        await memory_adapter.add_conversation_message(
+            role="user",
+            content=request.message,
+            metadata={"message_id": user_message.message_id}
         )
 
         # 更新对话历史
@@ -223,8 +251,8 @@ class ChatController:
                     yield chunk
 
         try:
-            # 获取流式响应
-            stream = self.assistant.run_stream(task=user_task)
+            # 获取流式响应（使用带记忆的助手）
+            stream = assistant.run_stream(task=user_task)
 
             # 处理流式响应
             async for event in stream:
@@ -244,13 +272,24 @@ class ChatController:
                         response_time = int((time.time() - start_time) * 1000)
 
                         # 保存完整的助手回复
-                        await self.save_message(
+                        assistant_message = await self.save_message(
                             conversation_id=conversation.conversation_id,
                             user_id=user_id,
                             content=response_content,
                             sender="assistant",
                             response_time=response_time,
                             tokens_used=total_tokens_used
+                        )
+
+                        # 添加助手回复到记忆服务
+                        await memory_adapter.add_conversation_message(
+                            role="assistant",
+                            content=response_content,
+                            metadata={
+                                "message_id": assistant_message.message_id,
+                                "response_time": response_time,
+                                "tokens_used": total_tokens_used
+                            }
                         )
 
                         # 更新会话历史
@@ -386,6 +425,11 @@ class ChatController:
         # 删除内存中的会话历史
         if conversation_id in self.conversation_history:
             del self.conversation_history[conversation_id]
+
+        # 清理记忆适配器
+        if conversation_id in self.memory_adapters:
+            await self.memory_adapters[conversation_id].close()
+            del self.memory_adapters[conversation_id]
 
         return True
 
