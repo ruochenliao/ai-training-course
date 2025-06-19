@@ -1,0 +1,289 @@
+# Prometheus告警规则配置
+
+groups:
+  # 系统级别告警
+  - name: system.rules
+    rules:
+    # 服务可用性告警
+    - alert: ServiceDown
+      expr: up == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "服务 {{ $labels.instance }} 不可用"
+        description: "服务 {{ $labels.instance }} 已经停机超过1分钟"
+
+    # 高CPU使用率告警
+    - alert: HighCPUUsage
+      expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "{{ $labels.instance }} CPU使用率过高"
+        description: "{{ $labels.instance }} CPU使用率已超过80%，当前值: {{ $value }}%"
+
+    # 高内存使用率告警
+    - alert: HighMemoryUsage
+      expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "{{ $labels.instance }} 内存使用率过高"
+        description: "{{ $labels.instance }} 内存使用率已超过85%，当前值: {{ $value }}%"
+
+    # 磁盘空间不足告警
+    - alert: DiskSpaceLow
+      expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 90
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "{{ $labels.instance }} 磁盘空间不足"
+        description: "{{ $labels.instance }} 磁盘 {{ $labels.mountpoint }} 使用率已超过90%，当前值: {{ $value }}%"
+
+  # 应用级别告警
+  - name: application.rules
+    rules:
+    # API响应时间过长告警
+    - alert: HighAPIResponseTime
+      expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "API响应时间过长"
+        description: "95%的API请求响应时间超过2秒，当前值: {{ $value }}秒"
+
+    # API错误率过高告警
+    - alert: HighAPIErrorRate
+      expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 5
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "API错误率过高"
+        description: "API 5xx错误率超过5%，当前值: {{ $value }}%"
+
+    # 并发连接数过高告警
+    - alert: HighConcurrentConnections
+      expr: http_requests_active > 1000
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "并发连接数过高"
+        description: "当前并发连接数: {{ $value }}，超过阈值1000"
+
+  # 数据库告警
+  - name: database.rules
+    rules:
+    # MySQL连接数过高告警
+    - alert: MySQLHighConnections
+      expr: mysql_global_status_threads_connected / mysql_global_variables_max_connections * 100 > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "MySQL连接数过高"
+        description: "MySQL连接数使用率超过80%，当前值: {{ $value }}%"
+
+    # MySQL慢查询告警
+    - alert: MySQLSlowQueries
+      expr: rate(mysql_global_status_slow_queries[5m]) > 10
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "MySQL慢查询过多"
+        description: "MySQL慢查询频率: {{ $value }} queries/sec"
+
+    # Redis内存使用率过高告警
+    - alert: RedisHighMemoryUsage
+      expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 > 90
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Redis内存使用率过高"
+        description: "Redis内存使用率超过90%，当前值: {{ $value }}%"
+
+    # Redis连接数过高告警
+    - alert: RedisHighConnections
+      expr: redis_connected_clients > 1000
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Redis连接数过高"
+        description: "Redis连接数: {{ $value }}，超过阈值1000"
+
+  # 向量数据库告警
+  - name: vector_database.rules
+    rules:
+    # Milvus查询延迟过高告警
+    - alert: MilvusHighQueryLatency
+      expr: milvus_query_latency_seconds > 5
+      for: 3m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Milvus查询延迟过高"
+        description: "Milvus查询延迟: {{ $value }}秒，超过阈值5秒"
+
+    # Milvus索引构建失败告警
+    - alert: MilvusIndexBuildFailure
+      expr: increase(milvus_index_build_failed_total[10m]) > 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Milvus索引构建失败"
+        description: "过去10分钟内有 {{ $value }} 次索引构建失败"
+
+  # 图数据库告警
+  - name: graph_database.rules
+    rules:
+    # Neo4j查询延迟过高告警
+    - alert: Neo4jHighQueryLatency
+      expr: neo4j_cypher_query_duration_seconds > 10
+      for: 3m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Neo4j查询延迟过高"
+        description: "Neo4j查询延迟: {{ $value }}秒，超过阈值10秒"
+
+    # Neo4j事务失败告警
+    - alert: Neo4jTransactionFailure
+      expr: increase(neo4j_transaction_rollbacks_total[5m]) > 10
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Neo4j事务失败过多"
+        description: "过去5分钟内有 {{ $value }} 次事务回滚"
+
+  # 任务队列告警
+  - name: task_queue.rules
+    rules:
+    # Celery任务队列积压告警
+    - alert: CeleryTaskBacklog
+      expr: celery_queue_length > 100
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Celery任务队列积压"
+        description: "队列 {{ $labels.queue }} 中有 {{ $value }} 个待处理任务"
+
+    # Celery任务失败率过高告警
+    - alert: CeleryHighFailureRate
+      expr: rate(celery_task_failed_total[5m]) / rate(celery_task_total[5m]) * 100 > 10
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Celery任务失败率过高"
+        description: "任务失败率: {{ $value }}%，超过阈值10%"
+
+    # Celery Worker离线告警
+    - alert: CeleryWorkerDown
+      expr: celery_worker_online == 0
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Celery Worker离线"
+        description: "Worker {{ $labels.worker }} 已离线"
+
+  # 文件存储告警
+  - name: file_storage.rules
+    rules:
+    # MinIO存储空间不足告警
+    - alert: MinIOStorageLow
+      expr: (1 - (minio_disk_storage_available_bytes / minio_disk_storage_total_bytes)) * 100 > 85
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "MinIO存储空间不足"
+        description: "MinIO存储使用率: {{ $value }}%，超过阈值85%"
+
+    # MinIO API错误率过高告警
+    - alert: MinIOHighErrorRate
+      expr: rate(minio_http_requests_total{status=~"5.."}[5m]) / rate(minio_http_requests_total[5m]) * 100 > 5
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "MinIO API错误率过高"
+        description: "MinIO API错误率: {{ $value }}%，超过阈值5%"
+
+  # 业务指标告警
+  - name: business.rules
+    rules:
+    # 文档处理失败率过高告警
+    - alert: HighDocumentProcessingFailureRate
+      expr: rate(document_processing_failed_total[10m]) / rate(document_processing_total[10m]) * 100 > 20
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "文档处理失败率过高"
+        description: "文档处理失败率: {{ $value }}%，超过阈值20%"
+
+    # 用户查询响应时间过长告警
+    - alert: HighUserQueryLatency
+      expr: histogram_quantile(0.95, rate(user_query_duration_seconds_bucket[5m])) > 10
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "用户查询响应时间过长"
+        description: "95%的用户查询响应时间超过10秒，当前值: {{ $value }}秒"
+
+    # 知识库同步失败告警
+    - alert: KnowledgeBaseSyncFailure
+      expr: increase(knowledge_base_sync_failed_total[15m]) > 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "知识库同步失败"
+        description: "知识库 {{ $labels.knowledge_base }} 同步失败"
+
+  # 安全告警
+  - name: security.rules
+    rules:
+    # 异常登录尝试告警
+    - alert: SuspiciousLoginAttempts
+      expr: rate(auth_login_failed_total[5m]) > 10
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "异常登录尝试"
+        description: "来自 {{ $labels.ip }} 的登录失败频率: {{ $value }} attempts/sec"
+
+    # 权限提升尝试告警
+    - alert: PrivilegeEscalationAttempt
+      expr: increase(auth_privilege_escalation_attempts_total[5m]) > 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "检测到权限提升尝试"
+        description: "用户 {{ $labels.user }} 尝试进行权限提升"
+
+    # API访问频率异常告警
+    - alert: AbnormalAPIAccess
+      expr: rate(http_requests_total[1m]) > 1000
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "API访问频率异常"
+        description: "来自 {{ $labels.client_ip }} 的API访问频率: {{ $value }} requests/sec"
