@@ -6,7 +6,9 @@ from .auditlog import auditlog_router
 from .base import base_router
 from .chat import chats_router
 from .depts import depts_router
+from .knowledge import knowledge_router
 from .menus import menus_router
+from .models import models_router
 from .roles import roles_router
 from .users import users_router
 
@@ -20,3 +22,5 @@ v1_router.include_router(apis_router, prefix="/api", dependencies=[DependPermiss
 v1_router.include_router(depts_router, prefix="/dept", dependencies=[DependPermission])
 v1_router.include_router(auditlog_router, prefix="/auditlog", dependencies=[DependPermission])
 v1_router.include_router(chats_router, prefix="/chat")
+v1_router.include_router(knowledge_router, prefix="/knowledge")
+v1_router.include_router(models_router, prefix="/models")

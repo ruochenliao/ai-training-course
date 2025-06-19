@@ -1,6 +1,6 @@
 import React from 'react'
-import { usePermissionStore } from '../store/permission'
-import { useAuthStore } from '../store/auth'
+import {usePermissionStore} from '../store/permission'
+import {useAuthStore} from '../store/auth'
 
 /**
  * 检查是否有指定权限

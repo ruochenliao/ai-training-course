@@ -1,10 +1,8 @@
 """
 记忆数据库初始化工具
 """
-import sqlite3
-import json
 import logging
-from datetime import datetime
+import sqlite3
 from pathlib import Path
 
 from app.settings import settings

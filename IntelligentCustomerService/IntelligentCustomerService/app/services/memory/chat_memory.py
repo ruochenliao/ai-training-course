@@ -3,13 +3,13 @@
 基于现有ChatMessage模型扩展，提供聊天历史记忆功能
 """
 import json
-import sqlite3
 import logging
-from typing import List, Dict, Any, Optional, Union
+import sqlite3
 from datetime import datetime, timedelta
+from typing import List, Dict, Any, Union
 
-from .base import MemoryItem
 from app.settings import settings
+from .base import MemoryItem
 
 logger = logging.getLogger(__name__)
 

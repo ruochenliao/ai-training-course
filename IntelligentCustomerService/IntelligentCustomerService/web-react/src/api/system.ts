@@ -1,4 +1,4 @@
-import { type ApiResponse, type PageResponse, request } from './index'
+import {type ApiResponse, type PageResponse, request} from './index'
 
 // 用户管理接口
 export interface User {

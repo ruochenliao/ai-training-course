@@ -6,9 +6,9 @@
 import json
 import logging
 import os
-from typing import List, Dict, Any
 from datetime import datetime
 from pathlib import Path
+from typing import List, Dict, Any
 
 try:
     import chromadb
@@ -70,8 +70,9 @@ class PrivateMemoryService:
                     metadata={"user_id": self.user_id, "type": "private_memory"}
                 )
 
-            # 初始化嵌入模型
-            self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+            # 初始化嵌入模型 - 使用全局模型管理器
+            from ...config.vector_db_config import model_manager
+            self.embedding_model = model_manager.get_embedding_model()
 
             logger.info(f"私有记忆向量数据库初始化成功: {self.chroma_path}")
 
@@ -211,43 +212,52 @@ class PrivateMemoryService:
     
     async def get_user_preferences(self, preference_type: str = None) -> List[MemoryItem]:
         """获取用户偏好"""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = sqlite3.Row
-            
+        try:
+            # 构建查询条件
+            where_conditions = {"user_id": self.user_id, "content_type": "user_preference"}
             if preference_type:
-                cursor = conn.execute(
-                    """SELECT * FROM private_memories 
-                       WHERE user_id = ? AND metadata LIKE ? 
-                       ORDER BY created_at DESC""",
-                    (self.user_id, f'%"preference_type": "{preference_type}"%')
-                )
-            else:
-                cursor = conn.execute(
-                    """SELECT * FROM private_memories 
-                       WHERE user_id = ? AND metadata LIKE ? 
-                       ORDER BY created_at DESC""",
-                    (self.user_id, '%"type": "user_preference"%')
-                )
-            
-            rows = cursor.fetchall()
-            
+                where_conditions["preference_type"] = preference_type
+
+            # 从ChromaDB检索偏好记录
+            results = self.collection.get(
+                where=where_conditions,
+                include=["documents", "metadatas"]
+            )
+
             memories = []
-            for row in rows:
-                try:
-                    metadata = json.loads(row["metadata"])
-                    memory = MemoryItem(
-                        id=row["id"],
-                        content=row["content"],
-                        metadata=metadata,
-                        created_at=datetime.fromisoformat(row["created_at"]),
-                        updated_at=datetime.fromisoformat(row["updated_at"])
-                    )
-                    memories.append(memory)
-                except (json.JSONDecodeError, ValueError) as e:
-                    logger.warning(f"Failed to parse preference memory: {e}")
-                    continue
-            
+            if results["ids"]:
+                for i, doc_id in enumerate(results["ids"]):
+                    try:
+                        content = results["documents"][i]
+                        metadata = results["metadatas"][i]
+
+                        # 解析标签
+                        if "tags" in metadata:
+                            try:
+                                metadata["tags"] = json.loads(metadata["tags"])
+                            except (json.JSONDecodeError, TypeError):
+                                metadata["tags"] = []
+
+                        memory = MemoryItem(
+                            id=doc_id,
+                            content=content,
+                            metadata=metadata,
+                            created_at=datetime.fromisoformat(metadata.get("created_at", datetime.now().isoformat())),
+                            updated_at=datetime.now()
+                        )
+                        memories.append(memory)
+
+                    except Exception as e:
+                        logger.warning(f"Failed to parse preference memory: {e}")
+                        continue
+
+            # 按创建时间排序
+            memories.sort(key=lambda x: x.created_at, reverse=True)
             return memories
+
+        except Exception as e:
+            logger.error(f"获取用户偏好失败: {e}")
+            return []
     
     def _generate_summary(self, content: str, max_length: int = 100) -> str:
         """生成内容摘要"""

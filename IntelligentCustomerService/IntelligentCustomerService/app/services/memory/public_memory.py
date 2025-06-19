@@ -7,10 +7,9 @@
 import json
 import logging
 import os
-import asyncio
-from typing import List, Dict, Any
 from datetime import datetime
 from pathlib import Path
+from typing import List, Dict, Any
 
 try:
     import chromadb
@@ -41,8 +40,8 @@ class PublicMemoryService:
 
         self._init_vector_db()
 
-        # 初始化默认知识库内容
-        asyncio.create_task(self._init_default_knowledge())
+        # 初始化默认知识库内容（延迟到第一次使用时）
+        self._knowledge_initialized = False
 
     def _init_vector_db(self):
         """初始化向量数据库"""
@@ -74,14 +73,21 @@ class PublicMemoryService:
                     metadata={"type": "public_knowledge", "version": "1.0"}
                 )
 
-            # 初始化嵌入模型（用于检索）
-            self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+            # 初始化嵌入模型和重排模型 - 使用全局模型管理器
+            from ...config.vector_db_config import model_manager
 
-            # 初始化重排模型（用于精确排序）
+            # 获取嵌入模型
+            self.embedding_model = model_manager.get_embedding_model()
+            logger.info("嵌入模型初始化成功")
+
+            # 获取重排模型（可选）
             try:
-                self.reranker_model = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
-                self.use_reranker = True
-                logger.info("重排模型初始化成功")
+                self.reranker_model = model_manager.get_reranker_model()
+                self.use_reranker = self.reranker_model is not None
+                if self.use_reranker:
+                    logger.info("重排模型初始化成功")
+                else:
+                    logger.info("重排模型未启用")
             except Exception as e:
                 logger.warning(f"重排模型初始化失败，将使用基础排序: {e}")
                 self.reranker_model = None
@@ -92,6 +98,12 @@ class PublicMemoryService:
         except Exception as e:
             logger.error(f"向量数据库初始化失败: {e}")
             raise
+
+    async def _ensure_knowledge_initialized(self):
+        """确保知识库已初始化"""
+        if not self._knowledge_initialized:
+            await self._init_default_knowledge()
+            self._knowledge_initialized = True
     
     async def _init_default_knowledge(self):
         """初始化默认知识库内容"""
@@ -210,6 +222,8 @@ class PublicMemoryService:
     
     async def add_memory(self, content: str, metadata: Dict[str, Any] = None) -> str:
         """添加公共知识"""
+        # 确保知识库已初始化
+        await self._ensure_knowledge_initialized()
         metadata = metadata or {}
         memory_id = f"public_{metadata.get('category', 'general')}_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}"
         return await self._add_memory_vector(memory_id, content, metadata)
@@ -251,6 +265,8 @@ class PublicMemoryService:
     
     async def retrieve_memories(self, query: str, limit: int = 5) -> List[MemoryItem]:
         """检索相关公共知识，使用向量检索+重排模型"""
+        # 确保知识库已初始化
+        await self._ensure_knowledge_initialized()
         return await self._retrieve_memories_vector(query, limit)
 
     async def _retrieve_memories_vector(self, query: str, limit: int = 5) -> List[MemoryItem]:
@@ -372,41 +388,51 @@ class PublicMemoryService:
     
     async def get_by_category(self, category: str, limit: int = 10) -> List[MemoryItem]:
         """按分类获取知识"""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.execute(
-                """SELECT * FROM public_memories 
-                   WHERE category = ? AND is_active = 1 
-                   ORDER BY priority DESC, created_at DESC 
-                   LIMIT ?""",
-                (category, limit)
+        try:
+            # 确保知识库已初始化
+            await self._ensure_knowledge_initialized()
+
+            # 从ChromaDB按分类检索
+            results = self.collection.get(
+                where={"category": category, "is_active": True},
+                include=["documents", "metadatas"],
+                limit=limit
             )
-            rows = cursor.fetchall()
-            
+
             memories = []
-            for row in rows:
-                try:
-                    metadata = json.loads(row["metadata"])
-                    metadata.update({
-                        "category": row["category"],
-                        "title": row["title"],
-                        "tags": json.loads(row["tags"]),
-                        "priority": row["priority"]
-                    })
-                    
-                    memory = MemoryItem(
-                        id=row["id"],
-                        content=row["content"],
-                        metadata=metadata,
-                        created_at=datetime.fromisoformat(row["created_at"]),
-                        updated_at=datetime.fromisoformat(row["updated_at"])
-                    )
-                    memories.append(memory)
-                except (json.JSONDecodeError, ValueError) as e:
-                    logger.warning(f"Failed to parse public memory: {e}")
-                    continue
-            
-            return memories
+            if results["ids"]:
+                for i, doc_id in enumerate(results["ids"]):
+                    try:
+                        content = results["documents"][i]
+                        metadata = results["metadatas"][i]
+
+                        # 解析标签
+                        if "tags" in metadata:
+                            try:
+                                metadata["tags"] = json.loads(metadata["tags"])
+                            except (json.JSONDecodeError, TypeError):
+                                metadata["tags"] = []
+
+                        memory = MemoryItem(
+                            id=doc_id,
+                            content=content,
+                            metadata=metadata,
+                            created_at=datetime.fromisoformat(metadata.get("created_at", datetime.now().isoformat())),
+                            updated_at=datetime.now()
+                        )
+                        memories.append(memory)
+
+                    except Exception as e:
+                        logger.warning(f"Failed to parse public memory: {e}")
+                        continue
+
+            # 按优先级和创建时间排序
+            memories.sort(key=lambda x: (x.metadata.get("priority", 1), x.created_at), reverse=True)
+            return memories[:limit]
+
+        except Exception as e:
+            logger.error(f"按分类获取知识失败: {e}")
+            return []
     
     def _generate_summary(self, content: str, max_length: int = 150) -> str:
         """生成内容摘要"""
@@ -424,53 +450,43 @@ class PublicMemoryService:
     
     async def update_memory(self, memory_id: str, content: str = None, metadata: Dict[str, Any] = None) -> bool:
         """更新公共知识"""
-        updates = []
-        params = []
-        
-        if content is not None:
-            updates.extend(["content = ?", "summary = ?", "embedding = ?"])
-            params.extend([
-                content,
-                self._generate_summary(content),
-                json.dumps(self._generate_embedding(content))
-            ])
-        
-        if metadata is not None:
-            if "title" in metadata:
-                updates.append("title = ?")
-                params.append(metadata["title"])
-            
-            if "category" in metadata:
-                updates.append("category = ?")
-                params.append(metadata["category"])
-            
-            if "tags" in metadata:
-                updates.append("tags = ?")
-                params.append(json.dumps(metadata["tags"]))
-            
-            if "priority" in metadata:
-                updates.append("priority = ?")
-                params.append(metadata["priority"])
-            
-            if "is_active" in metadata:
-                updates.append("is_active = ?")
-                params.append(metadata["is_active"])
-            
-            updates.append("metadata = ?")
-            params.append(json.dumps(metadata))
-        
-        if not updates:
+        try:
+            # ChromaDB不支持直接更新，需要删除后重新添加
+            if content is not None or metadata is not None:
+                # 先获取现有记录
+                existing_results = self.collection.get(
+                    ids=[memory_id],
+                    include=["documents", "metadatas"]
+                )
+
+                if not existing_results["ids"]:
+                    logger.warning(f"记忆ID不存在: {memory_id}")
+                    return False
+
+                # 获取现有内容和元数据
+                existing_content = existing_results["documents"][0]
+                existing_metadata = existing_results["metadatas"][0]
+
+                # 更新内容和元数据
+                updated_content = content if content is not None else existing_content
+                updated_metadata = existing_metadata.copy()
+                if metadata is not None:
+                    updated_metadata.update(metadata)
+                    # 更新时间戳
+                    updated_metadata["updated_at"] = datetime.now().isoformat()
+
+                # 删除旧记录
+                self.collection.delete(ids=[memory_id])
+
+                # 重新添加更新后的记录
+                await self._add_memory_vector(memory_id, updated_content, updated_metadata)
+                return True
+
             return False
-        
-        updates.append("updated_at = CURRENT_TIMESTAMP")
-        params.append(memory_id)
-        
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.execute(
-                f"UPDATE public_memories SET {', '.join(updates)} WHERE id = ?",
-                params
-            )
-            return cursor.rowcount > 0
+
+        except Exception as e:
+            logger.error(f"更新公共知识失败: {e}")
+            return False
     
     async def delete_memory(self, memory_id: str) -> bool:
         """删除公共知识"""
@@ -502,3 +518,69 @@ class PublicMemoryService:
             return truncated[:last_period + 1]
         else:
             return truncated.strip() + "..."
+
+    async def get_all_categories(self) -> List[str]:
+        """获取所有知识分类"""
+        try:
+            # 确保知识库已初始化
+            await self._ensure_knowledge_initialized()
+
+            # 获取所有记录的元数据
+            results = self.collection.get(
+                where={"is_active": True},
+                include=["metadatas"]
+            )
+
+            categories = set()
+            if results["metadatas"]:
+                for metadata in results["metadatas"]:
+                    category = metadata.get("category")
+                    if category:
+                        categories.add(category)
+
+            return sorted(list(categories))
+
+        except Exception as e:
+            logger.error(f"获取知识分类失败: {e}")
+            return []
+
+    async def get_knowledge_stats(self) -> Dict[str, Any]:
+        """获取知识库统计信息"""
+        try:
+            # 确保知识库已初始化
+            await self._ensure_knowledge_initialized()
+
+            # 获取所有记录
+            results = self.collection.get(
+                include=["metadatas"]
+            )
+
+            total_count = len(results["ids"]) if results["ids"] else 0
+            active_count = 0
+            category_stats = {}
+
+            if results["metadatas"]:
+                for metadata in results["metadatas"]:
+                    if metadata.get("is_active", True):
+                        active_count += 1
+
+                    category = metadata.get("category", "unknown")
+                    category_stats[category] = category_stats.get(category, 0) + 1
+
+            return {
+                "total_count": total_count,
+                "active_count": active_count,
+                "inactive_count": total_count - active_count,
+                "categories": category_stats,
+                "last_updated": datetime.now().isoformat()
+            }
+
+        except Exception as e:
+            logger.error(f"获取知识库统计失败: {e}")
+            return {
+                "total_count": 0,
+                "active_count": 0,
+                "inactive_count": 0,
+                "categories": {},
+                "last_updated": datetime.now().isoformat()
+            }

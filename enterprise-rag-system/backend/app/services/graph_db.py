@@ -1,0 +1,468 @@
+"""
+Neo4j图数据库服务
+"""
+
+import json
+from typing import List, Dict, Any, Optional, Tuple
+from neo4j import AsyncGraphDatabase, AsyncDriver, AsyncSession
+from loguru import logger
+
+from app.core.config import settings
+from app.core.exceptions import GraphDatabaseException
+
+
+class Neo4jService:
+    """Neo4j图数据库服务类"""
+    
+    def __init__(self):
+        self.uri = settings.NEO4J_URI
+        self.user = settings.NEO4J_USER
+        self.password = settings.NEO4J_PASSWORD
+        self.database = settings.NEO4J_DATABASE
+        self.driver: Optional[AsyncDriver] = None
+    
+    async def connect(self):
+        """连接到Neo4j"""
+        try:
+            self.driver = AsyncGraphDatabase.driver(
+                self.uri,
+                auth=(self.user, self.password),
+                database=self.database
+            )
+            
+            # 验证连接
+            await self.driver.verify_connectivity()
+            
+            logger.info(f"成功连接到Neo4j: {self.uri}")
+            
+            # 创建约束和索引
+            await self._create_constraints_and_indexes()
+            
+        except Exception as e:
+            logger.error(f"连接Neo4j失败: {e}")
+            raise GraphDatabaseException(f"连接Neo4j失败: {e}")
+    
+    async def close(self):
+        """关闭Neo4j连接"""
+        try:
+            if self.driver:
+                await self.driver.close()
+                logger.info("已关闭Neo4j连接")
+        except Exception as e:
+            logger.error(f"关闭Neo4j连接失败: {e}")
+    
+    def _ensure_connected(self):
+        """确保已连接"""
+        if not self.driver:
+            raise GraphDatabaseException("未连接到Neo4j，请先调用connect()")
+    
+    async def _create_constraints_and_indexes(self):
+        """创建约束和索引"""
+        try:
+            async with self.driver.session() as session:
+                # 创建实体节点约束
+                await session.run("""
+                    CREATE CONSTRAINT entity_id IF NOT EXISTS 
+                    FOR (e:Entity) REQUIRE e.id IS UNIQUE
+                """)
+                
+                # 创建文档节点约束
+                await session.run("""
+                    CREATE CONSTRAINT document_id IF NOT EXISTS 
+                    FOR (d:Document) REQUIRE d.id IS UNIQUE
+                """)
+                
+                # 创建知识库节点约束
+                await session.run("""
+                    CREATE CONSTRAINT kb_id IF NOT EXISTS 
+                    FOR (k:KnowledgeBase) REQUIRE k.id IS UNIQUE
+                """)
+                
+                # 创建索引
+                await session.run("""
+                    CREATE INDEX entity_name_idx IF NOT EXISTS 
+                    FOR (e:Entity) ON (e.name)
+                """)
+                
+                await session.run("""
+                    CREATE INDEX entity_type_idx IF NOT EXISTS 
+                    FOR (e:Entity) ON (e.type)
+                """)
+                
+                logger.info("Neo4j约束和索引创建完成")
+                
+        except Exception as e:
+            logger.error(f"创建约束和索引失败: {e}")
+            # 不抛出异常，因为约束可能已存在
+    
+    async def create_entity(
+        self,
+        entity_id: str,
+        name: str,
+        entity_type: str,
+        properties: Dict[str, Any] = None,
+        knowledge_base_id: int = None
+    ) -> bool:
+        """创建实体节点"""
+        try:
+            self._ensure_connected()
+            
+            properties = properties or {}
+            
+            async with self.driver.session() as session:
+                query = """
+                MERGE (e:Entity {id: $entity_id})
+                SET e.name = $name,
+                    e.type = $entity_type,
+                    e.knowledge_base_id = $knowledge_base_id,
+                    e.created_at = datetime(),
+                    e.updated_at = datetime()
+                """
+                
+                # 添加自定义属性
+                for key, value in properties.items():
+                    if key not in ['id', 'name', 'type', 'knowledge_base_id']:
+                        query += f", e.{key} = ${key}"
+                
+                params = {
+                    "entity_id": entity_id,
+                    "name": name,
+                    "entity_type": entity_type,
+                    "knowledge_base_id": knowledge_base_id,
+                    **properties
+                }
+                
+                await session.run(query, params)
+                
+                logger.debug(f"创建实体: {name} ({entity_type})")
+                return True
+                
+        except Exception as e:
+            logger.error(f"创建实体失败: {e}")
+            raise GraphDatabaseException(f"创建实体失败: {e}")
+    
+    async def create_relationship(
+        self,
+        source_entity_id: str,
+        target_entity_id: str,
+        relationship_type: str,
+        properties: Dict[str, Any] = None
+    ) -> bool:
+        """创建关系"""
+        try:
+            self._ensure_connected()
+            
+            properties = properties or {}
+            
+            async with self.driver.session() as session:
+                query = """
+                MATCH (source:Entity {id: $source_id})
+                MATCH (target:Entity {id: $target_id})
+                MERGE (source)-[r:%s]->(target)
+                SET r.created_at = datetime(),
+                    r.updated_at = datetime()
+                """ % relationship_type
+                
+                # 添加自定义属性
+                for key, value in properties.items():
+                    query += f", r.{key} = ${key}"
+                
+                params = {
+                    "source_id": source_entity_id,
+                    "target_id": target_entity_id,
+                    **properties
+                }
+                
+                await session.run(query, params)
+                
+                logger.debug(f"创建关系: {source_entity_id} -[{relationship_type}]-> {target_entity_id}")
+                return True
+                
+        except Exception as e:
+            logger.error(f"创建关系失败: {e}")
+            raise GraphDatabaseException(f"创建关系失败: {e}")
+    
+    async def find_entities(
+        self,
+        name: str = None,
+        entity_type: str = None,
+        knowledge_base_id: int = None,
+        limit: int = 100
+    ) -> List[Dict[str, Any]]:
+        """查找实体"""
+        try:
+            self._ensure_connected()
+            
+            # 构建查询条件
+            conditions = []
+            params = {"limit": limit}
+            
+            if name:
+                conditions.append("e.name CONTAINS $name")
+                params["name"] = name
+            
+            if entity_type:
+                conditions.append("e.type = $entity_type")
+                params["entity_type"] = entity_type
+            
+            if knowledge_base_id is not None:
+                conditions.append("e.knowledge_base_id = $knowledge_base_id")
+                params["knowledge_base_id"] = knowledge_base_id
+            
+            where_clause = " AND ".join(conditions) if conditions else "true"
+            
+            query = f"""
+            MATCH (e:Entity)
+            WHERE {where_clause}
+            RETURN e
+            LIMIT $limit
+            """
+            
+            async with self.driver.session() as session:
+                result = await session.run(query, params)
+                records = await result.data()
+                
+                entities = []
+                for record in records:
+                    entity_data = dict(record["e"])
+                    entities.append(entity_data)
+                
+                logger.debug(f"找到 {len(entities)} 个实体")
+                return entities
+                
+        except Exception as e:
+            logger.error(f"查找实体失败: {e}")
+            raise GraphDatabaseException(f"查找实体失败: {e}")
+    
+    async def find_relationships(
+        self,
+        source_entity_id: str = None,
+        target_entity_id: str = None,
+        relationship_type: str = None,
+        knowledge_base_id: int = None,
+        limit: int = 100
+    ) -> List[Dict[str, Any]]:
+        """查找关系"""
+        try:
+            self._ensure_connected()
+            
+            # 构建查询
+            match_clause = "MATCH (source:Entity)-[r]->(target:Entity)"
+            conditions = []
+            params = {"limit": limit}
+            
+            if source_entity_id:
+                conditions.append("source.id = $source_id")
+                params["source_id"] = source_entity_id
+            
+            if target_entity_id:
+                conditions.append("target.id = $target_id")
+                params["target_id"] = target_entity_id
+            
+            if relationship_type:
+                match_clause = f"MATCH (source:Entity)-[r:{relationship_type}]->(target:Entity)"
+            
+            if knowledge_base_id is not None:
+                conditions.append("source.knowledge_base_id = $knowledge_base_id")
+                params["knowledge_base_id"] = knowledge_base_id
+            
+            where_clause = " AND ".join(conditions) if conditions else "true"
+            
+            query = f"""
+            {match_clause}
+            WHERE {where_clause}
+            RETURN source, r, target, type(r) as relationship_type
+            LIMIT $limit
+            """
+            
+            async with self.driver.session() as session:
+                result = await session.run(query, params)
+                records = await result.data()
+                
+                relationships = []
+                for record in records:
+                    rel_data = {
+                        "source": dict(record["source"]),
+                        "target": dict(record["target"]),
+                        "relationship": dict(record["r"]),
+                        "relationship_type": record["relationship_type"]
+                    }
+                    relationships.append(rel_data)
+                
+                logger.debug(f"找到 {len(relationships)} 个关系")
+                return relationships
+                
+        except Exception as e:
+            logger.error(f"查找关系失败: {e}")
+            raise GraphDatabaseException(f"查找关系失败: {e}")
+    
+    async def get_entity_neighbors(
+        self,
+        entity_id: str,
+        max_depth: int = 2,
+        relationship_types: List[str] = None
+    ) -> Dict[str, Any]:
+        """获取实体的邻居节点"""
+        try:
+            self._ensure_connected()
+            
+            # 构建关系类型过滤
+            rel_filter = ""
+            if relationship_types:
+                rel_types = "|".join(relationship_types)
+                rel_filter = f":{rel_types}"
+            
+            query = f"""
+            MATCH path = (start:Entity {{id: $entity_id}})-[r{rel_filter}*1..{max_depth}]-(neighbor:Entity)
+            RETURN start, relationships(path) as rels, neighbor, length(path) as depth
+            ORDER BY depth
+            """
+            
+            async with self.driver.session() as session:
+                result = await session.run(query, {"entity_id": entity_id})
+                records = await result.data()
+                
+                # 组织结果
+                start_entity = None
+                neighbors = []
+                relationships = []
+                
+                for record in records:
+                    if start_entity is None:
+                        start_entity = dict(record["start"])
+                    
+                    neighbor = dict(record["neighbor"])
+                    depth = record["depth"]
+                    
+                    neighbor["depth"] = depth
+                    neighbors.append(neighbor)
+                    
+                    # 处理路径上的关系
+                    for rel in record["rels"]:
+                        rel_data = {
+                            "type": rel.type,
+                            "properties": dict(rel),
+                            "start_node": rel.start_node.element_id,
+                            "end_node": rel.end_node.element_id
+                        }
+                        relationships.append(rel_data)
+                
+                result_data = {
+                    "entity": start_entity,
+                    "neighbors": neighbors,
+                    "relationships": relationships,
+                    "total_neighbors": len(neighbors)
+                }
+                
+                logger.debug(f"实体 {entity_id} 有 {len(neighbors)} 个邻居")
+                return result_data
+                
+        except Exception as e:
+            logger.error(f"获取实体邻居失败: {e}")
+            raise GraphDatabaseException(f"获取实体邻居失败: {e}")
+    
+    async def execute_cypher(self, query: str, parameters: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+        """执行自定义Cypher查询"""
+        try:
+            self._ensure_connected()
+            
+            parameters = parameters or {}
+            
+            async with self.driver.session() as session:
+                result = await session.run(query, parameters)
+                records = await result.data()
+                
+                logger.debug(f"Cypher查询返回 {len(records)} 条记录")
+                return records
+                
+        except Exception as e:
+            logger.error(f"执行Cypher查询失败: {e}")
+            raise GraphDatabaseException(f"执行Cypher查询失败: {e}")
+    
+    async def delete_entities(
+        self,
+        entity_ids: List[str] = None,
+        knowledge_base_id: int = None
+    ) -> int:
+        """删除实体"""
+        try:
+            self._ensure_connected()
+            
+            conditions = []
+            params = {}
+            
+            if entity_ids:
+                conditions.append("e.id IN $entity_ids")
+                params["entity_ids"] = entity_ids
+            
+            if knowledge_base_id is not None:
+                conditions.append("e.knowledge_base_id = $knowledge_base_id")
+                params["knowledge_base_id"] = knowledge_base_id
+            
+            if not conditions:
+                raise ValueError("必须指定删除条件")
+            
+            where_clause = " AND ".join(conditions)
+            
+            query = f"""
+            MATCH (e:Entity)
+            WHERE {where_clause}
+            DETACH DELETE e
+            RETURN count(e) as deleted_count
+            """
+            
+            async with self.driver.session() as session:
+                result = await session.run(query, params)
+                record = await result.single()
+                deleted_count = record["deleted_count"]
+                
+                logger.info(f"删除了 {deleted_count} 个实体")
+                return deleted_count
+                
+        except Exception as e:
+            logger.error(f"删除实体失败: {e}")
+            raise GraphDatabaseException(f"删除实体失败: {e}")
+    
+    async def get_graph_stats(self, knowledge_base_id: int = None) -> Dict[str, Any]:
+        """获取图谱统计信息"""
+        try:
+            self._ensure_connected()
+            
+            # 构建过滤条件
+            where_clause = ""
+            params = {}
+            
+            if knowledge_base_id is not None:
+                where_clause = "WHERE e.knowledge_base_id = $knowledge_base_id"
+                params["knowledge_base_id"] = knowledge_base_id
+            
+            query = f"""
+            MATCH (e:Entity) {where_clause}
+            OPTIONAL MATCH (e)-[r]->()
+            RETURN 
+                count(DISTINCT e) as entity_count,
+                count(DISTINCT r) as relationship_count,
+                collect(DISTINCT e.type) as entity_types,
+                collect(DISTINCT type(r)) as relationship_types
+            """
+            
+            async with self.driver.session() as session:
+                result = await session.run(query, params)
+                record = await result.single()
+                
+                stats = {
+                    "entity_count": record["entity_count"],
+                    "relationship_count": record["relationship_count"],
+                    "entity_types": [t for t in record["entity_types"] if t],
+                    "relationship_types": [t for t in record["relationship_types"] if t]
+                }
+                
+                return stats
+                
+        except Exception as e:
+            logger.error(f"获取图谱统计信息失败: {e}")
+            raise GraphDatabaseException(f"获取图谱统计信息失败: {e}")
+
+
+# 全局Neo4j服务实例
+neo4j_service = Neo4jService()

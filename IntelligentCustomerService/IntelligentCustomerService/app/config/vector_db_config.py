@@ -2,8 +2,8 @@
 向量数据库配置
 """
 import os
-from typing import Dict, Any
 from pathlib import Path
+from typing import Dict, Any
 
 
 class VectorDBConfig:
@@ -11,17 +11,33 @@ class VectorDBConfig:
     
     # ChromaDB配置
     CHROMA_PERSIST_DIRECTORY: str = os.getenv(
-        "CHROMA_PERSIST_DIRECTORY", 
+        "CHROMA_PERSIST_DIRECTORY",
         str(Path.home() / ".chromadb_intelligent_customer_service")
     )
-    
-    # 嵌入模型配置
-    EMBEDDING_MODEL_NAME: str = os.getenv("EMBEDDING_MODEL_NAME", "all-MiniLM-L6-v2")
-    EMBEDDING_DIMENSION: int = int(os.getenv("EMBEDDING_DIMENSION", "384"))
-    
-    # 重排模型配置
-    RERANKER_MODEL_NAME: str = os.getenv("RERANKER_MODEL_NAME", "cross-encoder/ms-marco-MiniLM-L-6-v2")
+
+    # 模型缓存目录配置
+    MODEL_CACHE_DIR: str = os.getenv(
+        "MODEL_CACHE_DIR",
+        str(Path(__file__).parent.parent.parent / "models")
+    )
+
+    # 嵌入模型配置 - 使用魔塔社区Qwen3-0.6B模型
+    EMBEDDING_MODEL_NAME: str = os.getenv("EMBEDDING_MODEL_NAME", "Qwen3-0.6B")
+    EMBEDDING_MODEL_PATH: str = os.getenv(
+        "EMBEDDING_MODEL_PATH",
+        str(Path(MODEL_CACHE_DIR) / "embedding" / "Qwen3-0.6B")
+    )
+    EMBEDDING_DIMENSION: int = int(os.getenv("EMBEDDING_DIMENSION", "896"))  # Qwen3-0.6B的嵌入维度
+    USE_LOCAL_EMBEDDING: bool = os.getenv("USE_LOCAL_EMBEDDING", "true").lower() == "true"  # 优先使用本地模型
+
+    # 重排模型配置 - 使用魔塔社区Qwen3-Reranker-0.6B模型
+    RERANKER_MODEL_NAME: str = os.getenv("RERANKER_MODEL_NAME", "Qwen3-Reranker-0.6B")
+    RERANKER_MODEL_PATH: str = os.getenv(
+        "RERANKER_MODEL_PATH",
+        str(Path(MODEL_CACHE_DIR) / "reranker" / "Qwen3-Reranker-0.6B")
+    )
     USE_RERANKER: bool = os.getenv("USE_RERANKER", "true").lower() == "true"
+    USE_LOCAL_RERANKER: bool = os.getenv("USE_LOCAL_RERANKER", "true").lower() == "true"  # 优先使用本地模型
     
     # 检索配置
     DEFAULT_RETRIEVAL_LIMIT: int = int(os.getenv("DEFAULT_RETRIEVAL_LIMIT", "5"))
@@ -50,10 +66,15 @@ class VectorDBConfig:
         """获取配置字典"""
         return {
             "chroma_persist_directory": cls.CHROMA_PERSIST_DIRECTORY,
+            "model_cache_dir": cls.MODEL_CACHE_DIR,
             "embedding_model_name": cls.EMBEDDING_MODEL_NAME,
+            "embedding_model_path": cls.EMBEDDING_MODEL_PATH,
             "embedding_dimension": cls.EMBEDDING_DIMENSION,
+            "use_local_embedding": cls.USE_LOCAL_EMBEDDING,
             "reranker_model_name": cls.RERANKER_MODEL_NAME,
+            "reranker_model_path": cls.RERANKER_MODEL_PATH,
             "use_reranker": cls.USE_RERANKER,
+            "use_local_reranker": cls.USE_LOCAL_RERANKER,
             "default_retrieval_limit": cls.DEFAULT_RETRIEVAL_LIMIT,
             "retrieval_multiplier": cls.RETRIEVAL_MULTIPLIER,
             "similarity_threshold": cls.SIMILARITY_THRESHOLD,
@@ -82,6 +103,8 @@ class VectorDBConfig:
         """获取嵌入模型配置"""
         return {
             "model_name": cls.EMBEDDING_MODEL_NAME,
+            "model_path": cls.EMBEDDING_MODEL_PATH,
+            "use_local": cls.USE_LOCAL_EMBEDDING,
             "device": "cpu",  # 可以设置为 "cuda" 如果有GPU
             "normalize_embeddings": True,
             "encode_kwargs": {
@@ -95,6 +118,8 @@ class VectorDBConfig:
         """获取重排模型配置"""
         return {
             "model_name": cls.RERANKER_MODEL_NAME,
+            "model_path": cls.RERANKER_MODEL_PATH,
+            "use_local": cls.USE_LOCAL_RERANKER,
             "device": "cpu",  # 可以设置为 "cuda" 如果有GPU
             "max_length": 512,
             "batch_size": cls.BATCH_SIZE
@@ -121,35 +146,93 @@ class ModelManager:
         """获取嵌入模型（懒加载）"""
         if self._embedding_model is None:
             try:
-                from sentence_transformers import SentenceTransformer
+                from ..utils.qwen_model_loader import create_qwen_embedding_model, create_fallback_embedding_model
                 config = vector_db_config.get_embedding_model_config()
-                self._embedding_model = SentenceTransformer(
-                    config["model_name"],
-                    device=config["device"]
-                )
-                print(f"✅ 嵌入模型加载成功: {config['model_name']}")
+
+                # 优先使用本地Qwen模型
+                if config["use_local"] and Path(config["model_path"]).exists():
+                    model_path = config["model_path"]
+                    print(f"🔄 加载本地Qwen嵌入模型: {model_path}")
+                    self._embedding_model = create_qwen_embedding_model(model_path, config["device"])
+
+                    if self._embedding_model:
+                        print(f"✅ 本地Qwen嵌入模型加载成功: {model_path}")
+                    else:
+                        raise Exception("本地Qwen模型加载失败")
+                else:
+                    # 尝试从魔塔社区加载Qwen模型
+                    model_name = config["model_name"]
+                    print(f"🔄 从魔塔社区加载Qwen嵌入模型: {model_name}")
+                    self._embedding_model = create_qwen_embedding_model(f"Qwen/{model_name}", config["device"])
+
+                    if self._embedding_model:
+                        print(f"✅ 魔塔社区Qwen嵌入模型加载成功: {model_name}")
+                    else:
+                        raise Exception("魔塔社区Qwen模型加载失败")
+
             except Exception as e:
-                print(f"❌ 嵌入模型加载失败: {e}")
-                raise
+                print(f"❌ Qwen嵌入模型加载失败: {e}")
+                # 回退到简单的嵌入模型
+                try:
+                    print("🔄 回退到简单嵌入模型...")
+                    self._embedding_model = create_fallback_embedding_model(config["device"])
+                    if self._embedding_model:
+                        print("✅ 回退嵌入模型加载成功")
+                    else:
+                        # 最后的回退：创建一个简单的嵌入模拟器
+                        from ..utils.simple_embedding import SimpleEmbeddingModel
+                        self._embedding_model = SimpleEmbeddingModel()
+                        print("✅ 简单嵌入模拟器加载成功")
+                except Exception as fallback_error:
+                    print(f"❌ 回退模型加载也失败: {fallback_error}")
+                    # 创建最简单的嵌入模拟器
+                    from ..utils.simple_embedding import SimpleEmbeddingModel
+                    self._embedding_model = SimpleEmbeddingModel()
+                    print("✅ 简单嵌入模拟器加载成功")
         return self._embedding_model
     
     def get_reranker_model(self):
         """获取重排模型（懒加载）"""
         if not vector_db_config.USE_RERANKER:
             return None
-            
+
         if self._reranker_model is None:
             try:
-                from sentence_transformers import CrossEncoder
+                from ..utils.qwen_model_loader import create_qwen_reranker_model
                 config = vector_db_config.get_reranker_config()
-                self._reranker_model = CrossEncoder(
-                    config["model_name"],
-                    device=config["device"],
-                    max_length=config["max_length"]
-                )
-                print(f"✅ 重排模型加载成功: {config['model_name']}")
+
+                # 优先使用本地Qwen重排模型
+                if config["use_local"] and Path(config["model_path"]).exists():
+                    model_path = config["model_path"]
+                    print(f"🔄 加载本地Qwen重排模型: {model_path}")
+                    self._reranker_model = create_qwen_reranker_model(
+                        model_path,
+                        config["device"],
+                        config["max_length"]
+                    )
+
+                    if self._reranker_model:
+                        print(f"✅ 本地Qwen重排模型加载成功: {model_path}")
+                    else:
+                        raise Exception("本地Qwen重排模型加载失败")
+                else:
+                    # 尝试从魔塔社区加载Qwen重排模型
+                    model_name = config["model_name"]
+                    print(f"🔄 从魔塔社区加载Qwen重排模型: {model_name}")
+                    self._reranker_model = create_qwen_reranker_model(
+                        f"Qwen/{model_name}",
+                        config["device"],
+                        config["max_length"]
+                    )
+
+                    if self._reranker_model:
+                        print(f"✅ 魔塔社区Qwen重排模型加载成功: {model_name}")
+                    else:
+                        raise Exception("魔塔社区Qwen重排模型加载失败")
+
             except Exception as e:
-                print(f"⚠️ 重排模型加载失败: {e}")
+                print(f"⚠️ Qwen重排模型加载失败: {e}")
+                print("⚠️ 重排功能将被禁用，仅使用嵌入模型进行检索")
                 self._reranker_model = None
         return self._reranker_model
     

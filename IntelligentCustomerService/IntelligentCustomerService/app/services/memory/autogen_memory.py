@@ -3,9 +3,8 @@ AutoGen Memory 适配器
 将基于向量数据库的记忆服务适配为AutoGen的Memory协议
 支持高质量的语义检索和重排
 """
-import json
 import logging
-from typing import List, Optional, Sequence, Dict, Any
+from typing import List, Sequence, Dict, Any
 
 try:
     from autogen_core.memory import Memory, MemoryContent, MemoryMimeType
@@ -26,7 +25,6 @@ except ImportError:
         pass
 
 from .factory import MemoryServiceFactory
-from .base import MemoryItem
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +41,10 @@ class AutoGenMemoryAdapter(Memory):
         self.chat_memory = self.memory_factory.get_chat_memory_service(user_id)
         self.private_memory = self.memory_factory.get_private_memory_service(user_id)
         self.public_memory = self.memory_factory.get_public_memory_service()
+
+        # 添加错误处理标志
+        self.context_update_enabled = True
+        self.max_context_retries = 3
 
         logger.info(f"AutoGen记忆适配器初始化完成 (使用ChromaDB向量数据库)")
         
@@ -140,53 +142,132 @@ class AutoGenMemoryAdapter(Memory):
             return []
     
     async def update_context(self, messages: Sequence[BaseMessage]) -> Sequence[BaseMessage]:
-        """更新上下文，添加相关记忆"""
+        """更新上下文，添加相关记忆
+
+        根据autogen官方文档实现Memory协议的update_context方法
+        """
         try:
-            if not messages:
+            if not AUTOGEN_AVAILABLE:
+                logger.debug("AutoGen不可用，跳过上下文更新")
                 return messages
-            
-            # 获取最后一条用户消息作为查询
-            last_message = messages[-1]
-            if isinstance(last_message, TextMessage):
-                query = last_message.content
-                
-                # 查询相关记忆
-                relevant_memories = await self.query(query, limit=3)
-                
-                if relevant_memories:
-                    # 构建记忆上下文
-                    memory_context = self._build_memory_context(relevant_memories)
-                    
-                    # 创建系统消息包含记忆上下文
-                    system_message = TextMessage(
-                        source="system",
-                        content=f"相关记忆信息：\n{memory_context}\n\n请基于以上记忆信息回答用户问题。"
-                    )
-                    
-                    # 将系统消息插入到消息序列中
-                    updated_messages = list(messages)
-                    updated_messages.insert(-1, system_message)
-                    return updated_messages
-            
-            return messages
-            
+
+            if not messages:
+                logger.debug("消息序列为空，跳过上下文更新")
+                return messages
+
+            # 直接处理Sequence[BaseMessage]，不强制转换为list
+            # 这是根据autogen官方文档的正确做法
+            return await self._update_context_with_memory(messages)
+
         except Exception as e:
             logger.error(f"Failed to update context: {e}")
+            # 返回原始消息，确保不中断流程
+            return messages
+
+    async def _update_context_with_memory(self, messages: Sequence[BaseMessage]) -> Sequence[BaseMessage]:
+        """使用记忆更新上下文
+
+        根据autogen官方文档的最佳实践实现
+        """
+        try:
+            # 获取最后一条消息作为查询
+            # 使用索引访问而不是转换为list
+            if not hasattr(messages, '__len__') or len(messages) == 0:
+                logger.debug("消息序列为空或无法获取长度")
+                return messages
+
+            # 安全地获取最后一条消息
+            try:
+                last_message = messages[-1]
+            except (IndexError, TypeError) as e:
+                logger.debug(f"无法获取最后一条消息: {e}")
+                return messages
+
+            # 检查消息类型和内容
+            if not hasattr(last_message, 'content'):
+                logger.debug("最后一条消息没有content属性")
+                return messages
+
+            query = getattr(last_message, 'content', '')
+            if not query or not isinstance(query, str):
+                logger.debug("查询内容为空或不是字符串")
+                return messages
+
+            # 查询相关记忆
+            logger.debug(f"查询记忆: {query[:50]}...")
+            relevant_memories = await self.query(query, limit=3)
+
+            if not relevant_memories:
+                logger.debug("没有找到相关记忆")
+                return messages
+
+            # 构建记忆上下文
+            memory_context = self._build_memory_context(relevant_memories)
+            if not memory_context:
+                logger.debug("记忆上下文构建失败")
+                return messages
+
+            # 创建包含记忆的系统消息
+            try:
+                # 根据autogen文档，直接创建TextMessage
+                system_content = f"相关记忆信息：\n{memory_context}\n\n请基于以上记忆信息回答用户问题。"
+
+                # 创建新的消息列表，包含记忆上下文
+                # 将记忆信息插入到最后一条消息之前
+                updated_messages = list(messages)  # 现在安全地转换为list
+
+                # 创建系统消息
+                if AUTOGEN_AVAILABLE:
+                    system_message = TextMessage(
+                        source="system",
+                        content=system_content
+                    )
+                    updated_messages.insert(-1, system_message)
+                    logger.debug(f"已添加记忆上下文，消息数量: {len(updated_messages)}")
+
+                return updated_messages
+
+            except Exception as msg_error:
+                logger.warning(f"创建系统消息失败: {msg_error}")
+                return messages
+
+        except Exception as e:
+            logger.error(f"更新上下文失败: {e}")
             return messages
     
     def _build_memory_context(self, memories: List[MemoryContent]) -> str:
         """构建记忆上下文字符串"""
         context_parts = []
-        
-        for i, memory in enumerate(memories, 1):
-            metadata = memory.metadata or {}
-            memory_type = metadata.get("memory_type", "unknown")
-            relevance_score = metadata.get("relevance_score", 0)
-            
-            context_part = f"{i}. [{memory_type}] (相关性: {relevance_score:.3f})\n{memory.content}"
-            context_parts.append(context_part)
-        
-        return "\n\n".join(context_parts)
+
+        try:
+            for i, memory in enumerate(memories, 1):
+                if not memory:
+                    continue
+
+                # 安全地获取内容和元数据
+                content = getattr(memory, 'content', '') if hasattr(memory, 'content') else str(memory)
+                metadata = getattr(memory, 'metadata', {}) if hasattr(memory, 'metadata') else {}
+
+                if not isinstance(metadata, dict):
+                    metadata = {}
+
+                memory_type = metadata.get("memory_type", "unknown")
+                relevance_score = metadata.get("relevance_score", 0)
+
+                # 确保相关性分数是数字
+                try:
+                    relevance_score = float(relevance_score)
+                except (ValueError, TypeError):
+                    relevance_score = 0.0
+
+                context_part = f"{i}. [{memory_type}] (相关性: {relevance_score:.3f})\n{content}"
+                context_parts.append(context_part)
+
+            return "\n\n".join(context_parts)
+
+        except Exception as e:
+            logger.error(f"Failed to build memory context: {e}")
+            return "记忆上下文构建失败"
     
     async def clear(self) -> None:
         """清空记忆（仅清空当前用户的私有记忆）"""

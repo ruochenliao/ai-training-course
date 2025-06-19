@@ -64,3 +64,12 @@ autogen-agentchat==0.4.9.3
 autogen-core==0.4.9.3
 autogen-ext==0.4.9.3
 openai>=1.0.0
+
+# ModelScope and embedding model dependencies
+modelscope>=1.9.0
+sentence-transformers>=2.2.0
+chromadb>=0.4.0
+transformers>=4.30.0
+torch>=2.0.0
+numpy>=1.21.0
+tqdm>=4.64.0

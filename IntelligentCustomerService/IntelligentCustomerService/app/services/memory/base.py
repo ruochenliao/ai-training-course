@@ -1,11 +1,10 @@
 """
 记忆服务基础类和数据结构
 """
-import json
 import logging
-from typing import List, Dict, Any, Optional
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
+from typing import List, Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
 
