@@ -9,20 +9,32 @@ from typing import List, Sequence, Dict, Any
 try:
     from autogen_core.memory import Memory, MemoryContent, MemoryMimeType
     from autogen_agentchat.messages import BaseMessage, TextMessage
+    from typing import Sequence
     AUTOGEN_AVAILABLE = True
 except ImportError:
     AUTOGEN_AVAILABLE = False
     # 创建占位符类
     class Memory:
-        pass
+        async def add(self, memory_content): pass
+        async def query(self, query, limit=5): return []
+        async def update_context(self, messages): return messages
+        async def clear(self): pass
+        async def close(self): pass
     class MemoryContent:
-        pass
+        def __init__(self, content, mime_type=None, metadata=None):
+            self.content = content
+            self.mime_type = mime_type
+            self.metadata = metadata or {}
     class MemoryMimeType:
         TEXT = "text"
     class BaseMessage:
-        pass
-    class TextMessage:
-        pass
+        def __init__(self, content=""):
+            self.content = content
+    class TextMessage(BaseMessage):
+        def __init__(self, source="", content=""):
+            super().__init__(content)
+            self.source = source
+    from typing import Sequence
 
 from .factory import MemoryServiceFactory
 
@@ -144,7 +156,8 @@ class AutoGenMemoryAdapter(Memory):
     async def update_context(self, messages: Sequence[BaseMessage]) -> Sequence[BaseMessage]:
         """更新上下文，添加相关记忆
 
-        根据autogen官方文档实现Memory协议的update_context方法
+        根据autogen 0.6.1官方文档实现Memory协议的update_context方法
+        这个方法会在AssistantAgent处理消息前被调用，用于注入相关的记忆信息
         """
         try:
             if not AUTOGEN_AVAILABLE:
@@ -155,12 +168,12 @@ class AutoGenMemoryAdapter(Memory):
                 logger.debug("消息序列为空，跳过上下文更新")
                 return messages
 
-            # 直接处理Sequence[BaseMessage]，不强制转换为list
-            # 这是根据autogen官方文档的正确做法
+            # 在autogen 0.6.1中，update_context方法负责修改消息序列
+            # 添加相关的记忆信息到上下文中
             return await self._update_context_with_memory(messages)
 
         except Exception as e:
-            logger.error(f"Failed to update context: {e}")
+            logger.error(f"更新上下文失败: {e}")
             # 返回原始消息，确保不中断流程
             return messages
 
@@ -207,28 +220,33 @@ class AutoGenMemoryAdapter(Memory):
                 logger.debug("记忆上下文构建失败")
                 return messages
 
-            # 创建包含记忆的系统消息
+            # 将记忆信息注入到现有消息中，而不是创建新的系统消息
             try:
-                # 根据autogen文档，直接创建TextMessage
-                system_content = f"相关记忆信息：\n{memory_context}\n\n请基于以上记忆信息回答用户问题。"
+                # 在autogen 0.6.1中，为了避免多个系统消息的问题，
+                # 我们将记忆信息添加到用户消息的开头
+                updated_messages = list(messages)
 
-                # 创建新的消息列表，包含记忆上下文
-                # 将记忆信息插入到最后一条消息之前
-                updated_messages = list(messages)  # 现在安全地转换为list
+                if updated_messages and AUTOGEN_AVAILABLE:
+                    # 找到最后一条用户消息并在其内容前添加记忆信息
+                    for i in range(len(updated_messages) - 1, -1, -1):
+                        message = updated_messages[i]
+                        if hasattr(message, 'source') and message.source == 'user':
+                            # 在用户消息内容前添加记忆上下文
+                            enhanced_content = f"[记忆信息]\n{memory_context}\n\n[用户问题]\n{message.content}"
 
-                # 创建系统消息
-                if AUTOGEN_AVAILABLE:
-                    system_message = TextMessage(
-                        source="system",
-                        content=system_content
-                    )
-                    updated_messages.insert(-1, system_message)
-                    logger.debug(f"已添加记忆上下文，消息数量: {len(updated_messages)}")
+                            # 创建新的用户消息，包含记忆信息
+                            enhanced_message = TextMessage(
+                                source="user",
+                                content=enhanced_content
+                            )
+                            updated_messages[i] = enhanced_message
+                            logger.debug(f"已将记忆上下文注入到用户消息中，总消息数量: {len(updated_messages)}")
+                            break
 
                 return updated_messages
 
             except Exception as msg_error:
-                logger.warning(f"创建系统消息失败: {msg_error}")
+                logger.warning(f"注入记忆信息失败: {msg_error}")
                 return messages
 
         except Exception as e:

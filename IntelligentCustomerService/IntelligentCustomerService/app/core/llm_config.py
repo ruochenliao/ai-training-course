@@ -11,6 +11,7 @@ from autogen_ext.models.openai import OpenAIChatCompletionClient
 from autogen_ext.models.openai._model_info import _MODEL_INFO, _MODEL_TOKEN_LIMITS
 
 from app.core.agent_tools import create_ecommerce_tools
+from app.core.custom_context import create_fixed_assistant, patch_memory_adapter
 
 # 定义Deepseek模型信息
 deepseek_model_info = ModelInfo(
@@ -19,6 +20,7 @@ deepseek_model_info = ModelInfo(
     json_output=True,  # 支持JSON输出
     structured_output=True,  # 支持结构化输出
     family=ModelFamily.UNKNOWN,  # 模型系列为未知
+    multiple_system_messages=True,  # 支持多个系统消息
 )
 
 # Deepseek模型配置字典
@@ -127,8 +129,14 @@ CUSTOMER_SERVICE_SYSTEM_PROMPT = """
 class DeepseekConfig:
     """Deepseek配置类"""
 
+    def __init__(self):
+        self.model_name = "deepseek-chat"
+        self.base_url = "https://api.deepseek.com/v1"
+        self.api_key = os.getenv("DEEPSEEK_API_KEY", "sk-56f5743d59364543a00109a4c1c10a56")
+        self.model_client = model_client  # 添加model_client属性
+
     def get_assistant(self, memory_adapters=None):
-        """获取助手实例"""
+        """获取助手实例（使用修复后的实现）"""
         # 获取电商工具集
         tools = create_ecommerce_tools(base_url="http://localhost:8001")
 
@@ -136,25 +144,25 @@ class DeepseekConfig:
         for tool in tools[:3]:  # 打印前3个工具信息
             print(f"[DEBUG] 工具: {tool.name} - {tool.description}")
 
-        # 创建助手参数
-        assistant_params = {
-            "name": "ecommerce_assistant",
-            "system_message": CUSTOMER_SERVICE_SYSTEM_PROMPT,
-            "model_client": model_client,
-            "tools": tools,
-            "reflect_on_tool_use": True,  # 启用工具使用反思
-            "model_client_stream": True,  # 启用流式输出
-        }
-
-        # 如果提供了记忆适配器，则添加到助手配置中
+        # 如果有内存适配器，应用workaround补丁
+        patched_memory_adapters = None
         if memory_adapters:
-            assistant_params["memory"] = memory_adapters
-            print(f"[DEBUG] 记忆服务已启用，适配器数量: {len(memory_adapters)}")
+            patched_memory_adapters = []
+            for adapter in memory_adapters:
+                patched_adapter = patch_memory_adapter(adapter)
+                patched_memory_adapters.append(patched_adapter)
+            print(f"[DEBUG] 记忆服务已启用并应用补丁，适配器数量: {len(patched_memory_adapters)}")
 
-        # 创建助手
-        assistant = AssistantAgent(**assistant_params)
+        # 使用修复后的助手创建函数
+        assistant = create_fixed_assistant(
+            name="ecommerce_assistant",
+            model_client=model_client,
+            system_message=CUSTOMER_SERVICE_SYSTEM_PROMPT,
+            tools=tools,
+            memory_adapters=patched_memory_adapters
+        )
 
-        print(f"[DEBUG] 助手创建成功，工具已注册: {len(assistant.tools) if hasattr(assistant, 'tools') else 0}")
+        print(f"[DEBUG] 修复后的助手创建成功，工具已注册: {len(assistant.tools) if hasattr(assistant, 'tools') else 0}")
         return assistant
 
 

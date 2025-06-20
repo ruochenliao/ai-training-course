@@ -145,50 +145,30 @@ class ModelManager:
     def get_embedding_model(self):
         """获取嵌入模型（懒加载）"""
         if self._embedding_model is None:
-            try:
-                from ..utils.qwen_model_loader import create_qwen_embedding_model, create_fallback_embedding_model
-                config = vector_db_config.get_embedding_model_config()
+            from ..utils.qwen_model_loader import create_qwen_embedding_model
+            config = vector_db_config.get_embedding_model_config()
 
-                # 优先使用本地Qwen模型
-                if config["use_local"] and Path(config["model_path"]).exists():
-                    model_path = config["model_path"]
-                    print(f"🔄 加载本地Qwen嵌入模型: {model_path}")
-                    self._embedding_model = create_qwen_embedding_model(model_path, config["device"])
+            # 优先使用本地Qwen模型
+            if config["use_local"] and Path(config["model_path"]).exists():
+                model_path = config["model_path"]
+                print(f"🔄 加载本地Qwen嵌入模型: {model_path}")
+                self._embedding_model = create_qwen_embedding_model(model_path, config["device"])
 
-                    if self._embedding_model:
-                        print(f"✅ 本地Qwen嵌入模型加载成功: {model_path}")
-                    else:
-                        raise Exception("本地Qwen模型加载失败")
+                if self._embedding_model:
+                    print(f"✅ 本地Qwen嵌入模型加载成功: {model_path}")
                 else:
-                    # 尝试从魔塔社区加载Qwen模型
-                    model_name = config["model_name"]
-                    print(f"🔄 从魔塔社区加载Qwen嵌入模型: {model_name}")
-                    self._embedding_model = create_qwen_embedding_model(f"Qwen/{model_name}", config["device"])
+                    raise Exception("本地Qwen模型加载失败")
+            else:
+                # 从魔塔社区加载Qwen模型
+                model_name = config["model_name"]
+                print(f"🔄 从魔塔社区加载Qwen嵌入模型: {model_name}")
+                self._embedding_model = create_qwen_embedding_model(f"Qwen/{model_name}", config["device"])
 
-                    if self._embedding_model:
-                        print(f"✅ 魔塔社区Qwen嵌入模型加载成功: {model_name}")
-                    else:
-                        raise Exception("魔塔社区Qwen模型加载失败")
+                if self._embedding_model:
+                    print(f"✅ 魔塔社区Qwen嵌入模型加载成功: {model_name}")
+                else:
+                    raise Exception("魔塔社区Qwen模型加载失败")
 
-            except Exception as e:
-                print(f"❌ Qwen嵌入模型加载失败: {e}")
-                # 回退到简单的嵌入模型
-                try:
-                    print("🔄 回退到简单嵌入模型...")
-                    self._embedding_model = create_fallback_embedding_model(config["device"])
-                    if self._embedding_model:
-                        print("✅ 回退嵌入模型加载成功")
-                    else:
-                        # 最后的回退：创建一个简单的嵌入模拟器
-                        from ..utils.simple_embedding import SimpleEmbeddingModel
-                        self._embedding_model = SimpleEmbeddingModel()
-                        print("✅ 简单嵌入模拟器加载成功")
-                except Exception as fallback_error:
-                    print(f"❌ 回退模型加载也失败: {fallback_error}")
-                    # 创建最简单的嵌入模拟器
-                    from ..utils.simple_embedding import SimpleEmbeddingModel
-                    self._embedding_model = SimpleEmbeddingModel()
-                    print("✅ 简单嵌入模拟器加载成功")
         return self._embedding_model
     
     def get_reranker_model(self):
