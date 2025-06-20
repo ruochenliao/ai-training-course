@@ -1,0 +1,555 @@
+/* Gemini风格聊天界面样式 */
+
+/* 主容器 */
+.gemini-chat-container {
+  background: 
+    linear-gradient(135deg, #667eea 0%, #764ba2 100%),
+    linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+  background-blend-mode: overlay;
+  position: relative;
+  overflow: hidden;
+}
+
+.gemini-chat-container.dark {
+  background: 
+    linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%),
+    radial-gradient(circle at 50% 50%, #2d1b69 0%, #0f0f23 100%);
+  background-blend-mode: multiply;
+}
+
+/* 动态背景效果 */
+.gemini-chat-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(240, 147, 251, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 60% 70%, rgba(245, 87, 108, 0.3) 0%, transparent 50%);
+  animation: geminiBackgroundShift 20s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes geminiBackgroundShift {
+  0%, 100% { 
+    transform: scale(1) rotate(0deg);
+    opacity: 0.8;
+  }
+  25% { 
+    transform: scale(1.1) rotate(90deg);
+    opacity: 0.6;
+  }
+  50% { 
+    transform: scale(1.05) rotate(180deg);
+    opacity: 0.9;
+  }
+  75% { 
+    transform: scale(1.15) rotate(270deg);
+    opacity: 0.7;
+  }
+}
+
+/* Gemini头部 */
+.gemini-header {
+  height: 80px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(40px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow:
+    0 8px 32px 0 rgba(102, 126, 234, 0.15),
+    0 2px 8px 0 rgba(118, 75, 162, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  border-radius: 0 0 24px 24px !important;
+  padding: 0 32px !important;
+  position: relative;
+  z-index: 100;
+}
+
+.gemini-header.dark {
+  background: rgba(15, 15, 35, 0.3) !important;
+  border-bottom-color: rgba(102, 126, 234, 0.2) !important;
+  box-shadow:
+    0 8px 32px 0 rgba(45, 27, 105, 0.3),
+    0 2px 8px 0 rgba(15, 15, 35, 0.2),
+    inset 0 1px 0 rgba(102, 126, 234, 0.2) !important;
+}
+
+/* Gemini导航按钮 */
+.gemini-nav-btn {
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500 !important;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.gemini-nav-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s ease;
+}
+
+.gemini-nav-btn:hover::before {
+  left: 100%;
+}
+
+.gemini-nav-btn:hover {
+  transform: translateY(-2px) scale(1.05) !important;
+  box-shadow: 
+    0 8px 24px rgba(102, 126, 234, 0.3),
+    0 4px 12px rgba(118, 75, 162, 0.2) !important;
+  border-color: rgba(102, 126, 234, 0.5) !important;
+  background: rgba(102, 126, 234, 0.2) !important;
+}
+
+/* Gemini Logo */
+.gemini-logo {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.gemini-logo.sparkle {
+  animation: geminiSparkle 1s ease-in-out;
+}
+
+@keyframes geminiSparkle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* Gemini标题 */
+.gemini-title {
+  background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 600 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Gemini主要按钮 */
+.gemini-primary-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+  border-radius: 20px !important;
+  color: white !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.gemini-primary-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s ease;
+}
+
+.gemini-primary-btn:hover::before {
+  left: 100%;
+}
+
+.gemini-primary-btn:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%) !important;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.6) !important;
+  transform: translateY(-2px) scale(1.05) !important;
+}
+
+/* 用户信息 */
+.gemini-user-info {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.gemini-user-info:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.gemini-avatar {
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3) !important;
+}
+
+/* Gemini侧边栏 */
+.gemini-sidebar {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(40px) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+  position: relative;
+  z-index: 10;
+}
+
+.gemini-sidebar.dark {
+  background: rgba(15, 15, 35, 0.2) !important;
+  border-right-color: rgba(102, 126, 234, 0.1) !important;
+}
+
+/* 新对话按钮 */
+.gemini-new-chat-btn {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+  border: none !important;
+  border-radius: 20px !important;
+  color: white !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 16px rgba(240, 147, 251, 0.4) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  height: 48px !important;
+}
+
+.gemini-new-chat-btn:hover {
+  background: linear-gradient(135deg, #e081e9 0%, #e3455a 100%) !important;
+  box-shadow: 0 8px 32px rgba(240, 147, 251, 0.6) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+}
+
+/* 对话列表 */
+.gemini-conversations .ant-x-conversations-item {
+  border-radius: 16px !important;
+  margin-bottom: 12px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.gemini-conversations .ant-x-conversations-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.gemini-conversations .ant-x-conversations-item:hover::before {
+  left: 100%;
+}
+
+.gemini-conversations .ant-x-conversations-item:hover {
+  transform: translateX(8px) !important;
+  background: rgba(102, 126, 234, 0.2) !important;
+  border-color: rgba(102, 126, 234, 0.4) !important;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3) !important;
+}
+
+.gemini-conversations .ant-x-conversations-item.ant-x-conversations-item-active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  transform: translateX(12px) !important;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4) !important;
+  border-color: transparent !important;
+}
+
+/* 主内容区 */
+.gemini-content {
+  background: transparent !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* 欢迎页面 */
+.gemini-welcome-icon {
+  position: relative;
+  display: inline-block;
+}
+
+.gemini-welcome-icon .gemini-sparkles {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(45deg, #f093fb, #f5576c);
+  border-radius: 50%;
+  animation: geminiPulse 2s ease-in-out infinite;
+}
+
+@keyframes geminiPulse {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.5);
+    opacity: 0.7;
+  }
+}
+
+.gemini-welcome-title {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+}
+
+.gemini-welcome-subtitle {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 18px !important;
+  font-weight: 400 !important;
+}
+
+/* 快捷提示 */
+.gemini-prompts .ant-x-prompts-item {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 16px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.gemini-prompts .ant-x-prompts-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s ease;
+}
+
+.gemini-prompts .ant-x-prompts-item:hover::before {
+  left: 100%;
+}
+
+.gemini-prompts .ant-x-prompts-item:hover {
+  transform: translateY(-4px) scale(1.02) !important;
+  border-color: rgba(102, 126, 234, 0.5) !important;
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.3) !important;
+  background: rgba(102, 126, 234, 0.2) !important;
+}
+
+/* 输入区域 */
+.gemini-input-area {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(40px) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  position: relative;
+  z-index: 10;
+}
+
+.gemini-sender {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(40px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15) !important;
+  transition: all 0.3s ease !important;
+}
+
+.gemini-sender:focus-within {
+  border-color: rgba(102, 126, 234, 0.5) !important;
+  box-shadow: 
+    0 0 0 3px rgba(102, 126, 234, 0.2),
+    0 8px 32px rgba(102, 126, 234, 0.25) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* 发送按钮 */
+.gemini-send-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+  border-radius: 16px !important;
+  color: white !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.gemini-send-btn:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%) !important;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.6) !important;
+  transform: translateY(-2px) scale(1.05) !important;
+}
+
+.gemini-stop-btn {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%) !important;
+  border: none !important;
+  border-radius: 16px !important;
+  color: white !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.4) !important;
+}
+
+.gemini-stop-btn:hover {
+  background: linear-gradient(135deg, #ff5252 0%, #d63031 100%) !important;
+  box-shadow: 0 8px 24px rgba(255, 107, 107, 0.6) !important;
+  transform: translateY(-2px) scale(1.05) !important;
+}
+
+/* Gemini抽屉样式 */
+.gemini-drawer .ant-drawer-content {
+  background: rgba(15, 15, 35, 0.95) !important;
+  backdrop-filter: blur(40px) !important;
+}
+
+.gemini-drawer .ant-drawer-header {
+  background: rgba(102, 126, 234, 0.2) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+.gemini-drawer .ant-drawer-title {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 600 !important;
+}
+
+.gemini-drawer .ant-drawer-close {
+  color: rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+.gemini-drawer .ant-drawer-close:hover {
+  color: white !important;
+  background: rgba(255, 107, 107, 0.3) !important;
+  transform: scale(1.1) !important;
+}
+
+.gemini-drawer .ant-drawer-body {
+  background: transparent !important;
+  padding: 24px !important;
+}
+
+/* 多模态支持组件样式 */
+.multimodal-support .multimodal-uploader {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 2px dashed rgba(102, 126, 234, 0.3) !important;
+  border-radius: 16px !important;
+  transition: all 0.3s ease !important;
+}
+
+.multimodal-support .multimodal-uploader:hover {
+  border-color: rgba(102, 126, 234, 0.6) !important;
+  background: rgba(102, 126, 234, 0.1) !important;
+}
+
+.multimodal-support .multimodal-uploader .ant-upload-drag-container {
+  background: transparent !important;
+}
+
+.multimodal-support .file-card {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+  transition: all 0.3s ease !important;
+}
+
+.multimodal-support .file-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3) !important;
+  border-color: rgba(102, 126, 234, 0.5) !important;
+}
+
+.multimodal-support .file-card .ant-card-meta-title {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.multimodal-support .file-card .ant-card-meta-description {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.multimodal-support .file-card .ant-card-actions {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.multimodal-support .file-card .ant-card-actions li {
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.multimodal-support .file-card .ant-card-actions li:last-child {
+  border-right: none !important;
+}
+
+/* 智能建议组件样式 */
+.smart-suggestions .suggestion-card {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+  border-radius: 16px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.smart-suggestions .suggestion-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.smart-suggestions .suggestion-card:hover::before {
+  left: 100%;
+}
+
+.smart-suggestions .category-filters .ant-btn {
+  border-radius: 20px !important;
+  backdrop-filter: blur(20px) !important;
+  transition: all 0.3s ease !important;
+}
+
+.smart-suggestions .category-filters .ant-btn:hover {
+  transform: translateY(-2px) scale(1.05) !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .gemini-drawer {
+    width: 100% !important;
+  }
+
+  .smart-suggestions .suggestions-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .multimodal-support .file-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

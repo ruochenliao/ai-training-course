@@ -1,0 +1,369 @@
+name: 智能客服系统 CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: intelligent-customer-service
+
+jobs:
+  # 代码质量检查
+  code-quality:
+    runs-on: ubuntu-latest
+    name: 代码质量检查
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 设置Python环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: 安装依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort mypy pytest
+        pip install -r requirements.txt
+        
+    - name: 代码格式检查
+      run: |
+        black --check --diff .
+        isort --check-only --diff .
+        
+    - name: 代码风格检查
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        
+    - name: 类型检查
+      run: |
+        mypy app/ --ignore-missing-imports
+        
+  # 单元测试
+  unit-tests:
+    runs-on: ubuntu-latest
+    name: 单元测试
+    needs: code-quality
+    
+    services:
+      redis:
+        image: redis:7.0-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          
+      neo4j:
+        image: neo4j:5.0
+        ports:
+          - 7687:7687
+          - 7474:7474
+        env:
+          NEO4J_AUTH: neo4j/test_password
+          NEO4J_PLUGINS: '["apoc"]'
+        options: >-
+          --health-cmd "cypher-shell -u neo4j -p test_password 'RETURN 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 设置Python环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: 安装依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-asyncio
+        
+    - name: 运行单元测试
+      env:
+        REDIS_URL: redis://localhost:6379/0
+        NEO4J_URI: bolt://localhost:7687
+        NEO4J_USER: neo4j
+        NEO4J_PASSWORD: test_password
+        DATABASE_URL: sqlite:///./test.db
+      run: |
+        pytest tests/ -v --cov=app --cov-report=xml --cov-report=html
+        
+    - name: 上传测试覆盖率
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        
+  # 前端测试
+  frontend-tests:
+    runs-on: ubuntu-latest
+    name: 前端测试
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 设置Node.js环境
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: web-react/package-lock.json
+        
+    - name: 安装前端依赖
+      working-directory: ./web-react
+      run: npm ci
+      
+    - name: 前端代码检查
+      working-directory: ./web-react
+      run: |
+        npm run lint
+        npm run type-check
+        
+    - name: 前端单元测试
+      working-directory: ./web-react
+      run: npm run test:coverage
+      
+    - name: 构建前端
+      working-directory: ./web-react
+      run: npm run build
+      
+  # 集成测试
+  integration-tests:
+    runs-on: ubuntu-latest
+    name: 集成测试
+    needs: [unit-tests, frontend-tests]
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_DATABASE: test_db
+          MYSQL_USER: test_user
+          MYSQL_PASSWORD: test_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+          
+      redis:
+        image: redis:7.0-alpine
+        ports:
+          - 6379:6379
+          
+      milvus:
+        image: milvusdb/milvus:v2.3.0
+        command: ["milvus", "run", "standalone"]
+        ports:
+          - 19530:19530
+        environment:
+          ETCD_ENDPOINTS: localhost:2379
+          MINIO_ADDRESS: localhost:9000
+          
+      neo4j:
+        image: neo4j:5.0
+        ports:
+          - 7687:7687
+        env:
+          NEO4J_AUTH: neo4j/test_password
+          NEO4J_PLUGINS: '["apoc"]'
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 设置Python环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: 安装依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: 等待服务启动
+      run: |
+        sleep 30
+        
+    - name: 运行集成测试
+      env:
+        DATABASE_URL: mysql://test_user:test_password@localhost:3306/test_db
+        REDIS_URL: redis://localhost:6379/0
+        MILVUS_HOST: localhost
+        MILVUS_PORT: 19530
+        NEO4J_URI: bolt://localhost:7687
+        NEO4J_USER: neo4j
+        NEO4J_PASSWORD: test_password
+      run: |
+        pytest tests/integration/ -v
+        
+  # 安全扫描
+  security-scan:
+    runs-on: ubuntu-latest
+    name: 安全扫描
+    needs: code-quality
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: Python安全扫描
+      run: |
+        pip install safety bandit
+        safety check -r requirements.txt
+        bandit -r app/ -f json -o bandit-report.json
+        
+    - name: 上传安全扫描报告
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: bandit-report.json
+        
+  # 构建Docker镜像
+  build-docker:
+    runs-on: ubuntu-latest
+    name: 构建Docker镜像
+    needs: [integration-tests, security-scan]
+    if: github.event_name == 'push' || github.event_name == 'release'
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 设置Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: 登录容器注册表
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 提取元数据
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha
+          
+    - name: 构建并推送后端镜像
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./docker/backend.Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: 构建并推送前端镜像
+      uses: docker/build-push-action@v5
+      with:
+        context: ./web-react
+        file: ./docker/frontend-chat.Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}-frontend
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+  # 部署到测试环境
+  deploy-staging:
+    runs-on: ubuntu-latest
+    name: 部署到测试环境
+    needs: build-docker
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 部署到测试环境
+      run: |
+        echo "部署到测试环境..."
+        # 这里添加实际的部署脚本
+        # 例如：kubectl apply -f k8s/staging/
+        
+  # 部署到生产环境
+  deploy-production:
+    runs-on: ubuntu-latest
+    name: 部署到生产环境
+    needs: build-docker
+    if: github.event_name == 'release'
+    environment: production
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 部署到生产环境
+      run: |
+        echo "部署到生产环境..."
+        # 这里添加实际的部署脚本
+        # 例如：kubectl apply -f k8s/production/
+        
+  # 性能测试
+  performance-test:
+    runs-on: ubuntu-latest
+    name: 性能测试
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 安装k6
+      run: |
+        sudo gpg -k
+        sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+        echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install k6
+        
+    - name: 运行性能测试
+      run: |
+        k6 run tests/performance/load-test.js
+        
+  # 通知
+  notify:
+    runs-on: ubuntu-latest
+    name: 通知
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    
+    steps:
+    - name: 发送通知
+      run: |
+        echo "CI/CD流水线完成"
+        # 这里可以添加实际的通知逻辑
+        # 例如：发送邮件、Slack消息、企业微信等

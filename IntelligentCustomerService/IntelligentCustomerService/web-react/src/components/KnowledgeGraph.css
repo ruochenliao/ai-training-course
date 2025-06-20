@@ -1,0 +1,358 @@
+.knowledge-graph-container {
+  padding: 20px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.graph-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.graph-card .ant-card-head {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px 8px 0 0;
+}
+
+.graph-card .ant-card-head-title {
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.graph-visualization {
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  padding: 20px;
+  margin: 16px 0;
+  min-height: 600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.graph-svg {
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 统计卡片样式 */
+.ant-statistic {
+  text-align: center;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 6px;
+  border: 1px solid #e8e8e8;
+}
+
+.ant-statistic-title {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.ant-statistic-content {
+  color: #1890ff;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* 操作按钮样式 */
+.ant-btn {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.ant-btn-primary {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border: none;
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.3);
+}
+
+.ant-btn-primary:hover {
+  background: linear-gradient(135deg, #40a9ff 0%, #1890ff 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(24, 144, 255, 0.4);
+}
+
+.ant-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 搜索框样式 */
+.ant-input-search {
+  border-radius: 6px;
+}
+
+.ant-input-search .ant-input {
+  border-radius: 6px 0 0 6px;
+}
+
+.ant-input-search .ant-btn {
+  border-radius: 0 6px 6px 0;
+}
+
+/* 选择器样式 */
+.ant-select {
+  border-radius: 6px;
+}
+
+.ant-select-selector {
+  border-radius: 6px !important;
+}
+
+/* 标签样式 */
+.ant-tag {
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  color: white;
+}
+
+/* 模态框样式 */
+.ant-modal {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ant-modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px 8px 0 0;
+  border-bottom: none;
+}
+
+.ant-modal-title {
+  color: white;
+  font-weight: 600;
+}
+
+.ant-modal-close {
+  color: white;
+}
+
+.ant-modal-close:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 表单样式 */
+.ant-form-item-label > label {
+  font-weight: 500;
+  color: #333;
+}
+
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-select-selector {
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  transition: all 0.3s ease;
+}
+
+.ant-input:focus,
+.ant-input-affix-wrapper:focus,
+.ant-select-focused .ant-select-selector {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* 文本域样式 */
+.ant-input {
+  resize: vertical;
+}
+
+/* 加载动画 */
+.ant-spin-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ant-spin-dot {
+  font-size: 24px;
+}
+
+/* 图谱节点动画 */
+.graph-svg circle {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.graph-svg circle:hover {
+  stroke: #1890ff;
+  stroke-width: 3px;
+  r: 10;
+}
+
+.graph-svg text {
+  pointer-events: none;
+  font-family: 'Arial', sans-serif;
+  font-weight: 500;
+  fill: #333;
+}
+
+.graph-svg line {
+  transition: all 0.3s ease;
+}
+
+.graph-svg line:hover {
+  stroke: #1890ff;
+  stroke-width: 3px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .knowledge-graph-container {
+    padding: 10px;
+  }
+  
+  .graph-visualization {
+    padding: 10px;
+    min-height: 400px;
+  }
+  
+  .graph-svg {
+    width: 100%;
+    height: 400px;
+  }
+  
+  .ant-statistic {
+    padding: 8px;
+  }
+  
+  .ant-statistic-content {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 576px) {
+  .ant-space {
+    width: 100%;
+  }
+  
+  .ant-space-item {
+    width: 100%;
+  }
+  
+  .ant-input-search,
+  .ant-select {
+    width: 100% !important;
+  }
+}
+
+/* 深色主题支持 */
+@media (prefers-color-scheme: dark) {
+  .knowledge-graph-container {
+    background: #141414;
+  }
+  
+  .graph-card {
+    background: #1f1f1f;
+    border: 1px solid #303030;
+  }
+  
+  .graph-visualization {
+    background: #262626;
+    border-color: #303030;
+  }
+  
+  .graph-svg {
+    background: #1f1f1f;
+  }
+  
+  .ant-statistic {
+    background: #262626;
+    border-color: #303030;
+  }
+  
+  .ant-statistic-title {
+    color: #bfbfbf;
+  }
+  
+  .graph-svg text {
+    fill: #bfbfbf;
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.graph-card {
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.ant-btn-primary:active {
+  animation: pulse 0.3s ease-in-out;
+}
+
+/* 工具提示样式 */
+.graph-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 1000;
+  max-width: 200px;
+  word-wrap: break-word;
+}
+
+/* 图例样式 */
+.graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 6px;
+  border: 1px solid #e8e8e8;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e8e8e8;
+  font-size: 12px;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
