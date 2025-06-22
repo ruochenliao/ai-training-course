@@ -4,9 +4,9 @@
 
 import pytest
 from httpx import AsyncClient
+from tests.conftest import assert_response_success, assert_response_error
 
 from app.models import User
-from tests.conftest import assert_response_success, assert_response_error
 
 
 class TestAuthAPI:

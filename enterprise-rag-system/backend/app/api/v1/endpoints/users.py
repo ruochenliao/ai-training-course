@@ -2,13 +2,13 @@
 用户管理API端点
 """
 
-from typing import Any, List
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from typing import Any
 
 from app.core.security import get_current_user, get_current_superuser
 from app.models.user import User
 from app.schemas.user import UserResponse, UserUpdate, UserListResponse
 from app.services.auth import AuthService
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 router = APIRouter()
 

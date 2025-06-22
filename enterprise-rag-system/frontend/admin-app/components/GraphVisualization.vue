@@ -125,8 +125,8 @@
 </template>
 
 <script setup lang="ts">
+import type {ECharts} from 'echarts'
 import * as echarts from 'echarts'
-import type { ECharts } from 'echarts'
 
 interface GraphNode {
   id: string

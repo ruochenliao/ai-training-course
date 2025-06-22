@@ -2,21 +2,20 @@
 聊天API端点
 """
 
-import asyncio
 from typing import Any, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
 
 from app.core.security import get_current_user
-from app.models.user import User
 from app.models.conversation import Conversation, Message
+from app.models.user import User
 from app.services.agent_service import QueryContext
 from app.services.workflow_service import (
     workflow_orchestrator,
     WorkflowConfig,
     WorkflowType
 )
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 
 router = APIRouter()
 

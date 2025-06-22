@@ -2,14 +2,12 @@
 健康检查服务
 """
 
-import asyncio
 import time
 from typing import Dict, Any
 
-from tortoise import connections
-from loguru import logger
-
 from app.core.config import settings
+from loguru import logger
+from tortoise import connections
 
 
 class HealthService:

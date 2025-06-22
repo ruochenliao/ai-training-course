@@ -2,20 +2,20 @@
 Milvus向量数据库服务
 """
 
-import json
 import uuid
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
+
+from app.core.config import settings
+from loguru import logger
 from pymilvus import (
-    connections, 
-    Collection, 
-    CollectionSchema, 
-    FieldSchema, 
+    connections,
+    Collection,
+    CollectionSchema,
+    FieldSchema,
     DataType,
     utility
 )
-from loguru import logger
 
-from app.core.config import settings
 from app.core.exceptions import VectorDatabaseException
 
 

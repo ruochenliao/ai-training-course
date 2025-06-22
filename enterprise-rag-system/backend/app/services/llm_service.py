@@ -2,15 +2,15 @@
 大语言模型服务
 """
 
-import json
 import asyncio
-from typing import Dict, List, Any, Optional, AsyncGenerator, Union
+import json
 from dataclasses import dataclass
+from typing import Dict, List, Any, Optional, AsyncGenerator, Union
 
 import httpx
+from app.core.config import settings
 from loguru import logger
 
-from app.core.config import settings
 from app.core.exceptions import AIServiceException
 
 
@@ -54,7 +54,7 @@ class LLMService:
     """大语言模型服务类"""
     
     def __init__(self):
-        self.api_base = settings.LLM_API_BASE
+        self.api_base = settings.LLM_BASE_URL
         self.api_key = settings.LLM_API_KEY
         self.model_name = settings.LLM_MODEL_NAME
         self.max_tokens = settings.LLM_MAX_TOKENS

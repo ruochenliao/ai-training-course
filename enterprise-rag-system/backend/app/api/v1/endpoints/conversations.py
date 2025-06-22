@@ -3,10 +3,10 @@
 """
 
 from typing import Any
-from fastapi import APIRouter, Depends
 
 from app.core.security import get_current_user
 from app.models.user import User
+from fastapi import APIRouter, Depends
 
 router = APIRouter()
 

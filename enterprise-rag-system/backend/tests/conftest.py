@@ -3,18 +3,17 @@
 """
 
 import asyncio
+from typing import AsyncGenerator, Generator
+
 import pytest
 import pytest_asyncio
-from typing import AsyncGenerator, Generator
+from app.core.config import settings
+from app.main import app
+from app.services.auth import create_access_token
 from httpx import AsyncClient
-from tortoise import Tortoise
 from tortoise.contrib.test import finalizer, initializer
 
-from app.main import app
-from app.core.config import settings
 from app.models import User, Role, KnowledgeBase, Document
-from app.services.auth import create_access_token
-
 
 # 测试数据库配置
 TEST_DB_URL = "sqlite://:memory:"

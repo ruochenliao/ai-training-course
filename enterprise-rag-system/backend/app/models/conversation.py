@@ -3,15 +3,16 @@
 """
 
 from datetime import datetime
-from typing import List, Optional
+from enum import Enum
+from typing import List
 
 from tortoise import fields
 
 from .base import (
-    BaseModel, 
-    TimestampMixin, 
-    StatusMixin, 
-    SoftDeleteMixin, 
+    BaseModel,
+    TimestampMixin,
+    StatusMixin,
+    SoftDeleteMixin,
     OwnershipMixin,
     MetadataMixin
 )
@@ -119,36 +120,24 @@ class Conversation(BaseModel, TimestampMixin, StatusMixin, SoftDeleteMixin, Owne
         self.model_config[key] = value
 
 
+class MessageRole(str, Enum):
+    """消息角色枚举"""
+    USER = "user"
+    ASSISTANT = "assistant"
+    SYSTEM = "system"
+    FUNCTION = "function"
+
+
+class MessageType(str, Enum):
+    """消息类型枚举"""
+    TEXT = "text"
+    IMAGE = "image"
+    FILE = "file"
+    MULTIMODAL = "multimodal"
+
+
 class Message(BaseModel, TimestampMixin, MetadataMixin):
     """消息模型"""
-    
-    class MessageRole:
-        """消息角色"""
-        USER = "user"
-        ASSISTANT = "assistant"
-        SYSTEM = "system"
-        FUNCTION = "function"
-        
-        CHOICES = [
-            (USER, "用户"),
-            (ASSISTANT, "助手"),
-            (SYSTEM, "系统"),
-            (FUNCTION, "函数"),
-        ]
-    
-    class MessageType:
-        """消息类型"""
-        TEXT = "text"
-        IMAGE = "image"
-        FILE = "file"
-        MULTIMODAL = "multimodal"
-        
-        CHOICES = [
-            (TEXT, "文本"),
-            (IMAGE, "图片"),
-            (FILE, "文件"),
-            (MULTIMODAL, "多模态"),
-        ]
     
     # 关联关系
     conversation = fields.ForeignKeyField(
@@ -206,15 +195,15 @@ class Message(BaseModel, TimestampMixin, MetadataMixin):
     
     def is_user_message(self) -> bool:
         """是否为用户消息"""
-        return self.role == self.MessageRole.USER
-    
+        return self.role == MessageRole.USER
+
     def is_assistant_message(self) -> bool:
         """是否为助手消息"""
-        return self.role == self.MessageRole.ASSISTANT
-    
+        return self.role == MessageRole.ASSISTANT
+
     def is_multimodal(self) -> bool:
         """是否为多模态消息"""
-        return self.message_type == self.MessageType.MULTIMODAL or bool(self.images) or bool(self.files)
+        return self.message_type == MessageType.MULTIMODAL or bool(self.images) or bool(self.files)
     
     def has_images(self) -> bool:
         """是否包含图片"""
@@ -248,20 +237,15 @@ class Message(BaseModel, TimestampMixin, MetadataMixin):
         await self.save(update_fields=["user_rating", "user_feedback"])
 
 
+class FeedbackType(str, Enum):
+    """反馈类型枚举"""
+    LIKE = "like"
+    DISLIKE = "dislike"
+    REPORT = "report"
+
+
 class MessageFeedback(BaseModel, TimestampMixin):
     """消息反馈模型"""
-    
-    class FeedbackType:
-        """反馈类型"""
-        LIKE = "like"
-        DISLIKE = "dislike"
-        REPORT = "report"
-        
-        CHOICES = [
-            (LIKE, "喜欢"),
-            (DISLIKE, "不喜欢"),
-            (REPORT, "举报"),
-        ]
     
     # 关联关系
     message = fields.ForeignKeyField(

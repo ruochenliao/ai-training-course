@@ -3,13 +3,13 @@
 """
 
 import asyncio
-from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass
+from typing import List, Dict, Any, Optional, Tuple
 
 import httpx
+from app.core.config import settings
 from loguru import logger
 
-from app.core.config import settings
 from app.core.exceptions import AIServiceException
 
 

@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
-import { Send, Bot, User, Loader2, FileText } from 'lucide-react'
+import React, {useEffect, useRef, useState} from 'react'
+import {Bot, FileText, Loader2, Send, User} from 'lucide-react'
 
 interface Message {
   id: string

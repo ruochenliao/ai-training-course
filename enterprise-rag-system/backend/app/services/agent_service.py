@@ -4,25 +4,22 @@ AutoGen智能体服务
 
 import asyncio
 import json
-from typing import Dict, List, Any, Optional, AsyncGenerator
 from dataclasses import dataclass
 from enum import Enum
-
-from loguru import logger
-from autogen_agentchat.agents import AssistantAgent
-from autogen_agentchat.teams import DiGraphBuilder, GraphFlow
-from autogen_agentchat.messages import TextMessage
+from typing import Dict, List, Any, AsyncGenerator
 
 from app.core.config import settings
-from app.core.exceptions import AgentException
-from app.services.llm_service import LLMService
-from app.services.vector_db import VectorDBService
-from app.services.graph_db_service import neo4j_service
 from app.services.embedding_service import embedding_service
+from app.services.graph_db_service import neo4j_service
+from app.services.llm_service import LLMService
+from app.services.vector_db import MilvusService
+from loguru import logger
+
+from app.core.exceptions import AgentException
 
 # 创建服务实例
 llm_service = LLMService()
-milvus_service = VectorDBService()
+vector_db_service = MilvusService()
 
 
 class AgentType(Enum):
@@ -76,14 +73,9 @@ class BaseRAGAgent:
     def _initialize_agent(self):
         """初始化智能体"""
         try:
-            # 这里需要根据实际的AutoGen API来实现
-            # 由于AutoGen的API可能有变化，这里提供一个基础框架
-            self.agent = AssistantAgent(
-                name=self.config.name,
-                system_message=self.config.system_message,
-                # model_client=self.config.model_client,
-                # max_consecutive_auto_reply=self.config.max_consecutive_auto_reply
-            )
+            # 暂时使用简化的智能体实现，不依赖AutoGen
+            # 后续可以根据需要集成AutoGen
+            self.agent = None  # 暂时设为None
             logger.info(f"初始化智能体: {self.config.name}")
         except Exception as e:
             logger.error(f"初始化智能体失败: {e}")
@@ -159,7 +151,7 @@ class VectorRetrieverAgent(BaseRAGAgent):
             query_vector = await embedding_service.embed_text(context.query)
             
             # 2. 向量搜索
-            search_results = await milvus_service.search_vectors(
+            search_results = await vector_db_service.search_vectors(
                 collection_name=settings.MILVUS_COLLECTION_NAME,
                 query_vectors=[query_vector],
                 top_k=20,

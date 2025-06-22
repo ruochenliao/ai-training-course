@@ -5,15 +5,14 @@
 from datetime import timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
-
 from app.core.config import settings
 from app.core.security import create_access_token, get_current_user
 from app.models.user import User
 from app.schemas.auth import Token, UserLogin, UserRegister
 from app.schemas.user import UserResponse
 from app.services.auth import AuthService
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter()
 

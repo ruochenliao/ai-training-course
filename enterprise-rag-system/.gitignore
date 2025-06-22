@@ -1,3 +1,11 @@
+# =============================================================================
+# 企业级RAG知识库系统 - .gitignore 配置文件
+# =============================================================================
+
+# =============================================================================
+# Python 后端相关
+# =============================================================================
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -28,8 +36,6 @@ share/python-wheels/
 MANIFEST
 
 # PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
 
@@ -55,17 +61,17 @@ coverage.xml
 *.mo
 *.pot
 
-# Django stuff:
+# FastAPI/Django stuff
 *.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
-# Flask stuff:
+# Flask stuff
 instance/
 .webassets-cache
 
-# Scrapy stuff:
+# Scrapy stuff
 .scrapy
 
 # Sphinx documentation
@@ -85,13 +91,9 @@ ipython_config.py
 .python-version
 
 # pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
+Pipfile.lock
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+# PEP 582
 __pypackages__/
 
 # Celery stuff
@@ -103,6 +105,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env.*
 .venv
 env/
 venv/
@@ -128,12 +131,17 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Node.js
+# =============================================================================
+# Node.js 前端相关 (Next.js + Nuxt.js)
+# =============================================================================
+
+# Dependencies
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+pnpm-debug.log*
 
 # Runtime data
 pids
@@ -148,24 +156,20 @@ coverage/
 # nyc test coverage
 .nyc_output
 
-# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
+# Grunt intermediate storage
 .grunt
 
-# Bower dependency directory (https://bower.io/)
+# Bower dependency directory
 bower_components
 
 # node-waf configuration
 .lock-wscript
 
-# Compiled binary addons (https://nodejs.org/api/addons.html)
+# Compiled binary addons
 build/Release
 
 # Dependency directories
-node_modules/
 jspm_packages/
-
-# TypeScript v1 declaration files
-typings/
 
 # TypeScript cache
 *.tsbuildinfo
@@ -191,30 +195,22 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
-.env.test
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# parcel-bundler cache (https://parceljs.org/)
+# parcel-bundler cache
 .cache
 .parcel-cache
 
 # Next.js build output
-.next
+.next/
+out/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
+.output/
+dist/
 
 # Gatsby files
 .cache/
-# Comment in the public line in if your project uses Gatsby and *not* Next.js
-# https://nextjs.org/blog/next-9-1#public-directory-support
-# public
+public
 
 # vuepress build output
 .vuepress/dist
@@ -231,14 +227,50 @@ dist
 # TernJS port file
 .tern-port
 
-# IDE
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# =============================================================================
+# IDE 和编辑器
+# =============================================================================
+
+# VSCode
 .vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# IntelliJ IDEA
 .idea/
+*.iws
+*.iml
+*.ipr
+
+# Vim
 *.swp
 *.swo
 *~
 
-# OS
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# =============================================================================
+# 操作系统
+# =============================================================================
+
+# macOS
 .DS_Store
 .DS_Store?
 ._*
@@ -247,41 +279,294 @@ dist
 ehthumbs.db
 Thumbs.db
 
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+
+# =============================================================================
+# Docker
+# =============================================================================
+
 # Docker
 .dockerignore
+docker-compose.override.yml
 
-# Logs
-logs/
-*.log
+# =============================================================================
+# 数据库和存储
+# =============================================================================
 
-# Database
+# SQLite
 *.db
 *.sqlite
 *.sqlite3
+*.db-journal
 
-# Uploads
-uploads/
-temp/
+# MySQL
+*.sql
 
-# Vector database
+# PostgreSQL
+*.dump
+
+# Vector databases
 vector_db_data/
 chroma_data/
+milvus_data/
+weaviate_data/
+pinecone_data/
+
+# Graph databases
+neo4j_data/
+graph_data/
+
+# =============================================================================
+# AI/ML 相关
+# =============================================================================
+
+# Model files
+*.bin
+*.onnx
+*.pb
+*.h5
+*.pkl
+*.joblib
+*.model
 
 # Model cache
 model_cache/
+models/
+checkpoints/
 .cache/
+transformers_cache/
+huggingface_cache/
 
-# Secrets
+# Training data
+data/
+datasets/
+training_data/
+test_data/
+
+# Embeddings
+embeddings/
+vectors/
+
+# =============================================================================
+# 应用特定文件
+# =============================================================================
+
+# 日志文件
+logs/
+*.log
+*.log.*
+
+# 上传文件
+uploads/
+static/uploads/
+media/
+
+# 临时文件
+temp/
+tmp/
+.tmp/
+*.tmp
+
+# 备份文件
+backups/
+*.bak
+*.backup
+*.old
+
+# 配置文件
+config/local.py
+config/production.py
+settings/local.py
+settings/production.py
+
+# 密钥和证书
 secrets/
 *.key
 *.pem
 *.crt
+*.p12
+*.pfx
+ssl/
+certs/
 
-# Backup files
-*.bak
-*.backup
+# API密钥文件
+.api_keys
+api_keys.json
+api_keys.yaml
 
-# Temporary files
-tmp/
-temp/
-.tmp/
+# 插件目录中的用户安装插件
+plugins/user_plugins/
+plugins/custom/
+
+# 缓存目录
+cache/
+.cache/
+redis_data/
+
+# 搜索索引
+indexes/
+search_indexes/
+elasticsearch_data/
+
+# 文档处理临时文件
+document_processing/
+processed_docs/
+text_extraction/
+
+# 监控和指标
+metrics/
+monitoring/
+prometheus_data/
+grafana_data/
+
+# 测试相关
+test_results/
+test_reports/
+.coverage
+htmlcov/
+
+# 部署相关
+deploy/
+kubernetes/secrets/
+helm/values-*.yaml
+!helm/values-example.yaml
+
+# =============================================================================
+# 其他
+# =============================================================================
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# 系统文件
+*.pid
+*.lock
+
+# 本地开发配置
+.local
+.development
+
+# 性能分析
+*.prof
+*.pprof
+
+# 内存转储
+*.hprof
+*.dump
+
+# 调试文件
+*.dmp
+*.stackdump
+
+# 编译输出
+*.o
+*.a
+*.lib
+*.dll
+*.exe
+
+# 文档生成
+docs/build/
+docs/_build/
+site/
+
+# 国际化
+locale/
+i18n/compiled/
+
+# 包管理器锁文件 (根据团队决定是否提交)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# 环境特定的配置文件
+.env.local
+.env.development
+.env.staging
+.env.production
+.env.test
+
+# 用户特定的配置
+.user.ini
+user_config.json
+
+# 临时的开发文件
+TODO.md
+NOTES.md
+DEBUG.md
+scratch.py
+test_*.py
+!tests/test_*.py
+
+# 第三方服务配置
+.firebase/
+.vercel/
+.netlify/
+
+# 移动端相关（如果有）
+*.apk
+*.ipa
+*.app
+
+# 桌面应用相关（如果有）
+*.dmg
+*.pkg
+*.deb
+*.rpm
+
+# 性能测试
+benchmark_results/
+load_test_results/
+
+# 安全扫描结果
+security_reports/
+vulnerability_reports/
+
+# 许可证检查
+license_reports/
+
+# 依赖检查
+dependency_reports/
+
+# 代码质量报告
+code_quality_reports/
+sonar_reports/
+
+# 自动生成的文件
+auto_generated/
+generated/
+*.generated.*
+
+# 实验性功能
+experimental/
+prototype/
+
+# 个人笔记和草稿
+personal_notes/
+drafts/
+sketches/
+
+# 供应商文件（如果不使用包管理器）
+vendor/
+third_party/
+
+# 构建工具配置的本地覆盖
+.local.env
+local.config.js
+local.settings.json

@@ -149,7 +149,175 @@ class DocumentProcessingException(BusinessException):
 
 class RateLimitException(BusinessException):
     """限流异常"""
-    
+
+    def __init__(self, message: str = "请求频率过高", details: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message,
+            code="RATE_LIMIT_ERROR",
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            details=details,
+        )
+
+
+class AgentException(BusinessException):
+    """Agent异常"""
+
+    def __init__(self, message: str = "Agent处理失败", details: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message,
+            code="AGENT_ERROR",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            details=details,
+        )
+
+
+class WorkflowException(BusinessException):
+    """工作流异常"""
+
+    def __init__(self, message: str = "工作流处理失败", details: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message,
+            code="WORKFLOW_ERROR",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            details=details,
+        )
+
+
+class SearchException(BusinessException):
+    """搜索异常"""
+
+    def __init__(self, message: str = "搜索处理失败", details: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message,
+            code="SEARCH_ERROR",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            details=details,
+        )
+
+
+class QAException(BusinessException):
+    """问答异常"""
+
+    def __init__(self, message: str = "问答处理失败", details: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message,
+            code="QA_ERROR",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            details=details,
+        )
+
+
+class AnalyticsException(BusinessException):
+    """分析异常"""
+
+    def __init__(self, message: str = "分析处理失败", details: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message,
+            code="ANALYTICS_ERROR",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            details=details,
+        )
+
+
+class CacheException(BusinessException):
+    """缓存异常"""
+
+    def __init__(self, message: str = "缓存操作失败", details: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message,
+            code="CACHE_ERROR",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            details=details,
+        )
+
+
+class TenantException(BusinessException):
+    """租户异常"""
+
+    def __init__(self, message: str = "租户操作失败", details: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message,
+            code="TENANT_ERROR",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            details=details,
+        )
+
+
+class NotificationException(BusinessException):
+    """通知异常"""
+
+    def __init__(self, message: str = "通知发送失败", details: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message,
+            code="NOTIFICATION_ERROR",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            details=details,
+        )
+
+
+class BackupException(BusinessException):
+    """备份异常"""
+
+    def __init__(self, message: str = "备份操作失败", details: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message,
+            code="BACKUP_ERROR",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            details=details,
+        )
+
+
+class ConfigException(BusinessException):
+    """配置异常"""
+
+    def __init__(self, message: str = "配置操作失败", details: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message,
+            code="CONFIG_ERROR",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            details=details,
+        )
+
+
+class I18nException(BusinessException):
+    """国际化异常"""
+
+    def __init__(self, message: str = "国际化操作失败", details: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message,
+            code="I18N_ERROR",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            details=details,
+        )
+
+
+class PluginException(BusinessException):
+    """插件异常"""
+
+    def __init__(self, message: str = "插件操作失败", details: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message,
+            code="PLUGIN_ERROR",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            details=details,
+        )
+
+
+class SecurityException(BusinessException):
+    """安全异常"""
+
+    def __init__(self, message: str = "安全检查失败", details: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message,
+            code="SECURITY_ERROR",
+            status_code=status.HTTP_403_FORBIDDEN,
+            details=details,
+        )
+
+
+class RateLimitException(BusinessException):
+    """限流异常"""
+
     def __init__(self, message: str = "请求频率过高", details: Optional[Dict[str, Any]] = None):
         super().__init__(
             message=message,

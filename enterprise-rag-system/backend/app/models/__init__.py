@@ -3,18 +3,20 @@
 """
 
 from .base import BaseModel, TimestampMixin
-from .user import User, Role, Permission, UserRole
-from .knowledge import KnowledgeBase, Document, DocumentChunk
 from .conversation import Conversation, Message
+from .knowledge import KnowledgeBase, Document, DocumentChunk
 from .system import SystemConfig, AuditLog
+from .user import User, Role, Permission, UserRole, UserSession, UserEvent
 
 __all__ = [
     "BaseModel",
     "TimestampMixin",
     "User",
-    "Role", 
+    "Role",
     "Permission",
     "UserRole",
+    "UserSession",
+    "UserEvent",
     "KnowledgeBase",
     "Document",
     "DocumentChunk",

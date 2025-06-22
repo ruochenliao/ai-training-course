@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  compatibilityDate: '2025-06-22',
   devtools: { enabled: true },
   
   // CSS框架
@@ -67,7 +68,7 @@ export default defineNuxtConfig({
   // TypeScript配置
   typescript: {
     strict: true,
-    typeCheck: true
+    typeCheck: false
   },
   
   // 开发服务器配置

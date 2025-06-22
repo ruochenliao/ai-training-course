@@ -3,15 +3,14 @@
 """
 
 from datetime import datetime, timedelta
-from typing import Any, Union
+from typing import Union
 
+from app.core.config import settings
+from app.models.user import User
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-
-from app.core.config import settings
-from app.models.user import User
 
 # 密码加密上下文
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

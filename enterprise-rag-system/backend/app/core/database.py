@@ -2,11 +2,9 @@
 数据库配置和初始化
 """
 
-from tortoise import Tortoise
-from loguru import logger
-
 from app.core.config import settings
-
+from loguru import logger
+from tortoise import Tortoise
 
 # Tortoise ORM配置
 TORTOISE_ORM = {
@@ -31,7 +29,8 @@ async def init_db():
     """初始化数据库"""
     try:
         await Tortoise.init(config=TORTOISE_ORM)
-        await Tortoise.generate_schemas()
+        # 安全地生成表结构，不会覆盖已存在的表
+        await Tortoise.generate_schemas(safe=True)
         logger.info("数据库初始化成功")
     except Exception as e:
         logger.error(f"数据库初始化失败: {e}")
@@ -115,31 +114,12 @@ async def create_initial_data():
         
         logger.info("创建默认权限")
         
-        # 创建系统配置
-        configs = [
-            ("system.name", "企业级Agent+RAG知识库系统", "system", "系统名称"),
-            ("system.version", "1.0.0", "system", "系统版本"),
-            ("system.description", "基于多智能体协作的企业级知识库系统", "system", "系统描述"),
-            ("ai.llm_model", "deepseek-chat", "ai_model", "默认LLM模型"),
-            ("ai.embedding_model", "text-embedding-v1", "ai_model", "默认嵌入模型"),
-            ("ai.reranker_model", "gte-rerank", "ai_model", "默认重排模型"),
-            ("retrieval.default_top_k", 10, "feature", "默认检索数量"),
-            ("retrieval.score_threshold", 0.7, "feature", "相似度阈值"),
-            ("chunk.size", 1000, "feature", "分块大小"),
-            ("chunk.overlap", 200, "feature", "分块重叠"),
-        ]
-        
-        for key, value, config_type, name in configs:
-            config = await SystemConfig.get_or_none(key=key)
-            if not config:
-                await SystemConfig.create(
-                    key=key,
-                    value=value,
-                    config_type=config_type,
-                    name=name
-                )
-        
-        logger.info("创建系统配置")
+        # 系统配置已通过数据库迁移文件创建，这里只做检查
+        config_count = await SystemConfig.all().count()
+        if config_count > 0:
+            logger.info(f"系统配置已存在，共 {config_count} 项配置")
+        else:
+            logger.warning("系统配置为空，请检查数据库迁移是否正确执行")
         
     except Exception as e:
         logger.error(f"创建初始数据失败: {e}")

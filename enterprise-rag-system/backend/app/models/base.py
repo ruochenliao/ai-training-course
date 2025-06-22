@@ -3,6 +3,7 @@
 """
 
 from datetime import datetime
+from enum import Enum
 from typing import Any, Dict
 
 from tortoise import fields
@@ -96,22 +97,17 @@ class SoftDeleteMixin:
         await self.save(update_fields=["is_deleted", "deleted_at"])
 
 
+class StatusChoices(str, Enum):
+    """状态选择枚举"""
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    PENDING = "pending"
+    SUSPENDED = "suspended"
+
+
 class StatusMixin:
     """状态混入类"""
-    
-    class StatusChoices:
-        ACTIVE = "active"
-        INACTIVE = "inactive"
-        PENDING = "pending"
-        SUSPENDED = "suspended"
-        
-        CHOICES = [
-            (ACTIVE, "激活"),
-            (INACTIVE, "未激活"),
-            (PENDING, "待处理"),
-            (SUSPENDED, "暂停"),
-        ]
-    
+
     status = fields.CharEnumField(
         StatusChoices,
         default=StatusChoices.ACTIVE,
@@ -120,19 +116,19 @@ class StatusMixin:
     
     def is_active(self) -> bool:
         """是否激活状态"""
-        return self.status == self.StatusChoices.ACTIVE
-    
+        return self.status == StatusChoices.ACTIVE
+
     def is_inactive(self) -> bool:
         """是否未激活状态"""
-        return self.status == self.StatusChoices.INACTIVE
-    
+        return self.status == StatusChoices.INACTIVE
+
     def is_pending(self) -> bool:
         """是否待处理状态"""
-        return self.status == self.StatusChoices.PENDING
-    
+        return self.status == StatusChoices.PENDING
+
     def is_suspended(self) -> bool:
         """是否暂停状态"""
-        return self.status == self.StatusChoices.SUSPENDED
+        return self.status == StatusChoices.SUSPENDED
 
 
 class OwnershipMixin:
@@ -150,20 +146,16 @@ class OwnershipMixin:
         return self.owner_id == user_id
 
 
+class VisibilityChoices(str, Enum):
+    """可见性选择枚举"""
+    PUBLIC = "public"
+    PRIVATE = "private"
+    SHARED = "shared"
+
+
 class VisibilityMixin:
     """可见性混入类"""
-    
-    class VisibilityChoices:
-        PUBLIC = "public"
-        PRIVATE = "private"
-        SHARED = "shared"
-        
-        CHOICES = [
-            (PUBLIC, "公开"),
-            (PRIVATE, "私有"),
-            (SHARED, "共享"),
-        ]
-    
+
     visibility = fields.CharEnumField(
         VisibilityChoices,
         default=VisibilityChoices.PRIVATE,
@@ -172,15 +164,15 @@ class VisibilityMixin:
     
     def is_public(self) -> bool:
         """是否公开"""
-        return self.visibility == self.VisibilityChoices.PUBLIC
-    
+        return self.visibility == VisibilityChoices.PUBLIC
+
     def is_private(self) -> bool:
         """是否私有"""
-        return self.visibility == self.VisibilityChoices.PRIVATE
-    
+        return self.visibility == VisibilityChoices.PRIVATE
+
     def is_shared(self) -> bool:
         """是否共享"""
-        return self.visibility == self.VisibilityChoices.SHARED
+        return self.visibility == VisibilityChoices.SHARED
 
 
 class MetadataMixin:

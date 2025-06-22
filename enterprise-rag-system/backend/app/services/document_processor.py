@@ -2,20 +2,19 @@
 文档处理服务
 """
 
-import os
 import hashlib
 import mimetypes
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Any
 
-from loguru import logger
 import aiofiles
-
 from app.core.config import settings
-from app.core.exceptions import DocumentProcessingException
 from app.models.knowledge import Document, DocumentChunk
 from app.schemas.document import ProcessingResult, DocumentMetadata
+from loguru import logger
+
+from app.core.exceptions import DocumentProcessingException
 
 
 class DocumentProcessor:

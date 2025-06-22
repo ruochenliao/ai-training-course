@@ -3,6 +3,7 @@
 """
 
 from datetime import datetime
+from enum import Enum
 from typing import Any, Dict
 
 from tortoise import fields
@@ -10,44 +11,37 @@ from tortoise import fields
 from .base import BaseModel, TimestampMixin, StatusMixin, MetadataMixin
 
 
+class ConfigType(str, Enum):
+    """配置类型枚举"""
+    SYSTEM = "system"
+    AI_MODEL = "ai_model"
+    DATABASE = "database"
+    SECURITY = "security"
+    FEATURE = "feature"
+    UI = "ui"
+
+
 class SystemConfig(BaseModel, TimestampMixin, StatusMixin, MetadataMixin):
     """系统配置模型"""
-    
-    class ConfigType:
-        """配置类型"""
-        SYSTEM = "system"
-        AI_MODEL = "ai_model"
-        DATABASE = "database"
-        SECURITY = "security"
-        FEATURE = "feature"
-        UI = "ui"
-        
-        CHOICES = [
-            (SYSTEM, "系统配置"),
-            (AI_MODEL, "AI模型配置"),
-            (DATABASE, "数据库配置"),
-            (SECURITY, "安全配置"),
-            (FEATURE, "功能配置"),
-            (UI, "界面配置"),
-        ]
-    
+
     # 配置信息
     key = fields.CharField(max_length=100, unique=True, description="配置键", index=True)
-    value = fields.JSONField(description="配置值")
+    # 临时使用 TextField 来避免 JSON 解析问题，后续可以通过迁移改为 JSONField
+    value = fields.TextField(description="配置值")
     config_type = fields.CharEnumField(ConfigType, description="配置类型", index=True)
-    
+
     # 描述信息
     name = fields.CharField(max_length=100, description="配置名称")
     description = fields.TextField(null=True, description="配置描述")
-    
-    # 验证规则
-    validation_rules = fields.JSONField(default=dict, description="验证规则")
-    default_value = fields.JSONField(null=True, description="默认值")
-    
+
+    # 验证规则 - 临时使用 TextField
+    validation_rules = fields.TextField(default="{}", description="验证规则JSON")
+    default_value = fields.TextField(null=True, description="默认值JSON")
+
     # 权限控制
     is_public = fields.BooleanField(default=False, description="是否公开")
     is_readonly = fields.BooleanField(default=False, description="是否只读")
-    
+
     # 版本控制
     version = fields.IntField(default=1, description="版本号")
     
@@ -62,23 +56,43 @@ class SystemConfig(BaseModel, TimestampMixin, StatusMixin, MetadataMixin):
     
     def get_value(self, default: Any = None) -> Any:
         """获取配置值"""
-        return self.value if self.value is not None else default
-    
+        if self.value is None:
+            return default
+
+        # 尝试解析 JSON，如果失败则返回原始字符串
+        try:
+            import json
+            return json.loads(self.value)
+        except (json.JSONDecodeError, TypeError):
+            return self.value
+
     def set_value(self, value: Any):
         """设置配置值"""
-        self.value = value
+        import json
+        if isinstance(value, str):
+            self.value = value
+        else:
+            self.value = json.dumps(value, ensure_ascii=False)
         self.version += 1
     
     def validate_value(self, value: Any) -> bool:
         """验证配置值"""
-        # 这里可以根据validation_rules进行验证
-        # 简单实现，实际可以更复杂
-        if not self.validation_rules:
+        # 解析验证规则
+        try:
+            import json
+            if isinstance(self.validation_rules, str):
+                rules = json.loads(self.validation_rules) if self.validation_rules else {}
+            else:
+                rules = self.validation_rules or {}
+        except (json.JSONDecodeError, TypeError):
             return True
-        
+
+        if not rules:
+            return True
+
         # 检查类型
-        if "type" in self.validation_rules:
-            expected_type = self.validation_rules["type"]
+        if "type" in rules:
+            expected_type = rules["type"]
             if expected_type == "string" and not isinstance(value, str):
                 return False
             elif expected_type == "number" and not isinstance(value, (int, float)):
@@ -89,60 +103,43 @@ class SystemConfig(BaseModel, TimestampMixin, StatusMixin, MetadataMixin):
                 return False
             elif expected_type == "object" and not isinstance(value, dict):
                 return False
-        
+
         # 检查范围
-        if "min" in self.validation_rules and value < self.validation_rules["min"]:
+        if "min" in rules and value < rules["min"]:
             return False
-        if "max" in self.validation_rules and value > self.validation_rules["max"]:
+        if "max" in rules and value > rules["max"]:
             return False
-        
+
         # 检查枚举值
-        if "enum" in self.validation_rules and value not in self.validation_rules["enum"]:
+        if "enum" in rules and value not in rules["enum"]:
             return False
-        
+
         return True
+
+
+class ActionType(str, Enum):
+    """操作类型枚举"""
+    CREATE = "create"
+    UPDATE = "update"
+    DELETE = "delete"
+    LOGIN = "login"
+    LOGOUT = "logout"
+    ACCESS = "access"
+    UPLOAD = "upload"
+    DOWNLOAD = "download"
+    SEARCH = "search"
+    CHAT = "chat"
+
+
+class ResultType(str, Enum):
+    """结果类型枚举"""
+    SUCCESS = "success"
+    FAILURE = "failure"
+    WARNING = "warning"
 
 
 class AuditLog(BaseModel, TimestampMixin, MetadataMixin):
     """审计日志模型"""
-    
-    class ActionType:
-        """操作类型"""
-        CREATE = "create"
-        UPDATE = "update"
-        DELETE = "delete"
-        LOGIN = "login"
-        LOGOUT = "logout"
-        ACCESS = "access"
-        UPLOAD = "upload"
-        DOWNLOAD = "download"
-        SEARCH = "search"
-        CHAT = "chat"
-        
-        CHOICES = [
-            (CREATE, "创建"),
-            (UPDATE, "更新"),
-            (DELETE, "删除"),
-            (LOGIN, "登录"),
-            (LOGOUT, "登出"),
-            (ACCESS, "访问"),
-            (UPLOAD, "上传"),
-            (DOWNLOAD, "下载"),
-            (SEARCH, "搜索"),
-            (CHAT, "对话"),
-        ]
-    
-    class ResultType:
-        """结果类型"""
-        SUCCESS = "success"
-        FAILURE = "failure"
-        WARNING = "warning"
-        
-        CHOICES = [
-            (SUCCESS, "成功"),
-            (FAILURE, "失败"),
-            (WARNING, "警告"),
-        ]
     
     # 操作信息
     action_type = fields.CharEnumField(ActionType, description="操作类型", index=True)
@@ -219,22 +216,16 @@ class AuditLog(BaseModel, TimestampMixin, MetadataMixin):
         )
 
 
+class MetricType(str, Enum):
+    """指标类型枚举"""
+    PERFORMANCE = "performance"
+    USAGE = "usage"
+    ERROR = "error"
+    BUSINESS = "business"
+
+
 class SystemMetrics(BaseModel, TimestampMixin):
     """系统指标模型"""
-    
-    class MetricType:
-        """指标类型"""
-        PERFORMANCE = "performance"
-        USAGE = "usage"
-        ERROR = "error"
-        BUSINESS = "business"
-        
-        CHOICES = [
-            (PERFORMANCE, "性能指标"),
-            (USAGE, "使用指标"),
-            (ERROR, "错误指标"),
-            (BUSINESS, "业务指标"),
-        ]
     
     # 指标信息
     metric_name = fields.CharField(max_length=100, description="指标名称", index=True)
@@ -261,7 +252,7 @@ class SystemMetrics(BaseModel, TimestampMixin):
         cls,
         name: str,
         value: float,
-        metric_type: str = MetricType.PERFORMANCE,
+        metric_type: str = MetricType.PERFORMANCE.value,
         unit: str = None,
         dimensions: Dict = None,
         timestamp: datetime = None,
@@ -277,36 +268,24 @@ class SystemMetrics(BaseModel, TimestampMixin):
         )
 
 
+class NotificationType(str, Enum):
+    """通知类型枚举"""
+    INFO = "info"
+    WARNING = "warning"
+    ERROR = "error"
+    SUCCESS = "success"
+
+
+class NotificationLevel(str, Enum):
+    """通知级别枚举"""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
 class SystemNotification(BaseModel, TimestampMixin, StatusMixin):
     """系统通知模型"""
-    
-    class NotificationType:
-        """通知类型"""
-        INFO = "info"
-        WARNING = "warning"
-        ERROR = "error"
-        SUCCESS = "success"
-        
-        CHOICES = [
-            (INFO, "信息"),
-            (WARNING, "警告"),
-            (ERROR, "错误"),
-            (SUCCESS, "成功"),
-        ]
-    
-    class NotificationLevel:
-        """通知级别"""
-        LOW = "low"
-        MEDIUM = "medium"
-        HIGH = "high"
-        CRITICAL = "critical"
-        
-        CHOICES = [
-            (LOW, "低"),
-            (MEDIUM, "中"),
-            (HIGH, "高"),
-            (CRITICAL, "紧急"),
-        ]
     
     # 通知内容
     title = fields.CharField(max_length=200, description="通知标题")

@@ -2,19 +2,18 @@
 文件存储服务
 """
 
-import os
-import uuid
 import mimetypes
-from pathlib import Path
-from typing import Dict, List, Any, Optional, BinaryIO
+import uuid
 from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Dict, List, Any, BinaryIO
 
+import aiofiles
+from app.core.config import settings
+from loguru import logger
 from minio import Minio
 from minio.error import S3Error
-from loguru import logger
-import aiofiles
 
-from app.core.config import settings
 from app.core.exceptions import ExternalServiceException
 
 

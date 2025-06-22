@@ -3,6 +3,7 @@
 """
 
 from typing import Optional, Dict, Any
+
 from pydantic import BaseModel, EmailStr, validator
 
 

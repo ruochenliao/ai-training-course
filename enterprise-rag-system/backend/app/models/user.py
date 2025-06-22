@@ -275,3 +275,27 @@ class UserSession(BaseModel, TimestampMixin):
         self.last_activity_at = datetime.now()
         self.expires_at = datetime.now() + timedelta(minutes=extend_minutes)
         await self.save(update_fields=["last_activity_at", "expires_at"])
+
+
+class UserEvent(BaseModel, TimestampMixin):
+    """用户事件模型"""
+
+    user = fields.ForeignKeyField("models.User", related_name="events", on_delete=fields.CASCADE)
+    session_id = fields.CharField(max_length=255, description="会话ID", index=True)
+
+    # 事件信息
+    event_type = fields.CharField(max_length=50, description="事件类型", index=True)
+    properties = fields.JSONField(default=dict, description="事件属性")
+
+    # 请求信息
+    ip_address = fields.CharField(max_length=45, description="IP地址")
+    user_agent = fields.TextField(description="用户代理")
+
+    class Meta:
+        table = "user_events"
+        indexes = [
+            ["user_id", "event_type"],
+            ["session_id"],
+            ["event_type", "created_at"],
+            ["created_at"],
+        ]

@@ -2,17 +2,14 @@
 数据库迁移管理器
 """
 
-import os
 import importlib.util
-from typing import List, Dict, Any
-from pathlib import Path
 from datetime import datetime
-
-from tortoise import Tortoise
-from tortoise.backends.base.client import BaseDBAsyncClient
-from loguru import logger
+from pathlib import Path
+from typing import List, Dict, Any
 
 from app.core.config import settings
+from loguru import logger
+from tortoise import Tortoise
 
 
 class MigrationManager:

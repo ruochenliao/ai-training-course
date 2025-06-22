@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
-import { Layout, Input, Button, Card, Avatar, Typography, Tag, Spin, message } from 'antd'
-import { SendOutlined, RobotOutlined, UserOutlined, FileTextOutlined } from '@ant-design/icons'
+import React, {useEffect, useRef, useState} from 'react'
+import {Avatar, Button, Card, Input, Layout, message, Spin, Tag, Typography} from 'antd'
+import {FileTextOutlined, RobotOutlined, SendOutlined, UserOutlined} from '@ant-design/icons'
 
 const { Content } = Layout
 const { TextArea } = Input

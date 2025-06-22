@@ -2,16 +2,16 @@
 智能文档分块服务
 """
 
-import re
 import hashlib
-from typing import List, Dict, Any, Optional, Tuple
+import re
 from dataclasses import dataclass
-
-from loguru import logger
+from typing import List, Dict, Any, Optional, Tuple
 
 from app.core.config import settings
-from app.core.exceptions import DocumentProcessingException
 from app.models.knowledge import DocumentChunk
+from loguru import logger
+
+from app.core.exceptions import DocumentProcessingException
 
 
 @dataclass

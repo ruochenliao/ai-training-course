@@ -3,14 +3,14 @@
 """
 
 import asyncio
-import numpy as np
-from typing import List, Dict, Any, Optional, Union
 from dataclasses import dataclass
+from typing import List, Dict, Any, Union
 
 import httpx
+import numpy as np
+from app.core.config import settings
 from loguru import logger
 
-from app.core.config import settings
 from app.core.exceptions import AIServiceException
 
 

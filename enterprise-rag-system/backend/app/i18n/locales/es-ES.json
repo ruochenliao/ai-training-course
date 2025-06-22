@@ -1,0 +1,61 @@
+{
+  "common": {
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "username": "Username",
+    "password": "Password",
+    "email": "Email",
+    "forgot_password": "Forgot Password",
+    "login_success": "Login successful",
+    "login_failed": "Login failed",
+    "invalid_credentials": "Invalid username or password"
+  },
+  "knowledge_base": {
+    "title": "Knowledge Base",
+    "create": "Create Knowledge Base",
+    "name": "Knowledge Base Name",
+    "description": "Description",
+    "documents": "Documents",
+    "upload_document": "Upload Document",
+    "processing": "Processing",
+    "processed": "Processed",
+    "failed": "Processing Failed"
+  },
+  "chat": {
+    "title": "Intelligent Q&A",
+    "input_placeholder": "Please enter your question...",
+    "send": "Send",
+    "thinking": "Thinking...",
+    "no_results": "No relevant information found",
+    "sources": "Sources",
+    "new_conversation": "New Conversation"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "overview": "Overview",
+    "users": "Users",
+    "documents": "Documents",
+    "conversations": "Conversations",
+    "total_users": "Total Users",
+    "total_documents": "Total Documents",
+    "total_conversations": "Total Conversations",
+    "growth_rate": "Growth Rate"
+  }
+}

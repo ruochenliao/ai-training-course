@@ -3,39 +3,33 @@
 """
 
 from datetime import datetime
-from typing import List, Optional
+from enum import Enum
+from typing import List
 
 from tortoise import fields
 
 from .base import (
-    BaseModel, 
-    TimestampMixin, 
-    StatusMixin, 
-    SoftDeleteMixin, 
+    BaseModel,
+    TimestampMixin,
+    StatusMixin,
+    SoftDeleteMixin,
     OwnershipMixin,
     VisibilityMixin,
     MetadataMixin
 )
 
 
+class KnowledgeType(str, Enum):
+    """知识库类型枚举"""
+    CUSTOMER_SERVICE = "customer_service"
+    TEXT_SQL = "text_sql"
+    RAG = "rag"
+    CONTENT_CREATION = "content_creation"
+    GENERAL = "general"
+
+
 class KnowledgeBase(BaseModel, TimestampMixin, StatusMixin, SoftDeleteMixin, OwnershipMixin, VisibilityMixin, MetadataMixin):
     """知识库模型"""
-    
-    class KnowledgeType:
-        """知识库类型"""
-        CUSTOMER_SERVICE = "customer_service"
-        TEXT_SQL = "text_sql"
-        RAG = "rag"
-        CONTENT_CREATION = "content_creation"
-        GENERAL = "general"
-        
-        CHOICES = [
-            (CUSTOMER_SERVICE, "智能客服"),
-            (TEXT_SQL, "Text2SQL"),
-            (RAG, "RAG问答"),
-            (CONTENT_CREATION, "内容创作"),
-            (GENERAL, "通用知识库"),
-        ]
     
     # 基本信息
     name = fields.CharField(max_length=100, description="知识库名称", index=True)
@@ -117,24 +111,17 @@ class KnowledgeBase(BaseModel, TimestampMixin, StatusMixin, SoftDeleteMixin, Own
         return self.indexing_status == "ready"
 
 
+class ProcessingStatus(str, Enum):
+    """处理状态枚举"""
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+
 class Document(BaseModel, TimestampMixin, StatusMixin, SoftDeleteMixin, MetadataMixin):
     """文档模型"""
-    
-    class ProcessingStatus:
-        """处理状态"""
-        PENDING = "pending"
-        PROCESSING = "processing"
-        COMPLETED = "completed"
-        FAILED = "failed"
-        CANCELLED = "cancelled"
-        
-        CHOICES = [
-            (PENDING, "待处理"),
-            (PROCESSING, "处理中"),
-            (COMPLETED, "已完成"),
-            (FAILED, "失败"),
-            (CANCELLED, "已取消"),
-        ]
     
     # 关联关系
     knowledge_base = fields.ForeignKeyField(
@@ -202,33 +189,33 @@ class Document(BaseModel, TimestampMixin, StatusMixin, SoftDeleteMixin, Metadata
     
     def is_processing(self) -> bool:
         """是否正在处理"""
-        return self.processing_status == self.ProcessingStatus.PROCESSING
-    
+        return self.processing_status == ProcessingStatus.PROCESSING
+
     def is_completed(self) -> bool:
         """是否处理完成"""
-        return self.processing_status == self.ProcessingStatus.COMPLETED
-    
+        return self.processing_status == ProcessingStatus.COMPLETED
+
     def is_failed(self) -> bool:
         """是否处理失败"""
-        return self.processing_status == self.ProcessingStatus.FAILED
-    
+        return self.processing_status == ProcessingStatus.FAILED
+
     async def start_processing(self):
         """开始处理"""
-        self.processing_status = self.ProcessingStatus.PROCESSING
+        self.processing_status = ProcessingStatus.PROCESSING
         self.processing_started_at = datetime.now()
         self.processing_error = None
         await self.save(update_fields=["processing_status", "processing_started_at", "processing_error"])
-    
+
     async def complete_processing(self, chunk_count: int = 0):
         """完成处理"""
-        self.processing_status = self.ProcessingStatus.COMPLETED
+        self.processing_status = ProcessingStatus.COMPLETED
         self.processing_completed_at = datetime.now()
         self.chunk_count = chunk_count
         await self.save(update_fields=["processing_status", "processing_completed_at", "chunk_count"])
-    
+
     async def fail_processing(self, error_message: str):
         """处理失败"""
-        self.processing_status = self.ProcessingStatus.FAILED
+        self.processing_status = ProcessingStatus.FAILED
         self.processing_completed_at = datetime.now()
         self.processing_error = error_message
         await self.save(update_fields=["processing_status", "processing_completed_at", "processing_error"])

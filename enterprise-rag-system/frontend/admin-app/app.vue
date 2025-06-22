@@ -1,13 +1,30 @@
 <template>
   <div id="app">
-    <NuxtLayout>
-      <NuxtPage />
-    </NuxtLayout>
+    <n-config-provider :theme="theme">
+      <n-loading-bar-provider>
+        <n-dialog-provider>
+          <n-notification-provider>
+            <n-message-provider>
+              <NuxtLayout>
+                <NuxtPage />
+              </NuxtLayout>
+            </n-message-provider>
+          </n-notification-provider>
+        </n-dialog-provider>
+      </n-loading-bar-provider>
+    </n-config-provider>
   </div>
 </template>
 
 <script setup lang="ts">
-import { darkTheme } from 'naive-ui'
+import {
+  darkTheme,
+  NConfigProvider,
+  NLoadingBarProvider,
+  NDialogProvider,
+  NNotificationProvider,
+  NMessageProvider
+} from 'naive-ui'
 
 // 应用元数据
 useHead({

@@ -3,20 +3,20 @@
 """
 
 import asyncio
-from typing import Dict, Any, List
 from datetime import datetime
+from typing import Dict, Any, List
 
+from app.models.knowledge import Document, DocumentChunk
+from app.services.chunker import chunker_service
+from app.services.embedding_service import embedding_service
+from app.services.file_storage import file_storage
+from app.services.graph_db_service import graph_service
+from app.services.marker_service import marker_service
+from app.services.task_service import celery_app
+from app.services.vector_db import milvus_service
 from celery import current_task
 from loguru import logger
 
-from app.services.task_service import celery_app
-from app.services.marker_service import marker_service
-from app.services.chunker import chunker_service
-from app.services.file_storage import file_storage
-from app.services.embedding_service import embedding_service
-from app.services.vector_db import milvus_service
-from app.services.graph_db_service import graph_service
-from app.models.knowledge import Document, DocumentChunk
 from app.core.exceptions import DocumentProcessingException
 
 

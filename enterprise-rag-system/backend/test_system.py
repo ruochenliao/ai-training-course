@@ -5,7 +5,6 @@
 
 import asyncio
 import sys
-import os
 from pathlib import Path
 
 # 添加项目根目录到Python路径
@@ -13,11 +12,7 @@ sys.path.append(str(Path(__file__).parent))
 
 from app.services.agent_service import (
     QueryContext,
-    query_analyzer,
-    vector_retriever,
-    graph_retriever,
-    result_fusion,
-    answer_generator
+    query_analyzer
 )
 from app.services.workflow_service import (
     workflow_orchestrator,

@@ -5,7 +5,8 @@
 import secrets
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
+from pydantic import EmailStr, field_validator, model_validator
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -28,19 +29,23 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     
     # CORS配置
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
+    BACKEND_CORS_ORIGINS: List[str] = []
     ALLOWED_HOSTS: List[str] = ["*"]
-    
-    @validator("BACKEND_CORS_ORIGINS", pre=True)
-    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",")]
-        elif isinstance(v, (list, str)):
+
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        if isinstance(v, str):
+            if v == "*":
+                return ["*"]
+            elif not v.startswith("["):
+                return [i.strip() for i in v.split(",")]
+        elif isinstance(v, list):
             return v
-        raise ValueError(v)
+        return []
     
     # 数据库配置
-    DATABASE_URL: str = "mysql://root:password@localhost:3306/enterprise_rag"
+    DATABASE_URL: str = "mysql://root:password@localhost:3306/enterprise_rag?charset=utf8mb4"
     DATABASE_POOL_SIZE: int = 20
     DATABASE_MAX_OVERFLOW: int = 30
     
@@ -111,9 +116,16 @@ class Settings(BaseSettings):
     # 文档处理配置
     MAX_FILE_SIZE: int = 100 * 1024 * 1024  # 100MB
     SUPPORTED_FILE_TYPES: List[str] = [
-        ".pdf", ".docx", ".pptx", ".txt", ".md", 
+        ".pdf", ".docx", ".pptx", ".txt", ".md",
         ".html", ".csv", ".xlsx", ".json"
     ]
+
+    @field_validator("SUPPORTED_FILE_TYPES", mode="before")
+    @classmethod
+    def parse_supported_file_types(cls, v: Union[str, List[str]]) -> List[str]:
+        if isinstance(v, str):
+            return [ext.strip() for ext in v.split(",")]
+        return v
     
     # 分块配置
     CHUNK_SIZE: int = 1000
@@ -128,6 +140,37 @@ class Settings(BaseSettings):
     # 图谱配置
     GRAPH_MAX_DEPTH: int = 3
     GRAPH_MAX_NODES: int = 100
+
+    # 实体抽取配置
+    ENTITY_EXTRACTION_ENABLED: bool = True
+    ENTITY_EXTRACTION_BATCH_SIZE: int = 10
+    ENTITY_EXTRACTION_TIMEOUT: int = 30
+
+    # 高级搜索配置
+    SEARCH_MAX_CONCURRENT: int = 5
+    SEARCH_TIMEOUT: int = 30
+    SEARCH_DEFAULT_TOP_K: int = 10
+    SEARCH_ENABLE_RERANK: bool = True
+    SEARCH_RERANK_TOP_K: int = 20
+
+    # 智能问答配置
+    QA_MAX_CONTEXT_LENGTH: int = 8000
+    QA_MAX_SOURCES: int = 10
+    QA_CONFIDENCE_THRESHOLD: float = 0.7
+    QA_ENABLE_STREAM: bool = True
+
+    # Marker文档解析配置
+    MARKER_ENABLED: bool = True
+    MARKER_MAX_PAGES: Optional[int] = None
+    MARKER_LANGUAGES: List[str] = ["Chinese", "English"]
+    MARKER_BATCH_MULTIPLIER: int = 2
+
+    @field_validator("MARKER_LANGUAGES", mode="before")
+    @classmethod
+    def parse_marker_languages(cls, v: Union[str, List[str]]) -> List[str]:
+        if isinstance(v, str):
+            return [lang.strip() for lang in v.split(",")]
+        return v
     
     # 缓存配置
     CACHE_TTL_SHORT: int = 300  # 5分钟
@@ -159,23 +202,26 @@ class Settings(BaseSettings):
     EMAILS_FROM_EMAIL: Optional[EmailStr] = None
     EMAILS_FROM_NAME: Optional[str] = None
     
-    @validator("EMAILS_FROM_NAME")
-    def get_project_name(cls, v: Optional[str], values: Dict[str, Any]) -> str:
+    @field_validator("EMAILS_FROM_NAME", mode="before")
+    @classmethod
+    def get_project_name(cls, v: Optional[str]) -> str:
         if not v:
-            return values["PROJECT_NAME"]
+            return "企业级Agent+RAG知识库系统"  # 默认项目名称
         return v
     
     EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
     EMAIL_TEMPLATES_DIR: str = "app/email-templates/build"
     EMAILS_ENABLED: bool = False
     
-    @validator("EMAILS_ENABLED", pre=True)
-    def get_emails_enabled(cls, v: bool, values: Dict[str, Any]) -> bool:
-        return bool(
-            values.get("SMTP_HOST")
-            and values.get("SMTP_PORT")
-            and values.get("EMAILS_FROM_EMAIL")
-        )
+    @model_validator(mode="after")
+    def validate_emails_enabled(self) -> "Settings":
+        if not self.EMAILS_ENABLED:
+            self.EMAILS_ENABLED = bool(
+                self.SMTP_HOST
+                and self.SMTP_PORT
+                and self.EMAILS_FROM_EMAIL
+            )
+        return self
     
     # 测试配置
     TEST_DATABASE_URL: str = "sqlite://./test.db"
@@ -183,9 +229,33 @@ class Settings(BaseSettings):
     # 环境变量
     ENVIRONMENT: str = "development"  # development, staging, production
     
-    class Config:
-        case_sensitive = True
-        env_file = ".env"
+    model_config = {
+        "case_sensitive": True,
+        "env_file": ".env",
+        "env_parse_none_str": "None",
+        "env_parse_enums": True,
+        "extra": "ignore",  # 忽略额外的字段
+        "json_schema_extra": {
+            "env_prefix": "",
+        }
+    }
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls,
+        init_settings,
+        env_settings,
+        dotenv_settings,
+        file_secret_settings,
+    ):
+        # 自定义设置源，避免复杂类型的 JSON 解析
+        return (
+            init_settings,
+            env_settings,
+            dotenv_settings,
+            file_secret_settings,
+        )
 
 
 # 创建全局配置实例

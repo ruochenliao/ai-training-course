@@ -3,15 +3,12 @@ AutoGen工作流协调服务
 """
 
 import asyncio
-from typing import Dict, List, Any, Optional, AsyncGenerator
 from dataclasses import dataclass
 from enum import Enum
+from typing import Dict, List, Any, AsyncGenerator
 
-from loguru import logger
-
-from app.core.exceptions import WorkflowException
 from app.services.agent_service import (
-    QueryContext, 
+    QueryContext,
     RetrievalResult,
     query_analyzer,
     vector_retriever,
@@ -19,6 +16,9 @@ from app.services.agent_service import (
     result_fusion,
     answer_generator
 )
+from loguru import logger
+
+from app.core.exceptions import WorkflowException
 
 
 class WorkflowType(Enum):

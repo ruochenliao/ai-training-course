@@ -2,18 +2,25 @@
 Marker文档解析服务
 """
 
-import os
-import tempfile
-from typing import Dict, Any, Optional, List
-from pathlib import Path
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from typing import Dict, Any
 
-from loguru import logger
 import fitz  # PyMuPDF
-from docx import Document
-from pptx import Presentation
 import pandas as pd
+from docx import Document
+from loguru import logger
+from pptx import Presentation
+
+# Marker imports
+try:
+    from marker.convert import convert_single_pdf
+    from marker.models import load_all_models
+    MARKER_AVAILABLE = True
+except ImportError:
+    logger.warning("Marker library not available, falling back to basic PDF parsing")
+    MARKER_AVAILABLE = False
 
 from app.core.config import settings
 from app.core.exceptions import DocumentProcessingException
@@ -21,12 +28,12 @@ from app.core.exceptions import DocumentProcessingException
 
 class MarkerService:
     """Marker文档解析服务类"""
-    
+
     def __init__(self):
         """初始化Marker服务"""
         self.executor = ThreadPoolExecutor(max_workers=4)
         self.supported_formats = {
-            '.pdf': self._parse_pdf,
+            '.pdf': self._parse_pdf_with_marker,
             '.docx': self._parse_docx,
             '.doc': self._parse_docx,
             '.pptx': self._parse_pptx,
@@ -40,6 +47,19 @@ class MarkerService:
             '.xls': self._parse_excel,
             '.json': self._parse_json
         }
+
+        # 初始化Marker模型
+        self.marker_models = None
+        if MARKER_AVAILABLE:
+            try:
+                self.marker_models = load_all_models()
+                logger.info("Marker模型加载成功")
+            except Exception as e:
+                logger.warning(f"Marker模型加载失败，将使用基础PDF解析: {e}")
+                self.supported_formats['.pdf'] = self._parse_pdf_basic
+        else:
+            self.supported_formats['.pdf'] = self._parse_pdf_basic
+
         logger.info("Marker文档解析服务初始化完成")
     
     async def parse_document(
@@ -120,9 +140,69 @@ class MarkerService:
             result['word_count'] = len(result['content'].split())
         
         return result
-    
-    def _parse_pdf(self, file_path: str, extract_images: bool, extract_tables: bool) -> Dict[str, Any]:
-        """解析PDF文件"""
+
+    def _parse_pdf_with_marker(self, file_path: str, extract_images: bool, extract_tables: bool) -> Dict[str, Any]:
+        """使用Marker解析PDF文件（高级版本）"""
+        if not MARKER_AVAILABLE or not self.marker_models:
+            return self._parse_pdf_basic(file_path, extract_images, extract_tables)
+
+        try:
+            # 使用Marker进行高质量PDF解析
+            full_text, images, out_meta = convert_single_pdf(
+                file_path,
+                self.marker_models,
+                max_pages=None,
+                langs=["Chinese", "English"],
+                batch_multiplier=2
+            )
+
+            # 处理图片
+            processed_images = []
+            if extract_images and images:
+                for img_key, img_data in images.items():
+                    processed_images.append({
+                        'key': img_key,
+                        'data': img_data,
+                        'type': 'marker_extracted'
+                    })
+
+            # 从元数据中提取表格信息
+            tables = []
+            if extract_tables and out_meta.get('table_blocks'):
+                for i, table_block in enumerate(out_meta['table_blocks']):
+                    tables.append({
+                        'index': i,
+                        'bbox': table_block.get('bbox', []),
+                        'content': table_block.get('text', ''),
+                        'type': 'marker_table'
+                    })
+
+            # 构建结果
+            return {
+                'content': full_text,
+                'metadata': {
+                    'marker_version': True,
+                    'languages': out_meta.get('languages', []),
+                    'page_count': out_meta.get('page_count', 0),
+                    'processing_time': out_meta.get('processing_time', 0)
+                },
+                'images': processed_images,
+                'tables': tables,
+                'page_count': out_meta.get('page_count', 0),
+                'structure': {
+                    'type': 'pdf_marker',
+                    'blocks': len(out_meta.get('blocks', [])),
+                    'table_blocks': len(out_meta.get('table_blocks', [])),
+                    'image_blocks': len(out_meta.get('image_blocks', []))
+                }
+            }
+
+        except Exception as e:
+            logger.warning(f"Marker PDF解析失败，回退到基础解析: {e}")
+            return self._parse_pdf_basic(file_path, extract_images, extract_tables)
+
+    def _parse_pdf_basic(self, file_path: str, extract_images: bool, extract_tables: bool) -> Dict[str, Any]:
+        """基础PDF解析（使用PyMuPDF）"""
         try:
             doc = fitz.open(file_path)
             content_parts = []

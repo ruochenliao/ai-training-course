@@ -2,18 +2,17 @@
 企业级Agent+RAG知识库系统 - FastAPI主应用
 """
 
-import asyncio
-import os
 import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from loguru import logger
+
 # 添加项目根目录到Python路径
 sys.path.append(str(Path(__file__).parent.parent))
 

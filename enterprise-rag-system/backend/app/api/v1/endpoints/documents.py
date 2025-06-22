@@ -4,13 +4,11 @@
 
 import os
 import tempfile
-from typing import Any, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form, status
-from fastapi.responses import StreamingResponse
+from typing import Any, Optional
 
 from app.core.security import get_current_user
-from app.models.user import User
 from app.models.knowledge import Document, DocumentChunk, KnowledgeBase
+from app.models.user import User
 from app.schemas.document import (
     DocumentResponse, DocumentListResponse, DocumentUploadResponse,
     DocumentSearchRequest, DocumentSearchResponse, DocumentStats,
@@ -18,6 +16,8 @@ from app.schemas.document import (
 )
 from app.services.document_processor import document_processor
 from app.services.file_storage import file_storage
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form, status
+from fastapi.responses import StreamingResponse
 
 router = APIRouter()
 

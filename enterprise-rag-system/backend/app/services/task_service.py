@@ -2,17 +2,16 @@
 Celery异步任务服务
 """
 
-import asyncio
-from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Dict, Any, Optional, List
 
+import redis
+from app.core.config import settings
 from celery import Celery
 from celery.result import AsyncResult
 from loguru import logger
-import redis
 
-from app.core.config import settings
 from app.core.exceptions import TaskException
 
 

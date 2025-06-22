@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { Layout, Typography, Button, Input, Card, Space } from 'antd'
-import { MessageOutlined, BookOutlined, SearchOutlined } from '@ant-design/icons'
+import {useState} from 'react'
+import {Button, Card, Input, Layout, Space, Typography} from 'antd'
+import {BookOutlined, MessageOutlined, SearchOutlined} from '@ant-design/icons'
 
 const { Header, Content, Footer } = Layout
 const { Title, Paragraph } = Typography
