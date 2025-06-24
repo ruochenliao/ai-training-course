@@ -1,5 +1,5 @@
 """
-嵌入模型服务
+嵌入模型服务 - 集成通义千问3-8B嵌入模型
 """
 
 import asyncio
@@ -12,6 +12,7 @@ from app.core.config import settings
 from loguru import logger
 
 from app.core.exceptions import AIServiceException
+from app.services.qwen_model_service import qwen_model_manager
 
 
 @dataclass
@@ -32,56 +33,90 @@ class EmbeddingResponse:
 
 
 class EmbeddingService:
-    """嵌入模型服务类"""
-    
+    """嵌入模型服务类 - 支持通义千问3-8B本地模型和API"""
+
     def __init__(self):
         self.api_base = settings.EMBEDDING_API_BASE
         self.api_key = settings.EMBEDDING_API_KEY
         self.model_name = settings.EMBEDDING_MODEL_NAME
         self.dimension = settings.EMBEDDING_DIMENSION
-        
+
         # HTTP客户端配置
         self.timeout = httpx.Timeout(60.0, connect=10.0)
         self.limits = httpx.Limits(max_keepalive_connections=20, max_connections=100)
-        
+
         # 批处理配置
-        self.max_batch_size = 100
-        self.max_text_length = 8192
+        self.max_batch_size = settings.EMBEDDING_BATCH_SIZE
+        self.max_text_length = settings.EMBEDDING_MAX_LENGTH
+
+        # 通义千问模型服务
+        self.qwen_service = None
+        self._initialized = False
     
+    async def initialize(self):
+        """初始化嵌入服务"""
+        if self._initialized:
+            return
+
+        try:
+            self.qwen_service = await qwen_model_manager.get_embedding_service()
+            self._initialized = True
+            logger.info("嵌入服务初始化完成")
+        except Exception as e:
+            logger.error(f"嵌入服务初始化失败: {e}")
+            # 继续使用API模式
+
     async def create_embeddings(
-        self, 
+        self,
         texts: Union[str, List[str]],
         model: str = None,
         normalize: bool = True
     ) -> Union[List[float], List[List[float]]]:
-        """创建嵌入向量"""
+        """创建嵌入向量 - 优先使用通义千问本地模型"""
         try:
+            # 确保服务已初始化
+            if not self._initialized:
+                await self.initialize()
+
             # 标准化输入
             if isinstance(texts, str):
                 texts = [texts]
                 single_input = True
             else:
                 single_input = False
-            
+
             # 文本预处理
             processed_texts = self._preprocess_texts(texts)
-            
-            # 批处理
+
+            # 优先使用通义千问本地模型
+            if self.qwen_service:
+                try:
+                    all_embeddings = await self.qwen_service.embed_texts(processed_texts)
+                    if all_embeddings:
+                        # 返回结果
+                        if single_input:
+                            return all_embeddings[0]
+                        else:
+                            return all_embeddings
+                except Exception as e:
+                    logger.warning(f"通义千问模型调用失败，回退到API: {e}")
+
+            # 回退到原有API方式
             all_embeddings = []
             for batch in self._create_batches(processed_texts):
                 batch_embeddings = await self._create_batch_embeddings(batch, model)
                 all_embeddings.extend(batch_embeddings)
-            
+
             # 归一化
             if normalize:
                 all_embeddings = self._normalize_embeddings(all_embeddings)
-            
+
             # 返回结果
             if single_input:
                 return all_embeddings[0]
             else:
                 return all_embeddings
-                
+
         except Exception as e:
             logger.error(f"创建嵌入向量失败: {e}")
             raise AIServiceException(f"创建嵌入向量失败: {e}")
@@ -369,6 +404,10 @@ class EmbeddingService:
     async def embed_texts(self, texts: List[str]) -> List[List[float]]:
         """批量文本嵌入（兼容性方法）"""
         return await self.create_embeddings(texts)
+
+    async def embed_query(self, query: str) -> List[float]:
+        """查询嵌入（兼容性方法）"""
+        return await self.create_embeddings(query)
 
 
 # 全局嵌入服务实例

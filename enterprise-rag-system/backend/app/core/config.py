@@ -86,32 +86,50 @@ class Settings(BaseSettings):
     LLM_MAX_TOKENS: int = 4096
     LLM_TEMPERATURE: float = 0.1
     
-    # VLM配置
-    VLM_MODEL_NAME: str = "qwen-vl-max"
+    # VLM配置 - 通义千问多模态模型
+    VLM_MODEL_NAME: str = "qwen-vl-max-latest"
     VLM_API_BASE: str = "https://dashscope.aliyuncs.com/api/v1"
     VLM_API_KEY: str = ""
-    
-    # 嵌入模型配置
-    EMBEDDING_MODEL_NAME: str = "text-embedding-v1"
+
+    # 嵌入模型配置 - 通义千问3-8B嵌入模型
+    EMBEDDING_MODEL_NAME: str = "Qwen/Qwen3-8B"
+    EMBEDDING_MODEL_PATH: str = "./models/Qwen3-8B"  # 本地模型路径
     EMBEDDING_API_BASE: str = "https://dashscope.aliyuncs.com/api/v1"
     EMBEDDING_API_KEY: str = ""
-    EMBEDDING_DIMENSION: int = 1024
-    EMBEDDING_BATCH_SIZE: int = 100
-    
-    # 重排模型配置
-    RERANKER_MODEL_NAME: str = "gte-rerank"
+    EMBEDDING_DIMENSION: int = 4096  # Qwen3-8B嵌入维度
+    EMBEDDING_BATCH_SIZE: int = 32
+    EMBEDDING_MAX_LENGTH: int = 8192
+
+    # 重排模型配置 - 通义千问3-Reranker-8B
+    RERANKER_MODEL_NAME: str = "Qwen/Qwen3-Reranker-8B"
+    RERANKER_MODEL_PATH: str = "./models/Qwen3-Reranker-8B"  # 本地模型路径
     RERANKER_API_BASE: str = "https://dashscope.aliyuncs.com/api/v1"
     RERANKER_API_KEY: str = ""
+    RERANKER_TOP_K: int = 20
+    RERANKER_BATCH_SIZE: int = 16
     
-    # AutoGen配置
+    # AutoGen配置 - 多智能体框架配置
     AUTOGEN_CONFIG_LIST: List[Dict[str, Any]] = [
         {
             "model": "deepseek-chat",
             "api_key": "",
-            "base_url": "https://api.deepseek.com",
+            "base_url": "https://api.deepseek.com/v1",
             "api_type": "openai",
+        },
+        {
+            "model": "qwen-vl-max-latest",
+            "api_key": "",
+            "base_url": "https://dashscope.aliyuncs.com/api/v1",
+            "api_type": "dashscope",
         }
     ]
+
+    # AutoGen智能体配置
+    AUTOGEN_MAX_ROUND: int = 10
+    AUTOGEN_TIMEOUT: int = 300
+    AUTOGEN_TEMPERATURE: float = 0.1
+    AUTOGEN_ENABLE_CACHE: bool = True
+    AUTOGEN_CACHE_SEED: int = 42
     
     # 文档处理配置
     MAX_FILE_SIZE: int = 100 * 1024 * 1024  # 100MB

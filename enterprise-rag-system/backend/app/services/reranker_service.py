@@ -1,5 +1,5 @@
 """
-重排模型服务
+重排模型服务 - 集成通义千问3-Reranker-8B模型
 """
 
 import asyncio
@@ -11,6 +11,7 @@ from app.core.config import settings
 from loguru import logger
 
 from app.core.exceptions import AIServiceException
+from app.services.qwen_model_service import qwen_model_manager
 
 
 @dataclass
@@ -40,64 +41,109 @@ class RerankResponse:
 
 
 class RerankerService:
-    """重排模型服务类"""
-    
+    """重排模型服务类 - 支持通义千问3-Reranker-8B本地模型和API"""
+
     def __init__(self):
         self.api_base = settings.RERANKER_API_BASE
         self.api_key = settings.RERANKER_API_KEY
         self.model_name = settings.RERANKER_MODEL_NAME
-        
+
         # HTTP客户端配置
         self.timeout = httpx.Timeout(60.0, connect=10.0)
         self.limits = httpx.Limits(max_keepalive_connections=20, max_connections=100)
-        
+
         # 批处理配置
-        self.max_batch_size = 100
+        self.max_batch_size = settings.RERANKER_BATCH_SIZE
         self.max_query_length = 512
         self.max_document_length = 2048
+
+        # 通义千问重排服务
+        self.qwen_service = None
+        self._initialized = False
     
+    async def initialize(self):
+        """初始化重排服务"""
+        if self._initialized:
+            return
+
+        try:
+            self.qwen_service = await qwen_model_manager.get_reranker_service()
+            self._initialized = True
+            logger.info("重排服务初始化完成")
+        except Exception as e:
+            logger.error(f"重排服务初始化失败: {e}")
+            # 继续使用API模式
+
     async def rerank(
-        self, 
+        self,
         query: str,
         documents: List[str],
         top_k: Optional[int] = None,
         model: str = None,
         return_documents: bool = True
     ) -> List[RerankResult]:
-        """重排文档"""
+        """重排文档 - 优先使用通义千问本地模型"""
         try:
+            # 确保服务已初始化
+            if not self._initialized:
+                await self.initialize()
+
             # 预处理
             processed_query = self._preprocess_query(query)
             processed_documents = self._preprocess_documents(documents)
-            
-            # 批处理
+
+            # 优先使用通义千问本地模型
+            if self.qwen_service:
+                try:
+                    rerank_result = await self.qwen_service.rerank(
+                        query=processed_query,
+                        documents=processed_documents,
+                        top_k=top_k or settings.RERANKER_TOP_K
+                    )
+
+                    # 转换为标准格式
+                    results = []
+                    for i, (idx, score) in enumerate(zip(rerank_result["indices"], rerank_result["scores"])):
+                        result = RerankResult(
+                            index=idx,
+                            relevance_score=score,
+                            document=processed_documents[idx] if return_documents else None
+                        )
+                        results.append(result)
+
+                    return results
+
+                except Exception as e:
+                    logger.warning(f"通义千问重排模型调用失败，回退到API: {e}")
+
+            # 回退到原有API方式
             all_results = []
             for batch_start in range(0, len(processed_documents), self.max_batch_size):
                 batch_end = min(batch_start + self.max_batch_size, len(processed_documents))
                 batch_documents = processed_documents[batch_start:batch_end]
-                
+
                 batch_results = await self._rerank_batch(
                     processed_query,
                     batch_documents,
                     model,
                     return_documents
                 )
-                
+
                 # 调整索引
                 for result in batch_results:
                     result.index += batch_start
-                
+
                 all_results.extend(batch_results)
-            
+
             # 按相关性分数排序
             all_results.sort(key=lambda x: x.relevance_score, reverse=True)
-            
+
             # 应用top_k限制
             if top_k:
                 all_results = all_results[:top_k]
-            
+
             return all_results
-            
+
         except Exception as e:
             logger.error(f"文档重排失败: {e}")
             raise AIServiceException(f"文档重排失败: {e}")
