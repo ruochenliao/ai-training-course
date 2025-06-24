@@ -1,0 +1,241 @@
+{
+  "summary": {
+    "completion_rate": 1.8181818181818181,
+    "passed_items": 1,
+    "total_items": 55
+  },
+  "details": {
+    "backend": {
+      "file_main.py": {
+        "status": "FAIL",
+        "details": "主应用文件 - 文件不存在: backend/app/main.py"
+      },
+      "file_config.py": {
+        "status": "FAIL",
+        "details": "配置文件 - 文件不存在: backend/app/core/config.py"
+      },
+      "file_database.py": {
+        "status": "FAIL",
+        "details": "数据库配置 - 文件不存在: backend/app/core/database.py"
+      },
+      "file___init__.py": {
+        "status": "FAIL",
+        "details": "数据模式 - 文件不存在: backend/app/schemas/__init__.py"
+      },
+      "file_api.py": {
+        "status": "FAIL",
+        "details": "API路由 - 文件不存在: backend/app/api/v1/api.py"
+      },
+      "file_requirements.txt": {
+        "status": "FAIL",
+        "details": "依赖文件 - 文件不存在: backend/requirements.txt"
+      },
+      "file_Dockerfile": {
+        "status": "FAIL",
+        "details": "Docker配置 - 文件不存在: backend/Dockerfile"
+      },
+      "dir_services": {
+        "status": "FAIL",
+        "details": "业务服务 - 目录不存在: backend/app/services"
+      },
+      "dir_agents": {
+        "status": "FAIL",
+        "details": "智能体服务 - 目录不存在: backend/app/agents"
+      },
+      "dir_endpoints": {
+        "status": "FAIL",
+        "details": "API端点 - 目录不存在: backend/app/api/v1/endpoints"
+      },
+      "dir_tests": {
+        "status": "FAIL",
+        "details": "测试文件 - 目录不存在: backend/tests"
+      }
+    },
+    "frontend": {
+      "admin_nuxt.config.ts": {
+        "status": "FAIL",
+        "details": "Nuxt配置 - 文件不存在: frontend/admin-app/nuxt.config.ts"
+      },
+      "admin_package.json": {
+        "status": "FAIL",
+        "details": "依赖配置 - 文件不存在: frontend/admin-app/package.json"
+      },
+      "admin_Dockerfile": {
+        "status": "FAIL",
+        "details": "Docker配置 - 文件不存在: frontend/admin-app/Dockerfile"
+      },
+      "admin_default.vue": {
+        "status": "FAIL",
+        "details": "默认布局 - 文件不存在: frontend/admin-app/layouts/default.vue"
+      },
+      "admin_index.vue": {
+        "status": "FAIL",
+        "details": "用户管理 - 文件不存在: frontend/admin-app/pages/users/index.vue"
+      },
+      "admin_knowledgeBase.ts": {
+        "status": "FAIL",
+        "details": "知识库状态管理 - 文件不存在: frontend/admin-app/stores/knowledgeBase.ts"
+      },
+      "admin_document.ts": {
+        "status": "FAIL",
+        "details": "文档状态管理 - 文件不存在: frontend/admin-app/stores/document.ts"
+      },
+      "admin_user.ts": {
+        "status": "FAIL",
+        "details": "用户状态管理 - 文件不存在: frontend/admin-app/stores/user.ts"
+      },
+      "admin_useApi.ts": {
+        "status": "FAIL",
+        "details": "API组合函数 - 文件不存在: frontend/admin-app/composables/useApi.ts"
+      },
+      "admin_useAuth.ts": {
+        "status": "FAIL",
+        "details": "认证组合函数 - 文件不存在: frontend/admin-app/composables/useAuth.ts"
+      },
+      "admin_useWebSocket.ts": {
+        "status": "FAIL",
+        "details": "WebSocket组合函数 - 文件不存在: frontend/admin-app/composables/useWebSocket.ts"
+      },
+      "admin_naive-ui.client.ts": {
+        "status": "FAIL",
+        "details": "UI插件 - 文件不存在: frontend/admin-app/plugins/naive-ui.client.ts"
+      },
+      "user_next.config.js": {
+        "status": "FAIL",
+        "details": "Next.js配置 - 文件不存在: frontend/user-app/next.config.js"
+      },
+      "user_package.json": {
+        "status": "FAIL",
+        "details": "依赖配置 - 文件不存在: frontend/user-app/package.json"
+      },
+      "user_Dockerfile": {
+        "status": "FAIL",
+        "details": "Docker配置 - 文件不存在: frontend/user-app/Dockerfile"
+      },
+      "user_page.tsx": {
+        "status": "FAIL",
+        "details": "聊天页面 - 文件不存在: frontend/user-app/src/app/chat/page.tsx"
+      },
+      "user_ChatInterface.tsx": {
+        "status": "FAIL",
+        "details": "聊天组件 - 文件不存在: frontend/user-app/src/components/ChatInterface.tsx"
+      },
+      "user_api.ts": {
+        "status": "FAIL",
+        "details": "API工具 - 文件不存在: frontend/user-app/src/utils/api.ts"
+      },
+      "user_useChat.ts": {
+        "status": "FAIL",
+        "details": "聊天Hook - 文件不存在: frontend/user-app/src/hooks/useChat.ts"
+      },
+      "user_useWebSocket.ts": {
+        "status": "FAIL",
+        "details": "WebSocket Hook - 文件不存在: frontend/user-app/src/hooks/useWebSocket.ts"
+      },
+      "user_jest.config.js": {
+        "status": "FAIL",
+        "details": "Jest配置 - 文件不存在: frontend/user-app/jest.config.js"
+      },
+      "user_jest.setup.js": {
+        "status": "FAIL",
+        "details": "Jest设置 - 文件不存在: frontend/user-app/jest.setup.js"
+      }
+    },
+    "deployment": {
+      "docker-compose.yml": {
+        "status": "FAIL",
+        "details": "开发环境编排 - 文件不存在: docker-compose.yml"
+      },
+      "docker-compose.prod.yml": {
+        "status": "FAIL",
+        "details": "生产环境编排 - 文件不存在: docker-compose.prod.yml"
+      },
+      "default.conf": {
+        "status": "FAIL",
+        "details": "Nginx配置 - 文件不存在: nginx/conf.d/default.conf"
+      },
+      ".env.example": {
+        "status": "FAIL",
+        "details": "环境变量模板 - 文件不存在: .env.example"
+      },
+      "deploy.sh": {
+        "status": "FAIL",
+        "details": "部署脚本 - 文件不存在: scripts/deploy.sh"
+      },
+      "integration_test.py": {
+        "status": "FAIL",
+        "details": "集成测试 - 文件不存在: scripts/integration_test.py"
+      },
+      "simple_verify.py": {
+        "status": "FAIL",
+        "details": "简单验证 - 文件不存在: scripts/simple_verify.py"
+      },
+      "completeness_check.py": {
+        "status": "FAIL",
+        "details": "完整性检查 - 文件不存在: scripts/completeness_check.py"
+      }
+    },
+    "documentation": {
+      "README.md": {
+        "status": "PASS",
+        "details": "项目说明 - 文件存在"
+      },
+      "architecture.md": {
+        "status": "FAIL",
+        "details": "架构设计 - 文件不存在: docs/architecture.md"
+      },
+      "development-plan.md": {
+        "status": "FAIL",
+        "details": "开发计划 - 文件不存在: docs/development-plan.md"
+      },
+      "功能实现清单.md": {
+        "status": "FAIL",
+        "details": "功能清单 - 文件不存在: docs/功能实现清单.md"
+      },
+      "文件结构分析.md": {
+        "status": "FAIL",
+        "details": "文件结构 - 文件不存在: docs/文件结构分析.md"
+      },
+      "快速启动指南.md": {
+        "status": "FAIL",
+        "details": "启动指南 - 文件不存在: docs/快速启动指南.md"
+      },
+      "完整启动指南.md": {
+        "status": "FAIL",
+        "details": "完整启动指南 - 文件不存在: docs/完整启动指南.md"
+      },
+      "项目完成度总结.md": {
+        "status": "FAIL",
+        "details": "完成度总结 - 文件不存在: docs/项目完成度总结.md"
+      },
+      "项目交付报告.md": {
+        "status": "FAIL",
+        "details": "交付报告 - 文件不存在: docs/项目交付报告.md"
+      }
+    },
+    "testing": {
+      "test_api.py": {
+        "status": "FAIL",
+        "details": "后端API测试 - 文件不存在: backend/tests/test_api.py"
+      },
+      "pytest.ini": {
+        "status": "FAIL",
+        "details": "Pytest配置 - 文件不存在: backend/pytest.ini"
+      },
+      "ChatInterface.test.tsx": {
+        "status": "FAIL",
+        "details": "前端组件测试 - 文件不存在: frontend/user-app/src/__tests__/components/ChatInterface.test.tsx"
+      }
+    },
+    "monitoring": {
+      "prometheus.yml": {
+        "status": "FAIL",
+        "details": "Grafana数据源 - 文件不存在: monitoring/grafana/datasources/prometheus.yml"
+      },
+      "rag-system-overview.json": {
+        "status": "FAIL",
+        "details": "Grafana仪表板 - 文件不存在: monitoring/grafana/dashboards/rag-system-overview.json"
+      }
+    }
+  }
+}
