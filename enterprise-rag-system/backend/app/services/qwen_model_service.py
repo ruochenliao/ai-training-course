@@ -6,17 +6,14 @@
 import asyncio
 import logging
 import os
-from typing import Any, Dict, List, Optional, Union
-import numpy as np
-from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-import torch
-from transformers import AutoModel, AutoTokenizer, AutoConfig
-from modelscope import snapshot_download
 import dashscope
-from dashscope import TextEmbedding, TextRerank
-
+import torch
 from app.core.config import settings
+from dashscope import TextEmbedding, TextReRank
+from modelscope import snapshot_download
+from transformers import AutoModel, AutoTokenizer
 
 logger = logging.getLogger(__name__)
 
@@ -347,7 +344,7 @@ class QwenRerankerService:
             raise ValueError("API Key未配置")
         
         try:
-            response = TextRerank.call(
+            response = TextReRank.call(
                 model="gte-rerank",
                 query=query,
                 documents=documents,

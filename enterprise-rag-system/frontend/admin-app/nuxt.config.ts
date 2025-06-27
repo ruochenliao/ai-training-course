@@ -62,8 +62,8 @@ export default defineNuxtConfig({
     }
   },
   
-  // 服务端渲染
-  ssr: true,
+  // 服务端渲染 - 暂时禁用以避免 CSS 渲染问题
+  ssr: false,
   
   // TypeScript配置
   typescript: {

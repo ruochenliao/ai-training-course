@@ -4,21 +4,20 @@
 """
 
 import asyncio
-import json
 import time
-from typing import Any, Dict, List, Optional, Callable
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 import autogen
-from autogen import GroupChat, GroupChatManager
-from loguru import logger
-
 from app.core.config import settings
-from app.core.exceptions import WorkflowException
 from app.services.enhanced_autogen_service import (
     EnhancedAutoGenService, SearchMode, AgentTask, AgentResponse
 )
+from autogen import GroupChat, GroupChatManager
+from loguru import logger
+
+from app.core.exceptions import WorkflowException
 
 
 class WorkflowType(Enum):

@@ -1,5 +1,5 @@
-import { ref, computed, onUnmounted } from 'vue'
-import type { Ref } from 'vue'
+import type {Ref} from 'vue'
+import {computed, onUnmounted, ref} from 'vue'
 
 interface WebSocketMessage {
   type: string

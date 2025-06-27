@@ -4,24 +4,22 @@
 """
 
 import asyncio
-import json
 import time
-from typing import Any, Dict, List, Optional, Union, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 import autogen
+from app.core.config import settings
+from app.services.enhanced_graph_service import enhanced_graph_service
+# 导入增强版服务
+from app.services.enhanced_vector_db import enhanced_vector_db_service
+from app.services.llm_service import LLMService
+from app.services.qwen_model_service import qwen_model_manager
 from autogen import ConversableAgent, GroupChat, GroupChatManager
 from loguru import logger
 
-from app.core.config import settings
 from app.core.exceptions import AgentException
-
-# 导入增强版服务
-from app.services.enhanced_vector_db import enhanced_vector_db_service
-from app.services.enhanced_graph_service import enhanced_graph_service
-from app.services.qwen_model_service import qwen_model_manager
-from app.services.llm_service import LLMService
 
 
 class SearchMode(Enum):

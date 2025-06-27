@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # 后端API服务
+  # 后端API服务 - FastAPI 0.104+
   backend:
     build:
       context: ./backend
@@ -11,51 +11,41 @@ services:
     environment:
       - ENV=development
       - DEBUG=true
-      - DATABASE_URL=postgresql://rag_user:rag_password@postgres:5432/rag_db
+      # MySQL 8.0+ 数据库连接
+      - DATABASE_URL=mysql+aiomysql://rag_user:rag_password@mysql:3306/rag_db
       - REDIS_URL=redis://redis:6379/0
+      # Milvus 2.3+ 向量数据库
       - MILVUS_HOST=milvus-standalone
       - MILVUS_PORT=19530
+      # Neo4j 5.x 图数据库
       - NEO4J_URI=bolt://neo4j:7687
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=neo4j_password
-      - QWEN_API_KEY=${QWEN_API_KEY:-your_qwen_api_key}
+      # deepseek-chat API
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-your_deepseek_api_key}
+      # qwen-vl-max DashScope API
+      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY:-your_dashscope_api_key}
+      # Qwen2.5 ModelScope
+      - MODELSCOPE_CACHE_DIR=/app/models
       - SECRET_KEY=${SECRET_KEY:-dev_secret_key_change_in_production}
-      - CORS_ORIGINS=http://localhost:3000,http://localhost:3001
+      - CORS_ORIGINS=http://localhost:3001
     ports:
       - "8000:8000"
     depends_on:
-      - postgres
+      - mysql
       - redis
       - milvus-standalone
       - neo4j
     volumes:
       - ./backend:/app
       - ./data/uploads:/app/uploads
+      - ./data/models:/app/models
       - ./logs:/app/logs
     networks:
       - rag-network
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-  # 管理后台前端
-  admin-frontend:
-    build:
-      context: ./frontend/admin-app
-      dockerfile: Dockerfile.dev
-    container_name: rag-admin-frontend-dev
-    restart: unless-stopped
-    environment:
-      - NUXT_PUBLIC_API_BASE=http://localhost:8000/api/v1
-      - NUXT_PUBLIC_WS_BASE=ws://localhost:8000/ws
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend/admin-app:/app
-      - /app/node_modules
-    networks:
-      - rag-network
-    command: npm run dev
-
-  # 用户前端
+  # 用户前端 - React 18 + TypeScript + Vite
   user-frontend:
     build:
       context: ./frontend/user-app
@@ -63,8 +53,11 @@ services:
     container_name: rag-user-frontend-dev
     restart: unless-stopped
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
-      - NEXT_PUBLIC_WS_URL=ws://localhost:8000/ws
+      # React 18 + Vite 配置
+      - VITE_API_URL=http://localhost:8000
+      - VITE_WS_URL=ws://localhost:8000/ws
+      # Ant Design 5.12+ 主题配置
+      - VITE_THEME_MODE=light
     ports:
       - "3001:3000"
     volumes:
@@ -74,24 +67,31 @@ services:
       - rag-network
     command: npm run dev
 
-  # PostgreSQL数据库
-  postgres:
-    image: postgres:15
-    container_name: rag-postgres-dev
+  # 移除管理后台 - 专注核心RAG功能
+  # admin-frontend 已移除，只保留用户界面
+
+  # MySQL 8.0+ 关系数据库
+  mysql:
+    image: mysql:8.0
+    container_name: rag-mysql-dev
     restart: unless-stopped
     environment:
-      - POSTGRES_DB=rag_db
-      - POSTGRES_USER=rag_user
-      - POSTGRES_PASSWORD=rag_password
+      - MYSQL_DATABASE=rag_db
+      - MYSQL_USER=rag_user
+      - MYSQL_PASSWORD=rag_password
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_CHARSET=utf8mb4
+      - MYSQL_COLLATION=utf8mb4_unicode_ci
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql
+      - ./database/mysql-init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - rag-network
+    command: --default-authentication-plugin=mysql_native_password
 
-  # Redis缓存
+  # Redis 7.0+ 缓存和任务队列
   redis:
     image: redis:7-alpine
     container_name: rag-redis-dev
@@ -102,8 +102,9 @@ services:
       - redis_data:/data
     networks:
       - rag-network
+    command: redis-server --appendonly yes
 
-  # Milvus向量数据库
+  # Milvus 2.3+ 向量数据库 (HNSW索引)
   etcd:
     container_name: milvus-etcd-dev
     image: quay.io/coreos/etcd:v3.5.5
@@ -145,8 +146,11 @@ services:
     environment:
       ETCD_ENDPOINTS: etcd:2379
       MINIO_ADDRESS: minio:9000
+      # HNSW索引配置
+      MILVUS_CONFIG_PATH: /milvus/configs/milvus.yaml
     volumes:
       - milvus_data:/var/lib/milvus
+      - ./config/milvus.yaml:/milvus/configs/milvus.yaml
     ports:
       - "19530:19530"
       - "9091:9091"
@@ -156,16 +160,20 @@ services:
     networks:
       - rag-network
 
-  # Neo4j图数据库
+  # Neo4j 5.x 图数据库 (Cypher查询)
   neo4j:
     image: neo4j:5.13
     container_name: rag-neo4j-dev
     restart: unless-stopped
     environment:
       - NEO4J_AUTH=neo4j/neo4j_password
-      - NEO4J_PLUGINS=["apoc"]
-      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
-      - NEO4J_dbms_security_procedures_allowlist=apoc.*
+      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
+      - NEO4J_dbms_security_procedures_allowlist=apoc.*,gds.*
+      # 知识图谱优化配置
+      - NEO4J_dbms_memory_heap_initial_size=1G
+      - NEO4J_dbms_memory_heap_max_size=2G
+      - NEO4J_dbms_memory_pagecache_size=1G
     ports:
       - "7474:7474"
       - "7687:7687"
@@ -176,7 +184,7 @@ services:
       - rag-network
 
 volumes:
-  postgres_data:
+  mysql_data:
   redis_data:
   milvus_data:
   etcd_data:

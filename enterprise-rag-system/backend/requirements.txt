@@ -4,25 +4,30 @@ uvicorn[standard]==0.24.0
 gunicorn==21.2.0
 python-multipart==0.0.6
 
-# Database
-tortoise-orm[asyncpg]==0.20.0
-aerich==0.7.2
-asyncpg==0.29.0
+# Database - 严格按照技术栈要求
+# MySQL 8.0+ 支持
+sqlalchemy==2.0.23
+alembic==1.13.1
 pymysql==1.1.0
+aiomysql==0.2.0
 cryptography==41.0.7
+
+# 移除 Tortoise ORM，使用 SQLAlchemy 2.0+
+# tortoise-orm[asyncpg]==0.20.0  # 已移除
+# aerich==0.7.2  # 已移除
+# asyncpg==0.29.0  # 已移除
 
 # Authentication & Security
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
-python-multipart==0.0.6
 bcrypt==4.1.2
 
-# AI and ML - AutoGen智能体框架
+# AutoGen智能体框架 (microsoft/autogen)
 pyautogen==0.2.18
 autogen-agentchat==0.2.18
 openai==1.3.0
 
-# 模型和嵌入 - 通义千问模型支持
+# Qwen2.5-7B-Instruct 嵌入模型 (ModelScope部署)
 modelscope==1.9.5
 transformers==4.36.0
 torch==2.1.0
@@ -30,65 +35,71 @@ sentence-transformers==2.2.2
 numpy==1.24.3
 scikit-learn==1.3.0
 
-# 通义千问API支持
+# bge-reranker-v2-m3 重排序模型 (BAAI/bge-reranker-v2-m3)
+FlagEmbedding==1.2.5
+
+# deepseek-chat API 支持
+openai==1.3.0  # deepseek-chat 兼容 OpenAI API
+httpx==0.25.2
+
+# qwen-vl-max 多模态模型 (DashScope API)
 dashscope==1.14.1
-http-client==0.3.0
 
-# Vector Database
+# Milvus 2.3+ 向量数据库 (HNSW索引)
 pymilvus==2.3.4
-chromadb==0.4.18
 
-# Graph Database
+# Neo4j 5.x 图数据库 (Cypher查询)
 neo4j==5.14.0
 
-# Document Processing - Marker框架
+# Marker文档解析引擎 (VikParuchuri/marker)
 marker-pdf==0.2.15
 surya-ocr==0.4.15
+
+# 文档处理和分块
 langchain==0.1.0
 langchain-text-splitters==0.0.1
 langchain-community==0.0.13
 pypdf==3.17.0
 python-docx==1.1.0
 python-pptx==0.6.23
+openpyxl==3.1.2
 markdown==3.5.1
 pdfplumber==0.10.3
 pymupdf==1.23.14
 
-# File Storage
-minio==7.2.0
-boto3==1.34.0
+# spaCy + NER 实体识别
+spacy==3.7.2
+spacy-transformers==1.3.4
 
-# Task Queue
+# Celery 5.3+ 异步处理 + Redis 7.0+ 任务队列
 celery[redis]==5.3.4
-redis==5.0.1
+redis==7.0.5
 
 # HTTP Client
-httpx==0.25.2
 aiohttp==3.9.1
 requests==2.31.0
 
-# Data Processing
-pandas==2.1.3
+# Pydantic 2.0+ 数据验证
 pydantic==2.5.0
 pydantic-settings==2.1.0
 
-# Logging and Monitoring
+# 数据处理
+pandas==2.1.3
+
+# structlog + ELK Stack 日志系统
 loguru==0.7.2
-prometheus-client==0.19.0
 structlog==23.2.0
 
-# Configuration
+# 配置管理
 python-dotenv==1.0.0
 pyyaml==6.0.1
-toml==0.10.2
 
-# Utilities
+# 工具库
 click==8.1.7
 rich==13.7.0
-typer==0.9.0
 jinja2==3.1.2
 
-# Development
+# 开发和测试 (测试覆盖率 > 80%)
 pytest==7.4.3
 pytest-asyncio==0.21.1
 pytest-cov==4.1.0
@@ -96,57 +107,52 @@ black==23.11.0
 isort==5.12.0
 flake8==6.1.0
 mypy==1.7.1
-pre-commit==3.6.0
 
-# API Documentation
-python-multipart==0.0.6
+# JWT + OAuth2 + RBAC 认证
+python-jose[cryptography]==3.3.0
 
-# Date and Time
+# 时间处理
 python-dateutil==2.8.2
 pytz==2023.3
 
-# Image Processing
+# 图像处理 (多模态支持)
 Pillow==10.1.0
 opencv-python==4.8.1.78
 
-# Text Processing
+# 中文文本处理
 jieba==0.42.1
 nltk==3.8.1
-spacy==3.7.2
 
-# Async Support
-asyncio-mqtt==0.16.1
+# 异步支持
 aiofiles==23.2.1
 aioredis==2.0.1
 
-# WebSocket
+# WebSocket 实时通信
 websockets==12.0
 
-# Validation
+# 数据验证
 email-validator==2.1.0
-phonenumbers==8.13.26
 
-# Serialization
+# 序列化
 orjson==3.9.10
-msgpack==1.0.7
 
-# Caching
+# 缓存
 cachetools==5.3.2
 
-# Rate Limiting
+# 限流
 slowapi==0.1.9
 
 # CORS
 fastapi-cors==0.0.6
 
-# Health Checks
+# 健康检查
 fastapi-health==0.4.0
 
-# Background Tasks
-rq==1.15.1
-
-# Metrics
+# 系统监控
 psutil==5.9.6
 
-# Environment
+# 环境变量
 environs==10.0.0
+
+# OpenAPI 3.0 规范 + Swagger UI (自动生成)
+# 已包含在 FastAPI 中

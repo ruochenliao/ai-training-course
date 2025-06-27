@@ -5,7 +5,6 @@ Deepseek大模型配置
 import os
 from typing import Dict
 
-from autogen_agentchat.agents import AssistantAgent
 from autogen_core.models import ModelInfo, ModelFamily
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 from autogen_ext.models.openai._model_info import _MODEL_INFO, _MODEL_TOKEN_LIMITS

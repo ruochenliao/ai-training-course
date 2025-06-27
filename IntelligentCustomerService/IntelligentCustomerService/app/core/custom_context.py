@@ -1,11 +1,12 @@
 """
 自定义ChatCompletionContext来解决autogen 0.6.1的memories属性问题
 """
-from typing import List, Sequence, Any, Dict, Optional
+import logging
+from typing import List, Sequence, Any, Optional
+
+from autogen_agentchat.messages import BaseMessage
 from autogen_core.model_context import UnboundedChatCompletionContext
 from autogen_core.models import LLMMessage
-from autogen_agentchat.messages import BaseMessage
-import logging
 
 logger = logging.getLogger(__name__)
 

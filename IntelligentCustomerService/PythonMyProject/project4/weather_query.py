@@ -1,5 +1,6 @@
-import requests
 import json
+
+import requests
 
 # 城市名称映射字典，用于中文城市名转换
 CITY_NAME_MAP = {

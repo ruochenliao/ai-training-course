@@ -1,0 +1,358 @@
+/**
+ * Gemini风格全局样式
+ * 基于Google Material Design 3和Tailwind CSS
+ */
+
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&display=swap');
+
+/* CSS变量 - 由ThemeProvider动态设置 */
+:root {
+  /* 颜色变量将由ThemeProvider设置 */
+  --font-family: "Google Sans", "Roboto", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 基础样式重置 */
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-onBackground);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surfaceVariant);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-outline);
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-onSurfaceVariant);
+}
+
+/* 选择文本样式 */
+::selection {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+::-moz-selection {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+/* 链接样式 */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* 按钮基础样式 */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* 输入框基础样式 */
+input,
+textarea {
+  font-family: inherit;
+}
+
+/* Ant Design 组件样式覆盖 */
+.ant-layout {
+  background-color: var(--color-background) !important;
+}
+
+.ant-layout-header {
+  background-color: var(--color-surface) !important;
+  border-bottom: 1px solid var(--color-outline) !important;
+}
+
+.ant-layout-sider {
+  background-color: var(--color-surface) !important;
+}
+
+.ant-menu {
+  background-color: transparent !important;
+  border-right: none !important;
+}
+
+.ant-menu-item {
+  color: var(--color-onSurface) !important;
+}
+
+.ant-menu-item:hover {
+  background-color: var(--color-surfaceVariant) !important;
+}
+
+.ant-menu-item-selected {
+  background-color: var(--color-primary) !important;
+  color: white !important;
+}
+
+/* 卡片样式 */
+.ant-card {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-outline) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.ant-card-head {
+  border-bottom-color: var(--color-outline) !important;
+}
+
+.ant-card-head-title {
+  color: var(--color-onSurface) !important;
+}
+
+/* 输入框样式 */
+.ant-input,
+.ant-input-affix-wrapper {
+  background-color: var(--color-background) !important;
+  border-color: var(--color-outline) !important;
+  color: var(--color-onBackground) !important;
+}
+
+.ant-input:focus,
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper-focused {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2) !important;
+}
+
+.ant-input::placeholder {
+  color: var(--color-onSurfaceVariant) !important;
+}
+
+/* 按钮样式 */
+.ant-btn-primary {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+
+.ant-btn-primary:hover {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  opacity: 0.9;
+}
+
+/* 标签页样式 */
+.ant-tabs-tab {
+  color: var(--color-onSurfaceVariant) !important;
+}
+
+.ant-tabs-tab-active {
+  color: var(--color-primary) !important;
+}
+
+.ant-tabs-ink-bar {
+  background-color: var(--color-primary) !important;
+}
+
+/* 消息气泡动画 */
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-bubble {
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+/* 打字机效果 */
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+.typing-effect {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typing 2s steps(40, end), blink 1s infinite;
+}
+
+/* 搜索结果高亮 */
+.search-highlight {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 0 2px;
+  border-radius: 2px;
+  font-weight: 500;
+}
+
+/* 知识图谱样式 */
+.knowledge-graph {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--border-radius-lg);
+}
+
+.graph-node {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.graph-node:hover {
+  stroke-width: 3px;
+  filter: brightness(1.1);
+}
+
+.graph-link {
+  stroke: var(--color-outline);
+  stroke-opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.graph-link:hover {
+  stroke-opacity: 1;
+  stroke-width: 2px;
+}
+
+/* 加载动画 */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.pulse-animation {
+  animation: pulse 2s infinite;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .ant-layout-sider {
+    position: fixed !important;
+    z-index: 1000;
+    height: 100vh;
+  }
+  
+  .ant-layout-content {
+    margin-left: 0 !important;
+  }
+}
+
+/* 深色主题特定样式 */
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+[data-theme="dark"] .ant-spin-dot-item {
+  background-color: var(--color-primary) !important;
+}
+
+[data-theme="dark"] .ant-empty-description {
+  color: var(--color-onSurfaceVariant) !important;
+}
+
+/* 浅色主题特定样式 */
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* 自定义工具类 */
+.glass-effect {
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.shadow-glow {
+  box-shadow: 0 0 20px rgba(26, 115, 232, 0.3);
+}
+
+/* 打印样式 */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}

@@ -29,7 +29,12 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     
     # CORS配置
-    BACKEND_CORS_ORIGINS: List[str] = []
+    BACKEND_CORS_ORIGINS: List[str] = [
+        "http://localhost:3000",  # 用户应用
+        "http://localhost:3001",  # 管理应用
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+    ]
     ALLOWED_HOSTS: List[str] = ["*"]
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")

@@ -8,10 +8,10 @@ from typing import List, Dict, Any, Optional, Tuple
 
 import httpx
 from app.core.config import settings
+from app.services.qwen_model_service import qwen_model_manager
 from loguru import logger
 
 from app.core.exceptions import AIServiceException
-from app.services.qwen_model_service import qwen_model_manager
 
 
 @dataclass

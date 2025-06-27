@@ -4,7 +4,7 @@ AutoGen Memory 适配器
 支持高质量的语义检索和重排
 """
 import logging
-from typing import List, Sequence, Dict, Any
+from typing import List, Dict, Any
 
 try:
     from autogen_core.memory import Memory, MemoryContent, MemoryMimeType

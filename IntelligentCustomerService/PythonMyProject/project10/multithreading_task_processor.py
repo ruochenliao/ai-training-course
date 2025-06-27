@@ -1,9 +1,9 @@
 import queue
+import random
 import threading
 import time
-import random
-from typing import Any, Optional
 from datetime import datetime
+
 
 class MultiThreadTaskProcessor:
     """

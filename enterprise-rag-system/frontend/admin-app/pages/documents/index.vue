@@ -165,11 +165,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, h, onMounted, reactive, ref } from 'vue'
+import {computed, h, onMounted, reactive, ref} from 'vue'
 import {
   NButton,
   NDataTable,
-  NForm,
   NFormItem,
   NIcon,
   NInput,
@@ -180,16 +179,9 @@ import {
   NUploadDragger,
   useMessage
 } from 'naive-ui'
-import {
-  CloudUpload,
-  Download,
-  Eye,
-  Refresh,
-  Search,
-  Trash as Delete
-} from '@vicons/ionicons5'
-import { useDocumentStore } from '~/stores/document'
-import { useKnowledgeBaseStore } from '~/stores/knowledgeBase'
+import {CloudUpload, Download, Eye, Refresh, Search, Trash as Delete} from '@vicons/ionicons5'
+import {useDocumentStore} from '~/stores/document'
+import {useKnowledgeBaseStore} from '~/stores/knowledgeBase'
 
 const message = useMessage()
 const documentStore = useDocumentStore()

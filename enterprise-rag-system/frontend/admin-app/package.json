@@ -8,7 +8,7 @@
     "dev": "cross-env NODE_OPTIONS=\"--no-warnings=ExperimentalWarning\" nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
+    "postinstall": "node scripts/patch-oxc-parser.js && nuxt prepare",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "type-check": "vue-tsc --noEmit"

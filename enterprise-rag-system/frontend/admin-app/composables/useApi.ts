@@ -1,5 +1,5 @@
-import { ref, computed } from 'vue'
-import type { Ref } from 'vue'
+import type {Ref} from 'vue'
+import {computed, ref} from 'vue'
 
 interface ApiResponse<T = any> {
   data: T

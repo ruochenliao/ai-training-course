@@ -139,8 +139,28 @@
 
 <script setup lang="ts">
 import {computed, h, onMounted, reactive, ref} from 'vue'
-import {NButton, NDataTable, NDynamicTags, NForm, NFormItem, NIcon, NInput, NModal, NSelect, NTag, useMessage} from 'naive-ui'
-import {Trash as Delete, Create as Edit, Eye, Add as Plus, Refresh, Search, CloudUpload as Upload} from '@vicons/ionicons5'
+import {
+  NButton,
+  NDataTable,
+  NDynamicTags,
+  NForm,
+  NFormItem,
+  NIcon,
+  NInput,
+  NModal,
+  NSelect,
+  NTag,
+  useMessage
+} from 'naive-ui'
+import {
+  Add as Plus,
+  CloudUpload as Upload,
+  Create as Edit,
+  Eye,
+  Refresh,
+  Search,
+  Trash as Delete
+} from '@vicons/ionicons5'
 import {useKnowledgeBaseStore} from '~/stores/knowledgeBase'
 
 const message = useMessage()

@@ -4,19 +4,16 @@
 """
 
 import asyncio
-import json
 import os
-import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
 from typing import Dict, Any, List, Optional, Callable
 
+from app.core.config import settings
+from app.services.marker_service import MarkerService
 from loguru import logger
 
-from app.core.config import settings
 from app.core.exceptions import DocumentProcessingException
-from app.services.marker_service import MarkerService
 
 
 class DocumentProcessor:

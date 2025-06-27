@@ -6,18 +6,17 @@ HTML精确转PDF工具 - 使用系统已安装的Chrome浏览器
 2. 安装依赖: pip install selenium webdriver-manager
 """
 
+import base64
 import os
 import sys
 import time
-import base64
+
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+
 
 def convert_html_to_pdf(html_file, output_file, page_size='A4'):
     """

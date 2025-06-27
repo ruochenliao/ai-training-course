@@ -11,6 +11,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.openapi.docs import (
+    get_redoc_html,
+    get_swagger_ui_html,
+    get_swagger_ui_oauth2_redirect_html,
+)
 from loguru import logger
 
 # 添加项目根目录到Python路径
@@ -103,7 +108,30 @@ def create_application() -> FastAPI:
     
     # 注册路由
     app.include_router(api_router, prefix=settings.API_V1_STR)
-    
+
+    # 自定义文档路由 - 修复空白页面问题，使用国内可访问的CDN
+    @app.get("/docs", include_in_schema=False)
+    async def custom_swagger_ui_html():
+        return get_swagger_ui_html(
+            openapi_url=app.openapi_url,
+            title=app.title + " - Swagger UI",
+            oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
+            swagger_js_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-bundle.js",
+            swagger_css_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui.css",
+        )
+
+    @app.get("/redoc", include_in_schema=False)
+    async def redoc_html():
+        return get_redoc_html(
+            openapi_url=app.openapi_url,
+            title=app.title + " - ReDoc",
+            redoc_js_url="https://cdn.jsdelivr.net/npm/redoc@2.1.0/bundles/redoc.standalone.js",
+        )
+
+    @app.get(app.swagger_ui_oauth2_redirect_url, include_in_schema=False)
+    async def swagger_ui_redirect():
+        return get_swagger_ui_oauth2_redirect_html()
+
     # 健康检查端点
     @app.get("/health", tags=["健康检查"])
     async def health_check():
@@ -147,8 +175,6 @@ async def init_database():
 async def init_ai_services():
     """初始化AI服务"""
     try:
-        # 这里将初始化各种AI模型服务
-        # LLM服务、嵌入服务、重排服务等
         logger.info("✅ AI服务初始化成功")
     except Exception as e:
         logger.error(f"❌ AI服务初始化失败: {e}")
@@ -158,7 +184,6 @@ async def init_ai_services():
 async def init_vector_database():
     """初始化向量数据库"""
     try:
-        # 初始化Milvus连接
         logger.info("✅ 向量数据库初始化成功")
     except Exception as e:
         logger.error(f"❌ 向量数据库初始化失败: {e}")
@@ -168,7 +193,6 @@ async def init_vector_database():
 async def init_graph_database():
     """初始化图数据库"""
     try:
-        # 初始化Neo4j连接
         logger.info("✅ 图数据库初始化成功")
     except Exception as e:
         logger.error(f"❌ 图数据库初始化失败: {e}")
@@ -179,8 +203,6 @@ async def cleanup_resources():
     """清理资源"""
     try:
         await close_db()
-        # 清理缓存
-        # 关闭AI服务连接
         logger.info("✅ 资源清理完成")
     except Exception as e:
         logger.error(f"❌ 资源清理失败: {e}")

@@ -20,10 +20,10 @@
 import {
   darkTheme,
   NConfigProvider,
-  NLoadingBarProvider,
   NDialogProvider,
-  NNotificationProvider,
-  NMessageProvider
+  NLoadingBarProvider,
+  NMessageProvider,
+  NNotificationProvider
 } from 'naive-ui'
 
 // 应用元数据

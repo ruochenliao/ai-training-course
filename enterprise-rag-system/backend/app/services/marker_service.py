@@ -4,13 +4,12 @@ Marker文档解析服务 - 基于官方源码优化实现
 """
 
 import asyncio
-import json
 import os
 import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Union
+from typing import Dict, Any, List
 
 import fitz  # PyMuPDF
 import pandas as pd

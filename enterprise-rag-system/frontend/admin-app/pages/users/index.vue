@@ -192,7 +192,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, h, onMounted, reactive, ref } from 'vue'
+import {computed, h, onMounted, reactive, ref} from 'vue'
 import {
   NButton,
   NDataTable,
@@ -206,15 +206,8 @@ import {
   NTag,
   useMessage
 } from 'naive-ui'
-import {
-  Create as Edit,
-  Key,
-  PersonAdd,
-  Refresh,
-  Search,
-  Trash as Delete
-} from '@vicons/ionicons5'
-import { useUserStore } from '~/stores/user'
+import {Create as Edit, Key, PersonAdd, Refresh, Search, Trash as Delete} from '@vicons/ionicons5'
+import {useUserStore} from '~/stores/user'
 
 const message = useMessage()
 const userStore = useUserStore()

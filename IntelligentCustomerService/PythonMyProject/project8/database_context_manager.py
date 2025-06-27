@@ -1,6 +1,7 @@
 import sqlite3
 import time
-from typing import Optional, List, Tuple, Any
+from typing import Optional, List, Tuple
+
 
 class DatabaseConnection:
     """

@@ -219,7 +219,7 @@ import {
   ArrowBack,
   CheckmarkCircle,
   CloseCircle,
-  Trash as Delete,
+  CloudUpload as Upload,
   Document,
   Download,
   Eye,
@@ -228,7 +228,7 @@ import {
   Search,
   Server,
   Time,
-  CloudUpload as Upload
+  Trash as Delete
 } from '@vicons/ionicons5'
 import {useKnowledgeBaseStore} from '~/stores/knowledgeBase'
 import GraphVisualization from '~/components/GraphVisualization.vue'

@@ -3,21 +3,20 @@
 支持语义分块、结构感知、质量评估、自适应分块
 """
 
-import asyncio
 import hashlib
 import re
 import time
-from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, Tuple, Union
 from collections import defaultdict
+from dataclasses import dataclass, field
+from typing import List, Dict, Any, Optional, Tuple
 
 import numpy as np
-from loguru import logger
-
 from app.core.config import settings
-from app.core.exceptions import DocumentProcessingException
 from app.services.chunker import DocumentChunker, ChunkConfig
 from app.services.embedding_service import embedding_service
+from loguru import logger
+
+from app.core.exceptions import DocumentProcessingException
 
 
 @dataclass

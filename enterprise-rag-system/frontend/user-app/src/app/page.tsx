@@ -1,160 +1,184 @@
-'use client'
+'use client';
 
-import {useState} from 'react'
-import {Button, Card, Input, Layout, Space, Typography} from 'antd'
-import {BookOutlined, MessageOutlined, SearchOutlined} from '@ant-design/icons'
+import React, {useState} from 'react';
+import {Button, Drawer, Layout, Menu} from 'antd';
+import {BarChartOutlined, MenuOutlined, MessageOutlined, NodeIndexOutlined, SearchOutlined} from '@ant-design/icons';
+import {GeminiChatInterface} from '@/components/chat/GeminiChatInterface';
+import {MultiModeSearch} from '@/components/search/MultiModeSearch';
+import {KnowledgeGraph} from '@/components/visualization/KnowledgeGraph';
+import {useTheme} from '@/contexts/ThemeContext';
 
-const { Header, Content, Footer } = Layout
-const { Title, Paragraph } = Typography
-const { Search } = Input
+const { Header, Sider, Content } = Layout;
+
+type PageView = 'chat' | 'search' | 'graph' | 'analytics';
 
 export default function HomePage() {
-  const [loading, setLoading] = useState(false)
+  const { theme } = useTheme();
+  const [currentView, setCurrentView] = useState<PageView>('chat');
+  const [siderCollapsed, setSiderCollapsed] = useState(false);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
-  const handleSearch = async (value: string) => {
-    if (!value.trim()) return
-    
-    setLoading(true)
-    try {
-      // 这里将实现搜索功能
-      console.log('搜索:', value)
-    } catch (error) {
-      console.error('搜索失败:', error)
-    } finally {
-      setLoading(false)
+  // 菜单项配置
+  const menuItems = [
+    {
+      key: 'chat',
+      icon: <MessageOutlined />,
+      label: '智能对话',
+    },
+    {
+      key: 'search',
+      icon: <SearchOutlined />,
+      label: '多模式搜索',
+    },
+    {
+      key: 'graph',
+      icon: <NodeIndexOutlined />,
+      label: '知识图谱',
+    },
+    {
+      key: 'analytics',
+      icon: <BarChartOutlined />,
+      label: '数据分析',
+    },
+  ];
+
+  // 渲染主要内容
+  const renderContent = () => {
+    switch (currentView) {
+      case 'chat':
+        return (
+          <GeminiChatInterface
+            onNewConversation={() => {
+              console.log('新建对话');
+            }}
+          />
+        );
+      case 'search':
+        return (
+          <MultiModeSearch
+            onSearch={async (query, mode, filters) => {
+              console.log('搜索:', { query, mode, filters });
+              return [];
+            }}
+          />
+        );
+      case 'graph':
+        return (
+          <KnowledgeGraph
+            data={{ nodes: [], links: [] }}
+            onNodeClick={(node) => {
+              console.log('点击节点:', node);
+            }}
+            onLinkClick={(link) => {
+              console.log('点击连接:', link);
+            }}
+          />
+        );
+      case 'analytics':
+        return (
+          <div className="p-6">
+            <h2 style={{ color: theme.colors.onSurface }}>
+              数据分析功能开发中...
+            </h2>
+          </div>
+        );
+      default:
+        return null;
     }
-  }
+  };
+
+  // 侧边栏内容
+  const siderContent = (
+    <Menu
+      mode="inline"
+      selectedKeys={[currentView]}
+      items={menuItems}
+      onClick={({ key }) => {
+        setCurrentView(key as PageView);
+        setMobileDrawerOpen(false);
+      }}
+      style={{
+        height: '100%',
+        borderRight: 0,
+        backgroundColor: 'transparent',
+      }}
+    />
+  );
 
   return (
-    <Layout className="min-h-screen">
-      <Header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto flex items-center justify-between h-16">
-          <div className="flex items-center space-x-4">
-            <BookOutlined className="text-2xl text-blue-600" />
-            <Title level={3} className="!mb-0 !text-gray-800">
-              企业级RAG知识库
-            </Title>
-          </div>
-          <Space>
-            <Button type="primary" icon={<MessageOutlined />}>
-              开始对话
-            </Button>
-          </Space>
-        </div>
-      </Header>
-
-      <Content className="flex-1">
-        <div className="max-w-4xl mx-auto py-12 px-4">
-          {/* 欢迎区域 */}
-          <div className="text-center mb-12">
-            <Title level={1} className="!text-4xl !font-bold !text-gray-900 mb-4">
-              智能知识问答系统
-            </Title>
-            <Paragraph className="!text-xl !text-gray-600 mb-8">
-              基于多智能体协作的企业级知识库，提供精准、全面、可溯源的智能问答体验
-            </Paragraph>
-            
-            {/* 搜索框 */}
-            <div className="max-w-2xl mx-auto">
-              <Search
-                placeholder="请输入您的问题..."
-                size="large"
-                enterButton={<SearchOutlined />}
-                loading={loading}
-                onSearch={handleSearch}
-                className="shadow-lg"
-              />
-            </div>
-          </div>
-
-          {/* 功能卡片 */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            <Card 
-              hoverable
-              className="text-center"
-              cover={
-                <div className="p-8 bg-blue-50">
-                  <MessageOutlined className="text-4xl text-blue-600" />
-                </div>
-              }
-            >
-              <Card.Meta
-                title="智能对话"
-                description="与AI助手进行自然语言对话，获得准确的答案和建议"
-              />
-            </Card>
-
-            <Card 
-              hoverable
-              className="text-center"
-              cover={
-                <div className="p-8 bg-green-50">
-                  <SearchOutlined className="text-4xl text-green-600" />
-                </div>
-              }
-            >
-              <Card.Meta
-                title="多模态检索"
-                description="支持向量检索、图谱检索和混合检索，全方位获取信息"
-              />
-            </Card>
-
-            <Card 
-              hoverable
-              className="text-center"
-              cover={
-                <div className="p-8 bg-purple-50">
-                  <BookOutlined className="text-4xl text-purple-600" />
-                </div>
-              }
-            >
-              <Card.Meta
-                title="知识管理"
-                description="高效管理企业知识资产，支持多种文档格式"
-              />
-            </Card>
-          </div>
-
-          {/* 特性介绍 */}
-          <div className="bg-gray-50 rounded-lg p-8">
-            <Title level={2} className="text-center mb-8">
-              核心特性
-            </Title>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <Title level={4}>🤖 多智能体协作</Title>
-                <Paragraph>
-                  基于AutoGen的智能体编排和协调，实现复杂查询的智能分解和协作处理
-                </Paragraph>
-              </div>
-              <div>
-                <Title level={4}>🔍 多模态检索融合</Title>
-                <Paragraph>
-                  深度整合向量检索、图谱检索和关键词检索，提供全方位的信息获取能力
-                </Paragraph>
-              </div>
-              <div>
-                <Title level={4}>📊 智能结果融合</Title>
-                <Paragraph>
-                  通过AI驱动的结果分析和融合，确保答案的准确性和完整性
-                </Paragraph>
-              </div>
-              <div>
-                <Title level={4}>🔒 企业级安全</Title>
-                <Paragraph>
-                  完整的权限管理和数据安全保障，满足企业级应用需求
-                </Paragraph>
-              </div>
-            </div>
+    <Layout style={{ minHeight: '100vh' }}>
+      {/* 桌面端侧边栏 */}
+      <Sider
+        collapsible
+        collapsed={siderCollapsed}
+        onCollapse={setSiderCollapsed}
+        breakpoint="lg"
+        collapsedWidth={80}
+        width={240}
+        style={{
+          backgroundColor: theme.colors.surface,
+          borderRight: `1px solid ${theme.colors.outline}`,
+        }}
+        className="hidden lg:block"
+      >
+        <div className="p-4">
+          <div
+            className="text-lg font-bold text-center"
+            style={{ color: theme.colors.primary }}
+          >
+            {siderCollapsed ? 'RAG' : '企业级RAG系统'}
           </div>
         </div>
-      </Content>
+        {siderContent}
+      </Sider>
 
-      <Footer className="text-center bg-gray-50">
-        <Paragraph className="!mb-0 !text-gray-600">
-          企业级Agent+RAG知识库系统 ©2024 - 基于多智能体协作的下一代知识管理平台
-        </Paragraph>
-      </Footer>
+      <Layout>
+        {/* 移动端头部 */}
+        <Header
+          className="lg:hidden flex items-center justify-between px-4"
+          style={{
+            backgroundColor: theme.colors.surface,
+            borderBottom: `1px solid ${theme.colors.outline}`,
+            height: 64,
+          }}
+        >
+          <div
+            className="text-lg font-bold"
+            style={{ color: theme.colors.primary }}
+          >
+            企业级RAG系统
+          </div>
+          <Button
+            type="text"
+            icon={<MenuOutlined />}
+            onClick={() => setMobileDrawerOpen(true)}
+            style={{ color: theme.colors.onSurface }}
+          />
+        </Header>
+
+        {/* 主要内容区域 */}
+        <Content
+          style={{
+            backgroundColor: theme.colors.background,
+            minHeight: 'calc(100vh - 64px)',
+          }}
+          className="lg:min-h-screen"
+        >
+          {renderContent()}
+        </Content>
+      </Layout>
+
+      {/* 移动端抽屉菜单 */}
+      <Drawer
+        title="菜单"
+        placement="left"
+        onClose={() => setMobileDrawerOpen(false)}
+        open={mobileDrawerOpen}
+        className="lg:hidden"
+        bodyStyle={{ padding: 0 }}
+      >
+        {siderContent}
+      </Drawer>
     </Layout>
-  )
+  );
 }

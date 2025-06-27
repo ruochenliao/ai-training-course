@@ -5,20 +5,18 @@
 
 import asyncio
 import time
-import uuid
-from typing import List, Dict, Any, Optional, Union, Tuple
-from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
-
-from loguru import logger
-from pymilvus import (
-    connections, Collection, CollectionSchema, FieldSchema, DataType, utility,
-    Partition, Index, SearchResult
-)
+from dataclasses import dataclass
+from typing import List, Dict, Any, Optional
 
 from app.core.config import settings
-from app.core.exceptions import VectorDatabaseException
 from app.services.vector_db import MilvusService
+from loguru import logger
+from pymilvus import (
+    Collection, utility
+)
+
+from app.core.exceptions import VectorDatabaseException
 
 
 @dataclass

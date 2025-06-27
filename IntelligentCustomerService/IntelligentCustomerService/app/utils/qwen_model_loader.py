@@ -3,10 +3,9 @@ Qwen模型加载器
 使用ModelScope社区的Qwen嵌入模型和重排模型
 """
 
-import os
 import logging
-from pathlib import Path
-from typing import Optional, Any, List
+from typing import Optional, List
+
 import numpy as np
 
 try:

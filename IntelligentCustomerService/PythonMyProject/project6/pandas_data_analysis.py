@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 
 # 1. 创建包含姓名、年龄、工资和部门的字典数据
 data = {

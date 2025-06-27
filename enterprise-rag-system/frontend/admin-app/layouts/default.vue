@@ -107,17 +107,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { NAvatar, NButton, NDropdown, NIcon } from 'naive-ui'
-import {
-  Analytics,
-  Document,
-  Home,
-  Library,
-  Notifications,
-  People,
-  Person
-} from '@vicons/ionicons5'
+import {computed} from 'vue'
+import {NAvatar, NButton, NDropdown, NIcon} from 'naive-ui'
+import {Analytics, Document, Home, Library, Notifications, People, Person} from '@vicons/ionicons5'
 
 // 页面标题
 const route = useRoute()

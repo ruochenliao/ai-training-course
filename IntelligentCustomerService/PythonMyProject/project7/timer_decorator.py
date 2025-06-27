@@ -1,5 +1,6 @@
-import time
 import functools
+import time
+
 
 # 定义timer装饰器函数
 def timer(func):

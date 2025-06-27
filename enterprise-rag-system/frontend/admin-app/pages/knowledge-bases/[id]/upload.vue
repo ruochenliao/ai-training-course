@@ -221,7 +221,16 @@ import {
   NUploadDragger,
   useMessage
 } from 'naive-ui'
-import {ArrowBack, CloudUpload, Trash as Delete, Download, Eye, Refresh, Search, CloudUpload as Upload} from '@vicons/ionicons5'
+import {
+  ArrowBack,
+  CloudUpload,
+  CloudUpload as Upload,
+  Download,
+  Eye,
+  Refresh,
+  Search,
+  Trash as Delete
+} from '@vicons/ionicons5'
 import {useKnowledgeBaseStore} from '~/stores/knowledgeBase'
 
 const route = useRoute()
