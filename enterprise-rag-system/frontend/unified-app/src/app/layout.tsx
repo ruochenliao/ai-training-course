@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ConfigProvider } from 'antd';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { PermissionProvider } from '@/contexts/PermissionContext';
 import { QueryProvider } from '@/contexts/QueryProvider';
 import './globals.css';
 
@@ -33,19 +34,21 @@ export default function RootLayout({
       <body suppressHydrationWarning className="font-sans antialiased">
         <QueryProvider>
           <AuthProvider>
-            <ThemeProvider>
-              <ConfigProvider
-                theme={{
-                  token: {
-                    fontFamily: '"Inter", "Google Sans", "Roboto", -apple-system, BlinkMacSystemFont, sans-serif',
-                    colorPrimary: '#0ea5e9',
-                    borderRadius: 8,
-                  },
-                }}
-              >
-                {children}
-              </ConfigProvider>
-            </ThemeProvider>
+            <PermissionProvider>
+              <ThemeProvider>
+                <ConfigProvider
+                  theme={{
+                    token: {
+                      fontFamily: '"Inter", "Google Sans", "Roboto", -apple-system, BlinkMacSystemFont, sans-serif',
+                      colorPrimary: '#0ea5e9',
+                      borderRadius: 8,
+                    },
+                  }}
+                >
+                  {children}
+                </ConfigProvider>
+              </ThemeProvider>
+            </PermissionProvider>
           </AuthProvider>
         </QueryProvider>
       </body>

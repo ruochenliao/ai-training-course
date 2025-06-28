@@ -362,6 +362,194 @@ export interface RouteConfig {
   exact?: boolean;
   protected?: boolean;
   adminOnly?: boolean;
+  permissions?: string[];
   title?: string;
   icon?: React.ComponentType;
+}
+
+// RBAC权限相关类型
+export interface Department extends BaseEntity {
+  name: string;
+  code: string;
+  description?: string;
+  parent_id?: number;
+  level: number;
+  sort_order: number;
+  manager_id?: number;
+  status: string;
+  children?: Department[];
+  parent?: Department;
+  manager_name?: string;
+}
+
+export interface Role extends BaseEntity {
+  name: string;
+  code: string;
+  description?: string;
+  parent_id?: number;
+  level: number;
+  sort_order: number;
+  role_type: string;
+  data_scope: string;
+  status: string;
+  permissions?: Permission[];
+  children?: Role[];
+  parent?: Role;
+  user_count?: number;
+}
+
+export interface Permission extends BaseEntity {
+  name: string;
+  code: string;
+  description?: string;
+  group: string;
+  resource: string;
+  action: string;
+  permission_type: string;
+  menu_path?: string;
+  menu_component?: string;
+  menu_icon?: string;
+  parent_id?: number;
+  sort_order: number;
+  status: string;
+  children?: Permission[];
+  parent?: Permission;
+}
+
+export interface UserRole extends BaseEntity {
+  user_id: number;
+  role_id: number;
+  granted_by: number;
+  granted_at: string;
+  expires_at?: string;
+  dept_ids: number[];
+  role?: Role;
+}
+
+export interface UserPermission extends BaseEntity {
+  user_id: number;
+  permission_id: number;
+  granted_by: number;
+  granted_at: string;
+  expires_at?: string;
+  permission_type: string;
+  permission?: Permission;
+}
+
+// RBAC请求类型
+export interface CreateDepartmentRequest {
+  name: string;
+  code: string;
+  description?: string;
+  parent_id?: number;
+  sort_order?: number;
+  manager_id?: number;
+}
+
+export interface UpdateDepartmentRequest {
+  name?: string;
+  description?: string;
+  parent_id?: number;
+  sort_order?: number;
+  manager_id?: number;
+  status?: string;
+}
+
+export interface CreateRoleRequest {
+  name: string;
+  code: string;
+  description?: string;
+  parent_id?: number;
+  sort_order?: number;
+  role_type?: string;
+  data_scope?: string;
+  permission_ids?: number[];
+}
+
+export interface UpdateRoleRequest {
+  name?: string;
+  description?: string;
+  parent_id?: number;
+  sort_order?: number;
+  data_scope?: string;
+  status?: string;
+  permission_ids?: number[];
+}
+
+export interface CreatePermissionRequest {
+  name: string;
+  code: string;
+  description?: string;
+  group: string;
+  resource: string;
+  action: string;
+  permission_type?: string;
+  menu_path?: string;
+  menu_component?: string;
+  menu_icon?: string;
+  parent_id?: number;
+  sort_order?: number;
+}
+
+export interface UpdatePermissionRequest {
+  name?: string;
+  description?: string;
+  group?: string;
+  resource?: string;
+  action?: string;
+  permission_type?: string;
+  menu_path?: string;
+  menu_component?: string;
+  menu_icon?: string;
+  parent_id?: number;
+  sort_order?: number;
+  status?: string;
+}
+
+export interface AssignUserRolesRequest {
+  user_id: number;
+  role_ids: number[];
+  expires_at?: string;
+  dept_ids?: number[];
+}
+
+export interface AssignUserPermissionsRequest {
+  user_id: number;
+  permission_ids: number[];
+  permission_type?: string;
+  expires_at?: string;
+}
+
+export interface PermissionCheckRequest {
+  user_id: number;
+  permission_codes: string[];
+}
+
+export interface PermissionCheckResponse {
+  user_id: number;
+  permissions: Record<string, boolean>;
+}
+
+// 菜单树类型
+export interface MenuTree {
+  id: number;
+  name: string;
+  code: string;
+  path?: string;
+  component?: string;
+  icon?: string;
+  sort_order: number;
+  children?: MenuTree[];
+}
+
+// 权限上下文类型
+export interface PermissionContextType {
+  permissions: string[];
+  roles: string[];
+  hasPermission: (permission: string) => boolean;
+  hasRole: (role: string) => boolean;
+  hasAnyPermission: (permissions: string[]) => boolean;
+  hasAllPermissions: (permissions: string[]) => boolean;
+  checkPermissions: (permissionCodes: string[]) => Promise<Record<string, boolean>>;
+  refreshPermissions: () => Promise<void>;
 }

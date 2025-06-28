@@ -17,9 +17,14 @@ import {
   ArrowLeftOutlined,
   CrownOutlined,
   MonitorOutlined,
+  TeamOutlined,
+  SafetyOutlined,
+  ApartmentOutlined,
+  UserSwitchOutlined,
 } from '@ant-design/icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/contexts/PermissionContext';
 import ThemeToggle from '@/components/common/ThemeToggle';
 
 const { Sider } = Layout;
@@ -28,51 +33,130 @@ const { Text } = Typography;
 export default function AdminSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const { user, logout } = useAuth();
+  const { hasPermission } = usePermissions();
   const router = useRouter();
   const pathname = usePathname();
 
-  const menuItems = [
+  // 定义所有菜单项及其权限要求
+  const allMenuItems = [
     {
       key: '/admin/dashboard',
       icon: <DashboardOutlined />,
       label: '仪表板',
+      permission: null, // 所有管理员都可以访问
     },
     {
-      key: '/admin/users',
-      icon: <UserOutlined />,
-      label: '用户管理',
+      key: 'rbac',
+      icon: <SafetyOutlined />,
+      label: '权限管理',
+      permission: null, // 如果有子菜单权限则显示
+      children: [
+        {
+          key: '/admin/rbac',
+          icon: <DashboardOutlined />,
+          label: '权限概览',
+          permission: null, // 有任何RBAC权限都可以访问
+        },
+        {
+          key: '/admin/rbac/users',
+          icon: <UserOutlined />,
+          label: '用户管理',
+          permission: 'user:view',
+        },
+        {
+          key: '/admin/rbac/roles',
+          icon: <TeamOutlined />,
+          label: '角色管理',
+          permission: 'role:view',
+        },
+        {
+          key: '/admin/rbac/permissions',
+          icon: <SafetyOutlined />,
+          label: '权限管理',
+          permission: 'permission:view',
+        },
+        {
+          key: '/admin/rbac/departments',
+          icon: <ApartmentOutlined />,
+          label: '部门管理',
+          permission: 'dept:view',
+        },
+        {
+          key: '/admin/rbac/user-roles',
+          icon: <UserSwitchOutlined />,
+          label: '用户角色分配',
+          permission: 'user_role:manage',
+        },
+      ],
     },
     {
       key: '/admin/knowledge-bases',
       icon: <BookOutlined />,
       label: '知识库管理',
+      permission: 'knowledge:view',
     },
     {
       key: '/admin/documents',
       icon: <FileTextOutlined />,
       label: '文档管理',
+      permission: 'document:view',
     },
     {
       key: '/admin/conversations',
       icon: <MessageOutlined />,
       label: '对话管理',
+      permission: 'chat:history',
     },
     {
       key: '/admin/analytics',
       icon: <BarChartOutlined />,
       label: '数据分析',
+      permission: 'monitor:business',
     },
     {
       key: '/admin/monitoring',
       icon: <MonitorOutlined />,
       label: '系统监控',
+      permission: 'monitor:system',
     },
     {
       key: '/admin/settings',
       icon: <SettingOutlined />,
       label: '系统设置',
+      permission: 'system:config',
     },
   ];
+
+  // 根据权限过滤菜单项
+  const filterMenuItems = (items: any[]) => {
+    return items.filter(item => {
+      // 如果是超级用户，显示所有菜单
+      if (user?.is_superuser) {
+        if (item.children) {
+          item.children = filterMenuItems(item.children);
+        }
+        return true;
+      }
+
+      // 检查权限
+      if (item.permission && !hasPermission(item.permission)) {
+        return false;
+      }
+
+      // 如果有子菜单，递归过滤
+      if (item.children) {
+        const filteredChildren = filterMenuItems(item.children);
+        if (filteredChildren.length === 0) {
+          return false; // 如果没有可访问的子菜单，隐藏父菜单
+        }
+        item.children = filteredChildren;
+      }
+
+      return true;
+    });
+  };
+
+  const menuItems = filterMenuItems([...allMenuItems]);
 
   const userMenuItems = [
     {

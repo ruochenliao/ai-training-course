@@ -9,15 +9,16 @@ from tortoise import Tortoise
 # Tortoise ORM配置
 TORTOISE_ORM = {
     "connections": {
-        "default": settings.DATABASE_URL
+        "default": settings.DATABASE_URL.replace("mysql+aiomysql://", "mysql://")
     },
     "apps": {
         "models": {
             "models": [
                 "app.models.user",
-                "app.models.knowledge", 
+                "app.models.knowledge",
                 "app.models.conversation",
                 "app.models.system",
+                "app.models.rbac",  # 添加RBAC模型
             ],
             "default_connection": "default",
         },
@@ -32,6 +33,14 @@ async def init_db():
         # 安全地生成表结构，不会覆盖已存在的表
         await Tortoise.generate_schemas(safe=True)
         logger.info("数据库初始化成功")
+
+        # 初始化RBAC基础数据（如果失败不影响系统启动）
+        try:
+            from app.core.rbac_init import init_rbac_data
+            await init_rbac_data()
+        except Exception as rbac_error:
+            logger.warning(f"RBAC初始化失败，系统将以基础模式启动: {rbac_error}")
+
     except Exception as e:
         logger.error(f"数据库初始化失败: {e}")
         raise

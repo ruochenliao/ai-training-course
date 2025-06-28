@@ -473,10 +473,84 @@ class ApiClient {
   }> {
     return this.get('/api/v1/autogen/agents/status');
   }
+
+  // RBAC权限管理
+  // 部门管理
+  async getDepartments(): Promise<{ departments: any[]; total: number }> {
+    return this.get('/api/v1/rbac/departments');
+  }
+
+  async createDepartment(data: any): Promise<any> {
+    return this.post('/api/v1/rbac/departments', data);
+  }
+
+  async updateDepartment(id: number, data: any): Promise<any> {
+    return this.put(`/api/v1/rbac/departments/${id}`, data);
+  }
+
+  async deleteDepartment(id: number): Promise<void> {
+    return this.delete(`/api/v1/rbac/departments/${id}`);
+  }
+
+  // 角色管理
+  async getRoles(params?: any): Promise<{ roles: any[]; total: number; page: number; size: number; pages: number }> {
+    return this.get('/api/v1/rbac/roles', params);
+  }
+
+  async createRole(data: any): Promise<any> {
+    return this.post('/api/v1/rbac/roles', data);
+  }
+
+  async updateRole(id: number, data: any): Promise<any> {
+    return this.put(`/api/v1/rbac/roles/${id}`, data);
+  }
+
+  async deleteRole(id: number): Promise<void> {
+    return this.delete(`/api/v1/rbac/roles/${id}`);
+  }
+
+  // 权限管理
+  async getPermissions(params?: any): Promise<{ permissions: any[]; total: number; page: number; size: number; pages: number }> {
+    return this.get('/api/v1/rbac/permissions', params);
+  }
+
+  async createPermission(data: any): Promise<any> {
+    return this.post('/api/v1/rbac/permissions', data);
+  }
+
+  async updatePermission(id: number, data: any): Promise<any> {
+    return this.put(`/api/v1/rbac/permissions/${id}`, data);
+  }
+
+  async deletePermission(id: number): Promise<void> {
+    return this.delete(`/api/v1/rbac/permissions/${id}`);
+  }
+
+  // 用户角色分配
+  async assignUserRoles(data: any): Promise<any[]> {
+    return this.post('/api/v1/rbac/user-roles', data);
+  }
+
+  async getUserRoles(userId: number): Promise<any[]> {
+    return this.get(`/api/v1/rbac/users/${userId}/roles`);
+  }
+
+  // 权限检查
+  async checkPermissions(data: { user_id: number; permission_codes: string[] }): Promise<{ user_id: number; permissions: Record<string, boolean> }> {
+    return this.post('/api/v1/rbac/check-permissions', data);
+  }
+
+  // 菜单树
+  async getMenuTree(): Promise<any[]> {
+    return this.get('/api/v1/rbac/menu-tree');
+  }
 }
 
 // 创建并导出 API 客户端实例
 export const apiClient = new ApiClient();
+
+// 为了向后兼容，也导出为 api
+export const api = apiClient;
 
 // 导出类型
 export type { ApiResponse, ApiError };

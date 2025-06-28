@@ -15,6 +15,7 @@ from app.api.v1.endpoints import (
     advanced_search,
     graph,
     autogen_chat,
+    rbac,
 )
 from fastapi import APIRouter
 
@@ -55,6 +56,9 @@ api_router.include_router(graph.router, prefix="/graph", tags=["知识图谱"])
 
 # AutoGen多智能体接口
 api_router.include_router(autogen_chat.router, prefix="/autogen", tags=["多智能体协作"])
+
+# RBAC权限管理接口
+api_router.include_router(rbac.router, prefix="/rbac", tags=["权限管理"])
 
 
 @api_router.get("/")

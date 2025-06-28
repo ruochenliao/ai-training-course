@@ -35,6 +35,9 @@ class User(BaseModel, TimestampMixin, StatusMixin, SoftDeleteMixin, MetadataMixi
     # 权限信息
     is_superuser = fields.BooleanField(default=False, description="是否为超级用户")
     is_staff = fields.BooleanField(default=False, description="是否为员工")
+
+    # 部门信息
+    department_id = fields.IntField(null=True, description="所属部门ID")
     
     # 登录信息
     last_login_at = fields.DatetimeField(null=True, description="最后登录时间")
@@ -101,144 +104,115 @@ class User(BaseModel, TimestampMixin, StatusMixin, SoftDeleteMixin, MetadataMixi
     
     async def get_roles(self) -> List["Role"]:
         """获取用户角色"""
+        from .rbac import UserRole
         user_roles = await UserRole.filter(user_id=self.id).prefetch_related("role")
-        return [ur.role for ur in user_roles]
-    
+        # 过滤未过期的角色
+        active_roles = []
+        for ur in user_roles:
+            if not ur.is_expired() and ur.role.status == "active":
+                active_roles.append(ur.role)
+        return active_roles
+
     async def get_permissions(self) -> List["Permission"]:
-        """获取用户权限"""
+        """获取用户权限（角色权限 + 直接权限）"""
+        from .rbac import UserPermission
+
+        # 1. 获取角色权限
         roles = await self.get_roles()
-        permissions = []
+        role_permissions = []
         for role in roles:
-            role_permissions = await role.get_permissions()
-            permissions.extend(role_permissions)
-        
-        # 去重
+            role_perms = await role.get_permissions()
+            role_permissions.extend(role_perms)
+
+        # 2. 获取直接权限
+        user_permissions = await UserPermission.filter(user_id=self.id).prefetch_related("permission")
+        direct_permissions = []
+        denied_permissions = set()
+
+        for up in user_permissions:
+            if not up.is_expired() and up.permission.status == "active":
+                if up.permission_type == "grant":
+                    direct_permissions.append(up.permission)
+                elif up.permission_type == "deny":
+                    denied_permissions.add(up.permission.code)
+
+        # 3. 合并权限并处理拒绝权限
+        all_permissions = role_permissions + direct_permissions
         unique_permissions = {}
-        for perm in permissions:
-            unique_permissions[perm.code] = perm
-        
+        for perm in all_permissions:
+            if perm.code not in denied_permissions:
+                unique_permissions[perm.code] = perm
+
         return list(unique_permissions.values())
-    
+
     async def has_permission(self, permission_code: str) -> bool:
         """检查是否有指定权限"""
         if self.is_superuser:
             return True
-        
+
         permissions = await self.get_permissions()
         return any(perm.code == permission_code for perm in permissions)
-    
+
     async def has_role(self, role_code: str) -> bool:
         """检查是否有指定角色"""
         roles = await self.get_roles()
         return any(role.code == role_code for role in roles)
 
-
-class Role(BaseModel, TimestampMixin, StatusMixin, MetadataMixin):
-    """角色模型"""
-    
-    name = fields.CharField(max_length=50, description="角色名称")
-    code = fields.CharField(max_length=50, unique=True, description="角色代码", index=True)
-    description = fields.TextField(null=True, description="角色描述")
-    
-    # 层级关系
-    parent_id = fields.IntField(null=True, description="父角色ID")
-    level = fields.IntField(default=0, description="角色层级")
-    sort_order = fields.IntField(default=0, description="排序")
-    
-    class Meta:
-        table = "roles"
-        indexes = [
-            ["code"],
-            ["parent_id", "level"],
-            ["status"],
-        ]
-    
-    async def get_permissions(self) -> List["Permission"]:
-        """获取角色权限"""
-        role_permissions = await RolePermission.filter(role_id=self.id).prefetch_related("permission")
-        return [rp.permission for rp in role_permissions]
-    
-    async def add_permission(self, permission: "Permission"):
-        """添加权限"""
-        await RolePermission.get_or_create(role_id=self.id, permission_id=permission.id)
-    
-    async def remove_permission(self, permission: "Permission"):
-        """移除权限"""
-        await RolePermission.filter(role_id=self.id, permission_id=permission.id).delete()
-    
-    async def get_children(self) -> List["Role"]:
-        """获取子角色"""
-        return await Role.filter(parent_id=self.id)
-    
-    async def get_parent(self) -> Optional["Role"]:
-        """获取父角色"""
-        if self.parent_id:
-            return await Role.get_or_none(id=self.parent_id)
+    async def get_department(self) -> Optional["Department"]:
+        """获取用户部门"""
+        if self.department_id:
+            from .rbac import Department
+            return await Department.get_or_none(id=self.department_id)
         return None
 
+    async def get_data_scope_departments(self) -> List["Department"]:
+        """获取用户数据权限范围内的部门"""
+        from .rbac import UserRole, Department
 
-class Permission(BaseModel, TimestampMixin, StatusMixin, MetadataMixin):
-    """权限模型"""
-    
-    name = fields.CharField(max_length=50, description="权限名称")
-    code = fields.CharField(max_length=100, unique=True, description="权限代码", index=True)
-    description = fields.TextField(null=True, description="权限描述")
-    
-    # 权限分组
-    group = fields.CharField(max_length=50, description="权限分组", index=True)
-    
-    # 资源和操作
-    resource = fields.CharField(max_length=50, description="资源")
-    action = fields.CharField(max_length=50, description="操作")
-    
-    class Meta:
-        table = "permissions"
-        indexes = [
-            ["code"],
-            ["group"],
-            ["resource", "action"],
-            ["status"],
-        ]
+        if self.is_superuser:
+            # 超级用户可以访问所有部门
+            return await Department.all()
 
+        dept_ids = set()
+        user_roles = await UserRole.filter(user_id=self.id).prefetch_related("role")
 
-class UserRole(BaseModel, TimestampMixin):
-    """用户角色关联模型"""
-    
-    user = fields.ForeignKeyField("models.User", related_name="user_roles", on_delete=fields.CASCADE)
-    role = fields.ForeignKeyField("models.Role", related_name="role_users", on_delete=fields.CASCADE)
-    
-    # 授权信息
-    granted_by = fields.IntField(description="授权人ID")
-    granted_at = fields.DatetimeField(auto_now_add=True, description="授权时间")
-    expires_at = fields.DatetimeField(null=True, description="过期时间")
-    
-    class Meta:
-        table = "user_roles"
-        unique_together = [["user", "role"]]
-        indexes = [
-            ["user_id", "role_id"],
-            ["expires_at"],
-        ]
-    
-    def is_expired(self) -> bool:
-        """检查是否过期"""
-        if self.expires_at:
-            return datetime.now() > self.expires_at
-        return False
+        for ur in user_roles:
+            if not ur.is_expired() and ur.role.status == "active":
+                role = ur.role
+
+                if role.data_scope == "all":
+                    # 全部数据权限
+                    return await Department.all()
+                elif role.data_scope == "dept":
+                    # 本部门数据权限
+                    if self.department_id:
+                        dept_ids.add(self.department_id)
+                elif role.data_scope == "dept_and_child":
+                    # 本部门及子部门数据权限
+                    if self.department_id:
+                        dept = await self.get_department()
+                        if dept:
+                            dept_ids.add(dept.id)
+                            children = await dept.get_all_children()
+                            dept_ids.update([child.id for child in children])
+                elif role.data_scope == "custom":
+                    # 自定义数据权限
+                    dept_ids.update(ur.dept_ids)
+
+        if dept_ids:
+            return await Department.filter(id__in=list(dept_ids))
+        return []
 
 
-class RolePermission(BaseModel, TimestampMixin):
-    """角色权限关联模型"""
-    
-    role = fields.ForeignKeyField("models.Role", related_name="role_permissions", on_delete=fields.CASCADE)
-    permission = fields.ForeignKeyField("models.Permission", related_name="permission_roles", on_delete=fields.CASCADE)
-    
-    class Meta:
-        table = "role_permissions"
-        unique_together = [["role", "permission"]]
-        indexes = [
-            ["role_id", "permission_id"],
-        ]
+# 注意：Role、Permission等RBAC模型已移动到rbac.py文件中
+# 这里保留引用以保持向后兼容性
+
+def __getattr__(name):
+    """动态导入RBAC模型"""
+    if name in ['Role', 'Permission', 'UserRole', 'RolePermission', 'Department']:
+        from .rbac import Role, Permission, UserRole, RolePermission, Department
+        return locals()[name]
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
 class UserSession(BaseModel, TimestampMixin):
