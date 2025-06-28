@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Row, Col, Card, Statistic, Progress, Table, Tag, Typography, Space, Button } from 'antd';
+import { Row, Col, Card, Statistic, Progress, Table, Tag, Typography, Space, Button, Alert, Spin } from 'antd';
 import {
   UserOutlined,
   BookOutlined,
@@ -23,11 +23,41 @@ const { Title, Text } = Typography;
 export default function AdminDashboard() {
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // 获取系统统计数据
-  const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['admin-stats', refreshKey],
-    queryFn: () => apiClient.getSystemStats(),
-  });
+  // 默认数据结构
+  const defaultStats = {
+    users: {
+      total: 0,
+      active: 0,
+      new_today: 0,
+      growth_rate: 0,
+    },
+    knowledge_bases: {
+      total: 0,
+      public: 0,
+      private: 0,
+      growth_rate: 0,
+    },
+    documents: {
+      total: 0,
+      processing: 0,
+      completed: 0,
+      failed: 0,
+      total_size: 0,
+      growth_rate: 0,
+    },
+    conversations: {
+      total: 0,
+      today: 0,
+      this_week: 0,
+      growth_rate: 0,
+    },
+    system: {
+      uptime: 0,
+      memory_usage: 0,
+      cpu_usage: 0,
+      disk_usage: 0,
+    },
+  };
 
   // 模拟数据（实际应该从API获取）
   const mockStats = {
@@ -65,40 +95,54 @@ export default function AdminDashboard() {
     },
   };
 
-  const currentStats = stats || mockStats;
+  // 获取系统统计数据
+  const { data: stats, isLoading: statsLoading, error } = useQuery({
+    queryKey: ['admin-stats', refreshKey],
+    queryFn: () => apiClient.getSystemStats(),
+    retry: false, // 禁用重试，避免API错误时的无限重试
+  });
+
+  // 安全地合并数据，确保所有必需的属性都存在
+  const currentStats = {
+    users: { ...defaultStats.users, ...(stats?.users || mockStats.users) },
+    knowledge_bases: { ...defaultStats.knowledge_bases, ...(stats?.knowledge_bases || mockStats.knowledge_bases) },
+    documents: { ...defaultStats.documents, ...(stats?.documents || mockStats.documents) },
+    conversations: { ...defaultStats.conversations, ...(stats?.conversations || mockStats.conversations) },
+    system: { ...defaultStats.system, ...(stats?.system || mockStats.system) },
+  };
 
   // 统计卡片数据
   const statCards = [
     {
       title: '总用户数',
-      value: currentStats.users.total,
+      value: currentStats?.users?.total || 0,
       icon: <UserOutlined className="text-blue-500" />,
       color: 'blue',
-      growth: currentStats.users.growth_rate,
+      growth: currentStats?.users?.growth_rate || 0,
       suffix: '人',
     },
     {
       title: '知识库数量',
-      value: currentStats.knowledge_bases.total,
+      value: currentStats?.knowledge_bases?.total || 0,
       icon: <BookOutlined className="text-green-500" />,
       color: 'green',
-      growth: currentStats.knowledge_bases.growth_rate,
+      growth: currentStats?.knowledge_bases?.growth_rate || 0,
       suffix: '个',
     },
     {
       title: '文档总数',
-      value: currentStats.documents.total,
+      value: currentStats?.documents?.total || 0,
       icon: <FileTextOutlined className="text-purple-500" />,
       color: 'purple',
-      growth: currentStats.documents.growth_rate,
+      growth: currentStats?.documents?.growth_rate || 0,
       suffix: '份',
     },
     {
       title: '对话总数',
-      value: currentStats.conversations.total,
+      value: currentStats?.conversations?.total || 0,
       icon: <MessageOutlined className="text-orange-500" />,
       color: 'orange',
-      growth: currentStats.conversations.growth_rate,
+      growth: currentStats?.conversations?.growth_rate || 0,
       suffix: '次',
     },
   ];
@@ -230,8 +274,28 @@ export default function AdminDashboard() {
     setRefreshKey(prev => prev + 1);
   };
 
+  // 如果正在加载且没有缓存数据，显示加载状态
+  if (statsLoading && !stats) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* API错误提示 */}
+      {error && (
+        <Alert
+          message="数据加载失败"
+          description="无法从服务器获取最新数据，当前显示的是模拟数据。请检查网络连接或稍后重试。"
+          type="warning"
+          showIcon
+          closable
+        />
+      )}
+
       {/* 页面头部 */}
       <div className="flex items-center justify-between">
         <div>
@@ -325,46 +389,46 @@ export default function AdminDashboard() {
                 <div>
                   <div className="flex justify-between mb-2">
                     <Text>CPU使用率</Text>
-                    <Text>{currentStats.system.cpu_usage}%</Text>
+                    <Text>{currentStats?.system?.cpu_usage || 0}%</Text>
                   </div>
                   <Progress
-                    percent={currentStats.system.cpu_usage}
+                    percent={currentStats?.system?.cpu_usage || 0}
                     strokeColor="#52c41a"
                     size="small"
                   />
                 </div>
-                
+
                 <div>
                   <div className="flex justify-between mb-2">
                     <Text>内存使用率</Text>
-                    <Text>{currentStats.system.memory_usage}%</Text>
+                    <Text>{currentStats?.system?.memory_usage || 0}%</Text>
                   </div>
                   <Progress
-                    percent={currentStats.system.memory_usage}
+                    percent={currentStats?.system?.memory_usage || 0}
                     strokeColor="#1890ff"
                     size="small"
                   />
                 </div>
-                
+
                 <div>
                   <div className="flex justify-between mb-2">
                     <Text>磁盘使用率</Text>
-                    <Text>{currentStats.system.disk_usage}%</Text>
+                    <Text>{currentStats?.system?.disk_usage || 0}%</Text>
                   </div>
                   <Progress
-                    percent={currentStats.system.disk_usage}
+                    percent={currentStats?.system?.disk_usage || 0}
                     strokeColor="#faad14"
                     size="small"
                   />
                 </div>
-                
+
                 <div>
                   <div className="flex justify-between mb-2">
                     <Text>系统正常运行时间</Text>
-                    <Text>{currentStats.system.uptime}%</Text>
+                    <Text>{currentStats?.system?.uptime || 0}%</Text>
                   </div>
                   <Progress
-                    percent={currentStats.system.uptime}
+                    percent={currentStats?.system?.uptime || 0}
                     strokeColor="#722ed1"
                     size="small"
                   />

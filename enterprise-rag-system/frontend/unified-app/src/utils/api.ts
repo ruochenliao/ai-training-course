@@ -417,10 +417,6 @@ class ApiClient {
     return this.get('/api/v1/admin/logs');
   }
 
-  async getSystemStats(): Promise<any> {
-    return this.get('/api/v1/admin/stats');
-  }
-
   // 知识图谱可视化
   async getKnowledgeGraph(params: {
     knowledge_base_id?: number;

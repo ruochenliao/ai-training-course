@@ -47,14 +47,23 @@ async def get_knowledge_bases(
     offset = (page - 1) * size
     knowledge_bases = await query.offset(offset).limit(size).order_by("-created_at")
     
-    # 转换为响应格式
+    # 转换为响应格式，手动构建避免序列化问题
     kb_list = []
     for kb in knowledge_bases:
-        kb_dict = await kb.to_dict()
+        kb_dict = {
+            "id": kb.id,
+            "name": kb.name,
+            "description": kb.description,
+            "knowledge_type": kb.knowledge_type,
+            "visibility": kb.visibility,
+            "owner_id": kb.owner_id,
+            "created_at": kb.created_at.isoformat() if kb.created_at else None,
+            "updated_at": kb.updated_at.isoformat() if kb.updated_at else None
+        }
         kb_list.append(kb_dict)
-    
+
     return {
-        "knowledge_bases": kb_list,
+        "items": kb_list,
         "total": total,
         "page": page,
         "size": size,
@@ -64,18 +73,26 @@ async def get_knowledge_bases(
 
 @router.post("/", summary="创建知识库")
 async def create_knowledge_base(
-    name: str,
-    description: str = None,
-    knowledge_type: str = "general",
-    visibility: str = "private",
+    kb_data: dict,
     current_user: User = Depends(get_current_user)
 ) -> Any:
     """
     创建知识库
     """
+    # 提取参数
+    name = kb_data.get("name")
+    description = kb_data.get("description")
+    is_public = kb_data.get("is_public", False)
+
+    if not name:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="知识库名称不能为空"
+        )
+
     # 检查名称是否重复
     existing_kb = await KnowledgeBase.get_or_none(
-        name=name, 
+        name=name,
         owner_id=current_user.id,
         is_deleted=False
     )
@@ -84,17 +101,29 @@ async def create_knowledge_base(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="知识库名称已存在"
         )
-    
+
     # 创建知识库
     knowledge_base = await KnowledgeBase.create(
         name=name,
         description=description,
-        knowledge_type=knowledge_type,
-        visibility=visibility,
+        knowledge_type="general",
+        visibility="public" if is_public else "private",
         owner_id=current_user.id
     )
-    
-    return await knowledge_base.to_dict()
+
+    # 手动构建响应，避免序列化问题
+    result = {
+        "id": knowledge_base.id,
+        "name": knowledge_base.name,
+        "description": knowledge_base.description,
+        "knowledge_type": knowledge_base.knowledge_type,
+        "visibility": knowledge_base.visibility,
+        "owner_id": knowledge_base.owner_id,
+        "created_at": knowledge_base.created_at.isoformat() if knowledge_base.created_at else None,
+        "updated_at": knowledge_base.updated_at.isoformat() if knowledge_base.updated_at else None
+    }
+
+    return result
 
 
 @router.get("/{kb_id}", summary="获取知识库详情")
@@ -120,7 +149,19 @@ async def get_knowledge_base(
                 detail="无权访问此知识库"
             )
     
-    return await knowledge_base.to_dict()
+    # 手动构建响应，避免序列化问题
+    result = {
+        "id": knowledge_base.id,
+        "name": knowledge_base.name,
+        "description": knowledge_base.description,
+        "knowledge_type": knowledge_base.knowledge_type,
+        "visibility": knowledge_base.visibility,
+        "owner_id": knowledge_base.owner_id,
+        "created_at": knowledge_base.created_at.isoformat() if knowledge_base.created_at else None,
+        "updated_at": knowledge_base.updated_at.isoformat() if knowledge_base.updated_at else None
+    }
+
+    return result
 
 
 @router.put("/{kb_id}", summary="更新知识库")
@@ -158,7 +199,19 @@ async def update_knowledge_base(
     
     await knowledge_base.save()
     
-    return await knowledge_base.to_dict()
+    # 手动构建响应，避免序列化问题
+    result = {
+        "id": knowledge_base.id,
+        "name": knowledge_base.name,
+        "description": knowledge_base.description,
+        "knowledge_type": knowledge_base.knowledge_type,
+        "visibility": knowledge_base.visibility,
+        "owner_id": knowledge_base.owner_id,
+        "created_at": knowledge_base.created_at.isoformat() if knowledge_base.created_at else None,
+        "updated_at": knowledge_base.updated_at.isoformat() if knowledge_base.updated_at else None
+    }
+
+    return result
 
 
 @router.delete("/{kb_id}", summary="删除知识库")

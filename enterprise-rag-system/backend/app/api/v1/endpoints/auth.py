@@ -84,11 +84,25 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> Any:
     user.record_login()
     await user.save()
     
+    # 手动构建用户信息，避免序列化问题
+    user_info = {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "full_name": user.full_name,
+        "avatar_url": user.avatar_url,
+        "is_superuser": user.is_superuser,
+        "is_staff": user.is_staff,
+        "status": user.status,
+        "created_at": user.created_at.isoformat() if user.created_at else None,
+        "last_login_at": user.last_login_at.isoformat() if user.last_login_at else None
+    }
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
         "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        "user": await user.to_dict(exclude_fields=["password_hash"])
+        "user": user_info
     }
 
 
@@ -130,11 +144,25 @@ async def login_json(user_data: UserLogin) -> Any:
     user.record_login()
     await user.save()
     
+    # 手动构建用户信息，避免序列化问题
+    user_info = {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "full_name": user.full_name,
+        "avatar_url": user.avatar_url,
+        "is_superuser": user.is_superuser,
+        "is_staff": user.is_staff,
+        "status": user.status,
+        "created_at": user.created_at.isoformat() if user.created_at else None,
+        "last_login_at": user.last_login_at.isoformat() if user.last_login_at else None
+    }
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
         "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        "user": await user.to_dict(exclude_fields=["password_hash"])
+        "user": user_info
     }
 
 
@@ -147,12 +175,34 @@ async def logout(current_user: User = Depends(get_current_user)) -> Any:
     return {"message": "登出成功"}
 
 
-@router.get("/me", response_model=UserResponse, summary="获取当前用户信息")
+@router.get("/me", summary="获取当前用户信息")
 async def get_current_user_info(current_user: User = Depends(get_current_user)) -> Any:
     """
     获取当前用户信息
     """
-    return await current_user.to_dict(exclude_fields=["password_hash"])
+    # 手动构建用户信息，避免序列化问题
+    user_info = {
+        "id": current_user.id,
+        "username": current_user.username,
+        "email": current_user.email,
+        "full_name": current_user.full_name,
+        "avatar_url": current_user.avatar_url,
+        "bio": current_user.bio,
+        "phone": current_user.phone,
+        "is_email_verified": current_user.is_email_verified,
+        "is_phone_verified": current_user.is_phone_verified,
+        "is_superuser": current_user.is_superuser,
+        "is_staff": current_user.is_staff,
+        "status": current_user.status,
+        "language": current_user.language,
+        "timezone": current_user.timezone,
+        "theme": current_user.theme,
+        "created_at": current_user.created_at.isoformat() if current_user.created_at else None,
+        "updated_at": current_user.updated_at.isoformat() if current_user.updated_at else None,
+        "last_login_at": current_user.last_login_at.isoformat() if current_user.last_login_at else None,
+        "login_count": current_user.login_count
+    }
+    return user_info
 
 
 @router.post("/refresh", response_model=Token, summary="刷新令牌")
