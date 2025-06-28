@@ -2,6 +2,7 @@
 基础数据模型
 """
 
+import asyncio
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict
@@ -34,16 +35,28 @@ class BaseModel(Model):
         for field_name, field_obj in self._meta.fields_map.items():
             if field_name in exclude_fields:
                 continue
-                
-            value = getattr(self, field_name, None)
-            
-            # 处理特殊类型
-            if isinstance(value, datetime):
-                result[field_name] = value.isoformat()
-            elif hasattr(value, 'to_dict'):
-                result[field_name] = await value.to_dict()
-            else:
-                result[field_name] = value
+
+            try:
+                value = getattr(self, field_name, None)
+
+                # 处理特殊类型
+                if value is None:
+                    result[field_name] = None
+                elif isinstance(value, datetime):
+                    result[field_name] = value.isoformat()
+                elif hasattr(value, 'to_dict') and callable(getattr(value, 'to_dict')):
+                    # 检查 to_dict 方法是否是异步的
+                    to_dict_method = getattr(value, 'to_dict')
+                    if asyncio.iscoroutinefunction(to_dict_method):
+                        result[field_name] = await value.to_dict()
+                    else:
+                        result[field_name] = value.to_dict()
+                else:
+                    result[field_name] = value
+            except Exception as e:
+                # 如果获取字段值失败，记录错误并跳过该字段
+                print(f"Error getting field {field_name}: {e}")
+                continue
         
         # 包含关联关系
         if include_relations:
@@ -54,17 +67,27 @@ class BaseModel(Model):
                         if relation_value:
                             if hasattr(relation_value, '__iter__') and not isinstance(relation_value, str):
                                 # 一对多或多对多关系
-                                result[relation_name] = [
-                                    await item.to_dict() if hasattr(item, 'to_dict') else str(item)
-                                    for item in relation_value
-                                ]
+                                items = []
+                                for item in relation_value:
+                                    if hasattr(item, 'to_dict') and callable(getattr(item, 'to_dict')):
+                                        to_dict_method = getattr(item, 'to_dict')
+                                        if asyncio.iscoroutinefunction(to_dict_method):
+                                            items.append(await item.to_dict())
+                                        else:
+                                            items.append(item.to_dict())
+                                    else:
+                                        items.append(str(item))
+                                result[relation_name] = items
                             else:
                                 # 一对一或多对一关系
-                                result[relation_name] = (
-                                    await relation_value.to_dict() 
-                                    if hasattr(relation_value, 'to_dict') 
-                                    else str(relation_value)
-                                )
+                                if hasattr(relation_value, 'to_dict') and callable(getattr(relation_value, 'to_dict')):
+                                    to_dict_method = getattr(relation_value, 'to_dict')
+                                    if asyncio.iscoroutinefunction(to_dict_method):
+                                        result[relation_name] = await relation_value.to_dict()
+                                    else:
+                                        result[relation_name] = relation_value.to_dict()
+                                else:
+                                    result[relation_name] = str(relation_value)
                     except Exception:
                         # 如果关联数据获取失败，跳过
                         pass

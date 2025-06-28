@@ -13,6 +13,8 @@ from app.api.v1.endpoints import (
     admin,
     system,
     advanced_search,
+    graph,
+    autogen_chat,
 )
 from fastapi import APIRouter
 
@@ -48,6 +50,12 @@ api_router.include_router(system.router, prefix="/system", tags=["系统"])
 # 高级搜索接口
 api_router.include_router(advanced_search.router, prefix="/advanced-search", tags=["高级搜索"])
 
+# 知识图谱接口
+api_router.include_router(graph.router, prefix="/graph", tags=["知识图谱"])
+
+# AutoGen多智能体接口
+api_router.include_router(autogen_chat.router, prefix="/autogen", tags=["多智能体协作"])
+
 
 @api_router.get("/")
 async def api_info():
@@ -67,5 +75,7 @@ async def api_info():
             "admin": "系统管理接口",
             "system": "系统接口",
             "advanced-search": "高级搜索接口",
+            "graph": "知识图谱接口",
+            "autogen": "多智能体协作接口",
         }
     }

@@ -29,7 +29,7 @@ class AuthService:
         # 验证密码
         if not user.verify_password(password):
             # 记录失败登录
-            await user.record_failed_login()
+            user.record_failed_login()
             await user.save()
             return None
         

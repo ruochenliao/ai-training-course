@@ -81,7 +81,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> Any:
     )
     
     # 记录登录
-    await user.record_login()
+    user.record_login()
     await user.save()
     
     return {
@@ -127,7 +127,7 @@ async def login_json(user_data: UserLogin) -> Any:
     )
     
     # 记录登录
-    await user.record_login()
+    user.record_login()
     await user.save()
     
     return {

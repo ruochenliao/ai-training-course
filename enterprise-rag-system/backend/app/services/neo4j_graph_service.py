@@ -593,8 +593,95 @@ class Neo4jGraphService:
             }
 
 
+# 为Neo4jGraphService类添加缺失的方法
+async def get_graph_visualization(
+    self,
+    knowledge_base_id: Optional[int] = None,
+    entity_type: Optional[str] = None,
+    depth: int = 2,
+    limit: int = 100
+) -> Dict[str, Any]:
+    """获取图谱可视化数据"""
+    try:
+        if not self._connected:
+            await self.connect()
+
+        # 构建查询条件
+        where_conditions = []
+        if knowledge_base_id:
+            where_conditions.append(f"d.knowledge_base_id = {knowledge_base_id}")
+        if entity_type:
+            where_conditions.append(f"e.type = '{entity_type}'")
+
+        where_clause = "WHERE " + " AND ".join(where_conditions) if where_conditions else ""
+
+        # 查询节点和关系
+        query = f"""
+        MATCH (d:Document)-[:CONTAINS]->(c:Chunk)-[:MENTIONS]->(e:Entity)
+        {where_clause}
+        WITH e
+        LIMIT {limit}
+        OPTIONAL MATCH path = (e)-[r*1..{depth}]-(connected)
+        RETURN e, connected, r
+        """
+
+        async with self.driver.session() as session:
+            result = await session.run(query)
+            records = await result.data()
+
+        # 处理结果
+        nodes = {}
+        edges = []
+
+        for record in records:
+            # 处理主实体节点
+            entity = record['e']
+            if entity.element_id not in nodes:
+                nodes[entity.element_id] = {
+                    "id": entity.element_id,
+                    "label": entity.get('name', 'Unknown'),
+                    "type": entity.get('type', 'Entity'),
+                    "properties": dict(entity)
+                }
+
+            # 处理连接的节点
+            connected = record.get('connected')
+            if connected and connected.element_id not in nodes:
+                nodes[connected.element_id] = {
+                    "id": connected.element_id,
+                    "label": connected.get('name', 'Unknown'),
+                    "type": list(connected.labels)[0] if connected.labels else 'Unknown',
+                    "properties": dict(connected)
+                }
+
+            # 处理关系
+            relations = record.get('r', [])
+            if relations:
+                for rel in relations:
+                    edge = {
+                        "id": rel.element_id,
+                        "source": rel.start_node.element_id,
+                        "target": rel.end_node.element_id,
+                        "type": rel.type,
+                        "properties": dict(rel)
+                    }
+                    edges.append(edge)
+
+        return {
+            "nodes": list(nodes.values()),
+            "edges": edges
+        }
+
+    except Exception as e:
+        logger.error(f"获取图谱可视化数据失败: {e}")
+        return {"nodes": [], "edges": []}
+
+# 将方法添加到Neo4jGraphService类
+Neo4jGraphService.get_graph_visualization = get_graph_visualization
+
 # 全局Neo4j服务实例
 neo4j_service = Neo4jGraphService()
+neo4j_graph_service = neo4j_service  # 为了兼容现有的导入
 
 
 # 便捷函数

@@ -39,7 +39,7 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --upgrade pip
 
 # 复制requirements文件
-COPY requirements.txt .
+COPY ../requirements.txt .
 
 # 安装Python依赖
 RUN pip install --no-cache-dir -r requirements.txt

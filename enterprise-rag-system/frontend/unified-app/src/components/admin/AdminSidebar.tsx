@@ -1,0 +1,267 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { Layout, Menu, Button, Avatar, Dropdown, Typography, Badge } from 'antd';
+import {
+  DashboardOutlined,
+  UserOutlined,
+  BookOutlined,
+  FileTextOutlined,
+  SettingOutlined,
+  BarChartOutlined,
+  MessageOutlined,
+  LogoutOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  ArrowLeftOutlined,
+  CrownOutlined,
+  MonitorOutlined,
+} from '@ant-design/icons';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
+import ThemeToggle from '@/components/common/ThemeToggle';
+
+const { Sider } = Layout;
+const { Text } = Typography;
+
+export default function AdminSidebar() {
+  const [collapsed, setCollapsed] = useState(false);
+  const { user, logout } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const menuItems = [
+    {
+      key: '/admin/dashboard',
+      icon: <DashboardOutlined />,
+      label: '仪表板',
+    },
+    {
+      key: '/admin/users',
+      icon: <UserOutlined />,
+      label: '用户管理',
+    },
+    {
+      key: '/admin/knowledge-bases',
+      icon: <BookOutlined />,
+      label: '知识库管理',
+    },
+    {
+      key: '/admin/documents',
+      icon: <FileTextOutlined />,
+      label: '文档管理',
+    },
+    {
+      key: '/admin/conversations',
+      icon: <MessageOutlined />,
+      label: '对话管理',
+    },
+    {
+      key: '/admin/analytics',
+      icon: <BarChartOutlined />,
+      label: '数据分析',
+    },
+    {
+      key: '/admin/monitoring',
+      icon: <MonitorOutlined />,
+      label: '系统监控',
+    },
+    {
+      key: '/admin/settings',
+      icon: <SettingOutlined />,
+      label: '系统设置',
+    },
+  ];
+
+  const userMenuItems = [
+    {
+      key: 'profile',
+      icon: <UserOutlined />,
+      label: '个人资料',
+      onClick: () => router.push('/profile'),
+    },
+    {
+      key: 'back-to-user',
+      icon: <ArrowLeftOutlined />,
+      label: '返回用户端',
+      onClick: () => router.push('/chat'),
+    },
+    {
+      type: 'divider' as const,
+    },
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: '退出登录',
+      onClick: logout,
+    },
+  ];
+
+  const handleMenuClick = ({ key }: { key: string }) => {
+    router.push(key);
+  };
+
+  const sidebarVariants = {
+    expanded: {
+      width: 256,
+      transition: { duration: 0.3, ease: "easeInOut" }
+    },
+    collapsed: {
+      width: 80,
+      transition: { duration: 0.3, ease: "easeInOut" }
+    }
+  };
+
+  return (
+    <motion.div
+      variants={sidebarVariants}
+      animate={collapsed ? "collapsed" : "expanded"}
+      className="fixed left-0 top-0 h-full z-50 lg:relative lg:z-auto"
+    >
+      <Sider
+        trigger={null}
+        collapsible
+        collapsed={collapsed}
+        width={256}
+        collapsedWidth={80}
+        className="h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-lg lg:shadow-none"
+      >
+        <div className="flex flex-col h-full">
+          {/* Logo 和折叠按钮 */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+            <AnimatePresence mode="wait">
+              {!collapsed && (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-center space-x-3"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
+                    <CrownOutlined className="text-white text-sm" />
+                  </div>
+                  <div>
+                    <Text strong className="text-sm">管理后台</Text>
+                    <div className="text-xs text-gray-500">系统管理</div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+            <Button
+              type="text"
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setCollapsed(!collapsed)}
+              className="flex items-center justify-center"
+            />
+          </div>
+
+          {/* 返回用户端按钮 */}
+          <div className="p-4">
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                icon={<ArrowLeftOutlined />}
+                block={!collapsed}
+                size="large"
+                onClick={() => router.push('/chat')}
+                className="rounded-lg border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-500 hover:text-blue-500 transition-all duration-300"
+              >
+                {!collapsed && '返回用户端'}
+              </Button>
+            </motion.div>
+          </div>
+
+          {/* 主菜单 */}
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
+            <Menu
+              mode="inline"
+              selectedKeys={[pathname]}
+              items={menuItems}
+              onClick={handleMenuClick}
+              className="border-none bg-transparent"
+              inlineIndent={collapsed ? 0 : 24}
+            />
+          </div>
+
+          {/* 系统状态 */}
+          {!collapsed && (
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <Text className="text-sm font-medium text-green-800 dark:text-green-400">
+                    系统状态
+                  </Text>
+                  <Badge status="success" />
+                </div>
+                <div className="space-y-1 text-xs text-green-600 dark:text-green-400">
+                  <div className="flex justify-between">
+                    <span>在线用户:</span>
+                    <span>24</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>系统负载:</span>
+                    <span>正常</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 用户信息 */}
+          <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <ThemeToggle />
+              {!collapsed && (
+                <Dropdown
+                  menu={{ items: userMenuItems }}
+                  placement="topRight"
+                  trigger={['click']}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <Avatar
+                      size="small"
+                      src={user?.avatar_url}
+                      icon={<UserOutlined />}
+                      className="bg-gradient-to-r from-purple-500 to-pink-600"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {user?.full_name || user?.username}
+                      </div>
+                      <div className="text-xs text-purple-600 dark:text-purple-400 truncate">
+                        系统管理员
+                      </div>
+                    </div>
+                  </motion.div>
+                </Dropdown>
+              )}
+            </div>
+            
+            {collapsed && (
+              <div className="flex justify-center">
+                <Dropdown
+                  menu={{ items: userMenuItems }}
+                  placement="topRight"
+                  trigger={['click']}
+                >
+                  <motion.div whileHover={{ scale: 1.1 }}>
+                    <Avatar
+                      src={user?.avatar_url}
+                      icon={<UserOutlined />}
+                      className="bg-gradient-to-r from-purple-500 to-pink-600 cursor-pointer"
+                    />
+                  </motion.div>
+                </Dropdown>
+              </div>
+            )}
+          </div>
+        </div>
+      </Sider>
+    </motion.div>
+  );
+}
