@@ -6,17 +6,23 @@ from .base import BaseModel, TimestampMixin
 from .conversation import Conversation, Message
 from .knowledge import KnowledgeBase, Document, DocumentChunk
 from .system import SystemConfig, AuditLog
-from .user import User, Role, Permission, UserRole, UserSession, UserEvent
+from .user import User, UserSession, UserEvent
+from .rbac import Role, Permission, UserRole, RolePermission, UserPermission, Department, RoleDepartment, PermissionGroup
 
 __all__ = [
     "BaseModel",
     "TimestampMixin",
     "User",
+    "UserSession",
+    "UserEvent",
     "Role",
     "Permission",
     "UserRole",
-    "UserSession",
-    "UserEvent",
+    "RolePermission",
+    "UserPermission",
+    "Department",
+    "RoleDepartment",
+    "PermissionGroup",
     "KnowledgeBase",
     "Document",
     "DocumentChunk",

@@ -6,11 +6,19 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.core import get_current_user
+from app.core import get_current_user, PermissionChecker
+from app.core.resource_permissions import require_knowledge_base_access, get_knowledge_base_filter
+from app.core.permission_audit import audit_resource_access
 from app.models import KnowledgeBase
 from app.models import User
 
 router = APIRouter()
+
+# 权限检查器
+require_kb_read = PermissionChecker("knowledge_base:read")
+require_kb_write = PermissionChecker("knowledge_base:write")
+require_kb_delete = PermissionChecker("knowledge_base:delete")
+require_kb_manage = PermissionChecker("knowledge_base:manage")
 
 
 @router.get("/", summary="获取知识库列表")
@@ -19,7 +27,7 @@ async def get_knowledge_bases(
     size: int = Query(20, ge=1, le=100, description="每页数量"),
     search: str = Query(None, description="搜索关键词"),
     knowledge_type: str = Query(None, description="知识库类型"),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_kb_read)
 ) -> Any:
     """
     获取知识库列表
@@ -75,7 +83,7 @@ async def get_knowledge_bases(
 @router.post("/", summary="创建知识库")
 async def create_knowledge_base(
     kb_data: dict,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_kb_write)
 ) -> Any:
     """
     创建知识库
@@ -128,6 +136,7 @@ async def create_knowledge_base(
 
 
 @router.get("/{kb_id}", summary="获取知识库详情")
+@require_knowledge_base_access("kb_id", "knowledge_base:read")
 async def get_knowledge_base(
     kb_id: int,
     current_user: User = Depends(get_current_user)
@@ -141,14 +150,17 @@ async def get_knowledge_base(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="知识库不存在"
         )
-    
-    # 检查访问权限
-    if not current_user.is_superuser:
-        if knowledge_base.owner_id != current_user.id and knowledge_base.visibility != "public":
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="无权访问此知识库"
-            )
+
+    # 权限检查已由装饰器处理
+    # 记录审计日志
+    audit_resource_access(
+        user_id=current_user.id,
+        username=current_user.username,
+        resource_type="KnowledgeBase",
+        resource_id=str(kb_id),
+        action="read",
+        success=True
+    )
     
     # 手动构建响应，避免序列化问题
     result = {

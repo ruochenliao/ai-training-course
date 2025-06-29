@@ -10,11 +10,11 @@ from typing import List, Dict, Any, Optional
 from autogen import AssistantAgent, UserProxyAgent, GroupChat, GroupChatManager
 from loguru import logger
 
-from app import bge_reranker_service
-from app import deepseek_llm_service
-from app import milvus_service
-from app import neo4j_service
-from app import qwen_multimodal_service
+from app.services import bge_reranker_service
+from app.services import deepseek_llm_service
+from app.services import milvus_service
+from app.services import neo4j_graph_service as neo4j_service
+from app.services import qwen_multimodal_service
 from app.core import settings
 
 
@@ -30,9 +30,9 @@ class AutoGenAgentService:
         self.llm_config = {
             "config_list": [
                 {
-                    "model": "deepseek-chat",
-                    "api_key": settings.DEEPSEEK_API_KEY,
-                    "base_url": "https://api.deepseek.com/v1",
+                    "model": settings.LLM_MODEL_NAME,
+                    "api_key": settings.LLM_API_KEY,
+                    "base_url": settings.LLM_BASE_URL + "/v1" if not settings.LLM_BASE_URL.endswith("/v1") else settings.LLM_BASE_URL,
                     "api_type": "openai"
                 }
             ],

@@ -10,10 +10,10 @@ from typing import Dict, List, Any, AsyncGenerator
 
 from loguru import logger
 
-from app import LLMService
-from app import MilvusService
-from app import embedding_service
-from app import neo4j_service
+from app.services.llm_service import LLMService
+from app.services.milvus_service import MilvusService
+from app.services import embedding_service
+from app.services import neo4j_graph_service as neo4j_service
 from app.core import AgentException
 from app.core import settings
 

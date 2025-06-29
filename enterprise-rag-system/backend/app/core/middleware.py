@@ -11,7 +11,8 @@ from loguru import logger
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
-from app.core import RateLimitException
+from app.core.exceptions import RateLimitException
+from app.core.error_monitoring import get_error_monitor
 
 
 class ProcessTimeMiddleware(BaseHTTPMiddleware):
@@ -34,53 +35,91 @@ class ProcessTimeMiddleware(BaseHTTPMiddleware):
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
-    """日志记录中间件"""
-    
+    """增强的日志记录中间件，集成错误监控"""
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         start_time = time.time()
-        
+        error_monitor = get_error_monitor()
+
+        # 获取请求信息
+        request_id = getattr(request.state, "request_id", None)
+        client_ip = request.client.host if request.client else None
+        user_agent = request.headers.get("user-agent")
+
         # 记录请求开始
         logger.info(
             f"请求开始: {request.method} {request.url.path}",
             extra={
-                "request_id": getattr(request.state, "request_id", None),
+                "request_id": request_id,
                 "method": request.method,
                 "path": request.url.path,
                 "query_params": dict(request.query_params),
-                "client_ip": request.client.host if request.client else None,
-                "user_agent": request.headers.get("user-agent"),
+                "client_ip": client_ip,
+                "user_agent": user_agent,
+                "content_length": request.headers.get("content-length"),
+                "content_type": request.headers.get("content-type"),
             }
         )
-        
+
         try:
             response = await call_next(request)
-            
-            # 记录请求完成
+
+            # 计算处理时间
             process_time = time.time() - start_time
-            logger.info(
+
+            # 记录请求到监控系统
+            error_monitor.record_request(
+                path=request.url.path,
+                method=request.method,
+                response_time=process_time,
+                status_code=response.status_code
+            )
+
+            # 记录请求完成
+            log_level = "warning" if response.status_code >= 400 else "info"
+            getattr(logger, log_level)(
                 f"请求完成: {request.method} {request.url.path} - {response.status_code}",
                 extra={
-                    "request_id": getattr(request.state, "request_id", None),
+                    "request_id": request_id,
                     "method": request.method,
                     "path": request.url.path,
                     "status_code": response.status_code,
                     "process_time": process_time,
+                    "response_size": response.headers.get("content-length"),
+                    "client_ip": client_ip,
+                    "user_agent": user_agent,
                 }
             )
-            
+
             return response
-            
+
         except Exception as e:
-            # 记录请求异常
+            # 计算处理时间
             process_time = time.time() - start_time
+
+            # 记录异常到监控系统
+            error_monitor.record_error(
+                error_code="SYS_9001",  # INTERNAL_SERVER_ERROR
+                path=request.url.path,
+                method=request.method,
+                response_time=process_time,
+                user_agent=user_agent,
+                client_ip=client_ip,
+                request_id=request_id,
+            )
+
+            # 记录请求异常
             logger.error(
                 f"请求异常: {request.method} {request.url.path} - {type(e).__name__}: {str(e)}",
                 extra={
-                    "request_id": getattr(request.state, "request_id", None),
+                    "request_id": request_id,
                     "method": request.method,
                     "path": request.url.path,
                     "process_time": process_time,
+                    "exception_type": type(e).__name__,
                     "exception": str(e),
+                    "client_ip": client_ip,
+                    "user_agent": user_agent,
                 }
             )
             raise
@@ -187,10 +226,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
-            "style-src 'self' 'unsafe-inline'; "
-            "img-src 'self' data: https:; "
-            "font-src 'self' data:; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net https://cdn.bootcdn.net https://cdn.staticfile.org; "
+            "style-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net https://cdn.bootcdn.net https://cdn.staticfile.org https://fonts.googleapis.com; "
+            "img-src 'self' data: https: https://fastapi.tiangolo.com; "
+            "font-src 'self' data: https://fonts.gstatic.com https://unpkg.com; "
             "connect-src 'self' https:; "
             "frame-ancestors 'none';"
         )

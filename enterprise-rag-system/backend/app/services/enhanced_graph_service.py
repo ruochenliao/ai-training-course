@@ -11,7 +11,7 @@ from typing import List, Dict, Any
 
 from loguru import logger
 
-from app import Neo4jService
+from app.services.neo4j_graph_service import Neo4jGraphService as Neo4jService
 from app.core import GraphDatabaseException
 
 

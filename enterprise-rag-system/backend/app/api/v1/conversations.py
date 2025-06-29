@@ -8,14 +8,11 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, W
 from fastapi.responses import StreamingResponse
 from loguru import logger
 from pydantic import BaseModel, Field
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from app import autogen_service
-from app import deepseek_llm_service
-from app import multimodal_conversation_service
-from app import qwen_multimodal_service
+from app.services import autogen_agent_service as autogen_service
+from app.services import deepseek_llm_service
+from app.services import multimodal_conversation_service
+from app.services import qwen_multimodal_service
 from app.core import get_current_user
-from app.core import get_db_session
 from app.models import User, Conversation, Message, MessageRole, ContentType
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])

@@ -8,8 +8,8 @@ from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
-from app import QueryContext
-from app import (
+from app.services.agent_service import QueryContext
+from app.services.workflow_service import (
     workflow_orchestrator,
     WorkflowConfig,
     WorkflowType

@@ -9,7 +9,7 @@ from typing import Dict, List, Any, AsyncGenerator
 
 from loguru import logger
 
-from app import (
+from app.services.agent_service import (
     QueryContext,
     RetrievalResult,
     query_analyzer,

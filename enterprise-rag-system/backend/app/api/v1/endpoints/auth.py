@@ -8,7 +8,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app import AuthService
+from app.services.auth import AuthService
 from app.core import create_access_token, get_current_user
 from app.core import settings
 from app.models import User

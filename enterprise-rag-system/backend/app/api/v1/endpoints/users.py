@@ -6,7 +6,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app import AuthService
+from app.services.auth import AuthService
 from app.core import get_current_user, get_current_superuser
 from app.models import User
 from app.schemas import UserResponse, UserUpdate, UserListResponse

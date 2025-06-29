@@ -103,47 +103,77 @@ class User(BaseModel, TimestampMixin, StatusMixin, SoftDeleteMixin, MetadataMixi
             self.lock_account()
     
     async def get_roles(self) -> List["Role"]:
-        """获取用户角色"""
+        """获取用户角色（优化版本，避免N+1查询）"""
         from .rbac import UserRole
-        user_roles = await UserRole.filter(user_id=self.id).prefetch_related("role")
-        # 过滤未过期的角色
+        from datetime import datetime
+
+        # 使用单个查询获取所有相关数据
+        current_time = datetime.now()
+        user_roles = await UserRole.filter(
+            user_id=self.id,
+            status="active"
+        ).filter(
+            # 过滤未过期的角色关联
+            Q(expires_at__isnull=True) | Q(expires_at__gt=current_time)
+        ).prefetch_related("role").select_related("role")
+
+        # 过滤活跃的角色
         active_roles = []
         for ur in user_roles:
-            if not ur.is_expired() and ur.role.status == "active":
+            if ur.role and ur.role.status == "active":
                 active_roles.append(ur.role)
+
         return active_roles
 
     async def get_permissions(self) -> List["Permission"]:
-        """获取用户权限（角色权限 + 直接权限）"""
-        from .rbac import UserPermission
+        """获取用户权限（优化版本，减少数据库查询）"""
+        from .rbac import UserPermission, RolePermission
+        from datetime import datetime
 
-        # 1. 获取角色权限
-        roles = await self.get_roles()
-        role_permissions = []
-        for role in roles:
-            role_perms = await role.get_permissions()
-            role_permissions.extend(role_perms)
+        current_time = datetime.now()
 
-        # 2. 获取直接权限
-        user_permissions = await UserPermission.filter(user_id=self.id).prefetch_related("permission")
-        direct_permissions = []
+        # 使用单个查询获取角色权限
+        role_permissions = await RolePermission.filter(
+            role__userrole__user_id=self.id,
+            role__userrole__status="active",
+            role__status="active",
+            status="active"
+        ).filter(
+            # 过滤未过期的关联
+            Q(role__userrole__expires_at__isnull=True) | Q(role__userrole__expires_at__gt=current_time),
+            Q(expires_at__isnull=True) | Q(expires_at__gt=current_time)
+        ).prefetch_related("permission").select_related("permission")
+
+        # 获取直接权限
+        user_permissions = await UserPermission.filter(
+            user_id=self.id,
+            status="active"
+        ).filter(
+            Q(expires_at__isnull=True) | Q(expires_at__gt=current_time)
+        ).prefetch_related("permission").select_related("permission")
+
+        # 处理权限
+        granted_permissions = {}
         denied_permissions = set()
 
+        # 处理角色权限
+        for rp in role_permissions:
+            if rp.permission and rp.permission.status == "active":
+                granted_permissions[rp.permission.code] = rp.permission
+
+        # 处理直接权限
         for up in user_permissions:
-            if not up.is_expired() and up.permission.status == "active":
+            if up.permission and up.permission.status == "active":
                 if up.permission_type == "grant":
-                    direct_permissions.append(up.permission)
+                    granted_permissions[up.permission.code] = up.permission
                 elif up.permission_type == "deny":
                     denied_permissions.add(up.permission.code)
 
-        # 3. 合并权限并处理拒绝权限
-        all_permissions = role_permissions + direct_permissions
-        unique_permissions = {}
-        for perm in all_permissions:
-            if perm.code not in denied_permissions:
-                unique_permissions[perm.code] = perm
+        # 移除被拒绝的权限
+        for denied_code in denied_permissions:
+            granted_permissions.pop(denied_code, None)
 
-        return list(unique_permissions.values())
+        return list(granted_permissions.values())
 
     async def has_permission(self, permission_code: str) -> bool:
         """检查是否有指定权限"""

@@ -7,7 +7,7 @@ from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
-from app import autogen_service
+from app.services import autogen_agent_service as autogen_service
 from app.core import get_current_user
 from app.models import User
 
