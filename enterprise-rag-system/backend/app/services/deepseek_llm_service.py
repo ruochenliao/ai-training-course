@@ -16,11 +16,11 @@ class DeepSeekLLMService:
     """DeepSeek-Chat LLM服务"""
     
     def __init__(self):
-        self.api_key = settings.DEEPSEEK_API_KEY
-        self.base_url = "https://api.deepseek.com/v1"
-        self.model_name = "deepseek-chat"
-        self.max_tokens = 4096
-        self.temperature = 0.7
+        self.api_key = settings.LLM_API_KEY
+        self.base_url = settings.LLM_BASE_URL + "/v1" if not settings.LLM_BASE_URL.endswith("/v1") else settings.LLM_BASE_URL
+        self.model_name = settings.LLM_MODEL_NAME
+        self.max_tokens = settings.LLM_MAX_TOKENS
+        self.temperature = settings.LLM_TEMPERATURE
         self.timeout = 60
         self._client = None
         

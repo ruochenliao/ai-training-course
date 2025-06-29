@@ -9,10 +9,10 @@ from typing import Dict, Any, List
 
 from loguru import logger
 
-from app import embedding_service
-from app import graph_service
-from app import milvus_service
-from app import reranker_service
+from app.services import embedding_service
+from app.services import enhanced_graph_service as graph_service
+from app.services import milvus_service
+from app.services import reranker_service
 from app.core import SearchException
 
 

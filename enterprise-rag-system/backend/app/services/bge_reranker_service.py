@@ -8,8 +8,15 @@ from typing import List, Dict, Any, Optional, Tuple
 
 import numpy as np
 import torch
-from FlagEmbedding import FlagReranker
 from loguru import logger
+
+try:
+    from FlagEmbedding import FlagReranker
+    FLAGEMBEDDING_AVAILABLE = True
+except ImportError:
+    logger.warning("FlagEmbedding not available, BGE reranker will use mock implementation")
+    FlagReranker = None
+    FLAGEMBEDDING_AVAILABLE = False
 
 from app.core import settings
 
@@ -47,6 +54,11 @@ class BGERerankerService:
     def _load_model(self):
         """同步加载模型"""
         try:
+            if not FLAGEMBEDDING_AVAILABLE:
+                logger.warning("FlagEmbedding不可用，使用模拟实现")
+                self.reranker = None
+                return
+
             # 加载BGE Reranker模型
             self.reranker = FlagReranker(
                 self.model_name,
@@ -136,9 +148,24 @@ class BGERerankerService:
     def _rerank_sync(self, query_passage_pairs: List[Tuple[str, str]]) -> List[float]:
         """同步执行重排序"""
         try:
+            if not FLAGEMBEDDING_AVAILABLE or self.reranker is None:
+                # 返回模拟分数（基于文本长度的简单启发式）
+                scores = []
+                for query, passage in query_passage_pairs:
+                    # 简单的相似度计算：基于共同词汇
+                    query_words = set(query.lower().split())
+                    passage_words = set(passage.lower().split())
+                    if len(query_words) == 0:
+                        score = 0.5
+                    else:
+                        common_words = len(query_words.intersection(passage_words))
+                        score = min(0.9, max(0.1, common_words / len(query_words)))
+                    scores.append(score)
+                return scores
+
             # 准备输入格式
             inputs = [[query, passage] for query, passage in query_passage_pairs]
-            
+
             # 执行重排序
             scores = self.reranker.compute_score(inputs, normalize=True)
             

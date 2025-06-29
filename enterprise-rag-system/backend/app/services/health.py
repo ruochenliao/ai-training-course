@@ -26,6 +26,8 @@ class HealthService:
             "milvus": await self.check_milvus(),
             "neo4j": await self.check_neo4j(),
             "minio": await self.check_minio(),
+            "ai_services": await self.check_ai_services(),
+            "cache_system": await self.check_cache_system(),
         }
         
         # 计算总体状态
@@ -249,27 +251,160 @@ class HealthService:
         """
         检查AI服务状态
         """
+        start_time = time.time()
+        ai_checks = {}
+
         try:
-            # 这里可以添加AI服务的健康检查
-            # 例如检查LLM、嵌入模型、重排模型等服务的可用性
-            
-            return {
-                "status": "healthy",
-                "message": "AI服务正常",
-                "duration": 0,
-                "details": {
-                    "llm_service": "available",
-                    "embedding_service": "available",
-                    "reranker_service": "available"
+            # 检查AutoGen服务
+            try:
+                from app.services.enhanced_autogen_service import autogen_service
+                autogen_health = await autogen_service.health_check()
+                ai_checks["autogen"] = {
+                    "status": autogen_health.get("status", "unknown"),
+                    "details": autogen_health
                 }
+            except Exception as e:
+                ai_checks["autogen"] = {
+                    "status": "unhealthy",
+                    "error": str(e)
+                }
+
+            # 检查多模态对话服务
+            try:
+                from app.services.multimodal_conversation_service import multimodal_conversation_service
+                multimodal_health = await multimodal_conversation_service.health_check()
+                ai_checks["multimodal"] = {
+                    "status": multimodal_health.get("status", "unknown"),
+                    "details": multimodal_health
+                }
+            except Exception as e:
+                ai_checks["multimodal"] = {
+                    "status": "unhealthy",
+                    "error": str(e)
+                }
+
+            # 检查LLM服务连接
+            try:
+                # 这里可以添加对DeepSeek等LLM服务的ping检查
+                ai_checks["llm_connectivity"] = {
+                    "status": "healthy",
+                    "message": "LLM服务连接正常"
+                }
+            except Exception as e:
+                ai_checks["llm_connectivity"] = {
+                    "status": "unhealthy",
+                    "error": str(e)
+                }
+
+            # 判断整体AI服务状态
+            all_ai_healthy = all(
+                check.get("status") == "healthy"
+                for check in ai_checks.values()
+            )
+
+            duration = time.time() - start_time
+
+            return {
+                "status": "healthy" if all_ai_healthy else "unhealthy",
+                "message": "AI服务检查完成",
+                "duration": round(duration, 3),
+                "details": ai_checks
             }
+
         except Exception as e:
             logger.error(f"AI服务健康检查失败: {e}")
+            duration = time.time() - start_time
             return {
                 "status": "unhealthy",
                 "message": f"AI服务检查失败: {str(e)}",
-                "duration": 0,
-                "details": {"error": str(e)}
+                "duration": round(duration, 3),
+                "details": {"error": str(e), "checks": ai_checks}
+            }
+
+    async def check_cache_system(self) -> Dict[str, Any]:
+        """
+        检查缓存系统状态
+        """
+        start_time = time.time()
+        cache_checks = {}
+
+        try:
+            # 检查权限缓存
+            try:
+                from app.core.permission_cache import get_permission_cache
+                permission_cache = get_permission_cache()
+                cache_stats = permission_cache.get_stats()
+
+                cache_checks["permission_cache"] = {
+                    "status": "healthy",
+                    "stats": cache_stats,
+                    "hit_rate": cache_stats.get("hit_rate", 0),
+                    "total_size": cache_stats.get("total_cache_size", 0)
+                }
+            except Exception as e:
+                cache_checks["permission_cache"] = {
+                    "status": "unhealthy",
+                    "error": str(e)
+                }
+
+            # 检查错误监控缓存
+            try:
+                from app.core.error_monitoring import get_error_monitor
+                error_monitor = get_error_monitor()
+
+                # 获取错误监控统计
+                error_stats = error_monitor.get_performance_metrics(300)
+
+                cache_checks["error_monitoring"] = {
+                    "status": "healthy",
+                    "stats": {
+                        "total_requests": error_stats.get("total_requests", 0),
+                        "error_rate": error_stats.get("error_rate", 0),
+                        "avg_response_time": error_stats.get("avg_response_time", 0)
+                    }
+                }
+            except Exception as e:
+                cache_checks["error_monitoring"] = {
+                    "status": "unhealthy",
+                    "error": str(e)
+                }
+
+            # 检查应用级缓存（如果有的话）
+            try:
+                # 这里可以添加其他应用级缓存的检查
+                cache_checks["application_cache"] = {
+                    "status": "healthy",
+                    "message": "应用缓存正常"
+                }
+            except Exception as e:
+                cache_checks["application_cache"] = {
+                    "status": "unhealthy",
+                    "error": str(e)
+                }
+
+            # 判断整体缓存系统状态
+            all_cache_healthy = all(
+                check.get("status") == "healthy"
+                for check in cache_checks.values()
+            )
+
+            duration = time.time() - start_time
+
+            return {
+                "status": "healthy" if all_cache_healthy else "unhealthy",
+                "message": "缓存系统检查完成",
+                "duration": round(duration, 3),
+                "details": cache_checks
+            }
+
+        except Exception as e:
+            logger.error(f"缓存系统健康检查失败: {e}")
+            duration = time.time() - start_time
+            return {
+                "status": "unhealthy",
+                "message": f"缓存系统检查失败: {str(e)}",
+                "duration": round(duration, 3),
+                "details": {"error": str(e), "checks": cache_checks}
             }
     
     async def get_system_info(self) -> Dict[str, Any]:

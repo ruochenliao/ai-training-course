@@ -4,7 +4,7 @@ API v1 路由汇总
 
 from fastapi import APIRouter
 
-from app import (
+from .endpoints import (
     auth,
     users,
     knowledge_bases,
@@ -18,6 +18,13 @@ from app import (
     graph,
     autogen_chat,
     rbac,
+    monitoring,
+    permission_management,
+    monitoring_dashboard,
+    database_optimization,
+    cache_management,
+    validation_management,
+    file_upload,
 )
 
 api_router = APIRouter()
@@ -60,6 +67,27 @@ api_router.include_router(autogen_chat.router, prefix="/autogen", tags=["多智�
 
 # RBAC权限管理接口
 api_router.include_router(rbac.router, prefix="/rbac", tags=["权限管理"])
+
+# 监控接口
+api_router.include_router(monitoring.router, prefix="/monitoring", tags=["系统监控"])
+
+# 权限管理接口
+api_router.include_router(permission_management.router, prefix="/permissions", tags=["权限管理"])
+
+# 监控仪表板接口
+api_router.include_router(monitoring_dashboard.router, prefix="/dashboard", tags=["监控仪表板"])
+
+# 数据库优化接口
+api_router.include_router(database_optimization.router, prefix="/database", tags=["数据库优化"])
+
+# 缓存管理接口
+api_router.include_router(cache_management.router, prefix="/cache", tags=["缓存管理"])
+
+# 请求验证管理接口
+api_router.include_router(validation_management.router, prefix="/validation", tags=["请求验证管理"])
+
+# 文件上传接口
+api_router.include_router(file_upload.router, prefix="/upload", tags=["文件上传"])
 
 
 @api_router.get("/")

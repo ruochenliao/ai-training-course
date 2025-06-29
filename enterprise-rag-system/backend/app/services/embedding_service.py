@@ -10,7 +10,7 @@ import httpx
 import numpy as np
 from loguru import logger
 
-from app import qwen_model_manager
+from app.services import qwen_model_service as qwen_model_manager
 from app.core import AIServiceException
 from app.core import settings
 

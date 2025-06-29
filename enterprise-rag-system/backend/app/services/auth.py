@@ -7,8 +7,7 @@ from typing import Optional
 
 from app.core import verify_password, get_password_hash
 from app.models import User
-from app.schemas import UserCreate
-from app.schemas import UserRegister
+from app.schemas import UserRegister, UserCreate
 
 
 class AuthService:

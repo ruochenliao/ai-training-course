@@ -7,7 +7,7 @@ from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from app import (
+from app.services.advanced_search_service import (
     advanced_search_service,
     SearchConfig,
     SearchType

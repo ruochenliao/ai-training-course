@@ -9,8 +9,8 @@ from typing import Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form, status
 from fastapi.responses import StreamingResponse
 
-from app import document_processor
-from app import file_storage
+from app.services import document_processor
+from app.services import file_storage
 from app.core import get_current_user
 from app.models import Document, DocumentChunk, KnowledgeBase
 from app.models import User
@@ -455,51 +455,6 @@ async def delete_document(
 
     return {"message": "文档删除成功"}
 
-
-@router.get("/{document_id}/chunks", summary="获取文档分块")
-async def get_document_chunks(
-    document_id: int,
-    page: int = Query(1, ge=1, description="页码"),
-    size: int = Query(20, ge=1, le=100, description="每页数量"),
-    current_user: User = Depends(get_current_user)
-) -> Any:
-    """
-    获取文档分块
-    """
-    document = await Document.get_or_none(id=document_id, is_deleted=False)
-    if not document:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="文档不存在"
-        )
-
-    # 检查权限
-    knowledge_base = await KnowledgeBase.get(id=document.knowledge_base_id)
-    if not current_user.is_superuser:
-        if knowledge_base.owner_id != current_user.id and knowledge_base.visibility != "public":
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="无权访问此文档"
-            )
-
-    # 分页查询分块
-    total = await DocumentChunk.filter(document_id=document_id).count()
-    offset = (page - 1) * size
-    chunks = await DocumentChunk.filter(document_id=document_id).offset(offset).limit(size).order_by("chunk_index")
-
-    # 转换为响应格式
-    chunk_list = []
-    for chunk in chunks:
-        chunk_dict = await chunk.to_dict()
-        chunk_list.append(chunk_dict)
-
-    return {
-        "chunks": chunk_list,
-        "total": total,
-        "page": page,
-        "size": size,
-        "pages": (total + size - 1) // size
-    }
 
 
 @router.get("/{document_id}/download", summary="下载文档")

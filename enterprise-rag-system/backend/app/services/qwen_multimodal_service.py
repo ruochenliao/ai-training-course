@@ -20,8 +20,8 @@ class QwenMultimodalService:
     """Qwen-VL-Max多模态服务"""
     
     def __init__(self):
-        self.api_key = settings.DASHSCOPE_API_KEY
-        self.model_name = "qwen-vl-max"
+        self.api_key = settings.VLM_API_KEY
+        self.model_name = settings.VLM_MODEL_NAME
         self.max_image_size = 10 * 1024 * 1024  # 10MB
         self.supported_formats = {"jpg", "jpeg", "png", "bmp", "gif", "webp"}
         self.max_images_per_request = 10
