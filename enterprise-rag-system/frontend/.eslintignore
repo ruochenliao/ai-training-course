@@ -1,0 +1,21 @@
+.idea
+.local
+.vscode
+
+/bin
+/dist
+/docs
+/node_modules
+/public
+
+*.md
+*.sh
+*.ttf
+*.woff
+*.min.js
+*.min.css
+
+# 配置文件
+vite.config.ts
+*.config.js
+*.config.ts

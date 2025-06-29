@@ -1,0 +1,61 @@
+{
+  "name": "enterprise-rag-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "企业级RAG知识库系统前端应用",
+  "keywords": [
+    "react",
+    "typescript",
+    "vite",
+    "antd",
+    "rag",
+    "enterprise"
+  ],
+  "author": "Enterprise RAG Team",
+  "scripts": {
+    "dev": "vite --host localhost --port 3000 --open",
+    "build": "tsc -b && vite build",
+    "lint": "eslint src --ext js,jsx,ts,tsx --fix",
+    "lint:check": "eslint src --ext js,jsx,ts,tsx",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type-check": "tsc --noEmit",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.6.1",
+    "@tanstack/react-query": "^5.81.5",
+    "@tanstack/react-query-devtools": "^5.81.5",
+    "antd": "^5.12.8",
+    "axios": "^1.6.2",
+    "clsx": "^2.0.0",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^10.16.5",
+    "lucide-react": "^0.294.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-markdown": "^9.0.1",
+    "react-router-dom": "^6.20.1",
+    "react-syntax-highlighter": "^15.5.0",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "@types/react": "^18.2.33",
+    "@types/react-dom": "^18.2.14",
+    "@types/react-syntax-highlighter": "^15.5.11",
+    "@vitejs/plugin-react": "^4.5.2",
+    "eslint": "^9.29.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.2.0",
+    "prettier": "^3.1.0",
+    "terser": "^5.24.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.34.1",
+    "vite": "^5.4.19"
+  }
+}
