@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, Form, Input, Button, Switch, Select, Upload, Avatar, message, Divider, Space, Typography } from 'antd';
-import { UserOutlined, UploadOutlined, SaveOutlined, LockOutlined } from '@ant-design/icons';
-import { motion } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
-import { validatePassword } from '@/utils';
+import {useState} from 'react';
+import {Avatar, Button, Card, Divider, Form, Input, message, Select, Switch, Typography, Upload} from 'antd';
+import {LockOutlined, SaveOutlined, UploadOutlined, UserOutlined} from '@ant-design/icons';
+import {motion} from 'framer-motion';
+import {useAuth} from '@/contexts/AuthContext';
+import {useTheme} from '@/contexts/ThemeContext';
+import {validatePassword} from '@/utils';
 
 const { Title, Text } = Typography;
 const { Option } = Select;

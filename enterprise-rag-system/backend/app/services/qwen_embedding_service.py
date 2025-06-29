@@ -8,10 +8,11 @@ from typing import List, Dict, Any
 
 import numpy as np
 import torch
-from app.core.config import settings
 from loguru import logger
 from modelscope import AutoModel, AutoTokenizer
 from modelscope.hub.snapshot_download import snapshot_download
+
+from app.core import settings
 
 
 class QwenEmbeddingService:

@@ -10,32 +10,32 @@ from fastapi import FastAPI, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.responses import JSONResponse
 from fastapi.openapi.docs import (
     get_redoc_html,
     get_swagger_ui_html,
     get_swagger_ui_oauth2_redirect_html,
 )
+from fastapi.responses import JSONResponse
 from loguru import logger
 
 # 添加项目根目录到Python路径
 sys.path.append(str(Path(__file__).parent.parent))
 
-from app.api.v1.api import api_router
-from app.core.config import settings
-from app.core.database import init_db, close_db, create_initial_data
-from app.core.exceptions import (
+from app import api_router
+from app.core import settings
+from app.core import init_db, close_db, create_initial_data
+from app.core import (
     BusinessException,
     business_exception_handler,
     general_exception_handler,
     validation_exception_handler,
 )
-from app.core.middleware import (
+from app.core import (
     LoggingMiddleware,
     ProcessTimeMiddleware,
     RateLimitMiddleware,
 )
-from app.services.health import HealthService
+from app import HealthService
 
 
 @asynccontextmanager

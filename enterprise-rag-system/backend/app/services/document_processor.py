@@ -9,12 +9,12 @@ from pathlib import Path
 from typing import Dict, List, Any
 
 import aiofiles
-from app.core.config import settings
-from app.models.knowledge import Document, DocumentChunk
-from app.schemas.document import ProcessingResult, DocumentMetadata
 from loguru import logger
 
-from app.core.exceptions import DocumentProcessingException
+from app.core import DocumentProcessingException
+from app.core import settings
+from app.models import Document, DocumentChunk
+from app.schemas import ProcessingResult, DocumentMetadata
 
 
 class DocumentProcessor:
@@ -466,7 +466,7 @@ class DocumentProcessor:
     ) -> List[DocumentChunk]:
         """智能分块"""
         try:
-            from app.services.chunker import DocumentChunker
+            from app import DocumentChunker
             
             chunker = DocumentChunker()
             chunks = await chunker.chunk_text(

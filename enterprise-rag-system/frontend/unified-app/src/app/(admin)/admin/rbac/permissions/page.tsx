@@ -1,6 +1,6 @@
 'use client';
 
-import { PermissionManagement } from '@/components/admin/PermissionManagement';
+import {PermissionManagement} from '@/components/admin/PermissionManagement';
 
 export default function PermissionsPage() {
   return (

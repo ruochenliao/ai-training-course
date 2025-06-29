@@ -4,14 +4,12 @@
 作为AdvancedSearchService的适配器，保持向后兼容性
 """
 
-import asyncio
 import time
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 
 from loguru import logger
 
-from app.core.config import settings
-from app.services.advanced_search_service import AdvancedSearchService, SearchConfig, SearchType
+from app import AdvancedSearchService, SearchConfig, SearchType
 
 
 class SearchService:

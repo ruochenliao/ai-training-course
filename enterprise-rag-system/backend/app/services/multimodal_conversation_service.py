@@ -6,14 +6,15 @@ import uuid
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 
-from app.core.database_new import get_db_session
-from app.models.sqlalchemy_models import Conversation, Message, MessageRole, ContentType
-from app.services.autogen_agent_service import autogen_service
-from app.services.deepseek_llm_service import deepseek_llm_service
-from app.services.milvus_vector_service import milvus_service
-from app.services.neo4j_graph_service import neo4j_service
-from app.services.qwen_multimodal_service import qwen_multimodal_service
 from loguru import logger
+
+from app import autogen_service
+from app import deepseek_llm_service
+from app import milvus_service
+from app import neo4j_service
+from app import qwen_multimodal_service
+from app.core import get_db_session
+from app.models import Conversation, Message, MessageRole, ContentType
 
 
 class MultimodalConversationService:

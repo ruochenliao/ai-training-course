@@ -4,13 +4,13 @@ RBAC权限管理API端点
 
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query
 from loguru import logger
 
-from app.core.security import get_current_user, PermissionChecker
-from app.models.user import User
-from app.models.rbac import Department, Role, Permission, UserRole, RolePermission, UserPermission
-from app.schemas.rbac import (
+from app.core import get_current_user, PermissionChecker
+from app.models import Department, Role, Permission, UserRole, RolePermission, UserPermission
+from app.models import User
+from app.schemas import (
     DepartmentCreate, DepartmentUpdate, DepartmentResponse, DepartmentListResponse,
     RoleCreate, RoleUpdate, RoleResponse, RoleListResponse,
     PermissionCreate, PermissionUpdate, PermissionResponse, PermissionListResponse,
@@ -47,9 +47,9 @@ async def get_departments(
         for dept in accessible_depts:
             if dept.parent_id is None or dept.parent_id not in dept_dict:
                 # 根部门
-                dept_response = DepartmentResponse.from_orm(dept)
-                dept_response.children = await _build_dept_tree(dept, dept_dict)
-                tree_depts.append(dept_response)
+                dept_dict_data = await dept.to_dict()
+                dept_dict_data["children"] = await _build_dept_tree(dept, dept_dict)
+                tree_depts.append(dept_dict_data)
         
         return DepartmentListResponse(
             departments=tree_depts,
@@ -78,7 +78,7 @@ async def create_department(
             created_by=current_user.id
         )
         
-        return DepartmentResponse.from_orm(dept)
+        return await dept.to_dict()
     except HTTPException:
         raise
     except Exception as e:
@@ -105,7 +105,7 @@ async def update_department(
             await dept.update_from_dict(update_data)
             await dept.save()
         
-        return DepartmentResponse.from_orm(dept)
+        return await dept.to_dict()
     except HTTPException:
         raise
     except Exception as e:
@@ -167,10 +167,11 @@ async def get_roles(
         # 获取角色权限信息
         role_responses = []
         for role in roles:
-            role_response = RoleResponse.from_orm(role)
-            role_response.permissions = await role.get_permissions()
-            role_response.user_count = await UserRole.filter(role_id=role.id).count()
-            role_responses.append(role_response)
+            # 转换为字典格式
+            role_dict = await role.to_dict()
+            role_dict["permissions"] = await role.get_permissions()
+            role_dict["user_count"] = await UserRole.filter(role_id=role.id).count()
+            role_responses.append(role_dict)
         
         return RoleListResponse(
             roles=role_responses,
@@ -210,10 +211,10 @@ async def create_role(
                 await RolePermission.create(role_id=role.id, permission_id=perm_id)
         
         # 获取完整信息
-        role_response = RoleResponse.from_orm(role)
-        role_response.permissions = await role.get_permissions()
-        
-        return role_response
+        role_dict = await role.to_dict()
+        role_dict["permissions"] = await role.get_permissions()
+
+        return role_dict
     except HTTPException:
         raise
     except Exception as e:
@@ -250,10 +251,10 @@ async def update_role(
                 await RolePermission.create(role_id=role.id, permission_id=perm_id)
         
         # 获取完整信息
-        role_response = RoleResponse.from_orm(role)
-        role_response.permissions = await role.get_permissions()
-        
-        return role_response
+        role_dict = await role.to_dict()
+        role_dict["permissions"] = await role.get_permissions()
+
+        return role_dict
     except HTTPException:
         raise
     except Exception as e:
@@ -317,7 +318,7 @@ async def get_permissions(
         total = await query.count()
         permissions = await query.offset((page - 1) * size).limit(size).all()
 
-        permission_responses = [PermissionResponse.from_orm(perm) for perm in permissions]
+        permission_responses = [await perm.to_dict() for perm in permissions]
 
         return PermissionListResponse(
             permissions=permission_responses,
@@ -349,7 +350,7 @@ async def create_permission(
             created_by=current_user.id
         )
 
-        return PermissionResponse.from_orm(permission)
+        return await permission.to_dict()
     except HTTPException:
         raise
     except Exception as e:
@@ -376,7 +377,7 @@ async def update_permission(
             await permission.update_from_dict(update_data)
             await permission.save()
 
-        return PermissionResponse.from_orm(permission)
+        return await permission.to_dict()
     except HTTPException:
         raise
     except Exception as e:
@@ -445,9 +446,9 @@ async def assign_user_roles(
                 dept_ids=assignment.dept_ids or []
             )
 
-            user_role_response = UserRoleResponse.from_orm(user_role)
-            user_role_response.role = RoleResponse.from_orm(role)
-            user_roles.append(user_role_response)
+            user_role_dict = await user_role.to_dict()
+            user_role_dict["role"] = await role.to_dict()
+            user_roles.append(user_role_dict)
 
         return user_roles
     except HTTPException:
@@ -469,9 +470,9 @@ async def get_user_roles(
         user_role_responses = []
         for ur in user_roles:
             if not ur.is_expired() and ur.role.status == "active":
-                user_role_response = UserRoleResponse.from_orm(ur)
-                user_role_response.role = RoleResponse.from_orm(ur.role)
-                user_role_responses.append(user_role_response)
+                user_role_dict = await ur.to_dict()
+                user_role_dict["role"] = await ur.role.to_dict()
+                user_role_responses.append(user_role_dict)
 
         return user_role_responses
     except Exception as e:
@@ -550,14 +551,14 @@ async def get_menu_tree(
 
 # ============ 辅助函数 ============
 
-async def _build_dept_tree(dept: Department, dept_dict: dict) -> List[DepartmentResponse]:
+async def _build_dept_tree(dept: Department, dept_dict: dict) -> List[dict]:
     """构建部门树"""
     children = []
     for child_dept in dept_dict.values():
         if child_dept.parent_id == dept.id:
-            child_response = DepartmentResponse.from_orm(child_dept)
-            child_response.children = await _build_dept_tree(child_dept, dept_dict)
-            children.append(child_response)
+            child_dict = await child_dept.to_dict()
+            child_dict["children"] = await _build_dept_tree(child_dept, dept_dict)
+            children.append(child_dict)
     return children
 
 

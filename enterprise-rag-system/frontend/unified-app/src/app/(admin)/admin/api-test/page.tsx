@@ -1,34 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import {useState} from 'react';
 import {
-  Card,
-  Button,
-  Space,
-  Typography,
-  Table,
-  Tag,
-  Input,
-  Form,
-  Tabs,
-  Alert,
-  Progress,
-  Divider,
-  Row,
-  Col,
-  Statistic,
-  message
+    Alert,
+    Button,
+    Card,
+    Col,
+    Divider,
+    Form,
+    Input,
+    message,
+    Progress,
+    Row,
+    Space,
+    Statistic,
+    Table,
+    Tabs,
+    Tag,
+    Typography
 } from 'antd';
 import {
-  PlayCircleOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  ReloadOutlined,
-  ApiOutlined,
-  ClockCircleOutlined
+    ApiOutlined,
+    CheckCircleOutlined,
+    ClockCircleOutlined,
+    CloseCircleOutlined,
+    PlayCircleOutlined,
+    ReloadOutlined
 } from '@ant-design/icons';
-import { motion } from 'framer-motion';
-import { apiTester, quickTest, TestResult } from '@/utils/apiTest';
+import {motion} from 'framer-motion';
+import {apiTester, quickTest, TestResult} from '@/utils/apiTest';
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;

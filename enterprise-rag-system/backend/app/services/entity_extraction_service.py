@@ -10,7 +10,6 @@ from typing import List, Dict, Any
 import jieba
 import jieba.posseg as pseg
 import spacy
-from app.core.config import settings
 from loguru import logger
 
 

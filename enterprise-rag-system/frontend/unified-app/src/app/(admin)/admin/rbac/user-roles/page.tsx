@@ -1,6 +1,6 @@
 'use client';
 
-import { UserRoleAssignment } from '@/components/admin/UserRoleAssignment';
+import {UserRoleAssignment} from '@/components/admin/UserRoleAssignment';
 
 export default function UserRolesPage() {
   return (

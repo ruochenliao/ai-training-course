@@ -1,14 +1,15 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, Row, Col, Statistic, Button, Typography, Space } from 'antd';
+import {useRouter} from 'next/navigation';
+import {Button, Card, Col, Row, Statistic, Typography} from 'antd';
 import {
-  TeamOutlined,
-  SafetyOutlined,
-  ApartmentOutlined,
-  UserSwitchOutlined,
-  ArrowRightOutlined,
+    ApartmentOutlined,
+    ArrowRightOutlined,
+    SafetyOutlined,
+    TeamOutlined,
+    UserOutlined,
+    UserSwitchOutlined,
 } from '@ant-design/icons';
 // import { motion } from 'framer-motion';
 

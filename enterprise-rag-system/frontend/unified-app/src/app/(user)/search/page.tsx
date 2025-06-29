@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, Input, Button, Select, Space, Typography, Empty, Spin, Tag, Pagination } from 'antd';
-import { SearchOutlined, FilterOutlined, BookOutlined, FileTextOutlined } from '@ant-design/icons';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/utils/api';
-import { formatDate, highlightSearchTerm } from '@/utils';
+import {useState} from 'react';
+import {Button, Card, Empty, Input, Pagination, Select, Spin, Tag, Typography} from 'antd';
+import {BookOutlined, FileTextOutlined, FilterOutlined, SearchOutlined} from '@ant-design/icons';
+import {AnimatePresence, motion} from 'framer-motion';
+import {useQuery} from '@tanstack/react-query';
+import {apiClient} from '@/utils/api';
+import {formatDate, highlightSearchTerm} from '@/utils';
 
 const { Search } = Input;
 const { Title, Text, Paragraph } = Typography;

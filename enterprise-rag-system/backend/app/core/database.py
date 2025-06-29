@@ -2,9 +2,10 @@
 数据库配置和初始化
 """
 
-from app.core.config import settings
 from loguru import logger
 from tortoise import Tortoise
+
+from app.core import settings
 
 # Tortoise ORM配置
 TORTOISE_ORM = {
@@ -36,7 +37,7 @@ async def init_db():
 
         # 初始化RBAC基础数据（如果失败不影响系统启动）
         try:
-            from app.core.rbac_init import init_rbac_data
+            from app.core import init_rbac_data
             await init_rbac_data()
         except Exception as rbac_error:
             logger.warning(f"RBAC初始化失败，系统将以基础模式启动: {rbac_error}")
@@ -57,8 +58,8 @@ async def close_db():
 
 async def create_initial_data():
     """创建初始数据"""
-    from app.models.user import User, Role, Permission
-    from app.models.system import SystemConfig
+    from app.models import User, Role, Permission
+    from app.models import SystemConfig
     
     try:
         # 创建超级管理员

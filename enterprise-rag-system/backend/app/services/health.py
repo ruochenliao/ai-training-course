@@ -5,9 +5,10 @@
 import time
 from typing import Dict, Any
 
-from app.core.config import settings
 from loguru import logger
 from tortoise import connections
+
+from app.core import settings
 
 
 class HealthService:

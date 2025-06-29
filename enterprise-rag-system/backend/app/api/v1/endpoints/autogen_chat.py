@@ -4,11 +4,12 @@ AutoGen多智能体聊天API端点
 
 from typing import Any, List, Optional
 
-from app.core.security import get_current_user
-from app.models.user import User
-from app.services.autogen_service import autogen_service
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
+
+from app import autogen_service
+from app.core import get_current_user
+from app.models import User
 
 router = APIRouter()
 

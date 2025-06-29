@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, Typography, Button, Space } from 'antd';
-import { UserOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import {useEffect} from 'react';
+import {useRouter} from 'next/navigation';
+import {Button, Card, Space, Typography} from 'antd';
+import {ArrowRightOutlined, UserOutlined} from '@ant-design/icons';
 
 const { Title, Paragraph } = Typography;
 

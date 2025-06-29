@@ -3,8 +3,8 @@
  * 用于验证前后端接口的连通性和数据格式
  */
 
-import { apiClient } from './api';
-import { message } from 'antd';
+import {apiClient} from './api';
+import {message} from 'antd';
 
 export interface TestResult {
   endpoint: string;

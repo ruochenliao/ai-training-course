@@ -6,17 +6,18 @@ import asyncio
 from pathlib import Path
 from typing import List, Optional
 
-from app.core.auth import get_current_user
-from app.core.database_new import get_db_session
-from app.models.sqlalchemy_models import Document, KnowledgeBase, User
-from app.services.document_processing_pipeline import document_pipeline
-from app.services.intelligent_chunker import ChunkStrategy
-from app.services.marker_document_service import marker_service
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks
 from fastapi.responses import JSONResponse
 from loguru import logger
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app import ChunkStrategy
+from app import document_pipeline
+from app import marker_service
+from app.core import get_current_user
+from app.core import get_db_session
+from app.models import Document, KnowledgeBase, User
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 

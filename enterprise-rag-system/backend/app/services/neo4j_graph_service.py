@@ -5,9 +5,10 @@ Neo4j 5.x 知识图谱服务 - 企业级RAG系统
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 
-from app.core.config import settings
 from loguru import logger
 from neo4j import AsyncGraphDatabase, AsyncDriver
+
+from app.core import settings
 
 
 class Neo4jGraphService:

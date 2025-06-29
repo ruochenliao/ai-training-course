@@ -5,7 +5,6 @@ Milvus向量数据库服务
 import uuid
 from typing import List, Dict, Any, Optional
 
-from app.core.config import settings
 from loguru import logger
 from pymilvus import (
     connections,
@@ -16,7 +15,8 @@ from pymilvus import (
     utility
 )
 
-from app.core.exceptions import VectorDatabaseException
+from app.core import VectorDatabaseException
+from app.core import settings
 
 
 class MilvusService:

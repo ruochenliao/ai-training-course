@@ -1,9 +1,9 @@
-import type { Metadata } from 'next';
-import { ConfigProvider } from 'antd';
-import { ThemeProvider } from '@/contexts/ThemeContext';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { PermissionProvider } from '@/contexts/PermissionContext';
-import { QueryProvider } from '@/contexts/QueryProvider';
+import type {Metadata} from 'next';
+import {ConfigProvider} from 'antd';
+import {ThemeProvider} from '@/contexts/ThemeContext';
+import {AuthProvider} from '@/contexts/AuthContext';
+import {PermissionProvider} from '@/contexts/PermissionContext';
+import {QueryProvider} from '@/contexts/QueryProvider';
 import './globals.css';
 
 export const metadata: Metadata = {

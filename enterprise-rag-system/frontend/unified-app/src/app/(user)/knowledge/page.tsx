@@ -1,23 +1,22 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, Button, Input, Select, Space, Typography, Empty, Modal, Form, message, Tag, Dropdown } from 'antd';
+import {useState} from 'react';
+import {Button, Card, Dropdown, Empty, Form, Input, message, Modal, Select, Space, Tag, Typography} from 'antd';
 import {
-  PlusOutlined,
-  SearchOutlined,
-  BookOutlined,
-  FileTextOutlined,
-  MoreOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  ShareAltOutlined,
-  EyeOutlined,
+    BookOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    EyeOutlined,
+    FileTextOutlined,
+    MoreOutlined,
+    PlusOutlined,
+    ShareAltOutlined,
 } from '@ant-design/icons';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/utils/api';
-import { formatDate, formatNumber } from '@/utils';
-import type { KnowledgeBase } from '@/types';
+import {AnimatePresence, motion} from 'framer-motion';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+import {apiClient} from '@/utils/api';
+import {formatDate, formatNumber} from '@/utils';
+import type {KnowledgeBase} from '@/types';
 
 const { Search } = Input;
 const { Title, Text, Paragraph } = Typography;

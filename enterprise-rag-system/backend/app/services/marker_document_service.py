@@ -10,13 +10,14 @@ from pathlib import Path
 from typing import Dict, Tuple, Any
 
 import aiofiles
-from app.core.config import settings
-from app.core.database_new import get_db_session
-from app.models.sqlalchemy_models import Document, ParseStatus
 from loguru import logger
 from marker import convert_single_pdf
 from marker.models import load_all_models
 from marker.settings import settings as marker_settings
+
+from app.core import get_db_session
+from app.core import settings
+from app.models import Document, ParseStatus
 
 
 class MarkerDocumentService:

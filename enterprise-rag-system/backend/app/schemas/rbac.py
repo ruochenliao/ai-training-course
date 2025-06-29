@@ -3,9 +3,9 @@ RBAC权限系统Pydantic模式
 """
 
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
 
 # ============ 部门相关模式 ============

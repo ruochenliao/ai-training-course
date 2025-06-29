@@ -5,16 +5,17 @@
 import asyncio
 from typing import Any, List, Optional
 
-from app.core.security import get_current_user
-from app.models.user import User
-from app.services.agent_service import QueryContext
-from app.services.workflow_service import (
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
+
+from app import QueryContext
+from app import (
     workflow_orchestrator,
     WorkflowConfig,
     WorkflowType
 )
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from app.core import get_current_user
+from app.models import User
 
 router = APIRouter()
 

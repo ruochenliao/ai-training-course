@@ -3,18 +3,15 @@
 实现智能体协作的RAG检索和回答生成
 """
 
-import asyncio
-import json
-from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
+from typing import Dict, List, Any, Optional
 
-from loguru import logger
-import autogen
 from autogen import AssistantAgent, UserProxyAgent, GroupChat, GroupChatManager
+from loguru import logger
 
-from app.core.config import settings
-from app.services.search_service import SearchService
-from app.services.llm_service import llm_service
+from app import SearchService
+from app import llm_service
+from app.core import settings
 
 
 class AutoGenRAGService:

@@ -1,33 +1,28 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-  Table,
-  Button,
-  Modal,
-  Form,
-  Select,
-  Space,
-  message,
-  Card,
-  Row,
-  Col,
-  Typography,
-  Tag,
-  Tooltip,
-  DatePicker,
-  Transfer,
-  Divider,
+    Button,
+    Card,
+    Col,
+    DatePicker,
+    Divider,
+    Form,
+    message,
+    Modal,
+    Row,
+    Select,
+    Space,
+    Table,
+    Tag,
+    Tooltip,
+    Transfer,
+    Typography,
 } from 'antd';
-import {
-  UserOutlined,
-  TeamOutlined,
-  SettingOutlined,
-  ClockCircleOutlined,
-} from '@ant-design/icons';
-import { PermissionGuard } from '@/components/common/PermissionGuard';
-import { User, Role, UserRole, Department, AssignUserRolesRequest } from '@/types';
-import { api } from '@/utils/api';
+import {ClockCircleOutlined, SettingOutlined, TeamOutlined, UserOutlined,} from '@ant-design/icons';
+import {PermissionGuard} from '@/components/common/PermissionGuard';
+import {AssignUserRolesRequest, Department, Role, User, UserRole} from '@/types';
+import {apiClient} from '@/utils/api';
 import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
@@ -57,11 +52,8 @@ export const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({ classNam
   // 获取用户列表
   const fetchUsers = async () => {
     try {
-      const response = await api.get<{
-        users: User[];
-        total: number;
-      }>('/users?size=1000');
-      setUsers(response.data.users);
+      const response = await apiClient.getUsers({ size: 1000 });
+      setUsers(response.users || []);
     } catch (error) {
       message.error('获取用户列表失败');
       console.error('Failed to fetch users:', error);
@@ -71,11 +63,8 @@ export const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({ classNam
   // 获取角色列表
   const fetchRoles = async () => {
     try {
-      const response = await api.get<{
-        roles: Role[];
-        total: number;
-      }>('/rbac/roles?size=1000');
-      setRoles(response.data.roles.filter(role => role.status === 'active'));
+      const response = await apiClient.getRoles({ size: 1000 });
+      setRoles((response.roles || []).filter(role => role.status === 'active'));
     } catch (error) {
       message.error('获取角色列表失败');
       console.error('Failed to fetch roles:', error);

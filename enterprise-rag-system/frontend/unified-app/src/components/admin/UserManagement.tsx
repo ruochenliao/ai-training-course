@@ -1,45 +1,40 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-  Table,
-  Button,
-  Modal,
-  Form,
-  Input,
-  Select,
-  Space,
-  message,
-  Popconfirm,
-  Tag,
-  Card,
-  Row,
-  Col,
-  Divider,
-  Typography,
-  Tooltip,
-  Avatar,
-  Dropdown,
-  Badge,
+    Avatar,
+    Badge,
+    Button,
+    Card,
+    Col,
+    Divider,
+    Dropdown,
+    Form,
+    Input,
+    message,
+    Modal,
+    Row,
+    Select,
+    Space,
+    Table,
+    Tag,
+    Typography,
 } from 'antd';
 import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  UserOutlined,
-  LockOutlined,
-  UnlockOutlined,
-  CrownOutlined,
-  MoreOutlined,
-  TeamOutlined,
-  SafetyOutlined,
-  SearchOutlined,
-  SettingOutlined,
+    CrownOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    LockOutlined,
+    MoreOutlined,
+    PlusOutlined,
+    TeamOutlined,
+    UnlockOutlined,
+    UserOutlined,
 } from '@ant-design/icons';
-import { PermissionGuard } from '@/components/common/PermissionGuard';
-import { User, Role, Department, CreateUserRequest, UpdateUserRequest, UserRole } from '@/types';
-import { api } from '@/utils/api';
-import { formatDate } from '@/utils';
+import {PermissionGuard} from '@/components/common/PermissionGuard';
+import {CreateUserRequest, Department, Role, UpdateUserRequest, User, UserRole} from '@/types';
+import {apiClient} from '@/utils/api';
+import {formatDate} from '@/utils';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -68,16 +63,13 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className }) => 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams();
-      if (searchText) params.append('search', searchText);
-      if (statusFilter) params.append('status', statusFilter);
-      params.append('size', '1000');
+      const params: any = {};
+      if (searchText) params.search = searchText;
+      if (statusFilter) params.status = statusFilter;
+      params.size = 1000;
 
-      const response = await api.get<{
-        users: User[];
-        total: number;
-      }>(`/users?${params.toString()}`);
-      setUsers(response.data.users);
+      const response = await apiClient.getUsers(params);
+      setUsers(response.users || []);
     } catch (error) {
       message.error('获取用户列表失败');
       console.error('Failed to fetch users:', error);
@@ -89,11 +81,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className }) => 
   // 获取角色列表
   const fetchRoles = async () => {
     try {
-      const response = await api.get<{
-        roles: Role[];
-        total: number;
-      }>('/rbac/roles?size=1000');
-      setRoles(response.data.roles.filter(role => role.status === 'active'));
+      const response = await apiClient.getRoles({ size: 1000 });
+      setRoles((response.roles || []).filter(role => role.status === 'active'));
     } catch (error) {
       message.error('获取角色列表失败');
       console.error('Failed to fetch roles:', error);
@@ -103,11 +92,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className }) => 
   // 获取部门列表
   const fetchDepartments = async () => {
     try {
-      const response = await api.get<{
-        departments: Department[];
-        total: number;
-      }>('/rbac/departments');
-      setDepartments(response.data.departments);
+      const response = await apiClient.getDepartments();
+      setDepartments(response.departments || []);
     } catch (error) {
       message.error('获取部门列表失败');
       console.error('Failed to fetch departments:', error);
@@ -120,8 +106,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className }) => 
       const allUserRoles: UserRole[] = [];
       for (const user of users) {
         try {
-          const response = await api.get<UserRole[]>(`/rbac/users/${user.id}/roles`);
-          allUserRoles.push(...response.data);
+          const response = await apiClient.getUserRoles(user.id);
+          allUserRoles.push(...response);
         } catch (error) {
           console.warn(`Failed to fetch roles for user ${user.id}:`, error);
         }

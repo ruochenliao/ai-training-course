@@ -8,15 +8,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any
 
-from app.core.database_new import get_db_session
-from app.models.sqlalchemy_models import Document, DocumentChunk, ParseStatus, ChunkType
-from app.services.entity_extraction_service import entity_extraction_service
-from app.services.intelligent_chunker import intelligent_chunker, ChunkStrategy
-from app.services.marker_document_service import marker_service
-from app.services.milvus_vector_service import milvus_service
-from app.services.neo4j_graph_service import neo4j_service
-from app.services.qwen_embedding_service import qwen_embedding_service
 from loguru import logger
+
+from app import entity_extraction_service
+from app import intelligent_chunker, ChunkStrategy
+from app import marker_service
+from app import milvus_service
+from app import neo4j_service
+from app import qwen_embedding_service
+from app.core import get_db_session
+from app.models import Document, DocumentChunk, ParseStatus, ChunkType
 
 
 class DocumentProcessingPipeline:

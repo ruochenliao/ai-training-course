@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Layout, message } from 'antd';
-import { useAuth } from '@/contexts/AuthContext';
+import {useEffect} from 'react';
+import {useRouter} from 'next/navigation';
+import {Layout, message} from 'antd';
+import {useAuth} from '@/contexts/AuthContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
-import { motion } from 'framer-motion';
+import {motion} from 'framer-motion';
 
 const { Content } = Layout;
 

@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
-import { Spin } from 'antd';
-import { motion } from 'framer-motion';
+import {useEffect} from 'react';
+import {useRouter} from 'next/navigation';
+import {useAuth} from '@/contexts/AuthContext';
+import {Spin} from 'antd';
+import {motion} from 'framer-motion';
 
 export default function HomePage() {
   const { isAuthenticated, isLoading } = useAuth();

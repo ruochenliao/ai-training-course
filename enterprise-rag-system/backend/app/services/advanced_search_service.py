@@ -7,14 +7,13 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, Any, List
 
-from app.core.config import settings
-from app.services.embedding_service import embedding_service
-from app.services.graph_db import graph_service
-from app.services.reranker_service import reranker_service
-from app.services.vector_db import milvus_service
 from loguru import logger
 
-from app.core.exceptions import SearchException
+from app import embedding_service
+from app import graph_service
+from app import milvus_service
+from app import reranker_service
+from app.core import SearchException
 
 
 class SearchType(Enum):

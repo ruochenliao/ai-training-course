@@ -10,9 +10,10 @@ from typing import List, Dict, Any, Optional
 
 import dashscope
 from PIL import Image
-from app.core.config import settings
 from dashscope import MultiModalConversation
 from loguru import logger
+
+from app.core import settings
 
 
 class QwenMultimodalService:

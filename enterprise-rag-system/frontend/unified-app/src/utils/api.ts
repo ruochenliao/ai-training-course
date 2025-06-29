@@ -1,5 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
-import { message } from 'antd';
+import axios, {AxiosError, AxiosInstance, AxiosResponse} from 'axios';
 
 // API 响应类型
 export interface ApiResponse<T = any> {
@@ -201,7 +200,7 @@ class ApiClient {
   }
 
   // 用户管理
-  async getUsers(params?: { page?: number; size?: number; search?: string }): Promise<{ items: User[]; total: number }> {
+  async getUsers(params?: { page?: number; size?: number; search?: string }): Promise<{ users: User[]; total: number; page: number; size: number; pages: number }> {
     return this.get('/api/v1/users', params);
   }
 

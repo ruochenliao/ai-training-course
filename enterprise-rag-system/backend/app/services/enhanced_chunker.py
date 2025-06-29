@@ -11,12 +11,12 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional, Tuple
 
 import numpy as np
-from app.core.config import settings
-from app.services.chunker import DocumentChunker, ChunkConfig
-from app.services.embedding_service import embedding_service
 from loguru import logger
 
-from app.core.exceptions import DocumentProcessingException
+from app import DocumentChunker, ChunkConfig
+from app import embedding_service
+from app.core import DocumentProcessingException
+from app.core import settings
 
 
 @dataclass

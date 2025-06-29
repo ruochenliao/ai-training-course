@@ -7,11 +7,11 @@ import re
 from dataclasses import dataclass
 from typing import List, Dict, Any, Optional, Tuple
 
-from app.core.config import settings
-from app.models.knowledge import DocumentChunk
 from loguru import logger
 
-from app.core.exceptions import DocumentProcessingException
+from app.core import DocumentProcessingException
+from app.core import settings
+from app.models import DocumentChunk
 
 
 @dataclass

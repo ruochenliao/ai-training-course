@@ -127,19 +127,21 @@ GET    /menu-tree          # 获取菜单树
 ### 3. 权限检查装饰器
 
 ```python
-from app.core.security import PermissionChecker, RoleChecker
+from app.core import PermissionChecker, RoleChecker
+
 
 # 权限检查
 @router.get("/users")
 async def get_users(
-    current_user: User = Depends(PermissionChecker("user:view"))
+        current_user: User = Depends(PermissionChecker("user:view"))
 ):
     pass
+
 
 # 角色检查
 @router.get("/admin")
 async def admin_panel(
-    current_user: User = Depends(RoleChecker("admin"))
+        current_user: User = Depends(RoleChecker("admin"))
 ):
     pass
 ```
@@ -289,12 +291,13 @@ cat rbac_test_report.json
 ### 1. 后端权限检查
 
 ```python
-from app.core.security import PermissionChecker
+from app.core import PermissionChecker
+
 
 @router.post("/knowledge-bases")
 async def create_knowledge_base(
-    data: CreateKnowledgeBaseRequest,
-    current_user: User = Depends(PermissionChecker("knowledge:create"))
+        data: CreateKnowledgeBaseRequest,
+        current_user: User = Depends(PermissionChecker("knowledge:create"))
 ):
     # 创建知识库逻辑
     pass

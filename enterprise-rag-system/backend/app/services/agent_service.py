@@ -8,14 +8,14 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Any, AsyncGenerator
 
-from app.core.config import settings
-from app.services.embedding_service import embedding_service
-from app.services.graph_db_service import neo4j_service
-from app.services.llm_service import LLMService
-from app.services.vector_db import MilvusService
 from loguru import logger
 
-from app.core.exceptions import AgentException
+from app import LLMService
+from app import MilvusService
+from app import embedding_service
+from app import neo4j_service
+from app.core import AgentException
+from app.core import settings
 
 # 创建服务实例
 llm_service = LLMService()

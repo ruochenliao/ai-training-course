@@ -1,17 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { usePathname } from 'next/navigation';
-import { Layout, Breadcrumb, Input, Badge, Button, Dropdown, Space, Typography } from 'antd';
-import {
-  SearchOutlined,
-  BellOutlined,
-  QuestionCircleOutlined,
-  SettingOutlined,
-  MenuOutlined,
-} from '@ant-design/icons';
-import { motion } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
+import {useState} from 'react';
+import {usePathname} from 'next/navigation';
+import {Badge, Breadcrumb, Button, Dropdown, Input, Layout, Typography} from 'antd';
+import {BellOutlined, QuestionCircleOutlined, SearchOutlined, SettingOutlined,} from '@ant-design/icons';
+import {motion} from 'framer-motion';
+import {useAuth} from '@/contexts/AuthContext';
 
 const { Header } = Layout;
 const { Search } = Input;

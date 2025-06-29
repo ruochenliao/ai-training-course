@@ -1,30 +1,30 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { Layout, Menu, Button, Avatar, Dropdown, Typography, Badge } from 'antd';
+import {useState} from 'react';
+import {usePathname, useRouter} from 'next/navigation';
+import {Avatar, Badge, Button, Dropdown, Layout, Menu, Typography} from 'antd';
 import {
-  DashboardOutlined,
-  UserOutlined,
-  BookOutlined,
-  FileTextOutlined,
-  SettingOutlined,
-  BarChartOutlined,
-  MessageOutlined,
-  LogoutOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  ArrowLeftOutlined,
-  CrownOutlined,
-  MonitorOutlined,
-  TeamOutlined,
-  SafetyOutlined,
-  ApartmentOutlined,
-  UserSwitchOutlined,
+    ApartmentOutlined,
+    ArrowLeftOutlined,
+    BarChartOutlined,
+    BookOutlined,
+    CrownOutlined,
+    DashboardOutlined,
+    FileTextOutlined,
+    LogoutOutlined,
+    MenuFoldOutlined,
+    MenuUnfoldOutlined,
+    MessageOutlined,
+    MonitorOutlined,
+    SafetyOutlined,
+    SettingOutlined,
+    TeamOutlined,
+    UserOutlined,
+    UserSwitchOutlined,
 } from '@ant-design/icons';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
-import { usePermissions } from '@/contexts/PermissionContext';
+import {AnimatePresence, motion} from 'framer-motion';
+import {useAuth} from '@/contexts/AuthContext';
+import {usePermissions} from '@/contexts/PermissionContext';
 import ThemeToggle from '@/components/common/ThemeToggle';
 
 const { Sider } = Layout;

@@ -5,10 +5,10 @@
 from datetime import datetime
 from typing import Optional
 
-from app.core.security import verify_password, get_password_hash
-from app.models.user import User
-from app.schemas.auth import UserRegister
-from app.schemas.user import UserCreate
+from app.core import verify_password, get_password_hash
+from app.models import User
+from app.schemas import UserCreate
+from app.schemas import UserRegister
 
 
 class AuthService:

@@ -10,10 +10,10 @@ from enum import Enum
 from typing import Dict, List, Any, Optional, Tuple
 
 import redis.asyncio as redis
-from app.core.config import settings
 from loguru import logger
 
-from app.core.exceptions import RateLimitException, SecurityException
+from app.core import RateLimitException, SecurityException
+from app.core import settings
 
 
 class LimitType(Enum):

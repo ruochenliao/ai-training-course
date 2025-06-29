@@ -7,13 +7,14 @@ import uuid
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 
-from app.core.config import settings
-from app.services.qwen_embedding_service import qwen_embedding_service
 from loguru import logger
 from pymilvus import (
     connections, Collection, CollectionSchema, FieldSchema, DataType,
     utility, SearchResult
 )
+
+from app import qwen_embedding_service
+from app.core import settings
 
 
 class MilvusVectorService:

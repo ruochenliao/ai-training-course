@@ -1,38 +1,35 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {
-  Card,
-  Button,
-  Space,
-  Select,
-  Slider,
-  Typography,
-  Tooltip,
-  Spin,
-  Alert,
-  Row,
-  Col,
-  Tag,
-  Input,
-  Switch,
-  Divider
+    Alert,
+    Button,
+    Card,
+    Col,
+    Divider,
+    Input,
+    Row,
+    Select,
+    Slider,
+    Space,
+    Spin,
+    Switch,
+    Tag,
+    Typography
 } from 'antd';
 import {
-  FullscreenOutlined,
-  ReloadOutlined,
-  DownloadOutlined,
-  SearchOutlined,
-  SettingOutlined,
-  ZoomInOutlined,
-  ZoomOutOutlined,
-  CompressOutlined
+    CompressOutlined,
+    DownloadOutlined,
+    FullscreenOutlined,
+    ReloadOutlined,
+    SearchOutlined,
+    ZoomInOutlined,
+    ZoomOutOutlined
 } from '@ant-design/icons';
-import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import {useQuery} from '@tanstack/react-query';
 import * as d3 from 'd3';
-import { apiClient } from '@/utils/api';
-import type { KnowledgeBase } from '@/utils/api';
+import type {KnowledgeBase} from '@/utils/api';
+import {apiClient} from '@/utils/api';
 
 const { Title, Text } = Typography;
 

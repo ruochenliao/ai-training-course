@@ -2,20 +2,19 @@
 Milvus向量数据库服务
 """
 
-import asyncio
 from typing import Dict, List, Any, Optional
 
 from loguru import logger
 from pymilvus import (
-    connections, 
-    Collection, 
-    CollectionSchema, 
-    FieldSchema, 
+    connections,
+    Collection,
+    CollectionSchema,
+    FieldSchema,
     DataType,
     utility
 )
 
-from app.core.config import settings
+from app.core import settings
 
 
 class MilvusService:

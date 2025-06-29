@@ -7,7 +7,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any
 
-from app.core.config import settings
 from loguru import logger
 from tortoise import Tortoise
 

@@ -1,10 +1,10 @@
 'use client';
 
-import React, { ReactNode } from 'react';
-import { usePermissions } from '@/contexts/PermissionContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { Result, Spin } from 'antd';
-import { LockOutlined } from '@ant-design/icons';
+import React, {ReactNode} from 'react';
+import {usePermissions} from '@/contexts/PermissionContext';
+import {useAuth} from '@/contexts/AuthContext';
+import {Result, Spin} from 'antd';
+import {LockOutlined} from '@ant-design/icons';
 
 interface PermissionGuardProps {
   children: ReactNode;

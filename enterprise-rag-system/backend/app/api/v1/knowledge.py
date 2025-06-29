@@ -5,16 +5,17 @@
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 
-from app.core.auth import get_current_user
-from app.core.database_new import get_db_session
-from app.models.sqlalchemy_models import KnowledgeBase, User, Document
-from app.services.document_processing_pipeline import document_pipeline
-from app.services.milvus_vector_service import milvus_service
-from app.services.neo4j_graph_service import neo4j_service
 from fastapi import APIRouter, Depends, HTTPException, Query
 from loguru import logger
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app import document_pipeline
+from app import milvus_service
+from app import neo4j_service
+from app.core import get_current_user
+from app.core import get_db_session
+from app.models import KnowledgeBase, User, Document
 
 router = APIRouter(prefix="/knowledge", tags=["knowledge"])
 

@@ -7,8 +7,9 @@ import time
 from typing import List, Dict, Any, Optional, AsyncGenerator, Union
 
 import httpx
-from app.core.config import settings
 from loguru import logger
+
+from app.core import settings
 
 
 class DeepSeekLLMService:

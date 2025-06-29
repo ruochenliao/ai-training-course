@@ -9,15 +9,12 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-import autogen
-from app.core.config import settings
-from app.services.enhanced_autogen_service import (
-    EnhancedAutoGenService, SearchMode, AgentTask, AgentResponse
-)
-from autogen import GroupChat, GroupChatManager
 from loguru import logger
 
-from app.core.exceptions import WorkflowException
+from app import (
+    EnhancedAutoGenService, SearchMode, AgentTask, AgentResponse
+)
+from app.core import WorkflowException
 
 
 class WorkflowType(Enum):

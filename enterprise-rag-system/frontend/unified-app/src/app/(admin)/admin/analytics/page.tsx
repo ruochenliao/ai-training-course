@@ -1,55 +1,38 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import {useState} from 'react';
+import {Button, Card, Col, DatePicker, Progress, Row, Space, Statistic, Table, Tabs, Tag, Typography} from 'antd';
 import {
-  Card,
-  Row,
-  Col,
-  Statistic,
-  Table,
-  Select,
-  DatePicker,
-  Button,
-  Space,
-  Typography,
-  Tabs,
-  Progress,
-  Tag,
-  Tooltip,
-  Empty
-} from 'antd';
-import {
-  BarChartOutlined,
-  LineChartOutlined,
-  PieChartOutlined,
-  TrendingUpOutlined,
-  UserOutlined,
-  FileTextOutlined,
-  MessageOutlined,
-  SearchOutlined,
-  ReloadOutlined,
-  DownloadOutlined
+    BarChartOutlined,
+    DownloadOutlined,
+    FileTextOutlined,
+    LineChartOutlined,
+    MessageOutlined,
+    PieChartOutlined,
+    ReloadOutlined,
+    SearchOutlined,
+    TrendingUpOutlined,
+    UserOutlined
 } from '@ant-design/icons';
-import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import {useQuery} from '@tanstack/react-query';
 import {
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  Legend,
-  ResponsiveContainer
+    Area,
+    AreaChart,
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Legend,
+    Line,
+    LineChart,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip as RechartsTooltip,
+    XAxis,
+    YAxis
 } from 'recharts';
-import { apiClient } from '@/utils/api';
+import {apiClient} from '@/utils/api';
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;

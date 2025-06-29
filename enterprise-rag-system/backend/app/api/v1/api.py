@@ -2,7 +2,9 @@
 API v1 路由汇总
 """
 
-from app.api.v1.endpoints import (
+from fastapi import APIRouter
+
+from app import (
     auth,
     users,
     knowledge_bases,
@@ -17,7 +19,6 @@ from app.api.v1.endpoints import (
     autogen_chat,
     rbac,
 )
-from fastapi import APIRouter
 
 api_router = APIRouter()
 

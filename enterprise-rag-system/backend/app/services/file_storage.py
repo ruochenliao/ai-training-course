@@ -9,12 +9,12 @@ from pathlib import Path
 from typing import Dict, List, Any, BinaryIO
 
 import aiofiles
-from app.core.config import settings
 from loguru import logger
 from minio import Minio
 from minio.error import S3Error
 
-from app.core.exceptions import ExternalServiceException
+from app.core import ExternalServiceException
+from app.core import settings
 
 
 class FileStorageService:

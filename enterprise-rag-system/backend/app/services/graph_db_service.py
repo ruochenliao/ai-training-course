@@ -5,11 +5,11 @@
 import asyncio
 from typing import List, Dict, Any, Optional
 
-from app.core.config import settings
 from loguru import logger
 from neo4j import AsyncGraphDatabase, AsyncDriver
 
-from app.core.exceptions import GraphDatabaseException
+from app.core import GraphDatabaseException
+from app.core import settings
 
 
 class Neo4jService:

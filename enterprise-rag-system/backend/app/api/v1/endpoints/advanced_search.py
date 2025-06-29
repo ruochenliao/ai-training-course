@@ -4,17 +4,17 @@
 
 from typing import List, Optional, Dict, Any
 
-from app.core.security import get_current_user
-from app.models.user import User
-from app.services.advanced_search_service import (
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
+
+from app import (
     advanced_search_service,
     SearchConfig,
     SearchType
 )
-from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
-
-from app.core.exceptions import SearchException
+from app.core import SearchException
+from app.core import get_current_user
+from app.models import User
 
 router = APIRouter()
 

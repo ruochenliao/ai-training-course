@@ -1,9 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { useAuth } from './AuthContext';
-import { PermissionContextType, Permission, Role, UserRole, PermissionCheckResponse } from '@/types';
-import { api } from '@/utils/api';
+import React, {createContext, ReactNode, useContext, useEffect, useState} from 'react';
+import {useAuth} from './AuthContext';
+import {Permission, PermissionCheckResponse, PermissionContextType, UserRole} from '@/types';
+import {api} from '@/utils/api';
 
 const PermissionContext = createContext<PermissionContextType | undefined>(undefined);
 

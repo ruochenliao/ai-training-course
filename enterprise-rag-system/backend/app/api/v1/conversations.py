@@ -4,18 +4,19 @@
 """
 from typing import List, Optional, Dict, Any
 
-from app.core.auth import get_current_user
-from app.core.database_new import get_db_session
-from app.models.sqlalchemy_models import User, Conversation, Message, MessageRole, ContentType
-from app.services.autogen_agent_service import autogen_service
-from app.services.deepseek_llm_service import deepseek_llm_service
-from app.services.multimodal_conversation_service import multimodal_conversation_service
-from app.services.qwen_multimodal_service import qwen_multimodal_service
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 from loguru import logger
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app import autogen_service
+from app import deepseek_llm_service
+from app import multimodal_conversation_service
+from app import qwen_multimodal_service
+from app.core import get_current_user
+from app.core import get_db_session
+from app.models import User, Conversation, Message, MessageRole, ContentType
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
 

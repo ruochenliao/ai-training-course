@@ -64,6 +64,7 @@ def create_access_token(
 - **统计分析**: 知识库使用情况统计
 
 <augment_code_snippet path="enterprise-rag-system/backend/app/api/v1/knowledge.py" mode="EXCERPT">
+
 ````python
 """
 知识库管理API端点 - 企业级RAG系统
@@ -72,8 +73,8 @@ def create_access_token(
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 
-from app.core.auth import get_current_user
-from app.core.database_new import get_db_session
+from app.core import get_current_user
+from app.core import get_db_session
 ````
 </augment_code_snippet>
 

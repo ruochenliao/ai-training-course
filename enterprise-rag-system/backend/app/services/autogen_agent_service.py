@@ -7,15 +7,15 @@ import json
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 
-import autogen
-from app.core.config import settings
-from app.services.bge_reranker_service import bge_reranker_service
-from app.services.deepseek_llm_service import deepseek_llm_service
-from app.services.milvus_vector_service import milvus_service
-from app.services.neo4j_graph_service import neo4j_service
-from app.services.qwen_multimodal_service import qwen_multimodal_service
 from autogen import AssistantAgent, UserProxyAgent, GroupChat, GroupChatManager
 from loguru import logger
+
+from app import bge_reranker_service
+from app import deepseek_llm_service
+from app import milvus_service
+from app import neo4j_service
+from app import qwen_multimodal_service
+from app.core import settings
 
 
 class AutoGenAgentService:

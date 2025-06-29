@@ -11,7 +11,7 @@ from loguru import logger
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
-from app.core.exceptions import RateLimitException
+from app.core import RateLimitException
 
 
 class ProcessTimeMiddleware(BaseHTTPMiddleware):

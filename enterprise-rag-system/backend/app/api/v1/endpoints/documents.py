@@ -6,18 +6,19 @@ import os
 import tempfile
 from typing import Any, Optional
 
-from app.core.security import get_current_user
-from app.models.knowledge import Document, DocumentChunk, KnowledgeBase
-from app.models.user import User
-from app.schemas.document import (
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form, status
+from fastapi.responses import StreamingResponse
+
+from app import document_processor
+from app import file_storage
+from app.core import get_current_user
+from app.models import Document, DocumentChunk, KnowledgeBase
+from app.models import User
+from app.schemas import (
     DocumentResponse, DocumentListResponse, DocumentUploadResponse,
     DocumentSearchRequest, DocumentSearchResponse, DocumentStats,
     BatchProcessRequest, BatchProcessResponse
 )
-from app.services.document_processor import document_processor
-from app.services.file_storage import file_storage
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form, status
-from fastapi.responses import StreamingResponse
 
 router = APIRouter()
 

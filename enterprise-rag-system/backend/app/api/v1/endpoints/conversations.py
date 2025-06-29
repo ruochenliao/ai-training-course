@@ -4,11 +4,12 @@
 
 from typing import Any, List, Optional
 
-from app.core.security import get_current_user
-from app.models.conversation import Conversation, Message
-from app.models.user import User
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
+
+from app.core import get_current_user
+from app.models import Conversation, Message
+from app.models import User
 
 router = APIRouter()
 

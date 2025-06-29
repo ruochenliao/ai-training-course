@@ -1,14 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button, Form, Input, Card, Typography, Divider, Space, message } from 'antd';
-import { UserOutlined, LockOutlined, MailOutlined, EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
-import { motion } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
-import { apiClient } from '@/utils/api';
+import {useState} from 'react';
+import {useRouter} from 'next/navigation';
+import {Button, Card, Divider, Form, Input, message, Typography} from 'antd';
+import {EyeInvisibleOutlined, EyeTwoTone, LockOutlined, MailOutlined, UserOutlined} from '@ant-design/icons';
+import {motion} from 'framer-motion';
+import {useAuth} from '@/contexts/AuthContext';
+import {apiClient} from '@/utils/api';
 import ThemeToggle from '@/components/common/ThemeToggle';
-import { validatePassword, isValidEmail } from '@/utils';
+import {validatePassword} from '@/utils';
 
 const { Title, Text, Link } = Typography;
 

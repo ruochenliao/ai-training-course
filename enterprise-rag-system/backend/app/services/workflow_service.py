@@ -7,7 +7,9 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Any, AsyncGenerator
 
-from app.services.agent_service import (
+from loguru import logger
+
+from app import (
     QueryContext,
     RetrievalResult,
     query_analyzer,
@@ -16,9 +18,7 @@ from app.services.agent_service import (
     result_fusion,
     answer_generator
 )
-from loguru import logger
-
-from app.core.exceptions import WorkflowException
+from app.core import WorkflowException
 
 
 class WorkflowType(Enum):

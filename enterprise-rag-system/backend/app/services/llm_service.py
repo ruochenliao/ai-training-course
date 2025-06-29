@@ -8,10 +8,10 @@ from dataclasses import dataclass
 from typing import Dict, List, Any, Optional, AsyncGenerator, Union
 
 import httpx
-from app.core.config import settings
 from loguru import logger
 
-from app.core.exceptions import AIServiceException
+from app.core import AIServiceException
+from app.core import settings
 
 
 @dataclass

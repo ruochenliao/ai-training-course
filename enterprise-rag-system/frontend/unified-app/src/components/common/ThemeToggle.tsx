@@ -1,9 +1,9 @@
 'use client';
 
-import { Button } from 'antd';
-import { SunOutlined, MoonOutlined } from '@ant-design/icons';
-import { motion } from 'framer-motion';
-import { useTheme } from '@/contexts/ThemeContext';
+import {Button} from 'antd';
+import {MoonOutlined, SunOutlined} from '@ant-design/icons';
+import {motion} from 'framer-motion';
+import {useTheme} from '@/contexts/ThemeContext';
 
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();

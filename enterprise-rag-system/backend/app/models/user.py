@@ -210,7 +210,6 @@ class User(BaseModel, TimestampMixin, StatusMixin, SoftDeleteMixin, MetadataMixi
 def __getattr__(name):
     """动态导入RBAC模型"""
     if name in ['Role', 'Permission', 'UserRole', 'RolePermission', 'Department']:
-        from .rbac import Role, Permission, UserRole, RolePermission, Department
         return locals()[name]
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 

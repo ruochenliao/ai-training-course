@@ -1,21 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Row, Col, Card, Statistic, Progress, Table, Tag, Typography, Space, Button, Alert, Spin } from 'antd';
+import {useState} from 'react';
+import {Alert, Button, Card, Col, Progress, Row, Spin, Statistic, Table, Tag, Typography} from 'antd';
 import {
-  UserOutlined,
-  BookOutlined,
-  FileTextOutlined,
-  MessageOutlined,
-  ArrowUpOutlined,
-  ArrowDownOutlined,
-  ReloadOutlined,
-  EyeOutlined,
+    ArrowDownOutlined,
+    ArrowUpOutlined,
+    BookOutlined,
+    EyeOutlined,
+    FileTextOutlined,
+    MessageOutlined,
+    ReloadOutlined,
+    UserOutlined,
 } from '@ant-design/icons';
-import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/utils/api';
-import { formatNumber, formatDate } from '@/utils';
+import {motion} from 'framer-motion';
+import {useQuery} from '@tanstack/react-query';
+import {apiClient} from '@/utils/api';
 import ReactECharts from 'echarts-for-react';
 
 const { Title, Text } = Typography;

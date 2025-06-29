@@ -9,10 +9,10 @@ from enum import Enum
 from typing import Dict, List, Any, Optional
 
 import redis.asyncio as redis
-from app.core.config import settings
 from loguru import logger
 
-from app.core.exceptions import ConfigException
+from app.core import ConfigException
+from app.core import settings
 
 
 class ConfigType(Enum):

@@ -9,14 +9,14 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 
-from app.core.config import settings
-from app.services.vector_db import MilvusService
 from loguru import logger
 from pymilvus import (
     Collection, utility
 )
 
-from app.core.exceptions import VectorDatabaseException
+from app import MilvusService
+from app.core import VectorDatabaseException
+from app.core import settings
 
 
 @dataclass
@@ -397,7 +397,7 @@ class EnhancedVectorDBService:
             candidates = vector_results[0]
             
             # 使用重排模型重新排序
-            from app.services.reranker_service import reranker_service
+            from app import reranker_service
             
             documents = [result.get('content', '') for result in candidates]
             rerank_result = await reranker_service.rerank(

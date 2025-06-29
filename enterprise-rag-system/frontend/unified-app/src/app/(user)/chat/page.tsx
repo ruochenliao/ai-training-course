@@ -1,41 +1,39 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {
-  Card,
-  Input,
-  Button,
-  Space,
-  Typography,
-  Avatar,
-  Spin,
-  Empty,
-  message,
-  Select,
-  Tooltip,
-  Drawer,
-  Slider,
-  Switch,
-  Tag,
-  Divider,
-  Row,
-  Col
+    Avatar,
+    Button,
+    Card,
+    Divider,
+    Drawer,
+    Empty,
+    Input,
+    message,
+    Select,
+    Slider,
+    Space,
+    Spin,
+    Switch,
+    Tag,
+    Tooltip,
+    Typography
 } from 'antd';
 import {
-  SendOutlined,
-  PlusOutlined,
-  RobotOutlined,
-  UserOutlined,
-  SettingOutlined,
-  SearchOutlined,
-  ShareAltOutlined,
-  NodeIndexOutlined,
-  ThunderboltOutlined
+    NodeIndexOutlined,
+    PlusOutlined,
+    RobotOutlined,
+    SearchOutlined,
+    SendOutlined,
+    SettingOutlined,
+    ShareAltOutlined,
+    ThunderboltOutlined,
+    UserOutlined
 } from '@ant-design/icons';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
-import { apiClient } from '@/utils/api';
-import { formatDate } from '@/utils';
+import {AnimatePresence, motion} from 'framer-motion';
+import {useAuth} from '@/contexts/AuthContext';
+import {apiClient} from '@/utils/api';
+import {formatDate} from '@/utils';
 import ReactMarkdown from 'react-markdown';
 
 const { TextArea } = Input;

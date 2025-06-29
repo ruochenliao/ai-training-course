@@ -6,18 +6,18 @@ import asyncio
 from datetime import datetime
 from typing import Dict, Any, List
 
-from app.models.knowledge import Document, DocumentChunk
-from app.services.chunker import chunker_service
-from app.services.embedding_service import embedding_service
-from app.services.file_storage import file_storage
-from app.services.graph_db_service import graph_service
-from app.services.marker_service import marker_service
-from app.services.task_service import celery_app
-from app.services.vector_db import milvus_service
 from celery import current_task
 from loguru import logger
 
-from app.core.exceptions import DocumentProcessingException
+from app import celery_app
+from app import chunker_service
+from app import embedding_service
+from app import file_storage
+from app import graph_service
+from app import marker_service
+from app import milvus_service
+from app.core import DocumentProcessingException
+from app.models import Document, DocumentChunk
 
 
 @celery_app.task(bind=True, name='app.tasks.document_tasks.process_document_task')

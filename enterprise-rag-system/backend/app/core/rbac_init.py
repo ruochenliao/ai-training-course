@@ -3,8 +3,8 @@ RBAC权限系统初始化数据
 """
 
 from loguru import logger
-from app.models.rbac import Department, Role, Permission, RolePermission, PermissionGroup
-from app.models.user import User
+
+from app.models import Department, Role, Permission, RolePermission, PermissionGroup
 
 
 async def init_rbac_data():
@@ -14,7 +14,7 @@ async def init_rbac_data():
 
         # 检查RBAC表是否存在，如果不存在则跳过初始化
         try:
-            from app.models.rbac import PermissionGroup
+            from app.models import PermissionGroup
             await PermissionGroup.all().limit(1)
         except Exception as e:
             logger.warning(f"RBAC表不存在或结构不匹配，跳过初始化: {e}")

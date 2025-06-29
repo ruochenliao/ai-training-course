@@ -1,16 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { Card, Button, Slider, Select, Space, Typography, Tooltip } from 'antd';
-import {
-  ZoomInOutlined,
-  ZoomOutOutlined,
-  ReloadOutlined,
-  FullscreenOutlined,
-  SettingOutlined,
-} from '@ant-design/icons';
+import {useEffect, useRef, useState} from 'react';
+import {Button, Card, Select, Slider, Space, Tooltip, Typography} from 'antd';
+import {FullscreenOutlined, ReloadOutlined, SettingOutlined, ZoomInOutlined, ZoomOutOutlined,} from '@ant-design/icons';
 import * as d3 from 'd3';
-import { motion } from 'framer-motion';
+import {motion} from 'framer-motion';
 
 const { Title, Text } = Typography;
 const { Option } = Select;

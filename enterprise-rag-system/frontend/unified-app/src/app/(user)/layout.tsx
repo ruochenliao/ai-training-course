@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Layout } from 'antd';
-import { useAuth } from '@/contexts/AuthContext';
+import {useEffect} from 'react';
+import {useRouter} from 'next/navigation';
+import {Layout} from 'antd';
+import {useAuth} from '@/contexts/AuthContext';
 import UserSidebar from '@/components/user/UserSidebar';
 import UserHeader from '@/components/user/UserHeader';
-import { motion } from 'framer-motion';
+import {motion} from 'framer-motion';
 
 const { Content } = Layout;
 

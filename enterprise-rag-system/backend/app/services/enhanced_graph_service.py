@@ -9,11 +9,10 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import List, Dict, Any
 
-from app.core.config import settings
-from app.services.graph_db_service import Neo4jService
 from loguru import logger
 
-from app.core.exceptions import GraphDatabaseException
+from app import Neo4jService
+from app.core import GraphDatabaseException
 
 
 @dataclass

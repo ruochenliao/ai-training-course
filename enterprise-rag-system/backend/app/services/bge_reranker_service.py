@@ -9,8 +9,9 @@ from typing import List, Dict, Any, Optional, Tuple
 import numpy as np
 import torch
 from FlagEmbedding import FlagReranker
-from app.core.config import settings
 from loguru import logger
+
+from app.core import settings
 
 
 class BGERerankerService:

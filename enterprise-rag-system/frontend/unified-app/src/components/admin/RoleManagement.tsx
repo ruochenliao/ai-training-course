@@ -1,36 +1,29 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-  Table,
-  Button,
-  Modal,
-  Form,
-  Input,
-  Select,
-  Tree,
-  Space,
-  message,
-  Popconfirm,
-  Tag,
-  Card,
-  Row,
-  Col,
-  Divider,
-  Typography,
-  Tooltip,
+    Button,
+    Card,
+    Col,
+    Divider,
+    Form,
+    Input,
+    message,
+    Modal,
+    Popconfirm,
+    Row,
+    Select,
+    Space,
+    Table,
+    Tag,
+    Tooltip,
+    Tree,
+    Typography,
 } from 'antd';
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  SafetyOutlined,
-  TeamOutlined,
-  SettingOutlined,
-} from '@ant-design/icons';
-import { PermissionGuard } from '@/components/common/PermissionGuard';
-import { Role, Permission, CreateRoleRequest, UpdateRoleRequest } from '@/types';
-import { api } from '@/utils/api';
+import {DeleteOutlined, EditOutlined, PlusOutlined, SafetyOutlined, TeamOutlined,} from '@ant-design/icons';
+import {PermissionGuard} from '@/components/common/PermissionGuard';
+import {CreateRoleRequest, Permission, Role, UpdateRoleRequest} from '@/types';
+import {apiClient} from '@/utils/api';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -55,14 +48,8 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({ className }) => 
   const fetchRoles = async () => {
     try {
       setLoading(true);
-      const response = await api.get<{
-        roles: Role[];
-        total: number;
-        page: number;
-        size: number;
-        pages: number;
-      }>('/rbac/roles');
-      setRoles(response.data.roles);
+      const response = await apiClient.getRoles();
+      setRoles(response.roles || []);
     } catch (error) {
       message.error('获取角色列表失败');
       console.error('Failed to fetch roles:', error);
@@ -74,11 +61,8 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({ className }) => 
   // 获取权限列表
   const fetchPermissions = async () => {
     try {
-      const response = await api.get<{
-        permissions: Permission[];
-        total: number;
-      }>('/rbac/permissions?size=1000');
-      setPermissions(response.data.permissions);
+      const response = await apiClient.getPermissions({ size: 1000 });
+      setPermissions(response.permissions || []);
     } catch (error) {
       message.error('获取权限列表失败');
       console.error('Failed to fetch permissions:', error);
@@ -124,7 +108,7 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({ className }) => 
   // 删除角色
   const handleDelete = async (role: Role) => {
     try {
-      await api.delete(`/rbac/roles/${role.id}`);
+      await apiClient.deleteRole(role.id);
       message.success('角色删除成功');
       fetchRoles();
     } catch (error) {
@@ -138,7 +122,7 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({ className }) => 
     if (!selectedRole) return;
 
     try {
-      await api.put(`/rbac/roles/${selectedRole.id}`, {
+      await apiClient.updateRole(selectedRole.id, {
         permission_ids: values.permission_ids,
       });
       message.success('权限分配成功');

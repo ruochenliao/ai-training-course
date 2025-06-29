@@ -4,10 +4,11 @@
 
 from typing import Any
 
-from app.core.security import get_current_user
-from app.models.knowledge import KnowledgeBase
-from app.models.user import User
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+
+from app.core import get_current_user
+from app.models import KnowledgeBase
+from app.models import User
 
 router = APIRouter()
 

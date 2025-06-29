@@ -1,23 +1,23 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { Layout, Menu, Button, Avatar, Dropdown, Space, Typography } from 'antd';
+import {useState} from 'react';
+import {usePathname, useRouter} from 'next/navigation';
+import {Avatar, Button, Dropdown, Layout, Menu, Typography} from 'antd';
 import {
-  MessageOutlined,
-  SearchOutlined,
-  BookOutlined,
-  HistoryOutlined,
-  SettingOutlined,
-  UserOutlined,
-  LogoutOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  CrownOutlined,
-  PlusOutlined,
+    BookOutlined,
+    CrownOutlined,
+    HistoryOutlined,
+    LogoutOutlined,
+    MenuFoldOutlined,
+    MenuUnfoldOutlined,
+    MessageOutlined,
+    PlusOutlined,
+    SearchOutlined,
+    SettingOutlined,
+    UserOutlined,
 } from '@ant-design/icons';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
+import {AnimatePresence, motion} from 'framer-motion';
+import {useAuth} from '@/contexts/AuthContext';
 import ThemeToggle from '@/components/common/ThemeToggle';
 
 const { Sider } = Layout;

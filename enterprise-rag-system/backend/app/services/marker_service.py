@@ -31,8 +31,8 @@ except ImportError as e:
     logger.warning(f"Marker库不可用，将使用基础PDF解析: {e}")
     MARKER_AVAILABLE = False
 
-from app.core.config import settings
-from app.core.exceptions import DocumentProcessingException
+from app.core import settings
+from app.core import DocumentProcessingException
 
 
 class MarkerService:

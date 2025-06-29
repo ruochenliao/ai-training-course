@@ -1,21 +1,20 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, Input, Button, List, Typography, Empty, Modal, Space, Tag, Dropdown } from 'antd';
+import {useState} from 'react';
+import {Button, Card, Dropdown, Empty, Input, List, Modal, Tag, Typography} from 'antd';
 import {
-  SearchOutlined,
-  MessageOutlined,
-  DeleteOutlined,
-  EyeOutlined,
-  MoreOutlined,
-  CalendarOutlined,
-  ClockCircleOutlined,
+    CalendarOutlined,
+    ClockCircleOutlined,
+    DeleteOutlined,
+    EyeOutlined,
+    MessageOutlined,
+    MoreOutlined,
 } from '@ant-design/icons';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/utils/api';
-import { formatDate, formatRelativeTime } from '@/utils';
-import type { Conversation } from '@/types';
+import {AnimatePresence, motion} from 'framer-motion';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+import {apiClient} from '@/utils/api';
+import {formatDate, formatRelativeTime} from '@/utils';
+import type {Conversation} from '@/types';
 
 const { Search } = Input;
 const { Title, Text, Paragraph } = Typography;

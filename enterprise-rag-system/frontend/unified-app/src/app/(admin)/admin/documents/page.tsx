@@ -1,23 +1,22 @@
 'use client';
 
-import { useState } from 'react';
-import { Table, Card, Button, Input, Select, Space, Tag, Progress, Modal, Upload, message, Dropdown } from 'antd';
+import {useState} from 'react';
+import {Button, Card, Dropdown, Input, message, Modal, Progress, Select, Table, Tag, Upload} from 'antd';
 import {
-  UploadOutlined,
-  SearchOutlined,
-  EyeOutlined,
-  DeleteOutlined,
-  DownloadOutlined,
-  FileTextOutlined,
-  MoreOutlined,
-  ReloadOutlined,
+    DeleteOutlined,
+    DownloadOutlined,
+    EyeOutlined,
+    FileTextOutlined,
+    MoreOutlined,
+    ReloadOutlined,
+    UploadOutlined,
 } from '@ant-design/icons';
-import { motion } from 'framer-motion';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/utils/api';
-import { formatDate, formatFileSize, getFileTypeIcon } from '@/utils';
-import type { Document } from '@/types';
-import type { ColumnsType } from 'antd/es/table';
+import {motion} from 'framer-motion';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+import {apiClient} from '@/utils/api';
+import {formatDate, formatFileSize, getFileTypeIcon} from '@/utils';
+import type {Document} from '@/types';
+import type {ColumnsType} from 'antd/es/table';
 
 const { Search } = Input;
 const { Option } = Select;

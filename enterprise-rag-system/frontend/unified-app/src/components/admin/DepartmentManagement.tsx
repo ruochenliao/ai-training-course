@@ -1,35 +1,28 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-  Table,
-  Button,
-  Modal,
-  Form,
-  Input,
-  Select,
-  Space,
-  message,
-  Popconfirm,
-  Tag,
-  Card,
-  Row,
-  Col,
-  Divider,
-  Typography,
-  Tooltip,
-  Tree,
+    Button,
+    Card,
+    Col,
+    Divider,
+    Form,
+    Input,
+    message,
+    Modal,
+    Popconfirm,
+    Row,
+    Select,
+    Space,
+    Table,
+    Tag,
+    Tooltip,
+    Typography,
 } from 'antd';
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  ApartmentOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
-import { PermissionGuard } from '@/components/common/PermissionGuard';
-import { Department, CreateDepartmentRequest, UpdateDepartmentRequest, User } from '@/types';
-import { api } from '@/utils/api';
+import {ApartmentOutlined, DeleteOutlined, EditOutlined, PlusOutlined, UserOutlined,} from '@ant-design/icons';
+import {PermissionGuard} from '@/components/common/PermissionGuard';
+import {CreateDepartmentRequest, Department, UpdateDepartmentRequest, User} from '@/types';
+import {apiClient} from '@/utils/api';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -51,11 +44,8 @@ export const DepartmentManagement: React.FC<DepartmentManagementProps> = ({ clas
   const fetchDepartments = async () => {
     try {
       setLoading(true);
-      const response = await api.get<{
-        departments: Department[];
-        total: number;
-      }>('/rbac/departments');
-      setDepartments(response.data.departments);
+      const response = await apiClient.getDepartments();
+      setDepartments(response.departments || []);
     } catch (error) {
       message.error('获取部门列表失败');
       console.error('Failed to fetch departments:', error);
@@ -67,11 +57,8 @@ export const DepartmentManagement: React.FC<DepartmentManagementProps> = ({ clas
   // 获取用户列表
   const fetchUsers = async () => {
     try {
-      const response = await api.get<{
-        users: User[];
-        total: number;
-      }>('/users?size=1000');
-      setUsers(response.data.users);
+      const response = await apiClient.getUsers({ size: 1000 });
+      setUsers(response.users || []);
     } catch (error) {
       message.error('获取用户列表失败');
       console.error('Failed to fetch users:', error);

@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Card, Typography, Space, Tag } from 'antd';
-import { SafetyOutlined } from '@ant-design/icons';
-import { usePermissions } from '@/contexts/PermissionContext';
-import { useAuth } from '@/contexts/AuthContext';
+import {Card, Space, Tag, Typography} from 'antd';
+import {SafetyOutlined} from '@ant-design/icons';
+import {usePermissions} from '@/contexts/PermissionContext';
+import {useAuth} from '@/contexts/AuthContext';
 
 const { Title, Paragraph, Text } = Typography;
 

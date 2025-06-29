@@ -10,10 +10,11 @@ from typing import Any, Dict, List, Optional
 
 import dashscope
 import torch
-from app.core.config import settings
 from dashscope import TextEmbedding, TextReRank
 from modelscope import snapshot_download
 from transformers import AutoModel, AutoTokenizer
+
+from app.core import settings
 
 logger = logging.getLogger(__name__)
 

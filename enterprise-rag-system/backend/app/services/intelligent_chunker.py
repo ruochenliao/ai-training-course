@@ -10,8 +10,6 @@ from enum import Enum
 from typing import List, Dict, Any
 
 import jieba
-from app.core.config import settings
-from app.models.sqlalchemy_models import DocumentChunk, ChunkType
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_text_splitters import (
     CharacterTextSplitter,
@@ -19,6 +17,8 @@ from langchain_text_splitters import (
     MarkdownHeaderTextSplitter
 )
 from loguru import logger
+
+from app.models import DocumentChunk, ChunkType
 
 
 class ChunkStrategy(str, Enum):

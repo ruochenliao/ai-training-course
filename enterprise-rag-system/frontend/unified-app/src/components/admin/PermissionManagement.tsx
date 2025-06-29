@@ -1,37 +1,36 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-  Table,
-  Button,
-  Modal,
-  Form,
-  Input,
-  Select,
-  Space,
-  message,
-  Popconfirm,
-  Tag,
-  Card,
-  Row,
-  Col,
-  Divider,
-  Typography,
-  Tooltip,
-  Tree,
+    Button,
+    Card,
+    Col,
+    Divider,
+    Form,
+    Input,
+    message,
+    Modal,
+    Popconfirm,
+    Row,
+    Select,
+    Space,
+    Table,
+    Tag,
+    Tooltip,
+    Typography,
 } from 'antd';
 import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  SafetyOutlined,
-  MenuOutlined,
-  ApiOutlined,
-  ControlOutlined,
+    ApiOutlined,
+    ControlOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    MenuOutlined,
+    PlusOutlined,
+    SafetyOutlined,
 } from '@ant-design/icons';
-import { PermissionGuard } from '@/components/common/PermissionGuard';
-import { Permission, CreatePermissionRequest, UpdatePermissionRequest } from '@/types';
-import { api } from '@/utils/api';
+import {PermissionGuard} from '@/components/common/PermissionGuard';
+import {CreatePermissionRequest, Permission, UpdatePermissionRequest} from '@/types';
+import {apiClient} from '@/utils/api';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -55,17 +54,13 @@ export const PermissionManagement: React.FC<PermissionManagementProps> = ({ clas
   const fetchPermissions = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams();
-      if (searchText) params.append('search', searchText);
-      if (selectedGroup) params.append('group', selectedGroup);
-      if (selectedType) params.append('permission_type', selectedType);
-      params.append('size', '1000');
+      const params: any = { size: 1000 };
+      if (searchText) params.search = searchText;
+      if (selectedGroup) params.group = selectedGroup;
+      if (selectedType) params.permission_type = selectedType;
 
-      const response = await api.get<{
-        permissions: Permission[];
-        total: number;
-      }>(`/rbac/permissions?${params.toString()}`);
-      setPermissions(response.data.permissions);
+      const response = await apiClient.getPermissions(params);
+      setPermissions(response.permissions || []);
     } catch (error) {
       message.error('获取权限列表失败');
       console.error('Failed to fetch permissions:', error);

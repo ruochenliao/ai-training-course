@@ -12,7 +12,7 @@ from typing import Dict, List, Any, Optional, Callable
 # 移除 get_database 导入，使用 Tortoise ORM
 from loguru import logger
 
-from app.core.exceptions import WorkflowException
+from app.core import WorkflowException
 
 
 class WorkflowStatus(Enum):

@@ -8,11 +8,11 @@ from typing import List, Dict, Any, Union
 
 import httpx
 import numpy as np
-from app.core.config import settings
-from app.services.qwen_model_service import qwen_model_manager
 from loguru import logger
 
-from app.core.exceptions import AIServiceException
+from app import qwen_model_manager
+from app.core import AIServiceException
+from app.core import settings
 
 
 @dataclass

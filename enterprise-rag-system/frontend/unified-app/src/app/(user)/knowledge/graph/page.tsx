@@ -1,16 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, Select, Button, Space, Typography, Tabs, Statistic, Row, Col } from 'antd';
-import { 
-  ShareAltOutlined, 
-  DownloadOutlined, 
-  SettingOutlined,
-  NodeIndexOutlined,
-  BranchesOutlined,
-  ClusterOutlined,
+import {useState} from 'react';
+import {Button, Card, Col, Row, Select, Space, Statistic, Tabs, Typography} from 'antd';
+import {
+    BranchesOutlined,
+    ClusterOutlined,
+    DownloadOutlined,
+    NodeIndexOutlined,
+    SettingOutlined,
+    ShareAltOutlined,
 } from '@ant-design/icons';
-import { motion } from 'framer-motion';
+import {motion} from 'framer-motion';
 import KnowledgeGraph from '@/components/visualization/KnowledgeGraph';
 
 const { Title, Text } = Typography;
