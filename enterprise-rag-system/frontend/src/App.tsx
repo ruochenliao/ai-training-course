@@ -1,7 +1,7 @@
 import React from 'react'
 import { App as AntdApp, ConfigProvider } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, useLocation } from 'react-router-dom'
 
 // 导入样式
 import '@/assets/css/reset.css'
@@ -10,6 +10,7 @@ import '@/assets/css/global.css'
 // 导入组件
 import AppLayout from '@/components/Layout/AppLayout'
 import AppRoutes from '@/components/Routes/AppRoutes'
+import ErrorBoundary from '@/components/ErrorBoundary/ErrorBoundary'
 
 // Ant Design 主题配置
 const antdTheme = {
@@ -53,14 +54,39 @@ const antdTheme = {
   },
 }
 
+// 内容组件，根据路由决定是否显示布局
+const AppContent: React.FC = () => {
+  const location = useLocation()
+  const isLoginPage = location.pathname === '/login'
+
+  if (isLoginPage) {
+    return (
+      <ErrorBoundary>
+        <AppRoutes />
+      </ErrorBoundary>
+    )
+  }
+
+  return (
+    <ErrorBoundary>
+      <AppLayout>
+        <AppRoutes />
+      </AppLayout>
+    </ErrorBoundary>
+  )
+}
+
 function App() {
   return (
     <ConfigProvider locale={zhCN} theme={antdTheme} componentSize='middle'>
       <AntdApp>
-        <BrowserRouter>
-          <AppLayout>
-            <AppRoutes />
-          </AppLayout>
+        <BrowserRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
+          <AppContent />
         </BrowserRouter>
       </AntdApp>
     </ConfigProvider>

@@ -15,6 +15,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useSimpleAuthStore } from '@/store/simple-auth'
 
 const { Header, Sider, Content } = Layout
 const { Text } = Typography
@@ -94,6 +95,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
+  const { user, logout } = useSimpleAuthStore()
 
   // 处理菜单点击
   const handleMenuClick = ({ key }: { key: string }) => {
@@ -110,8 +112,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         navigate('/account/settings')
         break
       case 'logout':
-        // 处理退出登录
-        console.log('退出登录')
+        logout()
+        navigate('/login')
         break
       default:
         break
@@ -283,12 +285,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               <Space style={{ cursor: 'pointer' }}>
                 <Avatar
                   size='default'
+                  src={user?.avatar_url}
                   icon={<UserOutlined />}
                   style={{
                     background: 'linear-gradient(135deg, #0ea5e9, #8b5cf6)',
                   }}
                 />
-                <Text strong>管理员</Text>
+                <Text strong>{user?.full_name || user?.username || '用户'}</Text>
               </Space>
             </Dropdown>
           </Space>

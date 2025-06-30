@@ -44,7 +44,7 @@ export default defineConfig({
     // 配置代理
     proxy: {
       '/api': {
-        target: 'http://122.51.212.243:8000', // 接口地址
+        target: 'http://localhost:8000', // 接口地址
         changeOrigin: true, // 接口跨域
         secure: false, // 启用 https 服务时需要配置
       },

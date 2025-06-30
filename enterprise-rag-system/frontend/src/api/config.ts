@@ -1,12 +1,12 @@
 // API 配置文件
 
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios from 'axios'
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { message } from 'antd'
-import { localStorage } from '@/utils/storage'
 
 // API 基础配置
 export const API_CONFIG = {
-  baseURL: 'http://122.51.212.243:8000/api/v1',
+  baseURL: 'http://localhost:8000/api/v1',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -21,27 +21,27 @@ export const httpClient: AxiosInstance = axios.create(API_CONFIG)
 // Token 管理
 export const tokenManager = {
   getToken(): string | null {
-    return localStorage.get('access_token')
+    return localStorage.getItem('access_token')
   },
 
   setToken(token: string): void {
-    localStorage.set('access_token', token)
+    localStorage.setItem('access_token', token)
   },
 
   removeToken(): void {
-    localStorage.remove('access_token')
+    localStorage.removeItem('access_token')
   },
 
   getRefreshToken(): string | null {
-    return localStorage.get('refresh_token')
+    return localStorage.getItem('refresh_token')
   },
 
   setRefreshToken(token: string): void {
-    localStorage.set('refresh_token', token)
+    localStorage.setItem('refresh_token', token)
   },
 
   removeRefreshToken(): void {
-    localStorage.remove('refresh_token')
+    localStorage.removeItem('refresh_token')
   },
 
   isTokenExpired(): boolean {
@@ -82,7 +82,7 @@ export const tokenManager = {
 
 // 请求拦截器
 httpClient.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
+  (config: any) => {
     // 添加认证头
     const token = tokenManager.getToken()
     if (token && config.headers) {

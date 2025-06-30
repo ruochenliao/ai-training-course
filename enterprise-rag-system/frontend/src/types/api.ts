@@ -1,6 +1,6 @@
 // API 相关类型定义
 
-import { AxiosRequestConfig, AxiosResponse } from 'axios'
+import type { AxiosRequestConfig, AxiosResponse } from 'axios'
 
 // HTTP 方法类型
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
@@ -14,13 +14,15 @@ export interface ApiConfig {
 }
 
 // 请求配置类型
-export interface RequestConfig extends AxiosRequestConfig {
+export interface RequestConfig {
   skipAuth?: boolean
   skipLoading?: boolean
   skipErrorHandler?: boolean
   retries?: number
   cache?: boolean
   cacheTime?: number
+  // 继承axios的基础配置
+  [key: string]: any
 }
 
 // 响应类型
@@ -142,10 +144,10 @@ export interface RetryConfig {
 }
 
 // 请求拦截器类型
-export type RequestInterceptor = (config: RequestConfig) => RequestConfig | Promise<RequestConfig>
+export type RequestInterceptor = (config: any) => any | Promise<any>
 
 // 响应拦截器类型
-export type ResponseInterceptor = (response: AxiosResponse) => AxiosResponse | Promise<AxiosResponse>
+export type ResponseInterceptor = (response: any) => any | Promise<any>
 
 // 错误拦截器类型
 export type ErrorInterceptor = (error: any) => Promise<any>

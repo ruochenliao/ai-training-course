@@ -1,54 +1,118 @@
-import React, { useState } from 'react'
-import { Avatar, Button, Card, Divider, Input, Space, Typography } from 'antd'
-import { RobotOutlined, SendOutlined, UserOutlined } from '@ant-design/icons'
+import React, { useState, useEffect, useRef } from 'react'
+import {
+  Avatar,
+  Button,
+  Card,
+  Divider,
+  Input,
+  Space,
+  Typography,
+  Select,
+  Switch,
+  Tooltip,
+  Tag,
+  Dropdown,
+  Modal,
+  List,
+  Empty,
+  Spin
+} from 'antd'
+import {
+  RobotOutlined,
+  SendOutlined,
+  UserOutlined,
+  SettingOutlined,
+  HistoryOutlined,
+  PlusOutlined,
+  DeleteOutlined,
+  DatabaseOutlined,
+  ThunderboltOutlined,
+  BranchesOutlined
+} from '@ant-design/icons'
+import { useChatStore } from '@/store/chat'
+import { useKnowledgeStore } from '@/store/knowledge'
+import type { ChatRequest } from '@/api/chat'
 
-const { Title, Text } = Typography
+const { Title, Text, Paragraph } = Typography
 const { TextArea } = Input
-
-interface Message {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: Date
-}
+const { Option } = Select
 
 const ChatPage: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content: '您好！我是您的AI助手，基于企业知识库为您提供智能问答服务。请问有什么可以帮助您的吗？',
-      timestamp: new Date(),
-    },
-  ])
+  const {
+    conversations,
+    currentConversation,
+    messages,
+    sending,
+    fetchConversations,
+    createConversation,
+    setCurrentConversation,
+    sendMessage,
+    deleteConversation
+  } = useChatStore()
+
+  const { knowledgeBases, fetchKnowledgeBases } = useKnowledgeStore()
+
   const [inputValue, setInputValue] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [selectedKnowledgeBases, setSelectedKnowledgeBases] = useState<number[]>([])
+  const [searchMode, setSearchMode] = useState<'auto' | 'vector' | 'hybrid' | 'graph'>('auto')
+  const [useAutoGen, setUseAutoGen] = useState(false)
+  const [settingsVisible, setSettingsVisible] = useState(false)
+  const [conversationListVisible, setConversationListVisible] = useState(false)
 
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    fetchConversations()
+    fetchKnowledgeBases()
+  }, [])
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  // 发送消息
   const handleSendMessage = async () => {
-    if (!inputValue.trim() || loading) return
+    if (!inputValue.trim() || sending) return
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: inputValue.trim(),
-      timestamp: new Date(),
+    const chatRequest: ChatRequest = {
+      message: inputValue.trim(),
+      conversation_id: currentConversation?.id,
+      knowledge_base_ids: selectedKnowledgeBases.length > 0 ? selectedKnowledgeBases : undefined,
+      search_mode: searchMode,
+      stream: false
     }
 
-    setMessages(prev => [...prev, userMessage])
     setInputValue('')
-    setLoading(true)
 
-    // 模拟AI回复
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: `感谢您的问题："${userMessage.content}"。这是一个模拟回复，实际项目中这里会调用真实的AI接口来生成回答。`,
-        timestamp: new Date(),
-      }
-      setMessages(prev => [...prev, assistantMessage])
-      setLoading(false)
-    }, 1000)
+    const success = await sendMessage(chatRequest)
+    if (!success) {
+      // 如果发送失败，恢复输入内容
+      setInputValue(chatRequest.message)
+    }
+  }
+
+  // 创建新对话
+  const handleNewConversation = async () => {
+    const conversation = await createConversation({
+      title: '新对话',
+      knowledge_base_ids: selectedKnowledgeBases
+    })
+
+    if (conversation) {
+      setCurrentConversation(conversation)
+    }
+  }
+
+  // 删除对话
+  const handleDeleteConversation = async (conversationId: number) => {
+    await deleteConversation(conversationId)
+    if (currentConversation?.id === conversationId) {
+      setCurrentConversation(null)
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -58,21 +122,133 @@ const ChatPage: React.FC = () => {
     }
   }
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('zh-CN', {
+  const formatTime = (timestamp: string) => {
+    return new Date(timestamp).toLocaleTimeString('zh-CN', {
       hour: '2-digit',
       minute: '2-digit',
     })
   }
 
+  // 渲染消息
+  const renderMessage = (message: any, index: number) => {
+    const isUser = message.role === 'user'
+
+    return (
+      <div
+        key={message.id}
+        style={{
+          display: 'flex',
+          justifyContent: isUser ? 'flex-end' : 'flex-start',
+          marginBottom: 16,
+          animation: 'fadeIn 0.3s ease-in'
+        }}
+      >
+        <div
+          style={{
+            maxWidth: '70%',
+            display: 'flex',
+            flexDirection: isUser ? 'row-reverse' : 'row',
+            alignItems: 'flex-start',
+            gap: 8
+          }}
+        >
+          <Avatar
+            icon={isUser ? <UserOutlined /> : <RobotOutlined />}
+            style={{
+              backgroundColor: isUser ? '#1890ff' : '#52c41a',
+              flexShrink: 0
+            }}
+          />
+          <div
+            style={{
+              backgroundColor: isUser ? '#1890ff' : '#f6f6f6',
+              color: isUser ? 'white' : '#333',
+              padding: '12px 16px',
+              borderRadius: isUser ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              position: 'relative'
+            }}
+          >
+            <div style={{ marginBottom: 4 }}>
+              {message.content}
+            </div>
+            <div
+              style={{
+                fontSize: 12,
+                opacity: 0.7,
+                textAlign: isUser ? 'right' : 'left'
+              }}
+            >
+              {formatTime(message.timestamp)}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div style={{ padding: 24, height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column' }}>
-      {/* 页面标题 */}
+      {/* 页面标题和工具栏 */}
       <div style={{ marginBottom: 24 }}>
-        <Title level={2} style={{ margin: 0, color: '#1e293b' }}>
-          智能对话
-        </Title>
-        <Text style={{ color: '#64748b' }}>基于企业知识库的智能问答系统</Text>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <div>
+            <Title level={2} style={{ margin: 0, color: '#1e293b' }}>
+              智能对话
+            </Title>
+            <Text style={{ color: '#64748b' }}>基于企业知识库的智能问答系统</Text>
+          </div>
+          <Space>
+            <Button
+              icon={<HistoryOutlined />}
+              onClick={() => setConversationListVisible(true)}
+            >
+              对话历史
+            </Button>
+            <Button
+              icon={<SettingOutlined />}
+              onClick={() => setSettingsVisible(true)}
+            >
+              设置
+            </Button>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={handleNewConversation}
+              style={{
+                background: 'linear-gradient(135deg, #0ea5e9, #8b5cf6)',
+                border: 'none',
+              }}
+            >
+              新对话
+            </Button>
+          </Space>
+        </div>
+
+        {/* 当前对话信息 */}
+        {currentConversation && (
+          <Card size="small" style={{ backgroundColor: '#f8fafc' }}>
+            <Space>
+              <Text strong>当前对话:</Text>
+              <Text>{currentConversation.title}</Text>
+              {selectedKnowledgeBases.length > 0 && (
+                <>
+                  <Divider type="vertical" />
+                  <Text type="secondary">知识库:</Text>
+                  {selectedKnowledgeBases.map(id => {
+                    const kb = knowledgeBases.find(k => k.id === id)
+                    return kb ? <Tag key={id} color="blue">{kb.name}</Tag> : null
+                  })}
+                </>
+              )}
+              <Divider type="vertical" />
+              <Tag color={useAutoGen ? 'purple' : 'green'}>
+                {useAutoGen ? '多智能体模式' : '标准模式'}
+              </Tag>
+              <Tag color="cyan">{searchMode === 'auto' ? '智能检索' : searchMode}</Tag>
+            </Space>
+          </Card>
+        )}
       </div>
 
       {/* 聊天区域 */}
@@ -83,11 +259,13 @@ const ChatPage: React.FC = () => {
           flexDirection: 'column',
           overflow: 'hidden',
         }}
-        bodyStyle={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          padding: 0,
+        styles={{
+          body: {
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            padding: 0,
+          },
         }}
       >
         {/* 消息列表 */}
@@ -154,7 +332,7 @@ const ChatPage: React.FC = () => {
               </div>
             ))}
 
-            {loading && (
+            {sending && (
               <div style={{ display: 'flex', justifyContent: 'flex-start', width: '100%' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
                   <Avatar
@@ -220,7 +398,7 @@ const ChatPage: React.FC = () => {
               onKeyPress={handleKeyPress}
               placeholder='请输入您的问题...'
               autoSize={{ minRows: 1, maxRows: 4 }}
-              disabled={loading}
+              disabled={sending}
               style={{
                 resize: 'none',
                 borderRadius: '8px 0 0 8px',
@@ -230,8 +408,8 @@ const ChatPage: React.FC = () => {
               type='primary'
               icon={<SendOutlined />}
               onClick={handleSendMessage}
-              loading={loading}
-              disabled={!inputValue.trim()}
+              loading={sending}
+              disabled={!inputValue.trim() || sending}
               style={{
                 height: 'auto',
                 minHeight: 40,
@@ -252,6 +430,126 @@ const ChatPage: React.FC = () => {
         </div>
       </Card>
 
+      {/* 设置模态框 */}
+      <Modal
+        title="聊天设置"
+        open={settingsVisible}
+        onCancel={() => setSettingsVisible(false)}
+        footer={null}
+        width={500}
+      >
+        <Space direction="vertical" style={{ width: '100%' }} size="large">
+          <div>
+            <Text strong>知识库选择：</Text>
+            <Select
+              mode="multiple"
+              placeholder="选择要使用的知识库"
+              value={selectedKnowledgeBases}
+              onChange={setSelectedKnowledgeBases}
+              style={{ width: '100%', marginTop: 8 }}
+            >
+              {knowledgeBases.map(kb => (
+                <Option key={kb.id} value={kb.id}>
+                  <Space>
+                    <DatabaseOutlined />
+                    {kb.name}
+                  </Space>
+                </Option>
+              ))}
+            </Select>
+          </div>
+
+          <div>
+            <Text strong>检索模式：</Text>
+            <Select
+              value={searchMode}
+              onChange={setSearchMode}
+              style={{ width: '100%', marginTop: 8 }}
+            >
+              <Option value="auto">
+                <Space>
+                  <ThunderboltOutlined />
+                  智能检索
+                </Space>
+              </Option>
+              <Option value="vector">向量检索</Option>
+              <Option value="hybrid">混合检索</Option>
+              <Option value="graph">图谱检索</Option>
+            </Select>
+          </div>
+
+          <div>
+            <Space>
+              <Text strong>多智能体模式：</Text>
+              <Switch
+                checked={useAutoGen}
+                onChange={setUseAutoGen}
+                checkedChildren={<BranchesOutlined />}
+                unCheckedChildren="关闭"
+              />
+            </Space>
+            <div style={{ marginTop: 4 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                启用后将使用多个AI智能体协作回答问题
+              </Text>
+            </div>
+          </div>
+        </Space>
+      </Modal>
+
+      {/* 对话历史模态框 */}
+      <Modal
+        title="对话历史"
+        open={conversationListVisible}
+        onCancel={() => setConversationListVisible(false)}
+        footer={null}
+        width={600}
+      >
+        {conversations.length === 0 ? (
+          <Empty description="暂无对话历史" />
+        ) : (
+          <List
+            dataSource={conversations}
+            renderItem={(conversation) => (
+              <List.Item
+                actions={[
+                  <Button
+                    type="link"
+                    onClick={() => {
+                      setCurrentConversation(conversation)
+                      setConversationListVisible(false)
+                    }}
+                  >
+                    打开
+                  </Button>,
+                  <Button
+                    type="link"
+                    danger
+                    onClick={() => handleDeleteConversation(conversation.id)}
+                  >
+                    删除
+                  </Button>
+                ]}
+              >
+                <List.Item.Meta
+                  title={conversation.title}
+                  description={
+                    <Space>
+                      <Text type="secondary">
+                        {conversation.message_count} 条消息
+                      </Text>
+                      <Text type="secondary">
+                        {new Date(conversation.updated_at).toLocaleDateString()}
+                      </Text>
+                    </Space>
+                  }
+                />
+              </List.Item>
+            )}
+          />
+        )}
+      </Modal>
+
       <style>
         {`
           @keyframes pulse {
@@ -262,6 +560,17 @@ const ChatPage: React.FC = () => {
             40% {
               opacity: 1;
               transform: scale(1);
+            }
+          }
+
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
             }
           }
         `}

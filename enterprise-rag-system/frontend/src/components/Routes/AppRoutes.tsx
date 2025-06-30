@@ -1,16 +1,22 @@
-import React, { Suspense } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import React, { Suspense, useEffect } from 'react'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { Spin } from 'antd'
+import { useSimpleAuthStore } from '@/store/simple-auth'
 
-// 懒加载页面组件
-const HomePage = React.lazy(() => import('@/pages/Home/HomePage'))
-const ChatPage = React.lazy(() => import('@/pages/Chat/ChatPage'))
-const KnowledgeBasesPage = React.lazy(() => import('@/pages/Knowledge/KnowledgeBasesPage'))
-const DocumentsPage = React.lazy(() => import('@/pages/Knowledge/DocumentsPage'))
-const DocumentCenterPage = React.lazy(() => import('@/pages/Documents/DocumentCenterPage'))
-const UsersPage = React.lazy(() => import('@/pages/Users/UsersPage'))
-const SettingsPage = React.lazy(() => import('@/pages/Settings/SettingsPage'))
-const NotFoundPage = React.lazy(() => import('@/pages/Error/NotFoundPage'))
+// 直接导入页面组件
+import HomePage from '../../pages/Home/HomePage'
+import SimpleHomePage from '../../pages/Home/SimpleHomePage'
+import ChatPage from '../../pages/Chat/ChatPage'
+import KnowledgeBasesPage from '../../pages/Knowledge/KnowledgeBasesPage'
+import DocumentsPage from '../../pages/Knowledge/DocumentsPage'
+import DocumentCenterPage from '../../pages/Documents/DocumentCenterPage'
+import UsersPage from '../../pages/Users/UsersPage'
+import SettingsPage from '../../pages/Settings/SettingsPage'
+import NotFoundPage from '../../pages/Error/NotFoundPage'
+import LoginPage from '../../pages/Auth/LoginPage'
+import SimpleLoginPage from '../../pages/Auth/SimpleLoginPage'
+import ApiTestPage from '../../pages/Test/ApiTestPage'
+import SimpleTestPage from '../../pages/Test/SimpleTestPage'
 
 // 加载中组件
 const LoadingSpinner: React.FC = () => (
@@ -20,43 +26,111 @@ const LoadingSpinner: React.FC = () => (
       justifyContent: 'center',
       alignItems: 'center',
       height: '50vh',
+      flexDirection: 'column',
+      gap: 16,
     }}
   >
-    <Spin size='large' tip='页面加载中...' />
+    <Spin size='large' />
+    <div style={{ color: '#64748b', fontSize: 14 }}>页面加载中...</div>
   </div>
 )
+
+// 受保护的路由组件
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, checkAuth } = useSimpleAuthStore()
+  const location = useLocation()
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      const hasAuth = checkAuth()
+      if (!hasAuth) {
+        // 如果没有认证信息，重定向到登录页
+      }
+    }
+  }, [isAuthenticated, checkAuth])
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />
+  }
+
+  return <>{children}</>
+}
 
 // 路由配置
 const AppRoutes: React.FC = () => {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <Routes>
-        {/* 首页 */}
-        <Route path='/' element={<HomePage />} />
+    <Routes>
+      {/* 登录页面 */}
+      <Route path='/login' element={<SimpleLoginPage />} />
+      <Route path='/login-full' element={<LoginPage />} />
 
-        {/* 智能对话 */}
-        <Route path='/chat' element={<ChatPage />} />
+      {/* 受保护的路由 */}
+      <Route path='/' element={
+        <ProtectedRoute>
+          <SimpleHomePage />
+        </ProtectedRoute>
+      } />
 
-        {/* 知识库管理 */}
-        <Route path='/knowledge/bases' element={<KnowledgeBasesPage />} />
-        <Route path='/knowledge/documents' element={<DocumentsPage />} />
+      <Route path='/home' element={
+        <ProtectedRoute>
+          <HomePage />
+        </ProtectedRoute>
+      } />
 
-        {/* 文档中心 */}
-        <Route path='/documents' element={<DocumentCenterPage />} />
+      <Route path='/chat' element={
+        <ProtectedRoute>
+          <ChatPage />
+        </ProtectedRoute>
+      } />
 
-        {/* 用户管理 */}
-        <Route path='/users' element={<UsersPage />} />
+      <Route path='/knowledge/bases' element={
+        <ProtectedRoute>
+          <KnowledgeBasesPage />
+        </ProtectedRoute>
+      } />
 
-        {/* 系统设置 */}
-        <Route path='/settings' element={<SettingsPage />} />
+      <Route path='/knowledge/documents' element={
+        <ProtectedRoute>
+          <DocumentsPage />
+        </ProtectedRoute>
+      } />
 
-        {/* 重定向 */}
-        <Route path='/knowledge' element={<Navigate to='/knowledge/bases' replace />} />
+      <Route path='/documents' element={
+        <ProtectedRoute>
+          <DocumentCenterPage />
+        </ProtectedRoute>
+      } />
 
-        {/* 404 页面 */}
-        <Route path='*' element={<NotFoundPage />} />
-      </Routes>
-    </Suspense>
+      <Route path='/users' element={
+        <ProtectedRoute>
+          <UsersPage />
+        </ProtectedRoute>
+      } />
+
+      <Route path='/settings' element={
+        <ProtectedRoute>
+          <SettingsPage />
+        </ProtectedRoute>
+      } />
+
+      <Route path='/test/api' element={
+        <ProtectedRoute>
+          <ApiTestPage />
+        </ProtectedRoute>
+      } />
+
+      <Route path='/test/simple' element={
+        <ProtectedRoute>
+          <SimpleTestPage />
+        </ProtectedRoute>
+      } />
+
+      {/* 重定向 */}
+      <Route path='/knowledge' element={<Navigate to='/knowledge/bases' replace />} />
+
+      {/* 404 页面 */}
+      <Route path='*' element={<NotFoundPage />} />
+    </Routes>
   )
 }
 
