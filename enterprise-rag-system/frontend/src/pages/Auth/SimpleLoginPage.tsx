@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Form, Input, Button, Card, Typography, Space, message } from 'antd'
+import { Form, Input, Button, Card, Typography, Space, App } from 'antd'
 import { UserOutlined, LockOutlined, RobotOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useSimpleAuthStore } from '@/store/simple-auth'
@@ -11,10 +11,11 @@ const SimpleLoginPage: React.FC = () => {
   const { login } = useSimpleAuthStore()
   const [loading, setLoading] = useState(false)
   const [form] = Form.useForm()
+  const { message } = App.useApp()
 
   const handleLogin = async (values: { username: string; password: string }) => {
     setLoading(true)
-    
+
     try {
       const success = await login(values.username, values.password)
       if (success) {
@@ -38,7 +39,7 @@ const SimpleLoginPage: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 24
+        padding: 24,
       }}
     >
       <Card
@@ -46,12 +47,12 @@ const SimpleLoginPage: React.FC = () => {
           width: 400,
           boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
           borderRadius: 16,
-          border: 'none'
+          border: 'none',
         }}
         styles={{
           body: {
-            padding: 40
-          }
+            padding: 40,
+          },
         }}
       >
         {/* Logo和标题 */}
@@ -66,7 +67,7 @@ const SimpleLoginPage: React.FC = () => {
               alignItems: 'center',
               justifyContent: 'center',
               margin: '0 auto 16px',
-              boxShadow: '0 8px 24px rgba(14, 165, 233, 0.3)'
+              boxShadow: '0 8px 24px rgba(14, 165, 233, 0.3)',
             }}
           >
             <RobotOutlined style={{ fontSize: 32, color: 'white' }} />
@@ -74,58 +75,46 @@ const SimpleLoginPage: React.FC = () => {
           <Title level={2} style={{ margin: 0, color: '#1e293b' }}>
             企业级 RAG 系统
           </Title>
-          <Text style={{ color: '#64748b' }}>
-            基于 AutoGen 智能体协作的知识库平台
-          </Text>
+          <Text style={{ color: '#64748b' }}>基于 AutoGen 智能体协作的知识库平台</Text>
         </div>
 
         {/* 登录表单 */}
         <Form
           form={form}
-          layout="vertical"
+          layout='vertical'
           onFinish={handleLogin}
-          size="large"
+          size='large'
           initialValues={{
             username: 'admin',
-            password: 'admin123'
+            password: 'admin123',
           }}
         >
-          <Form.Item
-            name="username"
-            rules={[
-              { required: true, message: '请输入用户名' }
-            ]}
-          >
+          <Form.Item name='username' rules={[{ required: true, message: '请输入用户名' }]}>
             <Input
               prefix={<UserOutlined style={{ color: '#94a3b8' }} />}
-              placeholder="用户名"
+              placeholder='用户名'
               style={{
                 borderRadius: 8,
-                height: 48
+                height: 48,
               }}
             />
           </Form.Item>
 
-          <Form.Item
-            name="password"
-            rules={[
-              { required: true, message: '请输入密码' }
-            ]}
-          >
+          <Form.Item name='password' rules={[{ required: true, message: '请输入密码' }]}>
             <Input.Password
               prefix={<LockOutlined style={{ color: '#94a3b8' }} />}
-              placeholder="密码"
+              placeholder='密码'
               style={{
                 borderRadius: 8,
-                height: 48
+                height: 48,
               }}
             />
           </Form.Item>
 
           <Form.Item style={{ marginBottom: 16 }}>
             <Button
-              type="primary"
-              htmlType="submit"
+              type='primary'
+              htmlType='submit'
               loading={loading}
               style={{
                 width: '100%',
@@ -134,7 +123,7 @@ const SimpleLoginPage: React.FC = () => {
                 background: 'linear-gradient(135deg, #0ea5e9, #8b5cf6)',
                 border: 'none',
                 fontSize: 16,
-                fontWeight: 500
+                fontWeight: 500,
               }}
             >
               登录
@@ -148,29 +137,23 @@ const SimpleLoginPage: React.FC = () => {
             background: '#f8fafc',
             padding: 16,
             borderRadius: 8,
-            marginTop: 16
+            marginTop: 16,
           }}
         >
           <Text strong style={{ color: '#475569', fontSize: 14 }}>
             演示账号：
           </Text>
           <div style={{ marginTop: 8 }}>
-            <Space direction="vertical" size={4}>
-              <Text style={{ fontSize: 12, color: '#64748b' }}>
-                用户名：admin
-              </Text>
-              <Text style={{ fontSize: 12, color: '#64748b' }}>
-                密码：admin123
-              </Text>
+            <Space direction='vertical' size={4}>
+              <Text style={{ fontSize: 12, color: '#64748b' }}>用户名：admin</Text>
+              <Text style={{ fontSize: 12, color: '#64748b' }}>密码：admin123</Text>
             </Space>
           </div>
         </div>
 
         {/* 底部信息 */}
         <div style={{ textAlign: 'center', marginTop: 24 }}>
-          <Text style={{ fontSize: 12, color: '#94a3b8' }}>
-            © 2024 企业级RAG知识库系统. All rights reserved.
-          </Text>
+          <Text style={{ fontSize: 12, color: '#94a3b8' }}>© 2024 企业级RAG知识库系统. All rights reserved.</Text>
         </div>
       </Card>
     </div>

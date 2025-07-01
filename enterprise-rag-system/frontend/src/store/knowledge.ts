@@ -12,7 +12,7 @@ export interface KnowledgeState {
   total: number
   page: number
   size: number
-  
+
   // 操作
   fetchKnowledgeBases: (params?: any) => Promise<void>
   createKnowledgeBase: (data: KnowledgeBaseCreateRequest) => Promise<boolean>
@@ -36,20 +36,20 @@ export const useKnowledgeStore = create<KnowledgeState>((set, get) => ({
   fetchKnowledgeBases: async (params = {}) => {
     try {
       set({ loading: true })
-      
+
       const response = await knowledgeApi.getKnowledgeBases({
         page: get().page,
         size: get().size,
-        ...params
+        ...params,
       })
-      
+
       if (response.data) {
         set({
           knowledgeBases: response.data.items,
           total: response.data.total,
           page: response.data.page,
           size: response.data.size,
-          loading: false
+          loading: false,
         })
       }
     } catch (error: any) {
@@ -62,9 +62,9 @@ export const useKnowledgeStore = create<KnowledgeState>((set, get) => ({
   createKnowledgeBase: async (data: KnowledgeBaseCreateRequest) => {
     try {
       set({ loading: true })
-      
+
       const response = await knowledgeApi.createKnowledgeBase(data)
-      
+
       if (response.data) {
         // 重新获取列表
         await get().fetchKnowledgeBases()
@@ -72,7 +72,7 @@ export const useKnowledgeStore = create<KnowledgeState>((set, get) => ({
         set({ loading: false })
         return true
       }
-      
+
       set({ loading: false })
       return false
     } catch (error: any) {
@@ -86,27 +86,26 @@ export const useKnowledgeStore = create<KnowledgeState>((set, get) => ({
   updateKnowledgeBase: async (id: number, data: any) => {
     try {
       set({ loading: true })
-      
+
       const response = await knowledgeApi.updateKnowledgeBase(id, data)
-      
+
       if (response.data) {
         // 更新本地状态
-        const knowledgeBases = get().knowledgeBases.map(kb =>
-          kb.id === id ? { ...kb, ...response.data } : kb
-        )
-        
+        const knowledgeBases = get().knowledgeBases.map(kb => (kb.id === id ? { ...kb, ...response.data } : kb))
+
         set({
           knowledgeBases,
-          currentKnowledgeBase: get().currentKnowledgeBase?.id === id 
-            ? { ...get().currentKnowledgeBase, ...response.data }
-            : get().currentKnowledgeBase,
-          loading: false
+          currentKnowledgeBase:
+            get().currentKnowledgeBase?.id === id
+              ? { ...get().currentKnowledgeBase, ...response.data }
+              : get().currentKnowledgeBase,
+          loading: false,
         })
-        
+
         message.success('知识库更新成功')
         return true
       }
-      
+
       set({ loading: false })
       return false
     } catch (error: any) {
@@ -120,21 +119,19 @@ export const useKnowledgeStore = create<KnowledgeState>((set, get) => ({
   deleteKnowledgeBase: async (id: number) => {
     try {
       set({ loading: true })
-      
+
       await knowledgeApi.deleteKnowledgeBase(id)
-      
+
       // 从本地状态中移除
       const knowledgeBases = get().knowledgeBases.filter(kb => kb.id !== id)
-      
+
       set({
         knowledgeBases,
-        currentKnowledgeBase: get().currentKnowledgeBase?.id === id 
-          ? null 
-          : get().currentKnowledgeBase,
+        currentKnowledgeBase: get().currentKnowledgeBase?.id === id ? null : get().currentKnowledgeBase,
         total: get().total - 1,
-        loading: false
+        loading: false,
       })
-      
+
       message.success('知识库删除成功')
       return true
     } catch (error: any) {
@@ -162,7 +159,7 @@ export const useKnowledgeStore = create<KnowledgeState>((set, get) => ({
       loading: false,
       total: 0,
       page: 1,
-      size: 20
+      size: 20,
     })
-  }
+  },
 }))

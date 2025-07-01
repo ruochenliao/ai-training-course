@@ -17,7 +17,7 @@ import {
   Dropdown,
   message,
   Statistic,
-  Alert
+  Alert,
 } from 'antd'
 import {
   FileTextOutlined,
@@ -32,7 +32,7 @@ import {
   MoreOutlined,
   ClockCircleOutlined,
   UserOutlined,
-  FileOutlined
+  FileOutlined,
 } from '@ant-design/icons'
 import { documentsApi, type Document, type DocumentListParams } from '@/api/documents'
 import { knowledgeApi, type KnowledgeBase } from '@/api/knowledge'
@@ -64,7 +64,7 @@ const DocumentsPage: React.FC = () => {
         search: searchText,
         status: statusFilter,
         knowledge_base_id: selectedKnowledgeBase,
-        ...params
+        ...params,
       })
 
       if (response.data) {
@@ -112,7 +112,7 @@ const DocumentsPage: React.FC = () => {
       await documentsApi.uploadDocuments({
         knowledge_base_id: selectedKnowledgeBase,
         files,
-        auto_process: true
+        auto_process: true,
       })
 
       message.success('文档上传成功')
@@ -170,17 +170,15 @@ const DocumentsPage: React.FC = () => {
       pending: { color: 'default', text: '待处理' },
       processing: { color: 'processing', text: '处理中' },
       completed: { color: 'success', text: '已完成' },
-      failed: { color: 'error', text: '处理失败' }
+      failed: { color: 'error', text: '处理失败' },
     }
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending
 
     return (
-      <Space direction="vertical" size={4}>
+      <Space direction='vertical' size={4}>
         <Tag color={config.color}>{config.text}</Tag>
-        {status === 'processing' && (
-          <Progress percent={progress} size="small" />
-        )}
+        {status === 'processing' && <Progress percent={progress} size='small' />}
       </Space>
     )
   }
@@ -195,41 +193,39 @@ const DocumentsPage: React.FC = () => {
         <Space>
           <FileOutlined style={{ color: '#1890ff' }} />
           <Text strong>{text}</Text>
-          <Text type="secondary">({(record.file_size / 1024 / 1024).toFixed(2)} MB)</Text>
+          <Text type='secondary'>({(record.file_size / 1024 / 1024).toFixed(2)} MB)</Text>
         </Space>
-      )
+      ),
     },
     {
       title: '知识库',
       dataIndex: 'knowledge_base_name',
       key: 'knowledge_base',
-      render: (text: string) => text || '-'
+      render: (text: string) => text || '-',
     },
     {
       title: '文件类型',
       dataIndex: 'file_type',
       key: 'file_type',
-      render: (type: string) => (
-        <Tag color="blue">{type.toUpperCase()}</Tag>
-      )
+      render: (type: string) => <Tag color='blue'>{type.toUpperCase()}</Tag>,
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string, record: Document) => renderStatus(status, record.processing_progress)
+      render: (status: string, record: Document) => renderStatus(status, record.processing_progress),
     },
     {
       title: '分块数',
       dataIndex: 'chunk_count',
       key: 'chunk_count',
-      render: (count: number) => count || 0
+      render: (count: number) => count || 0,
     },
     {
       title: '向量数',
       dataIndex: 'vector_count',
       key: 'vector_count',
-      render: (count: number) => count || 0
+      render: (count: number) => count || 0,
     },
     {
       title: '上传时间',
@@ -242,7 +238,7 @@ const DocumentsPage: React.FC = () => {
             <Text>{new Date(date).toLocaleDateString()}</Text>
           </Space>
         </Tooltip>
-      )
+      ),
     },
     {
       title: '操作',
@@ -255,23 +251,23 @@ const DocumentsPage: React.FC = () => {
               {
                 key: 'preview',
                 icon: <EyeOutlined />,
-                label: '预览'
+                label: '预览',
               },
               {
                 key: 'download',
                 icon: <DownloadOutlined />,
                 label: '下载',
-                onClick: () => handleDownload(record.id, record.original_filename)
+                onClick: () => handleDownload(record.id, record.original_filename),
               },
               {
                 key: 'reprocess',
                 icon: <ReloadOutlined />,
                 label: '重新处理',
                 onClick: () => handleReprocess(record.id),
-                disabled: record.status === 'processing'
+                disabled: record.status === 'processing',
               },
               {
-                type: 'divider'
+                type: 'divider',
               },
               {
                 key: 'delete',
@@ -285,18 +281,18 @@ const DocumentsPage: React.FC = () => {
                     okText: '删除',
                     okType: 'danger',
                     cancelText: '取消',
-                    onOk: () => handleDelete(record.id)
+                    onOk: () => handleDelete(record.id),
                   })
-                }
-              }
-            ]
+                },
+              },
+            ],
           }}
           trigger={['click']}
         >
-          <Button type="text" icon={<MoreOutlined />} />
+          <Button type='text' icon={<MoreOutlined />} />
         </Dropdown>
-      )
-    }
+      ),
+    },
   ]
 
   return (
@@ -306,26 +302,20 @@ const DocumentsPage: React.FC = () => {
         <Title level={2} style={{ margin: 0, color: '#1e293b' }}>
           文档管理
         </Title>
-        <Paragraph style={{ margin: '8px 0 0 0', color: '#64748b', fontSize: 16 }}>
-          上传和管理知识库文档
-        </Paragraph>
+        <Paragraph style={{ margin: '8px 0 0 0', color: '#64748b', fontSize: 16 }}>上传和管理知识库文档</Paragraph>
       </div>
 
       {/* 统计卡片 */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={6}>
           <Card>
-            <Statistic
-              title="总文档数"
-              value={total}
-              prefix={<FileTextOutlined style={{ color: '#1890ff' }} />}
-            />
+            <Statistic title='总文档数' value={total} prefix={<FileTextOutlined style={{ color: '#1890ff' }} />} />
           </Card>
         </Col>
         <Col xs={24} sm={6}>
           <Card>
             <Statistic
-              title="处理中"
+              title='处理中'
               value={documents.filter(doc => doc.status === 'processing').length}
               prefix={<ReloadOutlined style={{ color: '#faad14' }} />}
             />
@@ -334,7 +324,7 @@ const DocumentsPage: React.FC = () => {
         <Col xs={24} sm={6}>
           <Card>
             <Statistic
-              title="已完成"
+              title='已完成'
               value={documents.filter(doc => doc.status === 'completed').length}
               prefix={<FileOutlined style={{ color: '#52c41a' }} />}
             />
@@ -343,7 +333,7 @@ const DocumentsPage: React.FC = () => {
         <Col xs={24} sm={6}>
           <Card>
             <Statistic
-              title="处理失败"
+              title='处理失败'
               value={documents.filter(doc => doc.status === 'failed').length}
               prefix={<DeleteOutlined style={{ color: '#ff4d4f' }} />}
             />
@@ -353,44 +343,46 @@ const DocumentsPage: React.FC = () => {
 
       {/* 筛选和操作栏 */}
       <Card style={{ marginBottom: 16 }}>
-        <Row gutter={16} align="middle">
-          <Col flex="auto">
+        <Row gutter={16} align='middle'>
+          <Col flex='auto'>
             <Space>
               <Input
-                placeholder="搜索文档名称"
+                placeholder='搜索文档名称'
                 prefix={<SearchOutlined />}
                 value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
+                onChange={e => setSearchText(e.target.value)}
                 style={{ width: 200 }}
               />
               <Select
-                placeholder="选择知识库"
+                placeholder='选择知识库'
                 value={selectedKnowledgeBase}
                 onChange={setSelectedKnowledgeBase}
                 style={{ width: 200 }}
                 allowClear
               >
                 {knowledgeBases.map(kb => (
-                  <Option key={kb.id} value={kb.id}>{kb.name}</Option>
+                  <Option key={kb.id} value={kb.id}>
+                    {kb.name}
+                  </Option>
                 ))}
               </Select>
               <Select
-                placeholder="状态筛选"
+                placeholder='状态筛选'
                 value={statusFilter}
                 onChange={setStatusFilter}
                 style={{ width: 120 }}
                 allowClear
               >
-                <Option value="pending">待处理</Option>
-                <Option value="processing">处理中</Option>
-                <Option value="completed">已完成</Option>
-                <Option value="failed">处理失败</Option>
+                <Option value='pending'>待处理</Option>
+                <Option value='processing'>处理中</Option>
+                <Option value='completed'>已完成</Option>
+                <Option value='failed'>处理失败</Option>
               </Select>
             </Space>
           </Col>
           <Col>
             <Button
-              type="primary"
+              type='primary'
               icon={<UploadOutlined />}
               onClick={() => setUploadModalVisible(true)}
               style={{
@@ -409,7 +401,7 @@ const DocumentsPage: React.FC = () => {
         <Table
           columns={columns}
           dataSource={documents}
-          rowKey="id"
+          rowKey='id'
           loading={loading}
           pagination={{
             current: page,
@@ -421,65 +413,60 @@ const DocumentsPage: React.FC = () => {
             onChange: (page, size) => {
               setPage(page)
               setPageSize(size || 20)
-            }
+            },
           }}
         />
       </Card>
 
       {/* 上传文档模态框 */}
       <Modal
-        title="上传文档"
+        title='上传文档'
         open={uploadModalVisible}
         onCancel={() => setUploadModalVisible(false)}
         footer={null}
         width={600}
       >
-        <Space direction="vertical" style={{ width: '100%' }} size="large">
+        <Space direction='vertical' style={{ width: '100%' }} size='large'>
           <Alert
-            message="上传说明"
-            description="支持 PDF、Word、PowerPoint、TXT、Markdown 等格式文档，单个文件最大 100MB"
-            type="info"
+            message='上传说明'
+            description='支持 PDF、Word、PowerPoint、TXT、Markdown 等格式文档，单个文件最大 100MB'
+            type='info'
             showIcon
           />
 
           <div>
             <Text strong>选择知识库：</Text>
             <Select
-              placeholder="请选择知识库"
+              placeholder='请选择知识库'
               value={selectedKnowledgeBase}
               onChange={setSelectedKnowledgeBase}
               style={{ width: '100%', marginTop: 8 }}
             >
               {knowledgeBases.map(kb => (
-                <Option key={kb.id} value={kb.id}>{kb.name}</Option>
+                <Option key={kb.id} value={kb.id}>
+                  {kb.name}
+                </Option>
               ))}
             </Select>
           </div>
 
           <Dragger
-            name="files"
+            name='files'
             multiple
-            accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.md"
+            accept='.pdf,.doc,.docx,.ppt,.pptx,.txt,.md'
             beforeUpload={() => false}
             onChange={handleUpload}
             disabled={!selectedKnowledgeBase || uploading}
           >
-            <p className="ant-upload-drag-icon">
+            <p className='ant-upload-drag-icon'>
               <InboxOutlined />
             </p>
-            <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
-            <p className="ant-upload-hint">
-              支持单个或批量上传，严禁上传公司数据或其他敏感文件
-            </p>
+            <p className='ant-upload-text'>点击或拖拽文件到此区域上传</p>
+            <p className='ant-upload-hint'>支持单个或批量上传，严禁上传公司数据或其他敏感文件</p>
           </Dragger>
 
           {uploading && (
-            <Alert
-              message="正在上传文档..."
-              description="请稍候，文档上传完成后将自动开始处理"
-              type="info"
-              showIcon
-            />
+            <Alert message='正在上传文档...' description='请稍候，文档上传完成后将自动开始处理' type='info' showIcon />
           )}
         </Space>
       </Modal>

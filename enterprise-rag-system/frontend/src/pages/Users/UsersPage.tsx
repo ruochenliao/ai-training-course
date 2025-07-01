@@ -17,7 +17,7 @@ import {
   Switch,
   message,
   Tooltip,
-  Statistic
+  Statistic,
 } from 'antd'
 import {
   UserOutlined,
@@ -30,7 +30,7 @@ import {
   CrownOutlined,
   TeamOutlined,
   ClockCircleOutlined,
-  MailOutlined
+  MailOutlined,
 } from '@ant-design/icons'
 import { usersApi, type User, type UserCreateRequest, type UserUpdateRequest } from '@/api/users'
 
@@ -60,7 +60,7 @@ const UsersPage: React.FC = () => {
         page,
         size: pageSize,
         search: searchText,
-        status: statusFilter
+        status: statusFilter,
       })
 
       if (response.data) {
@@ -99,7 +99,7 @@ const UsersPage: React.FC = () => {
       full_name: user.full_name,
       is_staff: user.is_staff,
       is_superuser: user.is_superuser,
-      status: user.status
+      status: user.status,
     })
     setEditModalVisible(true)
   }
@@ -163,7 +163,7 @@ const UsersPage: React.FC = () => {
       active: { color: 'success', text: '正常' },
       inactive: { color: 'default', text: '未激活' },
       locked: { color: 'error', text: '已锁定' },
-      disabled: { color: 'warning', text: '已禁用' }
+      disabled: { color: 'warning', text: '已禁用' },
     }
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.active
@@ -177,27 +177,19 @@ const UsersPage: React.FC = () => {
       key: 'user_info',
       render: (_, record: User) => (
         <Space>
-          <Avatar
-            src={record.avatar_url}
-            icon={<UserOutlined />}
-            style={{ backgroundColor: '#1890ff' }}
-          />
+          <Avatar src={record.avatar_url} icon={<UserOutlined />} style={{ backgroundColor: '#1890ff' }} />
           <div>
             <div>
               <Text strong>{record.full_name || record.username}</Text>
-              {record.is_superuser && (
-                <CrownOutlined style={{ color: '#faad14', marginLeft: 4 }} />
-              )}
-              {record.is_staff && (
-                <TeamOutlined style={{ color: '#52c41a', marginLeft: 4 }} />
-              )}
+              {record.is_superuser && <CrownOutlined style={{ color: '#faad14', marginLeft: 4 }} />}
+              {record.is_staff && <TeamOutlined style={{ color: '#52c41a', marginLeft: 4 }} />}
             </div>
-            <Text type="secondary" style={{ fontSize: 12 }}>
+            <Text type='secondary' style={{ fontSize: 12 }}>
               @{record.username}
             </Text>
           </div>
         </Space>
-      )
+      ),
     },
     {
       title: '邮箱',
@@ -208,36 +200,36 @@ const UsersPage: React.FC = () => {
           <MailOutlined />
           <Text>{email}</Text>
         </Space>
-      )
+      ),
     },
     {
       title: '角色',
       key: 'role',
       render: (_, record: User) => (
-        <Space direction="vertical" size={2}>
-          {record.is_superuser && <Tag color="red">超级管理员</Tag>}
-          {record.is_staff && <Tag color="blue">管理员</Tag>}
-          {!record.is_superuser && !record.is_staff && <Tag color="default">普通用户</Tag>}
+        <Space direction='vertical' size={2}>
+          {record.is_superuser && <Tag color='red'>超级管理员</Tag>}
+          {record.is_staff && <Tag color='blue'>管理员</Tag>}
+          {!record.is_superuser && !record.is_staff && <Tag color='default'>普通用户</Tag>}
         </Space>
-      )
+      ),
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      render: renderStatus
+      render: renderStatus,
     },
     {
       title: '登录次数',
       dataIndex: 'login_count',
       key: 'login_count',
-      render: (count: number) => count || 0
+      render: (count: number) => count || 0,
     },
     {
       title: '最后登录',
       dataIndex: 'last_login_at',
       key: 'last_login_at',
-      render: (date: string) => (
+      render: (date: string) =>
         date ? (
           <Tooltip title={new Date(date).toLocaleString()}>
             <Space>
@@ -246,9 +238,8 @@ const UsersPage: React.FC = () => {
             </Space>
           </Tooltip>
         ) : (
-          <Text type="secondary">从未登录</Text>
-        )
-      )
+          <Text type='secondary'>从未登录</Text>
+        ),
     },
     {
       title: '操作',
@@ -262,13 +253,13 @@ const UsersPage: React.FC = () => {
                 key: 'edit',
                 icon: <EditOutlined />,
                 label: '编辑',
-                onClick: () => handleEdit(record)
+                onClick: () => handleEdit(record),
               },
               {
                 key: 'toggle_status',
                 icon: record.status === 'active' ? <LockOutlined /> : <UnlockOutlined />,
                 label: record.status === 'active' ? '禁用' : '激活',
-                onClick: () => handleToggleStatus(record)
+                onClick: () => handleToggleStatus(record),
               },
               {
                 key: 'reset_password',
@@ -280,12 +271,12 @@ const UsersPage: React.FC = () => {
                     content: `确定要重置用户"${record.username}"的密码吗？`,
                     okText: '确认',
                     cancelText: '取消',
-                    onOk: () => handleResetPassword(record.id)
+                    onOk: () => handleResetPassword(record.id),
                   })
-                }
+                },
               },
               {
-                type: 'divider'
+                type: 'divider',
               },
               {
                 key: 'delete',
@@ -299,18 +290,18 @@ const UsersPage: React.FC = () => {
                     okText: '删除',
                     okType: 'danger',
                     cancelText: '取消',
-                    onOk: () => handleDelete(record.id)
+                    onOk: () => handleDelete(record.id),
                   })
-                }
-              }
-            ]
+                },
+              },
+            ],
           }}
           trigger={['click']}
         >
-          <Button type="text" icon={<MoreOutlined />} />
+          <Button type='text' icon={<MoreOutlined />} />
         </Dropdown>
-      )
-    }
+      ),
+    },
   ]
 
   return (
@@ -320,26 +311,20 @@ const UsersPage: React.FC = () => {
         <Title level={2} style={{ margin: 0, color: '#1e293b' }}>
           用户管理
         </Title>
-        <Paragraph style={{ margin: '8px 0 0 0', color: '#64748b', fontSize: 16 }}>
-          管理系统用户和权限
-        </Paragraph>
+        <Paragraph style={{ margin: '8px 0 0 0', color: '#64748b', fontSize: 16 }}>管理系统用户和权限</Paragraph>
       </div>
 
       {/* 统计卡片 */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={6}>
           <Card>
-            <Statistic
-              title="总用户数"
-              value={total}
-              prefix={<UserOutlined style={{ color: '#1890ff' }} />}
-            />
+            <Statistic title='总用户数' value={total} prefix={<UserOutlined style={{ color: '#1890ff' }} />} />
           </Card>
         </Col>
         <Col xs={24} sm={6}>
           <Card>
             <Statistic
-              title="活跃用户"
+              title='活跃用户'
               value={users.filter(user => user.status === 'active').length}
               prefix={<TeamOutlined style={{ color: '#52c41a' }} />}
             />
@@ -348,7 +333,7 @@ const UsersPage: React.FC = () => {
         <Col xs={24} sm={6}>
           <Card>
             <Statistic
-              title="管理员"
+              title='管理员'
               value={users.filter(user => user.is_staff || user.is_superuser).length}
               prefix={<CrownOutlined style={{ color: '#faad14' }} />}
             />
@@ -357,12 +342,14 @@ const UsersPage: React.FC = () => {
         <Col xs={24} sm={6}>
           <Card>
             <Statistic
-              title="今日登录"
-              value={users.filter(user => {
-                if (!user.last_login_at) return false
-                const today = new Date().toDateString()
-                return new Date(user.last_login_at).toDateString() === today
-              }).length}
+              title='今日登录'
+              value={
+                users.filter(user => {
+                  if (!user.last_login_at) return false
+                  const today = new Date().toDateString()
+                  return new Date(user.last_login_at).toDateString() === today
+                }).length
+              }
               prefix={<ClockCircleOutlined style={{ color: '#722ed1' }} />}
             />
           </Card>
@@ -371,32 +358,32 @@ const UsersPage: React.FC = () => {
 
       {/* 操作栏 */}
       <Card style={{ marginBottom: 16 }}>
-        <Row justify="space-between" align="middle">
+        <Row justify='space-between' align='middle'>
           <Col>
             <Space>
               <Input
-                placeholder="搜索用户名或邮箱"
+                placeholder='搜索用户名或邮箱'
                 value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
+                onChange={e => setSearchText(e.target.value)}
                 style={{ width: 200 }}
               />
               <Select
-                placeholder="状态筛选"
+                placeholder='状态筛选'
                 value={statusFilter}
                 onChange={setStatusFilter}
                 style={{ width: 120 }}
                 allowClear
               >
-                <Option value="active">正常</Option>
-                <Option value="inactive">未激活</Option>
-                <Option value="locked">已锁定</Option>
-                <Option value="disabled">已禁用</Option>
+                <Option value='active'>正常</Option>
+                <Option value='inactive'>未激活</Option>
+                <Option value='locked'>已锁定</Option>
+                <Option value='disabled'>已禁用</Option>
               </Select>
             </Space>
           </Col>
           <Col>
             <Button
-              type="primary"
+              type='primary'
               icon={<PlusOutlined />}
               onClick={() => setCreateModalVisible(true)}
               style={{
@@ -415,7 +402,7 @@ const UsersPage: React.FC = () => {
         <Table
           columns={columns}
           dataSource={users}
-          rowKey="id"
+          rowKey='id'
           loading={loading}
           pagination={{
             current: page,
@@ -427,14 +414,14 @@ const UsersPage: React.FC = () => {
             onChange: (page, size) => {
               setPage(page)
               setPageSize(size || 20)
-            }
+            },
           }}
         />
       </Card>
 
       {/* 创建用户模态框 */}
       <Modal
-        title="添加用户"
+        title='添加用户'
         open={createModalVisible}
         onCancel={() => {
           setCreateModalVisible(false)
@@ -443,84 +430,69 @@ const UsersPage: React.FC = () => {
         footer={null}
         width={600}
       >
-        <Form
-          form={createForm}
-          layout="vertical"
-          onFinish={handleCreate}
-        >
+        <Form form={createForm} layout='vertical' onFinish={handleCreate}>
           <Form.Item
-            name="username"
-            label="用户名"
+            name='username'
+            label='用户名'
             rules={[
               { required: true, message: '请输入用户名' },
               { min: 3, message: '用户名至少3个字符' },
-              { max: 50, message: '用户名不能超过50个字符' }
+              { max: 50, message: '用户名不能超过50个字符' },
             ]}
           >
-            <Input placeholder="请输入用户名" />
+            <Input placeholder='请输入用户名' />
           </Form.Item>
 
           <Form.Item
-            name="email"
-            label="邮箱"
+            name='email'
+            label='邮箱'
             rules={[
               { required: true, message: '请输入邮箱' },
-              { type: 'email', message: '请输入有效的邮箱地址' }
+              { type: 'email', message: '请输入有效的邮箱地址' },
             ]}
           >
-            <Input placeholder="请输入邮箱" />
+            <Input placeholder='请输入邮箱' />
           </Form.Item>
 
           <Form.Item
-            name="password"
-            label="密码"
+            name='password'
+            label='密码'
             rules={[
               { required: true, message: '请输入密码' },
-              { min: 6, message: '密码至少6个字符' }
+              { min: 6, message: '密码至少6个字符' },
             ]}
           >
-            <Input.Password placeholder="请输入密码" />
+            <Input.Password placeholder='请输入密码' />
           </Form.Item>
 
-          <Form.Item
-            name="full_name"
-            label="姓名"
-          >
-            <Input placeholder="请输入姓名" />
+          <Form.Item name='full_name' label='姓名'>
+            <Input placeholder='请输入姓名' />
           </Form.Item>
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item
-                name="is_staff"
-                label="管理员权限"
-                valuePropName="checked"
-                initialValue={false}
-              >
-                <Switch checkedChildren="是" unCheckedChildren="否" />
+              <Form.Item name='is_staff' label='管理员权限' valuePropName='checked' initialValue={false}>
+                <Switch checkedChildren='是' unCheckedChildren='否' />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item
-                name="is_superuser"
-                label="超级管理员"
-                valuePropName="checked"
-                initialValue={false}
-              >
-                <Switch checkedChildren="是" unCheckedChildren="否" />
+              <Form.Item name='is_superuser' label='超级管理员' valuePropName='checked' initialValue={false}>
+                <Switch checkedChildren='是' unCheckedChildren='否' />
               </Form.Item>
             </Col>
           </Row>
 
           <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
             <Space>
-              <Button onClick={() => {
-                setCreateModalVisible(false)
-                createForm.resetFields()
-              }}>
+              <Button
+                onClick={() => {
+                  setCreateModalVisible(false)
+                  createForm.resetFields()
+                }}
+              >
                 取消
               </Button>
-              <Button type="primary" htmlType="submit" loading={loading}>
+              <Button type='primary' htmlType='submit' loading={loading}>
                 创建
               </Button>
             </Space>
@@ -530,7 +502,7 @@ const UsersPage: React.FC = () => {
 
       {/* 编辑用户模态框 */}
       <Modal
-        title="编辑用户"
+        title='编辑用户'
         open={editModalVisible}
         onCancel={() => {
           setEditModalVisible(false)
@@ -540,71 +512,55 @@ const UsersPage: React.FC = () => {
         footer={null}
         width={600}
       >
-        <Form
-          form={editForm}
-          layout="vertical"
-          onFinish={handleUpdate}
-        >
+        <Form form={editForm} layout='vertical' onFinish={handleUpdate}>
           <Form.Item
-            name="email"
-            label="邮箱"
+            name='email'
+            label='邮箱'
             rules={[
               { required: true, message: '请输入邮箱' },
-              { type: 'email', message: '请输入有效的邮箱地址' }
+              { type: 'email', message: '请输入有效的邮箱地址' },
             ]}
           >
-            <Input placeholder="请输入邮箱" />
+            <Input placeholder='请输入邮箱' />
           </Form.Item>
 
-          <Form.Item
-            name="full_name"
-            label="姓名"
-          >
-            <Input placeholder="请输入姓名" />
+          <Form.Item name='full_name' label='姓名'>
+            <Input placeholder='请输入姓名' />
           </Form.Item>
 
-          <Form.Item
-            name="status"
-            label="状态"
-          >
+          <Form.Item name='status' label='状态'>
             <Select>
-              <Option value="active">正常</Option>
-              <Option value="inactive">未激活</Option>
-              <Option value="disabled">已禁用</Option>
+              <Option value='active'>正常</Option>
+              <Option value='inactive'>未激活</Option>
+              <Option value='disabled'>已禁用</Option>
             </Select>
           </Form.Item>
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item
-                name="is_staff"
-                label="管理员权限"
-                valuePropName="checked"
-              >
-                <Switch checkedChildren="是" unCheckedChildren="否" />
+              <Form.Item name='is_staff' label='管理员权限' valuePropName='checked'>
+                <Switch checkedChildren='是' unCheckedChildren='否' />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item
-                name="is_superuser"
-                label="超级管理员"
-                valuePropName="checked"
-              >
-                <Switch checkedChildren="是" unCheckedChildren="否" />
+              <Form.Item name='is_superuser' label='超级管理员' valuePropName='checked'>
+                <Switch checkedChildren='是' unCheckedChildren='否' />
               </Form.Item>
             </Col>
           </Row>
 
           <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
             <Space>
-              <Button onClick={() => {
-                setEditModalVisible(false)
-                setEditingUser(null)
-                editForm.resetFields()
-              }}>
+              <Button
+                onClick={() => {
+                  setEditModalVisible(false)
+                  setEditingUser(null)
+                  editForm.resetFields()
+                }}
+              >
                 取消
               </Button>
-              <Button type="primary" htmlType="submit" loading={loading}>
+              <Button type='primary' htmlType='submit' loading={loading}>
                 更新
               </Button>
             </Space>

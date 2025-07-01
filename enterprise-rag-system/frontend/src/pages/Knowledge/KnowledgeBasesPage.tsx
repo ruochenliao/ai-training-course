@@ -17,7 +17,7 @@ import {
   message,
   Popconfirm,
   Tooltip,
-  Statistic
+  Statistic,
 } from 'antd'
 import {
   DatabaseOutlined,
@@ -28,7 +28,7 @@ import {
   MoreOutlined,
   FileTextOutlined,
   UserOutlined,
-  ClockCircleOutlined
+  ClockCircleOutlined,
 } from '@ant-design/icons'
 import { useKnowledgeStore } from '@/store/knowledge'
 import type { KnowledgeBase, KnowledgeBaseCreateRequest } from '@/api/knowledge'
@@ -44,7 +44,7 @@ const KnowledgeBasesPage: React.FC = () => {
     fetchKnowledgeBases,
     createKnowledgeBase,
     updateKnowledgeBase,
-    deleteKnowledgeBase
+    deleteKnowledgeBase,
   } = useKnowledgeStore()
 
   const [createModalVisible, setCreateModalVisible] = useState(false)
@@ -72,7 +72,7 @@ const KnowledgeBasesPage: React.FC = () => {
     editForm.setFieldsValue({
       name: kb.name,
       description: kb.description,
-      visibility: kb.visibility
+      visibility: kb.visibility,
     })
     setEditModalVisible(true)
   }
@@ -105,24 +105,22 @@ const KnowledgeBasesPage: React.FC = () => {
           <DatabaseOutlined style={{ color: '#1890ff' }} />
           <Text strong>{text}</Text>
         </Space>
-      )
+      ),
     },
     {
       title: '描述',
       dataIndex: 'description',
       key: 'description',
       ellipsis: true,
-      render: (text: string) => text || '-'
+      render: (text: string) => text || '-',
     },
     {
       title: '可见性',
       dataIndex: 'visibility',
       key: 'visibility',
       render: (visibility: string) => (
-        <Tag color={visibility === 'public' ? 'green' : 'blue'}>
-          {visibility === 'public' ? '公开' : '私有'}
-        </Tag>
-      )
+        <Tag color={visibility === 'public' ? 'green' : 'blue'}>{visibility === 'public' ? '公开' : '私有'}</Tag>
+      ),
     },
     {
       title: '文档数量',
@@ -133,15 +131,13 @@ const KnowledgeBasesPage: React.FC = () => {
           <FileTextOutlined />
           <Text>{count}</Text>
         </Space>
-      )
+      ),
     },
     {
       title: '向量数量',
       dataIndex: 'vector_count',
       key: 'vector_count',
-      render: (count: number) => (
-        <Text type="secondary">{count.toLocaleString()}</Text>
-      )
+      render: (count: number) => <Text type='secondary'>{count.toLocaleString()}</Text>,
     },
     {
       title: '创建时间',
@@ -154,7 +150,7 @@ const KnowledgeBasesPage: React.FC = () => {
             <Text>{new Date(date).toLocaleDateString()}</Text>
           </Space>
         </Tooltip>
-      )
+      ),
     },
     {
       title: '操作',
@@ -167,16 +163,16 @@ const KnowledgeBasesPage: React.FC = () => {
               {
                 key: 'view',
                 icon: <EyeOutlined />,
-                label: '查看详情'
+                label: '查看详情',
               },
               {
                 key: 'edit',
                 icon: <EditOutlined />,
                 label: '编辑',
-                onClick: () => handleEdit(record)
+                onClick: () => handleEdit(record),
               },
               {
-                type: 'divider'
+                type: 'divider',
               },
               {
                 key: 'delete',
@@ -190,18 +186,18 @@ const KnowledgeBasesPage: React.FC = () => {
                     okText: '删除',
                     okType: 'danger',
                     cancelText: '取消',
-                    onOk: () => handleDelete(record.id)
+                    onOk: () => handleDelete(record.id),
                   })
-                }
-              }
-            ]
+                },
+              },
+            ],
           }}
           trigger={['click']}
         >
-          <Button type="text" icon={<MoreOutlined />} />
+          <Button type='text' icon={<MoreOutlined />} />
         </Dropdown>
-      )
-    }
+      ),
+    },
   ]
 
   return (
@@ -211,26 +207,20 @@ const KnowledgeBasesPage: React.FC = () => {
         <Title level={2} style={{ margin: 0, color: '#1e293b' }}>
           知识库管理
         </Title>
-        <Paragraph style={{ margin: '8px 0 0 0', color: '#64748b', fontSize: 16 }}>
-          管理和维护企业知识库
-        </Paragraph>
+        <Paragraph style={{ margin: '8px 0 0 0', color: '#64748b', fontSize: 16 }}>管理和维护企业知识库</Paragraph>
       </div>
 
       {/* 统计卡片 */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={8}>
           <Card>
-            <Statistic
-              title="总知识库数"
-              value={total}
-              prefix={<DatabaseOutlined style={{ color: '#1890ff' }} />}
-            />
+            <Statistic title='总知识库数' value={total} prefix={<DatabaseOutlined style={{ color: '#1890ff' }} />} />
           </Card>
         </Col>
         <Col xs={24} sm={8}>
           <Card>
             <Statistic
-              title="总文档数"
+              title='总文档数'
               value={knowledgeBases.reduce((sum, kb) => sum + kb.document_count, 0)}
               prefix={<FileTextOutlined style={{ color: '#52c41a' }} />}
             />
@@ -239,7 +229,7 @@ const KnowledgeBasesPage: React.FC = () => {
         <Col xs={24} sm={8}>
           <Card>
             <Statistic
-              title="总向量数"
+              title='总向量数'
               value={knowledgeBases.reduce((sum, kb) => sum + kb.vector_count, 0)}
               prefix={<UserOutlined style={{ color: '#722ed1' }} />}
             />
@@ -249,16 +239,16 @@ const KnowledgeBasesPage: React.FC = () => {
 
       {/* 操作栏 */}
       <Card style={{ marginBottom: 16 }}>
-        <Row justify="space-between" align="middle">
+        <Row justify='space-between' align='middle'>
           <Col>
             <Space>
               <Text strong>知识库列表</Text>
-              <Text type="secondary">({total} 个知识库)</Text>
+              <Text type='secondary'>({total} 个知识库)</Text>
             </Space>
           </Col>
           <Col>
             <Button
-              type="primary"
+              type='primary'
               icon={<PlusOutlined />}
               onClick={() => setCreateModalVisible(true)}
               style={{
@@ -277,20 +267,20 @@ const KnowledgeBasesPage: React.FC = () => {
         <Table
           columns={columns}
           dataSource={knowledgeBases}
-          rowKey="id"
+          rowKey='id'
           loading={loading}
           pagination={{
             total,
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条`
+            showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条`,
           }}
         />
       </Card>
 
       {/* 创建知识库模态框 */}
       <Modal
-        title="创建知识库"
+        title='创建知识库'
         open={createModalVisible}
         onCancel={() => {
           setCreateModalVisible(false)
@@ -299,68 +289,47 @@ const KnowledgeBasesPage: React.FC = () => {
         footer={null}
         width={600}
       >
-        <Form
-          form={createForm}
-          layout="vertical"
-          onFinish={handleCreate}
-        >
+        <Form form={createForm} layout='vertical' onFinish={handleCreate}>
           <Form.Item
-            name="name"
-            label="知识库名称"
+            name='name'
+            label='知识库名称'
             rules={[
               { required: true, message: '请输入知识库名称' },
-              { max: 100, message: '名称不能超过100个字符' }
+              { max: 100, message: '名称不能超过100个字符' },
             ]}
           >
-            <Input placeholder="请输入知识库名称" />
+            <Input placeholder='请输入知识库名称' />
           </Form.Item>
 
-          <Form.Item
-            name="description"
-            label="描述"
-            rules={[{ max: 500, message: '描述不能超过500个字符' }]}
-          >
-            <Input.TextArea
-              placeholder="请输入知识库描述"
-              rows={3}
-            />
+          <Form.Item name='description' label='描述' rules={[{ max: 500, message: '描述不能超过500个字符' }]}>
+            <Input.TextArea placeholder='请输入知识库描述' rows={3} />
           </Form.Item>
 
-          <Form.Item
-            name="is_public"
-            label="可见性"
-            valuePropName="checked"
-            initialValue={false}
-          >
-            <Switch
-              checkedChildren="公开"
-              unCheckedChildren="私有"
-            />
+          <Form.Item name='is_public' label='可见性' valuePropName='checked' initialValue={false}>
+            <Switch checkedChildren='公开' unCheckedChildren='私有' />
           </Form.Item>
 
-          <Form.Item
-            name="knowledge_type"
-            label="知识库类型"
-            initialValue="general"
-          >
-            <Select placeholder="请选择知识库类型">
-              <Option value="general">通用知识库</Option>
-              <Option value="technical">技术文档</Option>
-              <Option value="business">业务知识</Option>
-              <Option value="legal">法律法规</Option>
-              <Option value="other">其他</Option>
+          <Form.Item name='knowledge_type' label='知识库类型' initialValue='general'>
+            <Select placeholder='请选择知识库类型'>
+              <Option value='general'>通用知识库</Option>
+              <Option value='technical'>技术文档</Option>
+              <Option value='business'>业务知识</Option>
+              <Option value='legal'>法律法规</Option>
+              <Option value='other'>其他</Option>
             </Select>
           </Form.Item>
 
           <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
             <Space>
-              <Button onClick={() => {
-                setCreateModalVisible(false)
-                createForm.resetFields()
-              }}>
+              <Button
+                onClick={() => {
+                  setCreateModalVisible(false)
+                  createForm.resetFields()
+                }}
+              >
                 取消
               </Button>
-              <Button type="primary" htmlType="submit" loading={loading}>
+              <Button type='primary' htmlType='submit' loading={loading}>
                 创建
               </Button>
             </Space>
@@ -370,7 +339,7 @@ const KnowledgeBasesPage: React.FC = () => {
 
       {/* 编辑知识库模态框 */}
       <Modal
-        title="编辑知识库"
+        title='编辑知识库'
         open={editModalVisible}
         onCancel={() => {
           setEditModalVisible(false)
@@ -380,53 +349,41 @@ const KnowledgeBasesPage: React.FC = () => {
         footer={null}
         width={600}
       >
-        <Form
-          form={editForm}
-          layout="vertical"
-          onFinish={handleUpdate}
-        >
+        <Form form={editForm} layout='vertical' onFinish={handleUpdate}>
           <Form.Item
-            name="name"
-            label="知识库名称"
+            name='name'
+            label='知识库名称'
             rules={[
               { required: true, message: '请输入知识库名称' },
-              { max: 100, message: '名称不能超过100个字符' }
+              { max: 100, message: '名称不能超过100个字符' },
             ]}
           >
-            <Input placeholder="请输入知识库名称" />
+            <Input placeholder='请输入知识库名称' />
           </Form.Item>
 
-          <Form.Item
-            name="description"
-            label="描述"
-            rules={[{ max: 500, message: '描述不能超过500个字符' }]}
-          >
-            <Input.TextArea
-              placeholder="请输入知识库描述"
-              rows={3}
-            />
+          <Form.Item name='description' label='描述' rules={[{ max: 500, message: '描述不能超过500个字符' }]}>
+            <Input.TextArea placeholder='请输入知识库描述' rows={3} />
           </Form.Item>
 
-          <Form.Item
-            name="visibility"
-            label="可见性"
-          >
+          <Form.Item name='visibility' label='可见性'>
             <Select>
-              <Option value="public">公开</Option>
-              <Option value="private">私有</Option>
+              <Option value='public'>公开</Option>
+              <Option value='private'>私有</Option>
             </Select>
           </Form.Item>
 
           <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
             <Space>
-              <Button onClick={() => {
-                setEditModalVisible(false)
-                setEditingKb(null)
-                editForm.resetFields()
-              }}>
+              <Button
+                onClick={() => {
+                  setEditModalVisible(false)
+                  setEditingKb(null)
+                  editForm.resetFields()
+                }}
+              >
                 取消
               </Button>
-              <Button type="primary" htmlType="submit" loading={loading}>
+              <Button type='primary' htmlType='submit' loading={loading}>
                 更新
               </Button>
             </Space>

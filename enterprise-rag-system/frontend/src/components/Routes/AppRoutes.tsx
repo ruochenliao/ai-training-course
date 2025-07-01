@@ -50,7 +50,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }, [isAuthenticated, checkAuth])
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />
+    return <Navigate to='/login' state={{ from: location }} replace />
   }
 
   return <>{children}</>
@@ -65,65 +65,95 @@ const AppRoutes: React.FC = () => {
       <Route path='/login-full' element={<LoginPage />} />
 
       {/* 受保护的路由 */}
-      <Route path='/' element={
-        <ProtectedRoute>
-          <SimpleHomePage />
-        </ProtectedRoute>
-      } />
+      <Route
+        path='/'
+        element={
+          <ProtectedRoute>
+            <SimpleHomePage />
+          </ProtectedRoute>
+        }
+      />
 
-      <Route path='/home' element={
-        <ProtectedRoute>
-          <HomePage />
-        </ProtectedRoute>
-      } />
+      <Route
+        path='/home'
+        element={
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        }
+      />
 
-      <Route path='/chat' element={
-        <ProtectedRoute>
-          <ChatPage />
-        </ProtectedRoute>
-      } />
+      <Route
+        path='/chat'
+        element={
+          <ProtectedRoute>
+            <ChatPage />
+          </ProtectedRoute>
+        }
+      />
 
-      <Route path='/knowledge/bases' element={
-        <ProtectedRoute>
-          <KnowledgeBasesPage />
-        </ProtectedRoute>
-      } />
+      <Route
+        path='/knowledge/bases'
+        element={
+          <ProtectedRoute>
+            <KnowledgeBasesPage />
+          </ProtectedRoute>
+        }
+      />
 
-      <Route path='/knowledge/documents' element={
-        <ProtectedRoute>
-          <DocumentsPage />
-        </ProtectedRoute>
-      } />
+      <Route
+        path='/knowledge/documents'
+        element={
+          <ProtectedRoute>
+            <DocumentsPage />
+          </ProtectedRoute>
+        }
+      />
 
-      <Route path='/documents' element={
-        <ProtectedRoute>
-          <DocumentCenterPage />
-        </ProtectedRoute>
-      } />
+      <Route
+        path='/documents'
+        element={
+          <ProtectedRoute>
+            <DocumentCenterPage />
+          </ProtectedRoute>
+        }
+      />
 
-      <Route path='/users' element={
-        <ProtectedRoute>
-          <UsersPage />
-        </ProtectedRoute>
-      } />
+      <Route
+        path='/users'
+        element={
+          <ProtectedRoute>
+            <UsersPage />
+          </ProtectedRoute>
+        }
+      />
 
-      <Route path='/settings' element={
-        <ProtectedRoute>
-          <SettingsPage />
-        </ProtectedRoute>
-      } />
+      <Route
+        path='/settings'
+        element={
+          <ProtectedRoute>
+            <SettingsPage />
+          </ProtectedRoute>
+        }
+      />
 
-      <Route path='/test/api' element={
-        <ProtectedRoute>
-          <ApiTestPage />
-        </ProtectedRoute>
-      } />
+      <Route
+        path='/test/api'
+        element={
+          <ProtectedRoute>
+            <ApiTestPage />
+          </ProtectedRoute>
+        }
+      />
 
-      <Route path='/test/simple' element={
-        <ProtectedRoute>
-          <SimpleTestPage />
-        </ProtectedRoute>
-      } />
+      <Route
+        path='/test/simple'
+        element={
+          <ProtectedRoute>
+            <SimpleTestPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* 重定向 */}
       <Route path='/knowledge' element={<Navigate to='/knowledge/bases' replace />} />

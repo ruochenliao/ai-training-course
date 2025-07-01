@@ -17,7 +17,7 @@ from .endpoints import (
     advanced_search,
     graph,
     autogen_chat,
-    rbac,
+
     monitoring,
     permission_management,
     monitoring_dashboard,
@@ -66,7 +66,8 @@ api_router.include_router(graph.router, prefix="/graph", tags=["知识图谱"])
 api_router.include_router(autogen_chat.router, prefix="/autogen", tags=["多智能体协作"])
 
 # RBAC权限管理接口
-api_router.include_router(rbac.router, prefix="/rbac", tags=["权限管理"])
+from .rbac import rbac_router
+api_router.include_router(rbac_router, prefix="/rbac", tags=["RBAC权限管理"])
 
 # 监控接口
 api_router.include_router(monitoring.router, prefix="/monitoring", tags=["系统监控"])

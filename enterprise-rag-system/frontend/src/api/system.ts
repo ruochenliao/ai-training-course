@@ -91,7 +91,7 @@ export const systemApi = {
   // 获取监控数据
   getMonitoringData: (timeRange?: string): Promise<ApiResponseData<MonitoringData[]>> => {
     return httpClient.get('/monitoring/metrics', {
-      params: { time_range: timeRange }
+      params: { time_range: timeRange },
     })
   },
 
@@ -109,7 +109,7 @@ export const systemApi = {
   downloadLogs: (params?: LogQueryParams): Promise<Blob> => {
     return httpClient.get('/system/logs/download', {
       params,
-      responseType: 'blob'
+      responseType: 'blob',
     })
   },
 
@@ -156,5 +156,5 @@ export const systemApi = {
   // 重启服务
   restartService: (serviceName: string): Promise<ApiResponseData<any>> => {
     return httpClient.post('/system/restart', { service: serviceName })
-  }
+  },
 }

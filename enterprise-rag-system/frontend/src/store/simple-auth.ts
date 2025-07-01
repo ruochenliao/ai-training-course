@@ -26,18 +26,18 @@ export const useSimpleAuthStore = create<SimpleAuthState>()(
             id: 1,
             username: 'admin',
             full_name: '系统管理员',
-            email: 'admin@example.com'
+            email: 'admin@example.com',
           }
-          
+
           set({
             isAuthenticated: true,
             user: mockUser,
-            token: 'mock-token-' + Date.now()
+            token: 'mock-token-' + Date.now(),
           })
-          
+
           return true
         }
-        
+
         return false
       },
 
@@ -45,17 +45,17 @@ export const useSimpleAuthStore = create<SimpleAuthState>()(
         set({
           isAuthenticated: false,
           user: null,
-          token: null
+          token: null,
         })
       },
 
       checkAuth: () => {
         const { token } = get()
         return !!token
-      }
+      },
     }),
     {
-      name: 'simple-auth-storage'
+      name: 'simple-auth-storage',
     }
   )
 )

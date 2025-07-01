@@ -92,7 +92,7 @@ export const knowledgeApi = {
   // 导出知识库
   exportKnowledgeBase: (kbId: number): Promise<Blob> => {
     return httpClient.get(`/knowledge-bases/${kbId}/export`, {
-      responseType: 'blob'
+      responseType: 'blob',
     })
   },
 
@@ -102,8 +102,8 @@ export const knowledgeApi = {
     formData.append('file', file)
     return httpClient.post('/knowledge-bases/import', formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        'Content-Type': 'multipart/form-data',
+      },
     })
-  }
+  },
 }

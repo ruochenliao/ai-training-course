@@ -15,7 +15,7 @@ import {
   Modal,
   List,
   Empty,
-  Spin
+  Spin,
 } from 'antd'
 import {
   RobotOutlined,
@@ -27,7 +27,7 @@ import {
   DeleteOutlined,
   DatabaseOutlined,
   ThunderboltOutlined,
-  BranchesOutlined
+  BranchesOutlined,
 } from '@ant-design/icons'
 import { useChatStore } from '@/store/chat'
 import { useKnowledgeStore } from '@/store/knowledge'
@@ -47,7 +47,7 @@ const ChatPage: React.FC = () => {
     createConversation,
     setCurrentConversation,
     sendMessage,
-    deleteConversation
+    deleteConversation,
   } = useChatStore()
 
   const { knowledgeBases, fetchKnowledgeBases } = useKnowledgeStore()
@@ -83,7 +83,7 @@ const ChatPage: React.FC = () => {
       conversation_id: currentConversation?.id,
       knowledge_base_ids: selectedKnowledgeBases.length > 0 ? selectedKnowledgeBases : undefined,
       search_mode: searchMode,
-      stream: false
+      stream: false,
     }
 
     setInputValue('')
@@ -99,7 +99,7 @@ const ChatPage: React.FC = () => {
   const handleNewConversation = async () => {
     const conversation = await createConversation({
       title: '新对话',
-      knowledge_base_ids: selectedKnowledgeBases
+      knowledge_base_ids: selectedKnowledgeBases,
     })
 
     if (conversation) {
@@ -140,7 +140,7 @@ const ChatPage: React.FC = () => {
           display: 'flex',
           justifyContent: isUser ? 'flex-end' : 'flex-start',
           marginBottom: 16,
-          animation: 'fadeIn 0.3s ease-in'
+          animation: 'fadeIn 0.3s ease-in',
         }}
       >
         <div
@@ -149,14 +149,14 @@ const ChatPage: React.FC = () => {
             display: 'flex',
             flexDirection: isUser ? 'row-reverse' : 'row',
             alignItems: 'flex-start',
-            gap: 8
+            gap: 8,
           }}
         >
           <Avatar
             icon={isUser ? <UserOutlined /> : <RobotOutlined />}
             style={{
               backgroundColor: isUser ? '#1890ff' : '#52c41a',
-              flexShrink: 0
+              flexShrink: 0,
             }}
           />
           <div
@@ -166,17 +166,15 @@ const ChatPage: React.FC = () => {
               padding: '12px 16px',
               borderRadius: isUser ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
               boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              position: 'relative'
+              position: 'relative',
             }}
           >
-            <div style={{ marginBottom: 4 }}>
-              {message.content}
-            </div>
+            <div style={{ marginBottom: 4 }}>{message.content}</div>
             <div
               style={{
                 fontSize: 12,
                 opacity: 0.7,
-                textAlign: isUser ? 'right' : 'left'
+                textAlign: isUser ? 'right' : 'left',
               }}
             >
               {formatTime(message.timestamp)}
@@ -199,20 +197,14 @@ const ChatPage: React.FC = () => {
             <Text style={{ color: '#64748b' }}>基于企业知识库的智能问答系统</Text>
           </div>
           <Space>
-            <Button
-              icon={<HistoryOutlined />}
-              onClick={() => setConversationListVisible(true)}
-            >
+            <Button icon={<HistoryOutlined />} onClick={() => setConversationListVisible(true)}>
               对话历史
             </Button>
-            <Button
-              icon={<SettingOutlined />}
-              onClick={() => setSettingsVisible(true)}
-            >
+            <Button icon={<SettingOutlined />} onClick={() => setSettingsVisible(true)}>
               设置
             </Button>
             <Button
-              type="primary"
+              type='primary'
               icon={<PlusOutlined />}
               onClick={handleNewConversation}
               style={{
@@ -227,25 +219,27 @@ const ChatPage: React.FC = () => {
 
         {/* 当前对话信息 */}
         {currentConversation && (
-          <Card size="small" style={{ backgroundColor: '#f8fafc' }}>
+          <Card size='small' style={{ backgroundColor: '#f8fafc' }}>
             <Space>
               <Text strong>当前对话:</Text>
               <Text>{currentConversation.title}</Text>
               {selectedKnowledgeBases.length > 0 && (
                 <>
-                  <Divider type="vertical" />
-                  <Text type="secondary">知识库:</Text>
+                  <Divider type='vertical' />
+                  <Text type='secondary'>知识库:</Text>
                   {selectedKnowledgeBases.map(id => {
                     const kb = knowledgeBases.find(k => k.id === id)
-                    return kb ? <Tag key={id} color="blue">{kb.name}</Tag> : null
+                    return kb ? (
+                      <Tag key={id} color='blue'>
+                        {kb.name}
+                      </Tag>
+                    ) : null
                   })}
                 </>
               )}
-              <Divider type="vertical" />
-              <Tag color={useAutoGen ? 'purple' : 'green'}>
-                {useAutoGen ? '多智能体模式' : '标准模式'}
-              </Tag>
-              <Tag color="cyan">{searchMode === 'auto' ? '智能检索' : searchMode}</Tag>
+              <Divider type='vertical' />
+              <Tag color={useAutoGen ? 'purple' : 'green'}>{useAutoGen ? '多智能体模式' : '标准模式'}</Tag>
+              <Tag color='cyan'>{searchMode === 'auto' ? '智能检索' : searchMode}</Tag>
             </Space>
           </Card>
         )}
@@ -432,18 +426,18 @@ const ChatPage: React.FC = () => {
 
       {/* 设置模态框 */}
       <Modal
-        title="聊天设置"
+        title='聊天设置'
         open={settingsVisible}
         onCancel={() => setSettingsVisible(false)}
         footer={null}
         width={500}
       >
-        <Space direction="vertical" style={{ width: '100%' }} size="large">
+        <Space direction='vertical' style={{ width: '100%' }} size='large'>
           <div>
             <Text strong>知识库选择：</Text>
             <Select
-              mode="multiple"
-              placeholder="选择要使用的知识库"
+              mode='multiple'
+              placeholder='选择要使用的知识库'
               value={selectedKnowledgeBases}
               onChange={setSelectedKnowledgeBases}
               style={{ width: '100%', marginTop: 8 }}
@@ -461,20 +455,16 @@ const ChatPage: React.FC = () => {
 
           <div>
             <Text strong>检索模式：</Text>
-            <Select
-              value={searchMode}
-              onChange={setSearchMode}
-              style={{ width: '100%', marginTop: 8 }}
-            >
-              <Option value="auto">
+            <Select value={searchMode} onChange={setSearchMode} style={{ width: '100%', marginTop: 8 }}>
+              <Option value='auto'>
                 <Space>
                   <ThunderboltOutlined />
                   智能检索
                 </Space>
               </Option>
-              <Option value="vector">向量检索</Option>
-              <Option value="hybrid">混合检索</Option>
-              <Option value="graph">图谱检索</Option>
+              <Option value='vector'>向量检索</Option>
+              <Option value='hybrid'>混合检索</Option>
+              <Option value='graph'>图谱检索</Option>
             </Select>
           </div>
 
@@ -485,11 +475,11 @@ const ChatPage: React.FC = () => {
                 checked={useAutoGen}
                 onChange={setUseAutoGen}
                 checkedChildren={<BranchesOutlined />}
-                unCheckedChildren="关闭"
+                unCheckedChildren='关闭'
               />
             </Space>
             <div style={{ marginTop: 4 }}>
-              <Text type="secondary" style={{ fontSize: 12 }}>
+              <Text type='secondary' style={{ fontSize: 12 }}>
                 启用后将使用多个AI智能体协作回答问题
               </Text>
             </div>
@@ -499,22 +489,22 @@ const ChatPage: React.FC = () => {
 
       {/* 对话历史模态框 */}
       <Modal
-        title="对话历史"
+        title='对话历史'
         open={conversationListVisible}
         onCancel={() => setConversationListVisible(false)}
         footer={null}
         width={600}
       >
         {conversations.length === 0 ? (
-          <Empty description="暂无对话历史" />
+          <Empty description='暂无对话历史' />
         ) : (
           <List
             dataSource={conversations}
-            renderItem={(conversation) => (
+            renderItem={conversation => (
               <List.Item
                 actions={[
                   <Button
-                    type="link"
+                    type='link'
                     onClick={() => {
                       setCurrentConversation(conversation)
                       setConversationListVisible(false)
@@ -522,25 +512,17 @@ const ChatPage: React.FC = () => {
                   >
                     打开
                   </Button>,
-                  <Button
-                    type="link"
-                    danger
-                    onClick={() => handleDeleteConversation(conversation.id)}
-                  >
+                  <Button type='link' danger onClick={() => handleDeleteConversation(conversation.id)}>
                     删除
-                  </Button>
+                  </Button>,
                 ]}
               >
                 <List.Item.Meta
                   title={conversation.title}
                   description={
                     <Space>
-                      <Text type="secondary">
-                        {conversation.message_count} 条消息
-                      </Text>
-                      <Text type="secondary">
-                        {new Date(conversation.updated_at).toLocaleDateString()}
-                      </Text>
+                      <Text type='secondary'>{conversation.message_count} 条消息</Text>
+                      <Text type='secondary'>{new Date(conversation.updated_at).toLocaleDateString()}</Text>
                     </Space>
                   }
                 />

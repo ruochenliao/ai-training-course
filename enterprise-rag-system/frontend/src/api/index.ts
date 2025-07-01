@@ -22,7 +22,7 @@ export type {
   LoginResponse,
   UserInfo,
   RegisterRequest,
-  RefreshTokenRequest
+  RefreshTokenRequest,
 } from './auth'
 
 export type {
@@ -31,7 +31,7 @@ export type {
   UserCreateRequest,
   UserUpdateRequest,
   UserListParams,
-  UserListResponse
+  UserListResponse,
 } from './users'
 
 export type {
@@ -41,7 +41,7 @@ export type {
   KnowledgeBaseUpdateRequest,
   KnowledgeBaseListParams,
   KnowledgeBaseListResponse,
-  KnowledgeBaseStats
+  KnowledgeBaseStats,
 } from './knowledge'
 
 export type {
@@ -51,7 +51,7 @@ export type {
   DocumentListParams,
   DocumentListResponse,
   DocumentProcessingStatus,
-  DocumentChunk
+  DocumentChunk,
 } from './documents'
 
 export type {
@@ -64,7 +64,7 @@ export type {
   AutoGenChatRequest,
   AutoGenChatResponse,
   ConversationListParams,
-  ConversationListResponse
+  ConversationListResponse,
 } from './chat'
 
 export type {
@@ -77,7 +77,7 @@ export type {
   GraphSearchResult,
   GraphEntity,
   GraphRelation,
-  GraphPath
+  GraphPath,
 } from './search'
 
 export type {
@@ -87,7 +87,7 @@ export type {
   HealthCheck,
   MonitoringData,
   LogEntry,
-  LogQueryParams
+  LogQueryParams,
 } from './system'
 
 // 创建统一的API对象
@@ -99,7 +99,7 @@ const createApi = () => {
     documents: documentsApi,
     chat: chatApi,
     search: searchApi,
-    system: systemApi
+    system: systemApi,
   }
 }
 

@@ -92,8 +92,8 @@ export const documentsApi = {
 
     return httpClient.post('/documents/upload', formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        'Content-Type': 'multipart/form-data',
+      },
     })
   },
 
@@ -107,8 +107,8 @@ export const documentsApi = {
 
     return httpClient.post('/documents/batch-upload', formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        'Content-Type': 'multipart/form-data',
+      },
     })
   },
 
@@ -140,14 +140,14 @@ export const documentsApi = {
   // 获取文档分块
   getDocumentChunks: (docId: number, page?: number, size?: number): Promise<ApiResponseData<DocumentChunk[]>> => {
     return httpClient.get(`/documents/${docId}/chunks`, {
-      params: { page, size }
+      params: { page, size },
     })
   },
 
   // 下载文档
   downloadDocument: (docId: number): Promise<Blob> => {
     return httpClient.get(`/documents/${docId}/download`, {
-      responseType: 'blob'
+      responseType: 'blob',
     })
   },
 
@@ -159,5 +159,5 @@ export const documentsApi = {
   // 获取文档统计信息
   getDocumentStats: (): Promise<ApiResponseData<any>> => {
     return httpClient.get('/documents/stats')
-  }
+  },
 }

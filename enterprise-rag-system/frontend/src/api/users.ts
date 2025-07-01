@@ -104,5 +104,5 @@ export const usersApi = {
   // 获取用户统计信息
   getUserStats: (): Promise<ApiResponseData<any>> => {
     return httpClient.get('/users/stats')
-  }
+  },
 }

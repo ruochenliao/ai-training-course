@@ -80,5 +80,5 @@ export const authApi = {
   // 验证令牌
   verifyToken: (): Promise<ApiResponseData<UserInfo>> => {
     return httpClient.get('/auth/verify-token')
-  }
+  },
 }

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { App as AntdApp, ConfigProvider } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import { BrowserRouter, useLocation } from 'react-router-dom'
@@ -11,6 +11,9 @@ import '@/assets/css/global.css'
 import AppLayout from '@/components/Layout/AppLayout'
 import AppRoutes from '@/components/Routes/AppRoutes'
 import ErrorBoundary from '@/components/ErrorBoundary/ErrorBoundary'
+
+// 导入消息服务
+import { messageService } from '@/services/messageService'
 
 // Ant Design 主题配置
 const antdTheme = {
@@ -58,6 +61,12 @@ const antdTheme = {
 const AppContent: React.FC = () => {
   const location = useLocation()
   const isLoginPage = location.pathname === '/login'
+  const { message } = AntdApp.useApp()
+
+  // 初始化消息服务
+  useEffect(() => {
+    messageService.setMessageApi(message)
+  }, [message])
 
   if (isLoginPage) {
     return (

@@ -99,7 +99,7 @@ export const chatApi = {
   // 流式聊天
   sendStreamMessage: (data: ChatRequest): Promise<ReadableStream> => {
     return httpClient.post('/chat/stream', data, {
-      responseType: 'stream'
+      responseType: 'stream',
     })
   },
 
@@ -119,7 +119,10 @@ export const chatApi = {
   },
 
   // 创建新对话
-  createConversation: (data: { title?: string; knowledge_base_ids?: number[] }): Promise<ApiResponseData<Conversation>> => {
+  createConversation: (data: {
+    title?: string
+    knowledge_base_ids?: number[]
+  }): Promise<ApiResponseData<Conversation>> => {
     return httpClient.post('/conversations', data)
   },
 
@@ -134,9 +137,13 @@ export const chatApi = {
   },
 
   // 获取对话消息
-  getConversationMessages: (conversationId: number, page?: number, size?: number): Promise<ApiResponseData<ChatMessage[]>> => {
+  getConversationMessages: (
+    conversationId: number,
+    page?: number,
+    size?: number
+  ): Promise<ApiResponseData<ChatMessage[]>> => {
     return httpClient.get(`/conversations/${conversationId}/messages`, {
-      params: { page, size }
+      params: { page, size },
     })
   },
 
@@ -149,7 +156,7 @@ export const chatApi = {
   exportConversation: (conversationId: number, format: 'json' | 'txt' | 'pdf'): Promise<Blob> => {
     return httpClient.get(`/conversations/${conversationId}/export`, {
       params: { format },
-      responseType: 'blob'
+      responseType: 'blob',
     })
-  }
+  },
 }

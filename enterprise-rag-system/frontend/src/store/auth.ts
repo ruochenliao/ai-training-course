@@ -3,7 +3,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { authApi, type UserInfo, type LoginRequest } from '@/api/auth'
-import { message } from 'antd'
+import { messageService } from '@/services/messageService'
 
 export interface AuthState {
   // 状态
@@ -11,7 +11,7 @@ export interface AuthState {
   user: UserInfo | null
   token: string | null
   loading: boolean
-  
+
   // 操作
   login: (credentials: LoginRequest) => Promise<boolean>
   logout: () => void
@@ -34,31 +34,31 @@ export const useAuthStore = create<AuthState>()(
       login: async (credentials: LoginRequest) => {
         try {
           set({ loading: true })
-          
+
           const response = await authApi.login(credentials)
-          
+
           if (response.data) {
             const { access_token, user } = response.data
-            
+
             set({
               isAuthenticated: true,
               user,
               token: access_token,
-              loading: false
+              loading: false,
             })
-            
+
             // 存储token到localStorage
             localStorage.setItem('token', access_token)
-            
-            message.success('登录成功')
+
+            messageService.success('登录成功')
             return true
           }
-          
+
           set({ loading: false })
           return false
         } catch (error: any) {
           set({ loading: false })
-          message.error(error.response?.data?.message || '登录失败')
+          messageService.error(error.response?.data?.message || '登录失败')
           return false
         }
       },
@@ -73,14 +73,14 @@ export const useAuthStore = create<AuthState>()(
           set({
             isAuthenticated: false,
             user: null,
-            token: null
+            token: null,
           })
-          
+
           // 清除本地存储
           localStorage.removeItem('token')
           localStorage.removeItem('refresh_token')
-          
-          message.success('已退出登录')
+
+          messageService.success('已退出登录')
         }
       },
 
@@ -93,20 +93,20 @@ export const useAuthStore = create<AuthState>()(
           }
 
           const response = await authApi.refreshToken({ refresh_token: refreshToken })
-          
+
           if (response.data) {
             const { access_token, user } = response.data
-            
+
             set({
               isAuthenticated: true,
               user,
-              token: access_token
+              token: access_token,
             })
-            
+
             localStorage.setItem('token', access_token)
             return true
           }
-          
+
           return false
         } catch (error) {
           // 刷新失败，清除认证状态
@@ -120,7 +120,7 @@ export const useAuthStore = create<AuthState>()(
         const currentUser = get().user
         if (currentUser) {
           set({
-            user: { ...currentUser, ...userData }
+            user: { ...currentUser, ...userData },
           })
         }
       },
@@ -134,16 +134,16 @@ export const useAuthStore = create<AuthState>()(
           }
 
           const response = await authApi.getCurrentUser()
-          
+
           if (response.data) {
             set({
               isAuthenticated: true,
               user: response.data,
-              token
+              token,
             })
             return true
           }
-          
+
           return false
         } catch (error) {
           // 验证失败，尝试刷新令牌
@@ -154,15 +154,15 @@ export const useAuthStore = create<AuthState>()(
       // 设置加载状态
       setLoading: (loading: boolean) => {
         set({ loading })
-      }
+      },
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         isAuthenticated: state.isAuthenticated,
         user: state.user,
-        token: state.token
-      })
+        token: state.token,
+      }),
     }
   )
 )

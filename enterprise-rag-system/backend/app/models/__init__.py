@@ -7,7 +7,10 @@ from .conversation import Conversation, Message
 from .knowledge import KnowledgeBase, Document, DocumentChunk
 from .system import SystemConfig, AuditLog
 from .user import User, UserSession, UserEvent
-from .rbac import Role, Permission, UserRole, RolePermission, UserPermission, Department, RoleDepartment, PermissionGroup
+from .rbac import (
+    Department, Role, Permission, PermissionGroup,
+    UserRole, RolePermission, UserPermission, RoleDepartment
+)
 
 __all__ = [
     "BaseModel",

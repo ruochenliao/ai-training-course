@@ -25,27 +25,23 @@ export interface RequestConfig {
   [key: string]: any
 }
 
-// 响应类型
+// 响应类型 - 统一格式 {code, msg, data}
 export interface ApiResponseData<T = any> {
-  success: boolean
+  code: number
+  msg: string
   data: T
-  message?: string
-  code?: number
-  timestamp?: number
 }
 
 export interface ApiError {
-  code: string
-  message: string
-  details?: any
-  status?: number
-  timestamp: number
+  code: number
+  msg: string
+  data?: any
 }
 
 // 分页请求参数
 export interface PaginationParams {
   page?: number
-  size?: number
+  page_size?: number
   sort?: string
   order?: 'asc' | 'desc'
 }
@@ -55,10 +51,7 @@ export interface PaginationData<T> {
   items: T[]
   total: number
   page: number
-  size: number
-  pages: number
-  has_next: boolean
-  has_prev: boolean
+  page_size: number
 }
 
 // 文件上传相关
@@ -73,12 +66,14 @@ export interface UploadConfig {
 }
 
 export interface UploadResponse {
-  success: boolean
-  file_id: string
-  file_url: string
-  file_name: string
-  file_size: number
-  message?: string
+  code: number
+  msg: string
+  data: {
+    file_id: string
+    file_url: string
+    file_name: string
+    file_size: number
+  }
 }
 
 // WebSocket 相关

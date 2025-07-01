@@ -13,8 +13,10 @@ from loguru import logger
 try:
     from FlagEmbedding import FlagReranker
     FLAGEMBEDDING_AVAILABLE = True
-except ImportError:
-    logger.warning("FlagEmbedding not available, BGE reranker will use mock implementation")
+    logger.info("FlagEmbedding loaded successfully")
+except ImportError as e:
+    logger.warning(f"FlagEmbedding not available: {e}")
+    logger.info("BGE reranker will use mock implementation. To enable full functionality, install: pip install FlagEmbedding")
     FlagReranker = None
     FLAGEMBEDDING_AVAILABLE = False
 
@@ -56,6 +58,7 @@ class BGERerankerService:
         try:
             if not FLAGEMBEDDING_AVAILABLE:
                 logger.warning("FlagEmbedding不可用，使用模拟实现")
+                logger.info("要启用完整功能，请安装: pip install FlagEmbedding")
                 self.reranker = None
                 return
 
@@ -63,14 +66,15 @@ class BGERerankerService:
             self.reranker = FlagReranker(
                 self.model_name,
                 use_fp16=True if self.device == "cuda" else False,
-                cache_dir=settings.MODELSCOPE_CACHE_DIR
+                cache_dir=getattr(settings, 'MODELSCOPE_CACHE_DIR', './models')
             )
-            
+
             logger.info("BGE Reranker模型加载完成")
-            
+
         except Exception as e:
             logger.error(f"BGE Reranker模型加载失败: {e}")
-            raise
+            logger.warning("将使用模拟实现继续运行")
+            self.reranker = None
     
     def _preprocess_query_passage_pair(self, query: str, passage: str) -> Tuple[str, str]:
         """预处理查询和段落对"""

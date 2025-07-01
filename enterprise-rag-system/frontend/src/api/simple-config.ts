@@ -1,7 +1,7 @@
 // 简化的API配置文件
 
 import axios from 'axios'
-import { message } from 'antd'
+import { messageService } from '@/services/messageService'
 
 // API 基础配置
 export const API_CONFIG = {
@@ -29,12 +29,12 @@ export const simpleTokenManager = {
 
   removeToken(): void {
     localStorage.removeItem('access_token')
-  }
+  },
 }
 
 // 请求拦截器
 simpleHttpClient.interceptors.request.use(
-  (config) => {
+  config => {
     // 添加认证头
     const token = simpleTokenManager.getToken()
     if (token && config.headers) {
@@ -60,7 +60,7 @@ simpleHttpClient.interceptors.request.use(
 
 // 响应拦截器
 simpleHttpClient.interceptors.response.use(
-  (response) => {
+  response => {
     // 开发环境日志
     if (process.env.NODE_ENV === 'development') {
       console.log('✅ API Response:', {
@@ -68,6 +68,16 @@ simpleHttpClient.interceptors.response.use(
         url: response.config.url,
         data: response.data,
       })
+    }
+
+    // 统一处理响应数据 - 匹配后端 {code, msg, data} 格式
+    const { data } = response
+
+    // 检查业务状态码
+    if (data.code !== 200) {
+      const errorMessage = data.msg || '请求失败'
+      messageService.error(errorMessage)
+      return Promise.reject(new Error(errorMessage))
     }
 
     return response
@@ -85,14 +95,14 @@ simpleHttpClient.interceptors.response.use(
     // 处理 401 未授权错误
     if (response?.status === 401) {
       simpleTokenManager.removeToken()
-      message.error('登录已过期，请重新登录')
+      messageService.error('登录已过期，请重新登录')
       window.location.href = '/login'
       return Promise.reject(error)
     }
 
     // 处理其他错误
-    const errorMessage = response?.data?.message || error.message || '请求失败'
-    message.error(errorMessage)
+    const errorMessage = response?.data?.msg || error.message || '请求失败'
+    messageService.error(errorMessage)
 
     return Promise.reject(error)
   }

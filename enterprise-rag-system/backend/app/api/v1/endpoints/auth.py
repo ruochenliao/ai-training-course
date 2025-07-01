@@ -11,6 +11,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.services.auth import AuthService
 from app.core import create_access_token, get_current_user
 from app.core import settings
+from app.core.response import Response
 from app.models import User
 from app.schemas import Token, UserLogin, UserRegister
 from app.schemas import UserResponse
@@ -18,93 +19,78 @@ from app.schemas import UserResponse
 router = APIRouter()
 
 
-@router.post("/register", response_model=UserResponse, summary="用户注册")
-async def register(user_data: UserRegister) -> Any:
+@router.post("/register", summary="用户注册")
+async def register(user_data: UserRegister):
     """
     用户注册
     """
     auth_service = AuthService()
-    
+
     # 检查用户名是否已存在
     existing_user = await User.get_or_none(username=user_data.username)
     if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="用户名已存在"
-        )
-    
+        return Response.bad_request("用户名已存在")
+
     # 检查邮箱是否已存在
     existing_email = await User.get_or_none(email=user_data.email)
     if existing_email:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="邮箱已存在"
-        )
-    
+        return Response.bad_request("邮箱已存在")
+
     # 创建用户
     user = await auth_service.create_user(user_data)
-    return await user.to_dict()
+    user_dict = await user.to_dict()
+    return Response.created(data=user_dict, msg="注册成功")
 
 
-@router.post("/login", response_model=Token, summary="用户登录")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> Any:
+@router.post("/login", summary="用户登录")
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """
     用户登录
     """
     auth_service = AuthService()
-    
+
     # 验证用户
     user = await auth_service.authenticate_user(form_data.username, form_data.password)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="用户名或密码错误",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
+        return Response.unauthorized("用户名或密码错误")
+
     # 检查账户状态
     if user.is_locked():
-        raise HTTPException(
-            status_code=status.HTTP_423_LOCKED,
-            detail="账户已被锁定，请稍后再试"
-        )
-    
+        return Response.error("账户已被锁定，请稍后再试", code=423)
+
     if not user.is_active():
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="账户未激活"
-        )
-    
+        return Response.forbidden("账户未激活")
+
     # 生成访问令牌
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": str(user.id)}, expires_delta=access_token_expires
     )
-    
+
     # 记录登录
     user.record_login()
     await user.save()
-    
-    # 手动构建用户信息，避免序列化问题
-    user_info = {
-        "id": user.id,
-        "username": user.username,
-        "email": user.email,
-        "full_name": user.full_name,
-        "avatar_url": user.avatar_url,
-        "is_superuser": user.is_superuser,
-        "is_staff": user.is_staff,
-        "status": user.status,
-        "created_at": user.created_at.isoformat() if user.created_at else None,
-        "last_login_at": user.last_login_at.isoformat() if user.last_login_at else None
-    }
 
-    return {
+    # 构建响应数据
+    token_data = {
         "access_token": access_token,
         "token_type": "bearer",
         "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        "user": user_info
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "full_name": user.full_name,
+            "avatar_url": user.avatar_url,
+            "is_superuser": user.is_superuser,
+            "is_staff": user.is_staff,
+            "status": user.status,
+            "created_at": user.created_at.isoformat() if user.created_at else None,
+            "last_login_at": user.last_login_at.isoformat() if user.last_login_at else None
+        }
     }
+
+    return Response.success(data=token_data, msg="登录成功")
 
 
 @router.post("/login/json", response_model=Token, summary="JSON登录")

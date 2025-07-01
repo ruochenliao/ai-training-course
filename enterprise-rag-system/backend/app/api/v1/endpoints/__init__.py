@@ -14,7 +14,7 @@ from . import system
 from . import advanced_search
 from . import graph
 from . import autogen_chat
-from . import rbac
+# rbac 模块已重构为独立模块，不在此处导入
 from . import monitoring
 from . import permission_management
 from . import monitoring_dashboard
@@ -36,7 +36,7 @@ __all__ = [
     "advanced_search",
     "graph",
     "autogen_chat",
-    "rbac",
+    # "rbac" 已重构为独立模块
     "monitoring",
     "permission_management",
     "monitoring_dashboard",

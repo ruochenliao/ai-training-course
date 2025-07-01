@@ -132,21 +132,21 @@ export const searchApi = {
   // 获取搜索建议
   getSearchSuggestions: (query: string, knowledge_base_ids?: number[]): Promise<ApiResponseData<string[]>> => {
     return httpClient.get('/search/suggestions', {
-      params: { query, knowledge_base_ids }
+      params: { query, knowledge_base_ids },
     })
   },
 
   // 获取热门搜索
   getPopularSearches: (knowledge_base_ids?: number[]): Promise<ApiResponseData<string[]>> => {
     return httpClient.get('/search/popular', {
-      params: { knowledge_base_ids }
+      params: { knowledge_base_ids },
     })
   },
 
   // 获取搜索历史
   getSearchHistory: (page?: number, size?: number): Promise<ApiResponseData<any[]>> => {
     return httpClient.get('/search/history', {
-      params: { page, size }
+      params: { page, size },
     })
   },
 
@@ -163,7 +163,7 @@ export const searchApi = {
   // 获取保存的搜索
   getSavedSearches: (page?: number, size?: number): Promise<ApiResponseData<any[]>> => {
     return httpClient.get('/search/saved', {
-      params: { page, size }
+      params: { page, size },
     })
-  }
+  },
 }

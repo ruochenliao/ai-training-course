@@ -2,7 +2,7 @@
 
 import { create } from 'zustand'
 import { chatApi, type ChatMessage, type Conversation, type ChatRequest } from '@/api/chat'
-import { message } from 'antd'
+import { messageService } from '@/services/messageService'
 
 export interface ChatState {
   // 状态
@@ -11,7 +11,7 @@ export interface ChatState {
   messages: ChatMessage[]
   loading: boolean
   sending: boolean
-  
+
   // 操作
   fetchConversations: () => Promise<void>
   createConversation: (data?: any) => Promise<Conversation | null>
@@ -38,13 +38,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
   fetchConversations: async () => {
     try {
       set({ loading: true })
-      
+
       const response = await chatApi.getConversations()
-      
+
       if (response.data) {
         set({
           conversations: response.data.items,
-          loading: false
+          loading: false,
         })
       }
     } catch (error: any) {
@@ -57,18 +57,18 @@ export const useChatStore = create<ChatState>((set, get) => ({
   createConversation: async (data = {}) => {
     try {
       const response = await chatApi.createConversation(data)
-      
+
       if (response.data) {
         const newConversation = response.data
-        
+
         set({
           conversations: [newConversation, ...get().conversations],
-          currentConversation: newConversation
+          currentConversation: newConversation,
         })
-        
+
         return newConversation
       }
-      
+
       return null
     } catch (error: any) {
       message.error(error.response?.data?.message || '创建对话失败')
@@ -78,11 +78,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   // 设置当前对话
   setCurrentConversation: (conversation: Conversation | null) => {
-    set({ 
+    set({
       currentConversation: conversation,
-      messages: [] // 清空消息，等待重新加载
+      messages: [], // 清空消息，等待重新加载
     })
-    
+
     if (conversation) {
       get().fetchMessages(conversation.id)
     }
@@ -92,18 +92,18 @@ export const useChatStore = create<ChatState>((set, get) => ({
   fetchMessages: async (conversationId: number) => {
     try {
       set({ loading: true })
-      
+
       const response = await chatApi.getConversationMessages(conversationId)
-      
+
       if (response.data) {
         set({
           messages: response.data,
-          loading: false
+          loading: false,
         })
       }
     } catch (error: any) {
       set({ loading: false })
-      message.error(error.response?.data?.message || '获取消息失败')
+      messageService.error(error.response?.data?.message || '获取消息失败')
     }
   },
 
@@ -111,19 +111,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
   sendMessage: async (data: ChatRequest) => {
     try {
       set({ sending: true })
-      
+
       // 添加用户消息到本地状态
       const userMessage: ChatMessage = {
         id: `temp-${Date.now()}`,
         role: 'user',
         content: data.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }
-      
+
       get().addMessage(userMessage)
-      
+
       const response = await chatApi.sendMessage(data)
-      
+
       if (response.data) {
         // 添加AI回复到本地状态
         const assistantMessage: ChatMessage = {
@@ -131,11 +131,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
           role: 'assistant',
           content: response.data.content,
           timestamp: new Date().toISOString(),
-          metadata: response.data.metadata
+          metadata: response.data.metadata,
         }
-        
+
         get().addMessage(assistantMessage)
-        
+
         // 更新当前对话ID
         if (response.data.conversation_id && !get().currentConversation) {
           // 如果是新对话，获取对话信息
@@ -148,16 +148,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
             console.error('Failed to fetch conversation:', error)
           }
         }
-        
+
         set({ sending: false })
         return true
       }
-      
+
       set({ sending: false })
       return false
     } catch (error: any) {
       set({ sending: false })
-      message.error(error.response?.data?.message || '发送消息失败')
+      messageService.error(error.response?.data?.message || '发送消息失败')
       return false
     }
   },
@@ -165,16 +165,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
   // 添加消息
   addMessage: (message: ChatMessage) => {
     set({
-      messages: [...get().messages, message]
+      messages: [...get().messages, message],
     })
   },
 
   // 更新消息
   updateMessage: (messageId: string, updates: Partial<ChatMessage>) => {
-    const messages = get().messages.map(msg =>
-      msg.id === messageId ? { ...msg, ...updates } : msg
-    )
-    
+    const messages = get().messages.map(msg => (msg.id === messageId ? { ...msg, ...updates } : msg))
+
     set({ messages })
   },
 
@@ -182,17 +180,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
   deleteConversation: async (conversationId: number) => {
     try {
       await chatApi.deleteConversation(conversationId)
-      
+
       const conversations = get().conversations.filter(conv => conv.id !== conversationId)
-      
+
       set({
         conversations,
-        currentConversation: get().currentConversation?.id === conversationId 
-          ? null 
-          : get().currentConversation,
-        messages: get().currentConversation?.id === conversationId ? [] : get().messages
+        currentConversation: get().currentConversation?.id === conversationId ? null : get().currentConversation,
+        messages: get().currentConversation?.id === conversationId ? [] : get().messages,
       })
-      
+
       message.success('对话删除成功')
       return true
     } catch (error: any) {
@@ -214,5 +210,5 @@ export const useChatStore = create<ChatState>((set, get) => ({
   // 设置发送状态
   setSending: (sending: boolean) => {
     set({ sending })
-  }
+  },
 }))

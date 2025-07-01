@@ -1,18 +1,5 @@
 import React, { useState } from 'react'
-import {
-  Card,
-  Button,
-  Space,
-  Typography,
-  Divider,
-  Alert,
-  Spin,
-  Tag,
-  Row,
-  Col,
-  Statistic,
-  message
-} from 'antd'
+import { Card, Button, Space, Typography, Divider, Alert, Spin, Tag, Row, Col, Statistic, message } from 'antd'
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -21,7 +8,7 @@ import {
   DatabaseOutlined,
   UserOutlined,
   FileTextOutlined,
-  MessageOutlined
+  MessageOutlined,
 } from '@ant-design/icons'
 import { api } from '@/api'
 
@@ -45,77 +32,81 @@ const ApiTestPage: React.FC = () => {
       name: '系统健康检查',
       icon: <ApiOutlined />,
       test: () => api.system.healthCheck(),
-      description: '检查系统各服务状态'
+      description: '检查系统各服务状态',
     },
     {
       name: '用户认证',
       icon: <UserOutlined />,
       test: () => api.auth.getCurrentUser(),
-      description: '验证用户认证状态'
+      description: '验证用户认证状态',
     },
     {
       name: '知识库列表',
       icon: <DatabaseOutlined />,
       test: () => api.knowledge.getKnowledgeBases({ page: 1, size: 5 }),
-      description: '获取知识库列表'
+      description: '获取知识库列表',
     },
     {
       name: '文档列表',
       icon: <FileTextOutlined />,
       test: () => api.documents.getDocuments({ page: 1, size: 5 }),
-      description: '获取文档列表'
+      description: '获取文档列表',
     },
     {
       name: '对话列表',
       icon: <MessageOutlined />,
       test: () => api.chat.getConversations({ page: 1, size: 5 }),
-      description: '获取对话历史'
-    }
+      description: '获取对话历史',
+    },
   ]
 
   // 执行单个测试
   const runSingleTest = async (item: any, index: number) => {
     const startTime = Date.now()
-    
+
     try {
       const response = await item.test()
       const responseTime = Date.now() - startTime
-      
-      setResults(prev => prev.map((result, i) => 
-        i === index 
-          ? {
-              ...result,
-              status: 'success',
-              message: '测试通过',
-              responseTime,
-              data: response.data
-            }
-          : result
-      ))
+
+      setResults(prev =>
+        prev.map((result, i) =>
+          i === index
+            ? {
+                ...result,
+                status: 'success',
+                message: '测试通过',
+                responseTime,
+                data: response.data,
+              }
+            : result
+        )
+      )
     } catch (error: any) {
       const responseTime = Date.now() - startTime
-      
-      setResults(prev => prev.map((result, i) => 
-        i === index 
-          ? {
-              ...result,
-              status: 'error',
-              message: error.response?.data?.message || error.message || '测试失败',
-              responseTime
-            }
-          : result
-      ))
+
+      setResults(prev =>
+        prev.map((result, i) =>
+          i === index
+            ? {
+                ...result,
+                status: 'error',
+                message: error.response?.data?.message || error.message || '测试失败',
+                responseTime,
+              }
+            : result
+        )
+      )
     }
   }
 
   // 执行所有测试
   const runAllTests = async () => {
     setTesting(true)
-    
+
     // 初始化测试结果
     const initialResults = testItems.map(item => ({
       name: item.name,
-      status: 'pending' as const
+      status: 'pending' as const,
     }))
     setResults(initialResults)
 
@@ -155,55 +146,43 @@ const ApiTestPage: React.FC = () => {
     }
 
     return (
-      <Card
-        key={result.name}
-        size="small"
-        style={{ marginBottom: 16 }}
-      >
-        <Row align="middle" gutter={16}>
-          <Col flex="none">
-            {item.icon}
-          </Col>
-          <Col flex="auto">
+      <Card key={result.name} size='small' style={{ marginBottom: 16 }}>
+        <Row align='middle' gutter={16}>
+          <Col flex='none'>{item.icon}</Col>
+          <Col flex='auto'>
             <div>
               <Text strong>{result.name}</Text>
               <div>
-                <Text type="secondary" style={{ fontSize: 12 }}>
+                <Text type='secondary' style={{ fontSize: 12 }}>
                   {item.description}
                 </Text>
               </div>
             </div>
           </Col>
-          <Col flex="none">
+          <Col flex='none'>
             <Space>
               {result.responseTime && (
-                <Text type="secondary" style={{ fontSize: 12 }}>
+                <Text type='secondary' style={{ fontSize: 12 }}>
                   {result.responseTime}ms
                 </Text>
               )}
               <Tag color={getStatusColor()}>
                 {getStatusIcon()}
                 <span style={{ marginLeft: 4 }}>
-                  {result.status === 'pending' ? '测试中' : 
-                   result.status === 'success' ? '成功' : '失败'}
+                  {result.status === 'pending' ? '测试中' : result.status === 'success' ? '成功' : '失败'}
                 </span>
               </Tag>
             </Space>
           </Col>
         </Row>
-        
+
         {result.message && result.status === 'error' && (
-          <Alert
-            message={result.message}
-            type="error"
-            size="small"
-            style={{ marginTop: 8 }}
-          />
+          <Alert message={result.message} type='error' size='small' style={{ marginTop: 8 }} />
         )}
-        
+
         {result.data && result.status === 'success' && (
           <div style={{ marginTop: 8 }}>
-            <Text type="secondary" style={{ fontSize: 12 }}>
+            <Text type='secondary' style={{ fontSize: 12 }}>
               返回数据: {JSON.stringify(result.data).substring(0, 100)}...
             </Text>
           </div>
@@ -217,10 +196,9 @@ const ApiTestPage: React.FC = () => {
     const total = results.length
     const success = results.filter(r => r.status === 'success').length
     const error = results.filter(r => r.status === 'error').length
-    const avgResponseTime = results
-      .filter(r => r.responseTime)
-      .reduce((sum, r) => sum + (r.responseTime || 0), 0) / 
-      results.filter(r => r.responseTime).length || 0
+    const avgResponseTime =
+      results.filter(r => r.responseTime).reduce((sum, r) => sum + (r.responseTime || 0), 0) /
+        results.filter(r => r.responseTime).length || 0
 
     return { total, success, error, avgResponseTime }
   }
@@ -234,9 +212,7 @@ const ApiTestPage: React.FC = () => {
         <Title level={2} style={{ margin: 0, color: '#1e293b' }}>
           API 连接测试
         </Title>
-        <Paragraph style={{ margin: '8px 0 0 0', color: '#64748b', fontSize: 16 }}>
-          测试前后端API接口连接状态
-        </Paragraph>
+        <Paragraph style={{ margin: '8px 0 0 0', color: '#64748b', fontSize: 16 }}>测试前后端API接口连接状态</Paragraph>
       </div>
 
       {/* 统计信息 */}
@@ -244,17 +220,13 @@ const ApiTestPage: React.FC = () => {
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
           <Col xs={24} sm={6}>
             <Card>
-              <Statistic
-                title="总测试数"
-                value={stats.total}
-                prefix={<ApiOutlined style={{ color: '#1890ff' }} />}
-              />
+              <Statistic title='总测试数' value={stats.total} prefix={<ApiOutlined style={{ color: '#1890ff' }} />} />
             </Card>
           </Col>
           <Col xs={24} sm={6}>
             <Card>
               <Statistic
-                title="成功"
+                title='成功'
                 value={stats.success}
                 prefix={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
               />
@@ -263,7 +235,7 @@ const ApiTestPage: React.FC = () => {
           <Col xs={24} sm={6}>
             <Card>
               <Statistic
-                title="失败"
+                title='失败'
                 value={stats.error}
                 prefix={<CloseCircleOutlined style={{ color: '#ff4d4f' }} />}
               />
@@ -272,9 +244,9 @@ const ApiTestPage: React.FC = () => {
           <Col xs={24} sm={6}>
             <Card>
               <Statistic
-                title="平均响应时间"
+                title='平均响应时间'
                 value={Math.round(stats.avgResponseTime)}
-                suffix="ms"
+                suffix='ms'
                 prefix={<LoadingOutlined style={{ color: '#722ed1' }} />}
               />
             </Card>
@@ -286,7 +258,7 @@ const ApiTestPage: React.FC = () => {
       <Card style={{ marginBottom: 24 }}>
         <Space>
           <Button
-            type="primary"
+            type='primary'
             icon={<ApiOutlined />}
             onClick={runAllTests}
             loading={testing}
@@ -297,30 +269,23 @@ const ApiTestPage: React.FC = () => {
           >
             开始测试
           </Button>
-          <Button
-            onClick={() => setResults([])}
-            disabled={testing}
-          >
+          <Button onClick={() => setResults([])} disabled={testing}>
             清空结果
           </Button>
         </Space>
       </Card>
 
       {/* 测试结果 */}
-      <Card title="测试结果">
+      <Card title='测试结果'>
         {results.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 0' }}>
             <ApiOutlined style={{ fontSize: 48, color: '#d9d9d9', marginBottom: 16 }} />
             <div>
-              <Text type="secondary">点击"开始测试"按钮开始API连接测试</Text>
+              <Text type='secondary'>点击"开始测试"按钮开始API连接测试</Text>
             </div>
           </div>
         ) : (
-          <Spin spinning={testing}>
-            {results.map((result, index) => 
-              renderTestResult(result, testItems[index])
-            )}
-          </Spin>
+          <Spin spinning={testing}>{results.map((result, index) => renderTestResult(result, testItems[index]))}</Spin>
         )}
       </Card>
     </div>
