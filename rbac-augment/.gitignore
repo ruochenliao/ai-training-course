@@ -1,0 +1,469 @@
+# RBAC权限管理系统 - Git忽略文件
+# 适用于Python FastAPI + Vue.js + TypeScript项目
+
+# =============================================================================
+# Python相关
+# =============================================================================
+
+# 字节码文件
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C扩展
+*.so
+
+# 分发/打包
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# 单元测试/覆盖率报告
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# 翻译
+*.mo
+*.pot
+
+# Django相关
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask相关
+instance/
+.webassets-cache
+
+# Scrapy相关
+.scrapy
+
+# Sphinx文档
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery相关
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath解析文件
+*.sage.py
+
+# 虚拟环境
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder项目设置
+.spyderproject
+.spyproject
+
+# Rope项目设置
+.ropeproject
+
+# mkdocs文档
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre类型检查器
+.pyre/
+
+# pytype静态类型分析器
+.pytype/
+
+# Cython调试符号
+cython_debug/
+
+# =============================================================================
+# Node.js/Vue.js/前端相关
+# =============================================================================
+
+# 依赖目录
+node_modules/
+jspm_packages/
+
+# npm
+npm-debug.log*
+npm-error.log*
+.npm
+
+# yarn
+yarn-debug.log*
+yarn-error.log*
+.yarn-integrity
+
+# pnpm
+pnpm-debug.log*
+.pnpm-store/
+
+# 构建输出
+dist/
+build/
+.nuxt/
+.next/
+.vuepress/dist/
+
+# 缓存目录
+.cache/
+.parcel-cache/
+
+# 运行时数据
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# 覆盖率目录
+coverage/
+.nyc_output
+
+# Grunt中间存储
+.grunt
+
+# Bower依赖目录
+bower_components
+
+# node-waf配置
+.lock-wscript
+
+# 编译的二进制插件
+build/Release
+
+# TypeScript缓存
+*.tsbuildinfo
+
+# 可选的npm缓存目录
+.npm
+
+# 可选的eslint缓存
+.eslintcache
+
+# 可选的stylelint缓存
+.stylelintcache
+
+# Microbundle缓存
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# 可选的REPL历史
+.node_repl_history
+
+# Yarn完整性文件
+.yarn-integrity
+
+# dotenv环境变量文件
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Serverless目录
+.serverless/
+
+# FuseBox缓存
+.fusebox/
+
+# DynamoDB本地文件
+.dynamodb/
+
+# TernJS端口文件
+.tern-port
+
+# Stores VSCode版本用于测试
+.vscode-test
+
+# =============================================================================
+# 数据库文件
+# =============================================================================
+
+# SQLite数据库文件
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# MySQL
+*.sql
+
+# PostgreSQL
+*.dump
+
+# =============================================================================
+# IDE和编辑器
+# =============================================================================
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+# JetBrains IDEs
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# =============================================================================
+# 操作系统
+# =============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# 日志和临时文件
+# =============================================================================
+
+# 日志文件
+logs/
+*.log
+log/
+
+# 临时文件
+tmp/
+temp/
+.tmp/
+.temp/
+
+# 备份文件
+*.bak
+*.backup
+*.old
+
+# =============================================================================
+# 项目特定文件
+# =============================================================================
+
+# 环境配置文件
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# 上传文件目录
+uploads/
+static/uploads/
+
+# 缓存目录
+cache/
+.cache/
+
+# 测试文件
+test_*.py
+*_test.py
+test_output/
+
+# 文档构建
+docs/_build/
+docs/build/
+
+# 部署相关
+.deploy/
+deploy/
+
+# Docker相关
+.dockerignore
+
+# Kubernetes相关
+*.yaml.bak
+*.yml.bak
+
+# =============================================================================
+# 安全相关
+# =============================================================================
+
+# 密钥文件
+*.key
+*.pem
+*.crt
+*.csr
+*.p12
+*.pfx
+
+# 配置文件中的敏感信息
+config/local.py
+config/production.py
+secrets.json
+
+# =============================================================================
+# 其他
+# =============================================================================
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# 图片缓存
+*.thumb
+
+# 编辑器配置
+.editorconfig
+
+# 包管理器锁文件（根据需要取消注释）
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# =============================================================================
+# RBAC项目特定忽略
+# =============================================================================
+
+# 后端特定
+backend/__pycache__/
+backend/*.db
+backend/*.db-shm
+backend/*.db-wal
+backend/logs/
+backend/uploads/
+backend/.env
+backend/test_*.py
+
+# 前端特定
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.production.local
+frontend/auto-imports.d.ts
+frontend/components.d.ts
+
+# 开发工具生成的文件
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+
+# 运行时生成的文件
+*.pid
+*.sock

@@ -1,0 +1,287 @@
+/**
+ * 页面样式
+ */
+
+@use './variables.scss' as vars;
+
+// 登录页面
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+  .login-container {
+    width: 400px;
+    padding: vars.$spacing-xl;
+    background-color: #fff;
+    border-radius: vars.$border-radius-large;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+    .login-header {
+      text-align: center;
+      margin-bottom: vars.$spacing-xl;
+
+      .login-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: vars.$text-color-primary;
+        margin-bottom: vars.$spacing-sm;
+      }
+
+      .login-subtitle {
+        color: vars.$text-color-secondary;
+        font-size: vars.$font-size-sm;
+      }
+    }
+
+    .login-form {
+      .el-form-item {
+        margin-bottom: vars.$spacing-lg;
+      }
+
+      .login-button {
+        width: 100%;
+        margin-top: vars.$spacing-md;
+      }
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: vars.$spacing-lg;
+      color: vars.$text-color-placeholder;
+      font-size: vars.$font-size-xs;
+    }
+  }
+}
+
+// 布局页面
+.layout-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+
+  .layout-sidebar {
+    width: vars.$sidebar-width;
+    background-color: #001529;
+    transition: width 0.3s;
+    overflow: hidden;
+
+    &.collapsed {
+      width: vars.$sidebar-collapsed-width;
+    }
+  }
+
+  .layout-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .layout-header {
+      height: vars.$header-height;
+      background-color: #fff;
+      border-bottom: 1px solid vars.$border-color-light;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 vars.$spacing-lg;
+      box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+    }
+
+    .layout-content {
+      flex: 1;
+      overflow: auto;
+      background-color: vars.$background-color-base;
+    }
+  }
+}
+
+// 仪表板页面
+.dashboard-page {
+  .dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: vars.$spacing-md;
+    margin-bottom: vars.$spacing-lg;
+  }
+
+  .dashboard-charts {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: vars.$spacing-md;
+    margin-bottom: vars.$spacing-lg;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .dashboard-tables {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: vars.$spacing-md;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// 系统管理页面
+.system-page {
+  .system-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: vars.$spacing-lg;
+
+    .page-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: vars.$text-color-primary;
+    }
+
+    .page-actions {
+      display: flex;
+      gap: vars.$spacing-sm;
+    }
+  }
+
+  .system-content {
+    background-color: #fff;
+    border-radius: vars.$border-radius-base;
+    box-shadow: vars.$box-shadow-base;
+    overflow: hidden;
+  }
+}
+
+// 错误页面
+.error-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  text-align: center;
+  background-color: vars.$background-color-base;
+
+  .error-code {
+    font-size: 6rem;
+    font-weight: bold;
+    color: vars.$primary-color;
+    margin-bottom: vars.$spacing-md;
+  }
+
+  .error-message {
+    font-size: 1.25rem;
+    color: vars.$text-color-primary;
+    margin-bottom: vars.$spacing-sm;
+  }
+
+  .error-description {
+    color: vars.$text-color-secondary;
+    margin-bottom: vars.$spacing-xl;
+  }
+
+  .error-actions {
+    display: flex;
+    gap: vars.$spacing-md;
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .layout-container {
+    .layout-sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100vh;
+      z-index: vars.$z-index-top;
+      transform: translateX(-100%);
+      transition: transform 0.3s;
+
+      &.mobile-open {
+        transform: translateX(0);
+      }
+    }
+
+    .layout-main {
+      margin-left: 0;
+    }
+  }
+
+  .page-container {
+    margin: vars.$spacing-sm;
+    padding: vars.$spacing-md;
+  }
+
+  .search-form {
+    padding: vars.$spacing-md;
+
+    .el-form-item {
+      margin-bottom: vars.$spacing-sm;
+    }
+  }
+
+  .table-toolbar {
+    flex-direction: column;
+    gap: vars.$spacing-sm;
+
+    .toolbar-left,
+    .toolbar-right {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
+// 暗色主题适配
+.dark {
+  .login-page {
+    .login-container {
+      background-color: vars.$dark-bg-color-light;
+      color: vars.$dark-text-color;
+
+      .login-title {
+        color: vars.$dark-text-color;
+      }
+    }
+  }
+
+  .layout-container {
+    .layout-main {
+      .layout-header {
+        background-color: vars.$dark-bg-color-light;
+        border-bottom-color: vars.$dark-border-color;
+        color: vars.$dark-text-color;
+      }
+
+      .layout-content {
+        background-color: vars.$dark-bg-color;
+      }
+    }
+  }
+
+  .system-page {
+    .page-title {
+      color: vars.$dark-text-color;
+    }
+
+    .system-content {
+      background-color: vars.$dark-bg-color-light;
+      color: vars.$dark-text-color;
+    }
+  }
+
+  .error-page {
+    background-color: vars.$dark-bg-color;
+    color: vars.$dark-text-color;
+
+    .error-message {
+      color: vars.$dark-text-color;
+    }
+  }
+}

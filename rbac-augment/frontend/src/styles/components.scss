@@ -1,0 +1,249 @@
+/**
+ * 组件样式
+ */
+
+@use './variables.scss' as vars;
+
+// 页面容器
+.page-container {
+  padding: vars.$spacing-lg;
+  background-color: #fff;
+  border-radius: vars.$border-radius-base;
+  box-shadow: vars.$box-shadow-base;
+  margin: vars.$spacing-md;
+  min-height: calc(100vh - #{vars.$header-height} - #{vars.$spacing-md * 2});
+}
+
+// 搜索表单
+.search-form {
+  background-color: #fff;
+  padding: vars.$spacing-lg;
+  border-radius: vars.$border-radius-base;
+  box-shadow: vars.$box-shadow-base;
+  margin-bottom: vars.$spacing-md;
+
+  .el-form-item {
+    margin-bottom: vars.$spacing-md;
+  }
+
+  .search-buttons {
+    text-align: right;
+    margin-top: vars.$spacing-md;
+  }
+}
+
+// 表格工具栏
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: vars.$spacing-md;
+  padding: vars.$spacing-md;
+  background-color: #fff;
+  border-radius: vars.$border-radius-base;
+  box-shadow: vars.$box-shadow-base;
+
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: vars.$spacing-sm;
+  }
+
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: vars.$spacing-sm;
+  }
+}
+
+// 数据表格
+.data-table {
+  background-color: #fff;
+  border-radius: vars.$border-radius-base;
+  box-shadow: vars.$box-shadow-base;
+  overflow: hidden;
+
+  .el-table {
+    border-radius: vars.$border-radius-base;
+  }
+
+  .table-pagination {
+    padding: vars.$spacing-md;
+    text-align: right;
+    border-top: 1px solid vars.$border-color-light;
+  }
+}
+
+// 状态标签
+.status-tag {
+  &.active {
+    background-color: #f0f9ff;
+    color: #1890ff;
+    border-color: #91d5ff;
+  }
+
+  &.inactive {
+    background-color: #fff2f0;
+    color: #ff4d4f;
+    border-color: #ffccc7;
+  }
+}
+
+// 操作按钮组
+.action-buttons {
+  display: flex;
+  gap: vars.$spacing-xs;
+
+  .el-button {
+    padding: 4px 8px;
+    font-size: vars.$font-size-xs;
+  }
+}
+
+// 表单对话框
+.form-dialog {
+  .el-dialog__body {
+    padding: vars.$spacing-lg;
+  }
+
+  .dialog-footer {
+    text-align: right;
+    padding-top: vars.$spacing-md;
+    border-top: 1px solid vars.$border-color-light;
+  }
+}
+
+// 树形组件
+.tree-container {
+  border: 1px solid vars.$border-color-light;
+  border-radius: vars.$border-radius-base;
+  padding: vars.$spacing-md;
+  background-color: #fff;
+
+  .el-tree {
+    background-color: transparent;
+  }
+}
+
+// 卡片组件
+.info-card {
+  background-color: #fff;
+  border-radius: vars.$border-radius-base;
+  box-shadow: vars.$box-shadow-base;
+  padding: vars.$spacing-lg;
+  margin-bottom: vars.$spacing-md;
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: vars.$spacing-md;
+    padding-bottom: vars.$spacing-md;
+    border-bottom: 1px solid vars.$border-color-light;
+
+    .card-title {
+      font-size: vars.$font-size-lg;
+      font-weight: 600;
+      color: vars.$text-color-primary;
+    }
+  }
+
+  .card-content {
+    color: vars.$text-color-regular;
+  }
+}
+
+// 统计卡片
+.stat-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-radius: vars.$border-radius-base;
+  padding: vars.$spacing-lg;
+  text-align: center;
+  box-shadow: vars.$box-shadow-base;
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: vars.$spacing-sm;
+  }
+
+  .stat-label {
+    font-size: vars.$font-size-sm;
+    opacity: 0.8;
+  }
+
+  &.primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  &.success {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  }
+
+  &.warning {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  }
+
+  &.danger {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%);
+  }
+}
+
+// 空状态
+.empty-state {
+  text-align: center;
+  padding: vars.$spacing-xl * 2;
+  color: vars.$text-color-secondary;
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: vars.$spacing-md;
+    opacity: 0.5;
+  }
+
+  .empty-text {
+    font-size: vars.$font-size-lg;
+    margin-bottom: vars.$spacing-sm;
+  }
+
+  .empty-description {
+    font-size: vars.$font-size-sm;
+    color: vars.$text-color-placeholder;
+  }
+}
+
+// 加载状态
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: vars.$text-color-secondary;
+}
+
+// 暗色主题适配
+.dark {
+  .page-container,
+  .search-form,
+  .table-toolbar,
+  .data-table,
+  .tree-container,
+  .info-card {
+    background-color: vars.$dark-bg-color-light;
+    color: vars.$dark-text-color;
+    border-color: vars.$dark-border-color;
+  }
+
+  .card-header {
+    border-bottom-color: vars.$dark-border-color;
+  }
+
+  .table-pagination {
+    border-top-color: vars.$dark-border-color;
+  }
+
+  .dialog-footer {
+    border-top-color: vars.$dark-border-color;
+  }
+}
