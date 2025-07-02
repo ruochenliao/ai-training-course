@@ -1,0 +1,15 @@
+/**
+ * 全局样式文件
+ */
+
+// 变量
+@use './variables.scss';
+
+// 工具类
+@use './utils.scss';
+
+// 组件样式
+@use './components.scss';
+
+// 页面样式
+@use './pages.scss';
