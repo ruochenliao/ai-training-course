@@ -8,11 +8,13 @@ from .user import crud_user
 from .role import crud_role
 from .permission import crud_permission
 from .menu import crud_menu
+from .department import crud_department
 
 __all__ = [
     "CRUDBase",
-    "crud_user", 
+    "crud_user",
     "crud_role",
     "crud_permission",
-    "crud_menu"
+    "crud_menu",
+    "crud_department"
 ]

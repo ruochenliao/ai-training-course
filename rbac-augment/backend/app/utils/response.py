@@ -8,11 +8,11 @@ import time
 from typing import Any, Optional, List, Dict
 from datetime import datetime
 from fastapi import Request
-from app.schemas.common import (
+from ..schemas.common import (
     BaseResponse, ErrorResponse, PaginationResponse, PaginationInfo,
     ResponseMetadata, ErrorDetail, ApiResponse
 )
-from app.utils.error_codes import ErrorCode, ErrorCodeManager
+from .error_codes import ErrorCode, ErrorCodeManager
 
 
 class ResponseBuilder:

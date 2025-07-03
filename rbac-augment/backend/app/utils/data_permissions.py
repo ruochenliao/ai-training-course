@@ -7,8 +7,8 @@ from typing import List, Optional, Dict, Any, Type
 from enum import Enum
 from tortoise.models import Model
 from tortoise.queryset import QuerySet
-from app.models.user import User
-from app.utils.permissions import DataScope
+from ..models.user import User
+from .permissions import DataScope
 
 
 class DataPermissionFilter:

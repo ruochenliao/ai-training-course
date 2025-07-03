@@ -7,10 +7,10 @@ from typing import List, Optional, Dict, Any, Tuple
 from tortoise.queryset import QuerySet
 from tortoise.transactions import in_transaction
 
-from app.crud.base import CRUDBase
-from app.models.department import Department
-from app.models.user import User
-from app.schemas.department import (
+from .base import CRUDBase
+from ..models.department import Department
+from ..models.user import User
+from ..schemas.department import (
     DepartmentCreate, DepartmentUpdate, DepartmentSearchParams,
     DepartmentBatchOperation, DepartmentImportData
 )

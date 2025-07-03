@@ -5,16 +5,16 @@
 
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.schemas.permission import (
-    PermissionCreate, PermissionUpdate, PermissionResponse, 
+from ...schemas.permission import (
+    PermissionCreate, PermissionUpdate, PermissionResponse,
     PermissionTreeResponse, PermissionListResponse, PermissionSelectOption,
     PermissionGroupResponse
 )
-from app.schemas.common import BaseResponse, PaginationResponse, IDResponse, BulkOperationRequest
-from app.crud.permission import crud_permission
-from app.utils.deps import get_current_user, get_pagination_params, require_permission_read, require_permission_write, require_permission_delete
-from app.utils.pagination import create_pagination_response
-from app.models.user import User
+from ...schemas.common import BaseResponse, PaginationResponse, IDResponse, BulkOperationRequest
+from ...crud.permission import crud_permission
+from ...utils.deps import get_current_user, get_pagination_params, require_permission_read, require_permission_write, require_permission_delete
+from ...utils.pagination import create_pagination_response
+from ...models.user import User
 
 router = APIRouter()
 

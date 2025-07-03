@@ -7,7 +7,7 @@ from typing import List, Optional, Dict, Any
 from tortoise import fields
 from tortoise.queryset import QuerySet
 
-from app.models.base import BaseModel
+from .base import BaseModel
 
 
 class Department(BaseModel):

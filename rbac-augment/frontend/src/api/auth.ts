@@ -61,3 +61,26 @@ export function getUserPermissions() {
 export function getUserMenus() {
   return request.get<MenuRoute[]>('/api/v1/auth/menus')
 }
+
+/**
+ * 更新个人资料
+ */
+export function updateProfile(data: {
+  username: string
+  full_name: string
+  email: string
+  phone?: string
+}) {
+  return request.put('/api/v1/auth/profile', data)
+}
+
+/**
+ * 上传头像
+ */
+export function uploadAvatar(formData: FormData) {
+  return request.post('/api/v1/auth/avatar', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}

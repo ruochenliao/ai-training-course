@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from tortoise.models import Model
 from tortoise.queryset import QuerySet
 from tortoise.expressions import Q
-from app.schemas.common import PaginationParams
+from ..schemas.common import PaginationParams
 
 
 ModelType = TypeVar("ModelType", bound=Model)

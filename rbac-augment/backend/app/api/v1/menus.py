@@ -5,15 +5,15 @@
 
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.schemas.menu import (
+from ...schemas.menu import (
     MenuCreate, MenuUpdate, MenuResponse, MenuTreeResponse,
     MenuListResponse, MenuSelectOption, MenuRouteResponse, BreadcrumbResponse
 )
-from app.schemas.common import BaseResponse, PaginationResponse, IDResponse, BulkOperationRequest
-from app.crud.menu import crud_menu
-from app.utils.deps import get_current_user, get_pagination_params, require_menu_read, require_menu_write, require_menu_delete
-from app.utils.pagination import create_pagination_response
-from app.models.user import User
+from ...schemas.common import BaseResponse, PaginationResponse, IDResponse, BulkOperationRequest
+from ...crud.menu import crud_menu
+from ...utils.deps import get_current_user, get_pagination_params, require_menu_read, require_menu_write, require_menu_delete
+from ...utils.pagination import create_pagination_response
+from ...models.user import User
 
 router = APIRouter()
 

@@ -6,7 +6,7 @@
 from tortoise import fields
 from typing import List, Optional, Dict, Any
 
-from app.models.base import BaseModel
+from .base import BaseModel
 
 
 class Menu(BaseModel):

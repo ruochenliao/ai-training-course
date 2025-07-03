@@ -3,21 +3,17 @@
     <!-- Logo区域 -->
     <div class="sidebar-logo">
       <router-link to="/" class="logo-link">
-        <img 
-          v-if="!appStore.sidebarCollapsed" 
-          src="/logo.svg" 
-          alt="Logo" 
-          class="logo-img"
-        >
-        <span v-if="!appStore.sidebarCollapsed" class="logo-text">
-          RBAC系统
-        </span>
-        <img 
-          v-else 
-          src="/logo.svg" 
-          alt="Logo" 
-          class="logo-img-mini"
-        >
+        <div v-if="!appStore.sidebarCollapsed" class="logo-full">
+          <el-icon class="logo-icon" size="24">
+            <OfficeBuilding />
+          </el-icon>
+          <span class="logo-text">RBAC系统</span>
+        </div>
+        <div v-else class="logo-mini">
+          <el-icon class="logo-icon-mini" size="20">
+            <OfficeBuilding />
+          </el-icon>
+        </div>
       </router-link>
     </div>
 
@@ -47,6 +43,7 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { OfficeBuilding } from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
 import SidebarItem from './SidebarItem.vue'
@@ -148,132 +145,211 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+/**
+ * 侧边栏样式
+ * 参考 vue-fastapi-admin 的设计风格
+ * 包含响应式设计和暗色主题支持
+ */
+@import '@/styles/variables.scss';
+
 .sidebar {
   height: 100%;
   display: flex;
   flex-direction: column;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+  border-right: 1px solid $border-color;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
 
+  // ==================== Logo区域样式 ====================
   .sidebar-logo {
-    height: 60px;
+    height: $header-height;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-bottom: 1px solid #1f2937;
-    background-color: #000c17;
+    border-bottom: 1px solid $border-color;
+    background: $card-color;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 20px;
+      right: 20px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, $primary-color, transparent);
+    }
 
     .logo-link {
       display: flex;
       align-items: center;
       text-decoration: none;
-      color: #fff;
+      color: $text-color-1;
       font-weight: 600;
       font-size: 18px;
+      transition: all 0.3s ease;
+      padding: 8px 16px;
+      border-radius: 8px;
 
-      .logo-img {
-        width: 32px;
-        height: 32px;
-        margin-right: 12px;
+      &:hover {
+        background: rgba($primary-color, 0.1);
+        transform: translateY(-1px);
       }
 
-      .logo-img-mini {
-        width: 32px;
-        height: 32px;
+      .logo-full {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .logo-icon {
+          color: $primary-color;
+          font-size: 24px;
+          transition: all 0.3s ease;
+        }
+
+        .logo-text {
+          background: linear-gradient(135deg, $primary-color, $primary-color-hover);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          font-weight: 700;
+          letter-spacing: 0.5px;
+        }
       }
 
-      .logo-text {
-        transition: all 0.3s ease;
+      .logo-mini {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .logo-icon-mini {
+          color: $primary-color;
+          font-size: 20px;
+          transition: all 0.3s ease;
+
+          &:hover {
+            transform: scale(1.1);
+          }
+        }
       }
     }
   }
 
+  // ==================== 菜单区域样式 ====================
   .sidebar-menu {
     flex: 1;
     border: none;
     overflow-y: auto;
     overflow-x: hidden;
+    padding: 16px 8px;
 
-    // 自定义滚动条
+    // 自定义滚动条样式
     &::-webkit-scrollbar {
       width: 4px;
     }
 
     &::-webkit-scrollbar-track {
-      background: #001529;
+      background: transparent;
     }
 
     &::-webkit-scrollbar-thumb {
-      background: #1890ff;
+      background: rgba($primary-color, 0.3);
       border-radius: 2px;
-    }
-
-    // 菜单项样式
-    :deep(.el-menu-item) {
-      height: 50px;
-      line-height: 50px;
-      color: rgba(255, 255, 255, 0.85);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: background 0.3s ease;
 
       &:hover {
-        background-color: #1890ff !important;
-        color: #fff;
-      }
-
-      &.is-active {
-        background-color: #1890ff !important;
-        color: #fff;
-        position: relative;
-
-        &::after {
-          content: '';
-          position: absolute;
-          right: 0;
-          top: 0;
-          bottom: 0;
-          width: 3px;
-          background-color: #fff;
-        }
-      }
-
-      .el-icon {
-        margin-right: 8px;
-        font-size: 16px;
+        background: rgba($primary-color, 0.5);
       }
     }
 
-    // 子菜单样式
-    :deep(.el-sub-menu) {
+    // Element Plus 菜单样式覆盖
+    :deep(.el-menu) {
+      border: none;
+      background: transparent;
+
+      .el-menu-item,
       .el-sub-menu__title {
-        height: 50px;
-        line-height: 50px;
-        color: rgba(255, 255, 255, 0.85);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        height: 48px;
+        line-height: 48px;
+        margin: 4px 0;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        color: $text-color-2;
+
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 0;
+          height: 100%;
+          background: linear-gradient(90deg, $primary-color, $primary-color-hover);
+          transition: width 0.3s ease;
+          border-radius: 0 4px 4px 0;
+        }
 
         &:hover {
-          background-color: #1890ff !important;
-          color: #fff;
+          background: rgba($primary-color, 0.08);
+          transform: translateX(4px);
+          color: $text-color-1;
+
+          &::before {
+            width: 3px;
+          }
+        }
+
+        &.is-active {
+          background: linear-gradient(135deg, rgba($primary-color, 0.15), rgba($primary-color, 0.08));
+          color: $primary-color;
+          font-weight: 600;
+
+          &::before {
+            width: 3px;
+          }
+
+          .el-icon {
+            color: $primary-color;
+          }
         }
 
         .el-icon {
-          margin-right: 8px;
-          font-size: 16px;
+          font-size: 18px;
+          margin-right: 12px;
+          transition: all 0.3s ease;
         }
       }
 
-      .el-menu {
-        background-color: #000c17;
-
-        .el-menu-item {
-          height: 45px;
-          line-height: 45px;
-          padding-left: 60px !important;
-          background-color: transparent;
-
+      // 子菜单样式
+      .el-sub-menu {
+        .el-sub-menu__title {
           &:hover {
-            background-color: rgba(24, 144, 255, 0.8) !important;
+            background: rgba($primary-color, 0.08);
+            color: $text-color-1;
           }
+        }
 
-          &.is-active {
-            background-color: #1890ff !important;
+        .el-menu {
+          background: rgba($primary-color, 0.02);
+          border-radius: 8px;
+          margin: 4px 0;
+
+          .el-menu-item {
+            padding-left: 48px !important;
+            margin: 2px 8px;
+
+            &::before {
+              left: 20px;
+            }
+
+            &:hover {
+              background: rgba($primary-color, 0.12);
+            }
+
+            &.is-active {
+              background: linear-gradient(135deg, rgba($primary-color, 0.2), rgba($primary-color, 0.12));
+            }
           }
         }
       }
@@ -294,10 +370,101 @@ watch(
   }
 }
 
-// 响应式设计
+// ==================== 响应式设计 ====================
+
+// 平板设备适配
+@media (max-width: 992px) {
+  .sidebar {
+    .sidebar-logo {
+      .logo-link {
+        .logo-full {
+          .logo-text {
+            font-size: 16px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// 手机设备适配
 @media (max-width: 768px) {
   .sidebar {
-    width: 240px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1100;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+    width: 280px !important;
+
+    &.mobile-open {
+      transform: translateX(0);
+    }
+  }
+}
+
+// ==================== 暗色主题支持 ====================
+.dark {
+  .sidebar {
+    background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+    border-right-color: #333;
+
+    .sidebar-logo {
+      background: #1a1a1a;
+      border-bottom-color: #333;
+
+      .logo-link {
+        color: #e5eaf3;
+
+        &:hover {
+          background: rgba($primary-color, 0.15);
+        }
+
+        .logo-full {
+          .logo-text {
+            background: linear-gradient(135deg, $primary-color, $primary-color-hover);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+          }
+        }
+      }
+    }
+
+    .sidebar-menu {
+      :deep(.el-menu) {
+        .el-menu-item,
+        .el-sub-menu__title {
+          color: #a3a6ad;
+
+          &:hover {
+            background: rgba($primary-color, 0.15);
+            color: #e5eaf3;
+          }
+
+          &.is-active {
+            background: linear-gradient(135deg, rgba($primary-color, 0.25), rgba($primary-color, 0.15));
+            color: $primary-color;
+          }
+        }
+
+        .el-sub-menu {
+          .el-menu {
+            background: rgba(0, 0, 0, 0.2);
+
+            .el-menu-item {
+              &:hover {
+                background: rgba($primary-color, 0.2);
+              }
+
+              &.is-active {
+                background: linear-gradient(135deg, rgba($primary-color, 0.3), rgba($primary-color, 0.2));
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
 </style>

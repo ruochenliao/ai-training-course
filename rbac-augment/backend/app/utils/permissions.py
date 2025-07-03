@@ -10,9 +10,9 @@ import time
 import ipaddress
 from datetime import datetime, time as dt_time
 from fastapi import HTTPException, status, Request
-from app.models.user import User
-from app.core.config import settings
-from app.utils.error_codes import ErrorCode
+from ..models.user import User
+from ..core.config import settings
+from .error_codes import ErrorCode
 
 
 class PermissionLogic(Enum):

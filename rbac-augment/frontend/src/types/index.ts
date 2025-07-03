@@ -8,6 +8,7 @@ export * from './user'
 export * from './role'
 export * from './permission'
 export * from './menu'
+export * from './department'
 
 // 通用类型
 export interface SelectOption {

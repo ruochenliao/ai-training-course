@@ -5,10 +5,10 @@
 
 from typing import List, Optional, Dict, Any
 from tortoise.expressions import Q
-from app.crud.base import CRUDBase
-from app.models.permission import Permission
-from app.schemas.permission import PermissionCreate, PermissionUpdate
-from app.schemas.common import PaginationParams
+from .base import CRUDBase
+from ..models.permission import Permission
+from ..schemas.permission import PermissionCreate, PermissionUpdate
+from ..schemas.common import PaginationParams
 
 
 class CRUDPermission(CRUDBase[Permission, PermissionCreate, PermissionUpdate]):

@@ -5,12 +5,12 @@
 
 from typing import List, Optional, Dict, Any
 from tortoise.expressions import Q
-from app.crud.base import CRUDBase
-from app.models.user import User
-from app.models.role import Role
-from app.schemas.user import UserCreate, UserUpdate
-from app.schemas.common import PaginationParams
-from app.core.security import get_password_hash, verify_password
+from .base import CRUDBase
+from ..models.user import User
+from ..models.role import Role
+from ..schemas.user import UserCreate, UserUpdate
+from ..schemas.common import PaginationParams
+from ..core.security import get_password_hash, verify_password
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):

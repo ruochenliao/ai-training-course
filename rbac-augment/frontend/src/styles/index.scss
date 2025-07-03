@@ -1,15 +1,10 @@
 /**
- * 全局样式文件
+ * 全局样式入口文件
+ * 参考 vue-fastapi-admin 项目的设计风格
+ * 统一导入所有样式文件，确保样式的一致性和可维护性
  */
 
-// 变量
-@use './variables.scss';
-
-// 工具类
-@use './utils.scss';
-
-// 组件样式
-@use './components.scss';
-
-// 页面样式
-@use './pages.scss';
+// 导入样式变量和配置
+@import './variables.scss';
+@import './global.scss';
+@import './theme.scss';

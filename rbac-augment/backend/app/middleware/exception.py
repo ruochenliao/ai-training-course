@@ -14,9 +14,9 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from tortoise.exceptions import DoesNotExist, IntegrityError
 from pydantic import ValidationError
-from app.core.config import settings
-from app.utils.error_codes import ErrorCode, ErrorCodeManager
-from app.schemas.common import ErrorDetail, ResponseMetadata
+from ..core.config import settings
+from ..utils.error_codes import ErrorCode, ErrorCodeManager
+from ..schemas.common import ErrorDetail, ResponseMetadata
 
 
 class ExceptionMiddleware(BaseHTTPMiddleware):

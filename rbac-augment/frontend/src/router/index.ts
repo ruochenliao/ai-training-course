@@ -54,6 +54,17 @@ const asyncRoutes: RouteRecordRaw[] = [
           icon: 'el-icon-odometer',
           cache: true
         }
+      },
+      {
+        path: 'profile',
+        name: 'Profile',
+        component: () => import('@/views/profile/Index.vue'),
+        meta: {
+          title: '个人资料',
+          icon: 'el-icon-user',
+          hidden: true,
+          cache: false
+        }
       }
     ]
   },

@@ -3,16 +3,19 @@
 处理用户登录、登出、Token刷新等认证相关操作
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from app.schemas.user import (
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
+from ...schemas.user import (
     LoginRequest, LoginResponse, RefreshTokenRequest, RefreshTokenResponse,
-    UserProfileResponse, UserPasswordUpdate, UserCreate
+    UserProfileResponse, UserPasswordUpdate, UserCreate, UserProfileUpdate
 )
-from app.schemas.common import BaseResponse
-from app.crud.user import crud_user
-from app.core.security import verify_token, generate_token_pair, verify_password, get_password_hash
-from app.utils.deps import get_current_user
-from app.models.user import User
+from ...schemas.common import BaseResponse
+from ...crud.user import crud_user
+from ...core.security import verify_token, generate_token_pair, verify_password, get_password_hash
+from ...utils.deps import get_current_user
+from ...models.user import User
+import os
+import uuid
+from pathlib import Path
 
 router = APIRouter()
 
@@ -201,6 +204,100 @@ async def change_password(
     await crud_user.update_password(current_user, password_data.new_password)
     
     return BaseResponse(message="密码修改成功")
+
+
+@router.put("/profile", response_model=BaseResponse, summary="更新个人资料")
+async def update_profile(
+    profile_data: UserProfileUpdate,
+    current_user: User = Depends(get_current_user)
+):
+    """更新当前用户个人资料"""
+    # 检查邮箱是否已被其他用户使用
+    if profile_data.email and profile_data.email != current_user.email:
+        existing_user = await crud_user.get_by_email(profile_data.email)
+        if existing_user and existing_user.id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="邮箱已被其他用户使用"
+            )
+
+    # 检查用户名是否已被其他用户使用
+    if profile_data.username and profile_data.username != current_user.username:
+        existing_user = await crud_user.get_by_username(profile_data.username)
+        if existing_user and existing_user.id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="用户名已被其他用户使用"
+            )
+
+    # 更新用户信息
+    update_data = profile_data.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(current_user, field, value)
+
+    await current_user.save()
+
+    return BaseResponse(message="个人资料更新成功")
+
+
+@router.post("/avatar", response_model=BaseResponse, summary="上传头像")
+async def upload_avatar(
+    avatar: UploadFile = File(...),
+    current_user: User = Depends(get_current_user)
+):
+    """上传用户头像"""
+    # 检查文件类型
+    if not avatar.content_type or not avatar.content_type.startswith('image/'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="只支持图片文件"
+        )
+
+    # 检查文件大小（2MB）
+    if avatar.size and avatar.size > 2 * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="文件大小不能超过2MB"
+        )
+
+    # 创建上传目录
+    upload_dir = Path("uploads/avatars")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+
+    # 生成唯一文件名
+    file_extension = avatar.filename.split('.')[-1] if avatar.filename else 'jpg'
+    filename = f"{uuid.uuid4()}.{file_extension}"
+    file_path = upload_dir / filename
+
+    # 保存文件
+    try:
+        with open(file_path, "wb") as buffer:
+            content = await avatar.read()
+            buffer.write(content)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="文件上传失败"
+        )
+
+    # 删除旧头像文件（如果存在）
+    if current_user.avatar and current_user.avatar.startswith('/uploads/'):
+        old_file_path = Path(current_user.avatar.lstrip('/'))
+        if old_file_path.exists():
+            try:
+                old_file_path.unlink()
+            except:
+                pass  # 忽略删除失败
+
+    # 更新用户头像路径
+    avatar_url = f"/uploads/avatars/{filename}"
+    current_user.avatar = avatar_url
+    await current_user.save()
+
+    return BaseResponse(
+        message="头像上传成功",
+        data={"avatar_url": avatar_url}
+    )
 
 
 @router.get("/permissions", response_model=BaseResponse, summary="获取用户权限")

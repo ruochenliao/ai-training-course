@@ -3,12 +3,12 @@
 包含所有Tortoise ORM数据模型
 """
 
-from app.models.base import BaseModel
-from app.models.user import User
-from app.models.role import Role
-from app.models.permission import Permission
-from app.models.menu import Menu
-from app.models.department import Department
+from .base import BaseModel
+from .user import User
+from .role import Role
+from .permission import Permission
+from .menu import Menu
+from .department import Department
 
 __all__ = [
     "BaseModel",

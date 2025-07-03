@@ -11,8 +11,8 @@ from datetime import datetime, timedelta
 from fastapi import Request, Response, HTTPException, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-from app.core.config import settings
-from app.utils.error_codes import ErrorCode
+from ..core.config import settings
+from ..utils.error_codes import ErrorCode
 
 
 class RateLimiter:

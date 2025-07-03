@@ -5,8 +5,8 @@
 
 import math
 from typing import List, TypeVar, Generic
-from app.schemas.common import PaginationResponse, PaginationParams
-from app.core.config import settings
+from ..schemas.common import PaginationResponse, PaginationParams
+from ..core.config import settings
 
 
 T = TypeVar('T')

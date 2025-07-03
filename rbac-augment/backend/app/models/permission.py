@@ -5,7 +5,7 @@
 
 from tortoise import fields
 
-from app.models.base import BaseModel
+from .base import BaseModel
 
 
 class Permission(BaseModel):

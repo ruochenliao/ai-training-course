@@ -7,8 +7,8 @@ import time
 from typing import Callable
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-from app.core.security import verify_token
-from app.crud.user import crud_user
+from ..core.security import verify_token
+from ..crud.user import crud_user
 
 
 class AuthMiddleware(BaseHTTPMiddleware):

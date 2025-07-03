@@ -1,12 +1,18 @@
 <template>
+  <!--
+    应用头部导航栏组件
+    参考 vue-fastapi-admin 的设计风格
+    包含侧边栏折叠按钮、面包屑导航、搜索框、通知、用户操作区域等功能
+  -->
   <div class="layout-header">
-    <!-- 左侧区域 -->
+    <!-- 左侧功能区域 -->
     <div class="header-left">
-      <!-- 折叠按钮 -->
+      <!-- 侧边栏折叠/展开按钮 -->
       <el-button
         type="text"
         class="collapse-btn"
         @click="appStore.toggleSidebar"
+        :title="appStore.sidebarCollapsed ? '展开侧边栏' : '折叠侧边栏'"
       >
         <el-icon size="18">
           <Fold v-if="!appStore.sidebarCollapsed" />
@@ -14,21 +20,50 @@
         </el-icon>
       </el-button>
 
-      <!-- 面包屑导航 -->
+      <!-- 面包屑导航 - 显示当前页面路径 -->
       <el-breadcrumb separator="/" class="breadcrumb">
         <el-breadcrumb-item
           v-for="item in breadcrumbList"
           :key="item.path"
           :to="item.path === route.path ? undefined : item.path"
+          class="breadcrumb-item"
         >
+          <el-icon v-if="item.icon" class="breadcrumb-icon">
+            <component :is="item.icon" />
+          </el-icon>
           {{ item.title }}
         </el-breadcrumb-item>
       </el-breadcrumb>
     </div>
 
-    <!-- 右侧区域 -->
+    <!-- 右侧操作区域 -->
     <div class="header-right">
-      <!-- 全屏按钮 -->
+      <!-- 搜索框 -->
+      <div class="search-box">
+        <el-input
+          v-model="searchKeyword"
+          placeholder="搜索菜单..."
+          :prefix-icon="Search"
+          clearable
+          @keyup.enter="handleSearch"
+          @input="handleSearchInput"
+          class="search-input"
+          size="small"
+        />
+      </div>
+
+      <!-- 通知消息 -->
+      <el-tooltip content="消息通知" placement="bottom">
+        <el-badge :value="notificationCount" :hidden="notificationCount === 0" class="notification-badge">
+          <el-button type="text" @click="showNotifications" class="header-btn">
+            <el-icon size="18">
+              <Bell />
+            </el-icon>
+          </el-button>
+        </el-badge>
+      </el-tooltip>
+
+      <!-- 全屏切换按钮 -->
       <el-tooltip content="全屏" placement="bottom">
         <el-button
           type="text"
@@ -42,8 +77,8 @@
         </el-button>
       </el-tooltip>
 
-      <!-- 主题切换 -->
-      <el-tooltip content="主题切换" placement="bottom">
+      <!-- 主题切换按钮 -->
+      <el-tooltip content="切换主题" placement="bottom">
         <el-button
           type="text"
           class="header-btn"
@@ -56,8 +91,8 @@
         </el-button>
       </el-tooltip>
 
-      <!-- 用户菜单 -->
-      <el-dropdown trigger="click" @command="handleUserCommand">
+      <!-- 用户信息下拉菜单 -->
+      <el-dropdown trigger="click" @command="handleUserCommand" class="user-dropdown">
         <div class="user-info">
           <el-avatar
             :size="32"
@@ -66,23 +101,32 @@
           >
             <el-icon><User /></el-icon>
           </el-avatar>
-          <span class="user-name">{{ authStore.userInfo?.full_name || authStore.userInfo?.username }}</span>
-          <el-icon class="dropdown-icon"><ArrowDown /></el-icon>
+          <div class="user-details">
+            <span class="user-name">{{ authStore.userInfo?.full_name || authStore.userInfo?.username || '用户' }}</span>
+            <span class="user-role">{{ authStore.userInfo?.role_name || '管理员' }}</span>
+          </div>
+          <el-icon class="dropdown-icon" size="14">
+            <ArrowDown />
+          </el-icon>
         </div>
-        
+
         <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item command="profile">
+          <el-dropdown-menu class="user-dropdown-menu">
+            <el-dropdown-item command="profile" class="dropdown-item">
               <el-icon><User /></el-icon>
-              个人资料
+              <span>个人资料</span>
             </el-dropdown-item>
-            <el-dropdown-item command="password">
+            <el-dropdown-item command="password" class="dropdown-item">
               <el-icon><Lock /></el-icon>
-              修改密码
+              <span>修改密码</span>
             </el-dropdown-item>
-            <el-dropdown-item divided command="logout">
+            <el-dropdown-item command="settings" class="dropdown-item">
+              <el-icon><Setting /></el-icon>
+              <span>系统设置</span>
+            </el-dropdown-item>
+            <el-dropdown-item divided command="logout" class="dropdown-item logout-item">
               <el-icon><SwitchButton /></el-icon>
-              退出登录
+              <span>退出登录</span>
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -139,27 +183,40 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+/**
+ * 头部导航栏组件的逻辑处理
+ * 包含侧边栏控制、面包屑导航、搜索、通知、主题切换、用户操作等功能
+ */
+import { computed, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
+import { Search, Bell, FullScreen, Aim, Sunny, Moon, User, Lock, Setting, SwitchButton, Fold, Expand, ArrowDown } from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
 import type { ChangePasswordRequest } from '@/types'
+
+// ==================== 响应式数据定义 ====================
 
 const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
 const authStore = useAuthStore()
 
-// 全屏状态
+// 全屏状态管理
 const isFullscreen = ref(false)
 
-// 修改密码对话框
+// 搜索功能相关
+const searchKeyword = ref('')
+
+// 通知消息相关
+const notificationCount = ref(3) // 模拟通知数量
+
+// 修改密码对话框相关
 const passwordDialogVisible = ref(false)
 const passwordLoading = ref(false)
 const passwordFormRef = ref<FormInstance>()
 
-// 修改密码表单
+// 修改密码表单数据
 const passwordForm = reactive<ChangePasswordRequest>({
   old_password: '',
   new_password: '',
@@ -190,19 +247,57 @@ const passwordRules: FormRules = {
   ]
 }
 
-// 面包屑导航
+// ==================== 计算属性 ====================
+
+/**
+ * 面包屑导航列表
+ * 根据当前路由生成面包屑导航数据
+ */
 const breadcrumbList = computed(() => {
   const matched = route.matched.filter(item => item.meta?.title)
   const breadcrumbs = matched.map(item => ({
     title: item.meta?.title as string,
-    path: item.path
+    path: item.path,
+    icon: item.meta?.icon
   }))
-  
+
   return breadcrumbs
 })
 
+// ==================== 方法定义 ====================
+
 /**
- * 切换全屏
+ * 处理搜索输入
+ * @param value - 搜索关键词
+ */
+const handleSearchInput = (value: string) => {
+  // 实时搜索逻辑可以在这里实现
+  console.log('搜索关键词:', value)
+}
+
+/**
+ * 处理搜索提交
+ * 当用户按下回车键时触发
+ */
+const handleSearch = () => {
+  if (searchKeyword.value.trim()) {
+    ElMessage.info(`搜索: ${searchKeyword.value}`)
+    // 这里可以实现具体的搜索逻辑
+  }
+}
+
+/**
+ * 显示通知消息
+ * 打开通知消息面板
+ */
+const showNotifications = () => {
+  ElMessage.info('通知功能开发中...')
+  // 这里可以实现通知消息的显示逻辑
+}
+
+/**
+ * 切换全屏模式
+ * 进入或退出全屏显示
  */
 const toggleFullscreen = () => {
   if (!document.fullscreenElement) {
@@ -215,7 +310,8 @@ const toggleFullscreen = () => {
 }
 
 /**
- * 切换主题
+ * 切换主题模式
+ * 在明亮和暗黑主题之间切换
  */
 const toggleTheme = () => {
   const newTheme = appStore.themeMode === 'light' ? 'dark' : 'light'
@@ -223,7 +319,8 @@ const toggleTheme = () => {
 }
 
 /**
- * 处理用户菜单命令
+ * 处理用户下拉菜单命令
+ * @param command - 菜单命令类型
  */
 const handleUserCommand = (command: string) => {
   switch (command) {
@@ -234,6 +331,10 @@ const handleUserCommand = (command: string) => {
     case 'password':
       // 打开修改密码对话框
       passwordDialogVisible.value = true
+      break
+    case 'settings':
+      // 跳转到系统设置页面
+      router.push('/settings')
       break
     case 'logout':
       // 退出登录
@@ -297,130 +398,303 @@ document.addEventListener('fullscreenchange', () => {
 </script>
 
 <style lang="scss" scoped>
+/**
+ * 头部导航栏样式
+ * 参考 vue-fastapi-admin 的设计风格
+ * 包含响应式设计和暗色主题支持
+ */
+@import '@/styles/variables.scss';
+
 .layout-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 16px;
+  padding: 0 24px;
   height: 100%;
+  background: $card-color;
+  border-bottom: 1px solid $border-color;
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
 
+  // ==================== 左侧区域样式 ====================
   .header-left {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
 
+    // 折叠按钮样式
     .collapse-btn {
       padding: 8px;
-      color: #606266;
+      color: $text-color-2;
+      border-radius: 6px;
+      transition: all 0.3s ease;
 
       &:hover {
-        color: #409eff;
-        background-color: #ecf5ff;
+        color: $primary-color;
+        background-color: rgba($primary-color, 0.1);
       }
     }
 
+    // 面包屑导航样式
     .breadcrumb {
       font-size: 14px;
 
       :deep(.el-breadcrumb__item) {
         .el-breadcrumb__inner {
-          color: #606266;
+          color: $text-color-2;
           font-weight: normal;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          transition: color 0.3s ease;
 
           &:hover {
-            color: #409eff;
+            color: $primary-color;
           }
         }
 
         &:last-child .el-breadcrumb__inner {
-          color: #303133;
+          color: $text-color-1;
           font-weight: 500;
+        }
+      }
+
+      .breadcrumb-icon {
+        font-size: 14px;
+      }
+    }
+  }
+
+  // ==================== 右侧区域样式 ====================
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    // 搜索框样式
+    .search-box {
+      .search-input {
+        width: 240px;
+
+        :deep(.el-input__wrapper) {
+          border-radius: 20px;
+          background-color: rgba($text-color-3, 0.1);
+          border: 1px solid transparent;
+          transition: all 0.3s ease;
+
+          &:hover {
+            border-color: $primary-color;
+          }
+
+          &.is-focus {
+            border-color: $primary-color;
+            box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+          }
+        }
+      }
+    }
+
+    // 通知徽章样式
+    .notification-badge {
+      :deep(.el-badge__content) {
+        background-color: $error-color;
+        border: none;
+      }
+    }
+
+    // 头部按钮样式
+    .header-btn {
+      padding: 8px;
+      color: $text-color-2;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+
+      &:hover {
+        color: $primary-color;
+        background-color: rgba($primary-color, 0.1);
+      }
+    }
+
+    // 用户信息下拉菜单样式
+    .user-dropdown {
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+
+        &:hover {
+          background-color: rgba($primary-color, 0.05);
+          border-color: rgba($primary-color, 0.2);
+        }
+
+        .user-avatar {
+          flex-shrink: 0;
+          border: 2px solid rgba($primary-color, 0.2);
+        }
+
+        .user-details {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 2px;
+
+          .user-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: $text-color-1;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            line-height: 1.2;
+          }
+
+          .user-role {
+            font-size: 12px;
+            color: $text-color-3;
+            line-height: 1.2;
+          }
+        }
+
+        .dropdown-icon {
+          color: $text-color-3;
+          transition: transform 0.3s ease;
+        }
+
+        &:hover .dropdown-icon {
+          transform: rotate(180deg);
         }
       }
     }
   }
+}
 
-  .header-right {
+// ==================== 用户下拉菜单样式 ====================
+:deep(.user-dropdown-menu) {
+  padding: 8px 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  .dropdown-item {
+    padding: 12px 20px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+    transition: all 0.3s ease;
 
-    .header-btn {
-      padding: 8px;
-      color: #606266;
+    .el-icon {
+      font-size: 16px;
+      color: $text-color-2;
+    }
 
-      &:hover {
-        color: #409eff;
-        background-color: #ecf5ff;
+    span {
+      font-size: 14px;
+      color: $text-color-1;
+    }
+
+    &:hover {
+      background-color: rgba($primary-color, 0.1);
+
+      .el-icon {
+        color: $primary-color;
       }
     }
 
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-
+    &.logout-item {
       &:hover {
-        background-color: #f5f7fa;
-      }
+        background-color: rgba($error-color, 0.1);
 
-      .user-avatar {
-        flex-shrink: 0;
-      }
+        .el-icon {
+          color: $error-color;
+        }
 
-      .user-name {
-        font-size: 14px;
-        color: #303133;
-        max-width: 100px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .dropdown-icon {
-        font-size: 12px;
-        color: #909399;
-        transition: transform 0.3s;
+        span {
+          color: $error-color;
+        }
       }
     }
   }
 }
 
-// 响应式设计
+// ==================== 响应式设计 ====================
+
+// 平板设备适配
+@media (max-width: 992px) {
+  .layout-header {
+    .header-right {
+      .search-box {
+        .search-input {
+          width: 200px;
+        }
+      }
+
+      .user-details {
+        .user-name {
+          max-width: 80px;
+        }
+      }
+    }
+  }
+}
+
+// 手机设备适配
 @media (max-width: 768px) {
   .layout-header {
-    padding: 0 12px;
+    padding: 0 16px;
 
     .header-left {
-      gap: 8px;
+      gap: 12px;
 
       .breadcrumb {
-        display: none;
+        display: none; // 在小屏幕上隐藏面包屑
       }
     }
 
     .header-right {
-      .user-name {
-        display: none;
+      gap: 8px;
+
+      .search-box {
+        display: none; // 在小屏幕上隐藏搜索框
+      }
+
+      .user-details {
+        display: none; // 在小屏幕上隐藏用户详情文字
       }
     }
   }
 }
 
-// 暗色主题
+// 超小屏幕适配
+@media (max-width: 480px) {
+  .layout-header {
+    padding: 0 12px;
+
+    .header-right {
+      .notification-badge,
+      .header-btn:not(:last-child) {
+        display: none; // 在超小屏幕上只保留用户菜单
+      }
+    }
+  }
+}
+
+// ==================== 暗色主题支持 ====================
 .dark {
   .layout-header {
+    background: #1a1a1a;
+    border-bottom-color: #333;
+
     .header-left {
       .collapse-btn {
         color: #a3a6ad;
 
         &:hover {
-          color: #409eff;
-          background-color: rgba(64, 158, 255, 0.1);
+          color: $primary-color;
+          background-color: rgba($primary-color, 0.1);
         }
       }
 
@@ -430,7 +704,7 @@ document.addEventListener('fullscreenchange', () => {
             color: #a3a6ad;
 
             &:hover {
-              color: #409eff;
+              color: $primary-color;
             }
           }
 
@@ -442,23 +716,71 @@ document.addEventListener('fullscreenchange', () => {
     }
 
     .header-right {
+      .search-box {
+        .search-input {
+          :deep(.el-input__wrapper) {
+            background-color: rgba(255, 255, 255, 0.1);
+
+            .el-input__inner {
+              color: #e5eaf3;
+
+              &::placeholder {
+                color: #a3a6ad;
+              }
+            }
+          }
+        }
+      }
+
       .header-btn {
         color: #a3a6ad;
 
         &:hover {
-          color: #409eff;
-          background-color: rgba(64, 158, 255, 0.1);
+          color: $primary-color;
+          background-color: rgba($primary-color, 0.1);
         }
       }
 
-      .user-info {
-        &:hover {
-          background-color: #2b2b2b;
-        }
+      .user-dropdown {
+        .user-info {
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+          }
 
-        .user-name {
-          color: #e5eaf3;
+          .user-details {
+            .user-name {
+              color: #e5eaf3;
+            }
+
+            .user-role {
+              color: #a3a6ad;
+            }
+          }
         }
+      }
+    }
+  }
+
+  // 暗色主题下的下拉菜单
+  :deep(.user-dropdown-menu) {
+    background-color: #2a2a2a;
+    border-color: #333;
+
+    .dropdown-item {
+      .el-icon {
+        color: #a3a6ad;
+      }
+
+      span {
+        color: #e5eaf3;
+      }
+
+      &:hover {
+        background-color: rgba($primary-color, 0.1);
+      }
+
+      &.logout-item:hover {
+        background-color: rgba($error-color, 0.1);
       }
     }
   }

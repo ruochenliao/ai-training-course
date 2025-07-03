@@ -6,7 +6,9 @@ RBAC管理系统 - 主应用入口
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from tortoise.contrib.fastapi import register_tortoise
+from pathlib import Path
 
 from app.core.config import settings
 from app.middleware.exception import ExceptionMiddleware
@@ -43,7 +45,12 @@ def create_app() -> FastAPI:
     
     # 注册路由
     app.include_router(api_router, prefix=settings.API_V1_STR)
-    
+
+    # 配置静态文件服务
+    uploads_dir = Path("uploads")
+    uploads_dir.mkdir(exist_ok=True)
+    app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
     # 注册数据库
     register_tortoise(
         app,

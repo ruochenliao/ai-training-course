@@ -4,12 +4,12 @@
 """
 
 from typing import Optional
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from app.core.security import verify_token
-from app.crud.user import crud_user
-from app.models.user import User
-from app.schemas.common import PaginationParams
+from ..core.security import verify_token
+from ..crud.user import crud_user
+from ..models.user import User
+from ..schemas.common import PaginationParams
 
 
 # HTTP Bearer Token认证
@@ -71,11 +71,11 @@ async def get_current_superuser(
 
 
 def get_pagination_params(
-    page: int = 1,
-    page_size: int = 10,
-    search: Optional[str] = None,
-    sort_field: Optional[str] = None,
-    sort_order: str = "desc"
+    page: int = Query(1, ge=1, description="页码"),
+    page_size: int = Query(10, ge=1, le=1000, description="每页数量"),
+    search: Optional[str] = Query(None, description="搜索关键词"),
+    sort_field: Optional[str] = Query(None, description="排序字段"),
+    sort_order: str = Query("desc", regex="^(asc|desc)$", description="排序方向")
 ) -> PaginationParams:
     """获取分页参数"""
     return PaginationParams(

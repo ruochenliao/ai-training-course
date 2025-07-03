@@ -6,7 +6,7 @@
 from tortoise import fields
 from passlib.hash import bcrypt
 
-from app.models.base import BaseModel
+from .base import BaseModel
 from typing import List
 
 

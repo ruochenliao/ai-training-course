@@ -5,19 +5,19 @@
 
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
-from app.schemas.department import (
+from ...schemas.department import (
     DepartmentCreate, DepartmentUpdate, DepartmentResponse, DepartmentDetailResponse,
     DepartmentTreeResponse, DepartmentListResponse, DepartmentSelectOption,
     DepartmentUserAssign, DepartmentUserResponse, DepartmentStatistics,
     DepartmentSearchParams, DepartmentBatchOperation, DepartmentBatchOperationResponse,
     DepartmentMove, DepartmentImportData, DepartmentImportResponse
 )
-from app.schemas.common import BaseResponse, PaginationParams, IDResponse
-from app.crud.department import crud_department
-from app.models.user import User
-from app.utils.deps import get_current_user, get_pagination_params
-from app.utils.permissions import require_permissions, require_any_permission, PermissionLogic
-from app.utils.response import ResponseHelper
+from ...schemas.common import BaseResponse, PaginationParams, IDResponse
+from ...crud.department import crud_department
+from ...models.user import User
+from ...utils.deps import get_current_user, get_pagination_params
+from ...utils.permissions import require_permissions, require_any_permission, PermissionLogic
+from ...utils.response import ResponseHelper
 
 router = APIRouter()
 

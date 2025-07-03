@@ -50,6 +50,11 @@ export interface UserProfile extends UserInfo {
   roles: string[]
   permissions: string[]
   menus: MenuRoute[]
+  department?: {
+    id: number
+    name: string
+    code: string
+  }
 }
 
 // 修改密码请求类型

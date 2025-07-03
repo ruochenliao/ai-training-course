@@ -5,12 +5,12 @@
 
 from typing import List, Optional, Dict, Any
 from tortoise.expressions import Q
-from app.crud.base import CRUDBase
-from app.models.role import Role
-from app.models.permission import Permission
-from app.models.menu import Menu
-from app.schemas.role import RoleCreate, RoleUpdate
-from app.schemas.common import PaginationParams
+from .base import CRUDBase
+from ..models.role import Role
+from ..models.permission import Permission
+from ..models.menu import Menu
+from ..schemas.role import RoleCreate, RoleUpdate
+from ..schemas.common import PaginationParams
 
 
 class CRUDRole(CRUDBase[Role, RoleCreate, RoleUpdate]):

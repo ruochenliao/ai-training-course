@@ -1,35 +1,67 @@
 /**
- * SCSS变量定义
+ * 全局样式变量配置文件
+ * 参考 vue-fastapi-admin 项目的设计风格
+ * 定义了整个应用的颜色、尺寸、阴影等设计规范
  */
 
-// 颜色变量
-$primary-color: #409eff;
-$success-color: #67c23a;
-$warning-color: #e6a23c;
-$danger-color: #f56c6c;
-$info-color: #909399;
+// ==================== 颜色系统 ====================
 
-// 文本颜色
-$text-color-primary: #303133;
-$text-color-regular: #606266;
-$text-color-secondary: #909399;
-$text-color-placeholder: #c0c4cc;
+// 主色调 - 参考 vue-fastapi-admin 的绿色主题
+$primary-color: #18a058;           // 主要颜色 - 绿色主题
+$primary-color-hover: #36ad6a;     // 主要颜色悬停态
+$primary-color-pressed: #0c7a43;   // 主要颜色按下态
+$primary-color-suppl: #36ad6a;     // 主要颜色补充色
 
-// 边框颜色
-$border-color-base: #dcdfe6;
-$border-color-light: #e4e7ed;
-$border-color-lighter: #ebeef5;
-$border-color-extra-light: #f2f6fc;
+// 信息色彩
+$info-color: #2080f0;              // 信息色
+$info-color-hover: #4098fc;        // 信息色悬停态
+$info-color-pressed: #1060c9;      // 信息色按下态
 
-// 背景颜色
-$background-color-base: #f5f7fa;
-$background-color-light: #fafafa;
+$success-color: #18a058;           // 成功色
+$success-color-hover: #36ad6a;     // 成功色悬停态
+$success-color-pressed: #0c7a43;   // 成功色按下态
 
-// 布局变量
-$header-height: 60px;
-$sidebar-width: 240px;
-$sidebar-collapsed-width: 64px;
-$footer-height: 50px;
+$warning-color: #f0a020;           // 警告色
+$warning-color-hover: #fcb040;     // 警告色悬停态
+$warning-color-pressed: #c97c10;   // 警告色按下态
+
+$error-color: #d03050;             // 错误色
+$error-color-hover: #de576d;       // 错误色悬停态
+$error-color-pressed: #ab1f3f;     // 错误色按下态
+
+// 中性色彩
+$text-color-base: #000000d9;       // 基础文本色
+$text-color-1: #262626;            // 一级文本色
+$text-color-2: #525252;            // 二级文本色
+$text-color-3: #8c8c8c;            // 三级文本色
+$text-color-disabled: #c2c2c2;     // 禁用文本色
+
+// 背景色彩
+$body-color: #f6f9f8;              // 页面背景色
+$card-color: #ffffff;              // 卡片背景色
+$modal-color: #ffffff;             // 模态框背景色
+$popover-color: #ffffff;           // 弹出框背景色
+
+// 边框色彩
+$border-color: #e0e0e6;            // 边框色
+$divider-color: #e0e0e6;           // 分割线色
+$table-border-color: #e0e0e6;      // 表格边框色
+
+// ==================== 布局尺寸 ====================
+
+// 头部导航栏
+$header-height: 64px;              // 头部高度
+$header-padding: 0 24px;           // 头部内边距
+$header-z-index: 1001;             // 头部层级
+
+// 侧边栏
+$sidebar-width: 240px;             // 侧边栏宽度
+$sidebar-collapsed-width: 64px;    // 侧边栏折叠宽度
+$sidebar-z-index: 1000;            // 侧边栏层级
+
+// 主内容区域
+$main-padding: 24px;               // 主内容区域内边距
+$content-max-width: 1200px;        // 内容最大宽度
 
 // 间距变量
 $spacing-xs: 4px;

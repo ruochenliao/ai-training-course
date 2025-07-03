@@ -1,0 +1,374 @@
+/**
+ * 主题配置文件
+ * 参考 vue-fastapi-admin 项目的主题设计
+ * 包含明亮主题和暗色主题的完整配置
+ */
+
+@import './variables.scss';
+
+// ==================== Element Plus 主题定制 ====================
+
+// 覆盖 Element Plus 的默认颜色变量
+:root {
+  // 主色调
+  --el-color-primary: #{$primary-color};
+  --el-color-primary-light-3: #{$primary-color-hover};
+  --el-color-primary-light-5: #{rgba($primary-color, 0.5)};
+  --el-color-primary-light-7: #{rgba($primary-color, 0.3)};
+  --el-color-primary-light-8: #{rgba($primary-color, 0.2)};
+  --el-color-primary-light-9: #{rgba($primary-color, 0.1)};
+  --el-color-primary-dark-2: #{$primary-color-pressed};
+
+  // 成功色
+  --el-color-success: #{$success-color};
+  --el-color-success-light-3: #{$success-color-hover};
+  --el-color-success-dark-2: #{$success-color-pressed};
+
+  // 警告色
+  --el-color-warning: #{$warning-color};
+  --el-color-warning-light-3: #{$warning-color-hover};
+  --el-color-warning-dark-2: #{$warning-color-pressed};
+
+  // 危险色
+  --el-color-danger: #{$error-color};
+  --el-color-danger-light-3: #{$error-color-hover};
+  --el-color-danger-dark-2: #{$error-color-pressed};
+
+  // 信息色
+  --el-color-info: #{$info-color};
+  --el-color-info-light-3: #{$info-color-hover};
+  --el-color-info-dark-2: #{$info-color-pressed};
+
+  // 文本颜色
+  --el-text-color-primary: #{$text-color-1};
+  --el-text-color-regular: #{$text-color-2};
+  --el-text-color-secondary: #{$text-color-3};
+  --el-text-color-placeholder: #{$text-color-disabled};
+
+  // 边框颜色
+  --el-border-color: #{$border-color};
+  --el-border-color-light: #{rgba($border-color, 0.7)};
+  --el-border-color-lighter: #{rgba($border-color, 0.5)};
+  --el-border-color-extra-light: #{rgba($border-color, 0.3)};
+
+  // 背景颜色
+  --el-bg-color: #{$card-color};
+  --el-bg-color-page: #{$body-color};
+  --el-bg-color-overlay: #{$modal-color};
+
+  // 圆角
+  --el-border-radius-base: 6px;
+  --el-border-radius-small: 3px;
+  --el-border-radius-round: 20px;
+  --el-border-radius-circle: 100%;
+
+  // 阴影
+  --el-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+  --el-box-shadow-light: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  --el-box-shadow-base: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+  --el-box-shadow-dark: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.12);
+}
+
+// ==================== 明亮主题 ====================
+.light {
+  // 页面背景
+  background-color: $body-color;
+  color: $text-color-1;
+
+  // 卡片样式
+  .el-card {
+    background-color: $card-color;
+    border-color: $border-color;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+
+    .el-card__header {
+      background-color: rgba($primary-color, 0.02);
+      border-bottom-color: $border-color;
+    }
+  }
+
+  // 表格样式
+  .el-table {
+    background-color: $card-color;
+    color: $text-color-1;
+
+    .el-table__header {
+      background-color: #fafafa;
+    }
+
+    .el-table__row {
+      &:hover {
+        background-color: rgba($primary-color, 0.05);
+      }
+    }
+
+    .el-table__body tr.current-row {
+      background-color: rgba($primary-color, 0.1);
+    }
+  }
+
+  // 表单样式
+  .el-form {
+    .el-form-item__label {
+      color: $text-color-1;
+    }
+  }
+
+  // 输入框样式
+  .el-input {
+    .el-input__wrapper {
+      background-color: $card-color;
+      border-color: $border-color;
+
+      &:hover {
+        border-color: $primary-color;
+      }
+
+      &.is-focus {
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+      }
+    }
+  }
+
+  // 按钮样式增强
+  .el-button {
+    &.el-button--primary {
+      background: linear-gradient(135deg, $primary-color, $primary-color-hover);
+      border-color: $primary-color;
+
+      &:hover {
+        background: linear-gradient(135deg, $primary-color-hover, $primary-color);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba($primary-color, 0.4);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+
+    &.el-button--success {
+      background: linear-gradient(135deg, $success-color, $success-color-hover);
+    }
+
+    &.el-button--warning {
+      background: linear-gradient(135deg, $warning-color, $warning-color-hover);
+    }
+
+    &.el-button--danger {
+      background: linear-gradient(135deg, $error-color, $error-color-hover);
+    }
+  }
+}
+
+// ==================== 暗色主题 ====================
+.dark {
+  // 页面背景
+  background-color: #0f0f0f;
+  color: #e5eaf3;
+
+  // 覆盖 Element Plus 暗色主题变量
+  --el-text-color-primary: #e5eaf3;
+  --el-text-color-regular: #a3a6ad;
+  --el-text-color-secondary: #6c6e72;
+  --el-text-color-placeholder: #6c6e72;
+
+  --el-bg-color: #1a1a1a;
+  --el-bg-color-page: #0f0f0f;
+  --el-bg-color-overlay: #1a1a1a;
+
+  --el-border-color: #333;
+  --el-border-color-light: #2a2a2a;
+  --el-border-color-lighter: #262626;
+  --el-border-color-extra-light: #1f1f1f;
+
+  // 卡片样式
+  .el-card {
+    background-color: #1a1a1a;
+    border-color: #333;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.3);
+
+    .el-card__header {
+      background-color: rgba($primary-color, 0.1);
+      border-bottom-color: #333;
+      color: #e5eaf3;
+    }
+  }
+
+  // 表格样式
+  .el-table {
+    background-color: #1a1a1a;
+    color: #e5eaf3;
+
+    .el-table__header {
+      background-color: #2a2a2a;
+    }
+
+    .el-table__row {
+      &:hover {
+        background-color: rgba($primary-color, 0.1);
+      }
+    }
+
+    .el-table__body tr.current-row {
+      background-color: rgba($primary-color, 0.15);
+    }
+
+    .el-table__border {
+      border-color: #333;
+    }
+  }
+
+  // 表单样式
+  .el-form {
+    .el-form-item__label {
+      color: #e5eaf3;
+    }
+  }
+
+  // 输入框样式
+  .el-input {
+    .el-input__wrapper {
+      background-color: #2a2a2a;
+      border-color: #333;
+
+      .el-input__inner {
+        color: #e5eaf3;
+
+        &::placeholder {
+          color: #6c6e72;
+        }
+      }
+
+      &:hover {
+        border-color: $primary-color;
+      }
+
+      &.is-focus {
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.3);
+      }
+    }
+  }
+
+  // 选择器样式
+  .el-select {
+    .el-select__wrapper {
+      background-color: #2a2a2a;
+      border-color: #333;
+    }
+  }
+
+  // 下拉菜单样式
+  .el-dropdown-menu {
+    background-color: #2a2a2a;
+    border-color: #333;
+
+    .el-dropdown-menu__item {
+      color: #a3a6ad;
+
+      &:hover {
+        background-color: rgba($primary-color, 0.1);
+        color: #e5eaf3;
+      }
+    }
+  }
+
+  // 对话框样式
+  .el-dialog {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+
+    .el-dialog__header {
+      border-bottom: 1px solid #333;
+
+      .el-dialog__title {
+        color: #e5eaf3;
+      }
+    }
+
+    .el-dialog__body {
+      color: #a3a6ad;
+    }
+  }
+
+  // 消息提示样式
+  .el-message {
+    background-color: #2a2a2a;
+    border-color: #333;
+    color: #e5eaf3;
+  }
+
+  // 通知样式
+  .el-notification {
+    background-color: #2a2a2a;
+    border-color: #333;
+    color: #e5eaf3;
+
+    .el-notification__title {
+      color: #e5eaf3;
+    }
+
+    .el-notification__content {
+      color: #a3a6ad;
+    }
+  }
+}
+
+// ==================== 组件特定主题 ====================
+
+// 页面容器
+.page-container {
+  background-color: var(--el-bg-color-page);
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+}
+
+// 内容卡片
+.content-card {
+  background-color: var(--el-bg-color);
+  border: 1px solid var(--el-border-color);
+  border-radius: var(--el-border-radius-base);
+  box-shadow: var(--el-box-shadow-light);
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: var(--el-box-shadow-dark);
+    transform: translateY(-2px);
+  }
+}
+
+// 工具栏
+.toolbar {
+  background-color: var(--el-bg-color);
+  border-bottom: 1px solid var(--el-border-color);
+  padding: 16px 24px;
+}
+
+// 状态标签
+.status-tag {
+  &.success {
+    background-color: rgba($success-color, 0.1);
+    color: $success-color;
+    border: 1px solid rgba($success-color, 0.3);
+  }
+
+  &.warning {
+    background-color: rgba($warning-color, 0.1);
+    color: $warning-color;
+    border: 1px solid rgba($warning-color, 0.3);
+  }
+
+  &.danger {
+    background-color: rgba($error-color, 0.1);
+    color: $error-color;
+    border: 1px solid rgba($error-color, 0.3);
+  }
+
+  &.info {
+    background-color: rgba($info-color, 0.1);
+    color: $info-color;
+    border: 1px solid rgba($info-color, 0.3);
+  }
+}

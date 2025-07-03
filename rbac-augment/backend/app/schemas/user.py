@@ -59,6 +59,21 @@ class UserPasswordReset(BaseModel):
     new_password: str = Field(..., min_length=6, max_length=50, description="新密码")
 
 
+class UserProfileUpdate(BaseModel):
+    """用户个人资料更新模式"""
+    username: Optional[str] = Field(None, min_length=3, max_length=50, description="用户名")
+    email: Optional[EmailStr] = Field(None, description="邮箱")
+    full_name: Optional[str] = Field(None, max_length=100, description="姓名")
+    phone: Optional[str] = Field(None, max_length=20, description="手机号")
+
+    @validator('phone')
+    def validate_phone(cls, v):
+        """验证手机号格式"""
+        if v and not v.isdigit():
+            raise ValueError('手机号只能包含数字')
+        return v
+
+
 class UserRoleAssign(BaseModel):
     """用户角色分配模式"""
     role_ids: List[int] = Field(..., description="角色ID列表")

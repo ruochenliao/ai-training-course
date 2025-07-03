@@ -5,10 +5,10 @@
 
 from typing import List, Optional, Dict, Any
 from tortoise.expressions import Q
-from app.crud.base import CRUDBase
-from app.models.menu import Menu
-from app.schemas.menu import MenuCreate, MenuUpdate
-from app.schemas.common import PaginationParams
+from .base import CRUDBase
+from ..models.menu import Menu
+from ..schemas.menu import MenuCreate, MenuUpdate
+from ..schemas.common import PaginationParams
 
 
 class CRUDMenu(CRUDBase[Menu, MenuCreate, MenuUpdate]):

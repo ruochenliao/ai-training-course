@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     
     # 分页配置
     PAGINATION_PAGE_SIZE: int = 10
-    PAGINATION_MAX_PAGE_SIZE: int = 100
+    PAGINATION_MAX_PAGE_SIZE: int = 1000
     
     # 密码配置
     PASSWORD_MIN_LENGTH: int = 6

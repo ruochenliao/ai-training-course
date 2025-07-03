@@ -43,15 +43,27 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response: AxiosResponse<BaseResponse>) => {
     const { data } = response
-    
-    // 检查业务状态码
-    if (data.code === 200) {
-      return data
-    } else {
-      // 业务错误
-      ElMessage.error(data.message || '请求失败')
-      return Promise.reject(new Error(data.message || '请求失败'))
+
+    // 后端返回的是BaseResponse格式，直接返回data
+    // 如果有code字段，检查是否成功
+    if (data && typeof data === 'object' && 'code' in data) {
+      if (data.code === 200) {
+        return data
+      } else {
+        // 业务错误
+        ElMessage.error(data.message || '请求失败')
+        return Promise.reject(new Error(data.message || '请求失败'))
+      }
     }
+
+    // 如果没有code字段，说明是直接的数据响应，包装成BaseResponse格式
+    return {
+      code: 200,
+      message: 'success',
+      data: data,
+      timestamp: new Date().toISOString(),
+      request_id: ''
+    } as BaseResponse
   },
   async (error) => {
     const { response } = error

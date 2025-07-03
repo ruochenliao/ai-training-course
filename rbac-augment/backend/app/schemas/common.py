@@ -9,7 +9,7 @@ from datetime import datetime
 import uuid
 import time
 import os
-from app.utils.error_codes import ErrorCode
+from ..utils.error_codes import ErrorCode
 
 
 T = TypeVar('T')
@@ -97,7 +97,7 @@ class InternalServerErrorResponse(ErrorResponse):
 class PaginationParams(BaseModel):
     """分页参数模式"""
     page: int = Field(1, ge=1, description="页码")
-    page_size: int = Field(10, ge=1, le=100, description="每页数量")
+    page_size: int = Field(10, ge=1, le=1000, description="每页数量")
     search: Optional[str] = Field(None, description="搜索关键词")
     sort_field: Optional[str] = Field(None, description="排序字段")
     sort_order: Optional[str] = Field("desc", description="排序方向")

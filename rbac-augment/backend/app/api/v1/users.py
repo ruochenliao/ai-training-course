@@ -5,16 +5,16 @@
 
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from app.schemas.user import (
-    UserCreate, UserUpdate, UserResponse, UserDetailResponse, 
+from ...schemas.user import (
+    UserCreate, UserUpdate, UserResponse, UserDetailResponse,
     UserListResponse, UserPasswordReset, UserRoleAssign
 )
-from app.schemas.common import BaseResponse, PaginationResponse, IDResponse, BulkOperationRequest
-from app.crud.user import crud_user
-from app.crud.role import crud_role
-from app.utils.deps import get_current_user, get_pagination_params, require_user_read, require_user_write, require_user_delete
-from app.utils.pagination import create_pagination_response
-from app.models.user import User
+from ...schemas.common import BaseResponse, PaginationResponse, IDResponse, BulkOperationRequest
+from ...crud.user import crud_user
+from ...crud.role import crud_role
+from ...utils.deps import get_current_user, get_pagination_params, require_user_read, require_user_write, require_user_delete
+from ...utils.pagination import create_pagination_response
+from ...models.user import User
 
 router = APIRouter()
 
