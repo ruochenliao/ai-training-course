@@ -71,7 +71,7 @@ export function assignRoleMenus(id: number, data: MenuAssignRequest) {
  * 获取角色选择选项
  */
 export function getRoleOptions() {
-  return request.get<RoleSelectOption[]>('/api/v1/roles/options/select')
+  return request.get<RoleSelectOption[]>('/api/v1/roles/options')
 }
 
 /**
@@ -79,4 +79,18 @@ export function getRoleOptions() {
  */
 export function bulkDeleteRoles(data: BulkOperationRequest) {
   return request.post<BulkOperationResponse>('/api/v1/roles/bulk-delete', data)
+}
+
+/**
+ * 获取角色权限
+ */
+export function getRolePermissions(id: number) {
+  return request.get<{ permission_ids: number[] }>(`/api/v1/roles/${id}/permissions`)
+}
+
+/**
+ * 获取角色菜单
+ */
+export function getRoleMenus(id: number) {
+  return request.get<{ menu_ids: number[] }>(`/api/v1/roles/${id}/menus`)
 }

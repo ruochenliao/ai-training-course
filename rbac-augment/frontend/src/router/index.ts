@@ -116,6 +116,36 @@ const asyncRoutes: RouteRecordRaw[] = [
           icon: 'el-icon-menu',
           permissions: ['menu:read']
         }
+      },
+      {
+        path: 'departments',
+        name: 'SystemDepartment',
+        component: () => import('@/views/system/department/index.vue'),
+        meta: {
+          title: '部门管理',
+          icon: 'el-icon-office-building',
+          permissions: ['department:read']
+        }
+      },
+      {
+        path: 'data-permissions',
+        name: 'SystemDataPermission',
+        component: () => import('@/views/system/data-permission/Index.vue'),
+        meta: {
+          title: '数据权限管理',
+          icon: 'el-icon-key',
+          permissions: ['data_permission:read']
+        }
+      },
+      {
+        path: 'audit-logs',
+        name: 'SystemAuditLog',
+        component: () => import('@/views/system/audit-log/Index.vue'),
+        meta: {
+          title: '审计日志',
+          icon: 'el-icon-document',
+          permissions: ['audit_log:read']
+        }
       }
     ]
   }

@@ -116,6 +116,30 @@ async def get_department_select_options(
         return ResponseHelper.internal_error(detail=str(e), request=request)
 
 
+@router.get("/options", response_model=BaseResponse)
+async def get_department_options(
+    request: Request,
+    current_user: User = Depends(get_current_user)
+):
+    """获取部门选择选项（用于下拉选择）"""
+    try:
+        departments = await crud_department.get_all_active()
+
+        options = [
+            {
+                "id": dept.id,
+                "name": dept.name,
+                "parent_id": dept.parent_id
+            }
+            for dept in departments
+        ]
+
+        return ResponseHelper.success(options, "获取部门选项成功", request=request)
+
+    except Exception as e:
+        return ResponseHelper.internal_error(detail=str(e), request=request)
+
+
 @router.get("/{department_id}", response_model=BaseResponse[DepartmentDetailResponse])
 @require_permissions(["department:read"])
 async def get_department(
@@ -316,3 +340,6 @@ async def get_department_statistics(
         
     except Exception as e:
         return ResponseHelper.internal_error(detail=str(e), request=request)
+
+
+

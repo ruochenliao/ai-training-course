@@ -20,6 +20,8 @@ TORTOISE_ORM = {
                 "app.models.permission",
                 "app.models.menu",
                 "app.models.department",
+                "app.models.audit_log",
+                "app.models.data_permission",
                 "aerich.models"
             ],
             "default_connection": "default",

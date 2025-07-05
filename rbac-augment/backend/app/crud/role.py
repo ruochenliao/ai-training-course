@@ -218,6 +218,10 @@ class CRUDRole(CRUDBase[Role, RoleCreate, RoleUpdate]):
             for role in roles
         ]
 
+    async def get_active_roles(self) -> List[Role]:
+        """获取所有活跃的角色"""
+        return await self.model.filter(is_active=True).order_by("sort_order").all()
+
 
 # 创建角色CRUD实例
 crud_role = CRUDRole(Role)

@@ -302,7 +302,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getRoleList, deleteRole, bulkDeleteRoles, assignRolePermissions, assignRoleMenus, createRole, updateRole, getRoleDetail } from '@/api/role'
+import { getRoleList, deleteRole, bulkDeleteRoles, assignRolePermissions, assignRoleMenus, createRole, updateRole, getRoleDetail, getRolePermissions, getRoleMenus } from '@/api/role'
 import { getPermissionTree } from '@/api/permission'
 import { getMenuTree } from '@/api/menu'
 import { formatDateTime } from '@/utils'
@@ -574,11 +574,12 @@ const handleAssignPermissions = async (row: RoleListItem) => {
     currentRole.value = row
 
     // 获取权限树
-    const response = await getPermissionTree()
-    permissionTree.value = response.data
+    const permissionResponse = await getPermissionTree()
+    permissionTree.value = permissionResponse.data
 
-    // 获取角色已有权限（这里需要后端提供API）
-    selectedPermissions.value = []
+    // 获取角色已有权限
+    const rolePermissionResponse = await getRolePermissions(row.id)
+    selectedPermissions.value = rolePermissionResponse.data.permission_ids
 
     permissionDialogVisible.value = true
   } catch (error) {
@@ -595,11 +596,12 @@ const handleAssignMenus = async (row: RoleListItem) => {
     currentRole.value = row
 
     // 获取菜单树
-    const response = await getMenuTree()
-    menuTree.value = response.data
+    const menuResponse = await getMenuTree()
+    menuTree.value = menuResponse.data
 
-    // 获取角色已有菜单（这里需要后端提供API）
-    selectedMenus.value = []
+    // 获取角色已有菜单
+    const roleMenuResponse = await getRoleMenus(row.id)
+    selectedMenus.value = roleMenuResponse.data.menu_ids
 
     menuDialogVisible.value = true
   } catch (error) {
@@ -625,6 +627,8 @@ const handleSavePermissions = async () => {
 
     ElMessage.success('权限分配成功')
     permissionDialogVisible.value = false
+    // 刷新角色列表
+    fetchRoleList()
   } catch (error) {
     console.error('Failed to assign permissions:', error)
     ElMessage.error('权限分配失败')
@@ -648,6 +652,8 @@ const handleSaveMenus = async () => {
 
     ElMessage.success('菜单分配成功')
     menuDialogVisible.value = false
+    // 刷新角色列表
+    fetchRoleList()
   } catch (error) {
     console.error('Failed to assign menus:', error)
     ElMessage.error('菜单分配失败')

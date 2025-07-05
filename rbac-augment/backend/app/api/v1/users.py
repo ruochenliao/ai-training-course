@@ -7,7 +7,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from ...schemas.user import (
     UserCreate, UserUpdate, UserResponse, UserDetailResponse,
-    UserListResponse, UserPasswordReset, UserRoleAssign
+    UserListResponse, UserPasswordReset, UserRoleAssign, UserOption
 )
 from ...schemas.common import BaseResponse, PaginationResponse, IDResponse, BulkOperationRequest
 from ...crud.user import crud_user
@@ -355,3 +355,22 @@ async def enable_user(
     await user.save()
 
     return BaseResponse(message="用户已启用")
+
+
+@router.get("/options", response_model=BaseResponse[List[UserOption]], summary="获取用户选项列表")
+async def get_user_options(
+    current_user: User = Depends(get_current_user)
+):
+    """获取用户选项列表，用于下拉选择等场景"""
+    users = await User.filter(is_active=True).order_by('username')
+
+    options = []
+    for user in users:
+        options.append({
+            "id": user.id,
+            "username": user.username,
+            "real_name": user.real_name,
+            "email": user.email
+        })
+
+    return BaseResponse(data=options)

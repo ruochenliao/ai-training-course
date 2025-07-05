@@ -102,8 +102,8 @@
             <el-icon><User /></el-icon>
           </el-avatar>
           <div class="user-details">
-            <span class="user-name">{{ authStore.userInfo?.full_name || authStore.userInfo?.username || '用户' }}</span>
-            <span class="user-role">{{ authStore.userInfo?.role_name || '管理员' }}</span>
+            <span class="user-name">{{ displayUserName }}</span>
+            <span class="user-role">{{ displayUserRole }}</span>
           </div>
           <el-icon class="dropdown-icon" size="14">
             <ArrowDown />
@@ -221,6 +221,37 @@ const passwordForm = reactive<ChangePasswordRequest>({
   old_password: '',
   new_password: '',
   confirm_password: ''
+})
+
+// ==================== 计算属性 ====================
+
+/**
+ * 显示用户名
+ */
+const displayUserName = computed(() => {
+  const userInfo = authStore.userInfo
+  if (!userInfo) return '用户'
+
+  return userInfo.full_name || userInfo.username || '用户'
+})
+
+/**
+ * 显示用户角色
+ */
+const displayUserRole = computed(() => {
+  const userInfo = authStore.userInfo
+  if (!userInfo) return '访客'
+
+  if (userInfo.is_superuser) {
+    return '系统管理员'
+  }
+
+  // 如果有角色信息，显示第一个角色
+  if (authStore.roles && authStore.roles.length > 0) {
+    return authStore.roles[0]
+  }
+
+  return '普通用户'
 })
 
 // 密码表单验证规则

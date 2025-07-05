@@ -243,20 +243,55 @@ class PaginationInfo:
 def paginate_list(items: List[T], page: int, page_size: int) -> tuple[List[T], PaginationInfo]:
     """
     对列表进行分页
-    
+
     Args:
         items: 数据列表
         page: 页码
         page_size: 页面大小
-        
+
     Returns:
         tuple: (分页后的数据, 分页信息)
     """
     total = len(items)
     info = PaginationInfo(total, page, page_size)
-    
+
     start = info.offset
     end = start + info.limit
     paginated_items = items[start:end]
-    
+
     return paginated_items, info
+
+
+async def paginate(query, page: int, page_size: int):
+    """
+    对Tortoise ORM查询进行分页
+
+    Args:
+        query: Tortoise ORM查询对象
+        page: 页码
+        page_size: 页面大小
+
+    Returns:
+        dict: 分页结果
+    """
+    # 计算总数
+    total = await query.count()
+
+    # 计算偏移量
+    offset = (page - 1) * page_size
+
+    # 获取分页数据
+    items = await query.offset(offset).limit(page_size)
+
+    # 计算总页数
+    total_pages = math.ceil(total / page_size) if total > 0 else 1
+
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": total_pages,
+        "has_next": page < total_pages,
+        "has_prev": page > 1
+    }

@@ -85,6 +85,29 @@ async def create_role(
     )
 
 
+@router.get("/options", response_model=BaseResponse, summary="获取角色选项")
+async def get_role_options_list(
+    current_user: User = Depends(require_role_read)
+):
+    """获取角色选项列表（用于下拉选择）"""
+    roles = await crud_role.get_active_roles()
+
+    role_options = [
+        {
+            "id": role.id,
+            "name": role.name,
+            "code": role.code,
+            "description": role.description
+        }
+        for role in roles
+    ]
+
+    return BaseResponse(
+        message="获取角色选项成功",
+        data=role_options
+    )
+
+
 @router.get("/{role_id}", response_model=BaseResponse, summary="获取角色详情")
 async def get_role(
     role_id: int,
@@ -308,3 +331,50 @@ async def bulk_delete_roles(
         message=f"成功删除 {deleted_count} 个角色",
         data={"deleted_count": deleted_count}
     )
+
+
+@router.get("/{role_id}/permissions", response_model=BaseResponse, summary="获取角色权限")
+async def get_role_permissions(
+    role_id: int,
+    current_user: User = Depends(require_role_read)
+):
+    """获取角色的权限列表"""
+    role = await crud_role.get_with_permissions(role_id)
+    if not role:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="角色不存在"
+        )
+
+    # 获取角色的权限ID列表
+    permission_ids = [perm.id for perm in role.permissions] if role.permissions else []
+
+    return BaseResponse(
+        message="获取角色权限成功",
+        data={"permission_ids": permission_ids}
+    )
+
+
+@router.get("/{role_id}/menus", response_model=BaseResponse, summary="获取角色菜单")
+async def get_role_menus(
+    role_id: int,
+    current_user: User = Depends(require_role_read)
+):
+    """获取角色的菜单列表"""
+    role = await crud_role.get_with_menus(role_id)
+    if not role:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="角色不存在"
+        )
+
+    # 获取角色的菜单ID列表
+    menu_ids = [menu.id for menu in role.menus] if role.menus else []
+
+    return BaseResponse(
+        message="获取角色菜单成功",
+        data={"menu_ids": menu_ids}
+    )
+
+
+

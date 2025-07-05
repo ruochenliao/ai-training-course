@@ -4,7 +4,7 @@
     <div class="welcome-card">
       <div class="welcome-content">
         <h2 class="welcome-title">
-          欢迎回来，{{ authStore.userInfo?.full_name || authStore.userInfo?.username }}！
+          欢迎回来，{{ displayUserName }}！
         </h2>
         <p class="welcome-subtitle">
           今天是 {{ currentDate }}，祝您工作愉快！
@@ -145,11 +145,19 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { formatDate } from '@/utils'
 
 const authStore = useAuthStore()
+
+// 计算属性
+const displayUserName = computed(() => {
+  const userInfo = authStore.userInfo
+  if (!userInfo) return '用户'
+
+  return userInfo.full_name || userInfo.username || '用户'
+})
 
 // 图表容器引用
 const userChartRef = ref<HTMLElement>()

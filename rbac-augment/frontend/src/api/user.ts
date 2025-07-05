@@ -79,3 +79,10 @@ export function toggleUserStatus(id: number) {
 export function bulkDeleteUsers(data: BulkOperationRequest) {
   return request.post<BulkOperationResponse>('/api/v1/users/bulk-delete', data)
 }
+
+/**
+ * 获取用户选项列表（用于下拉选择）
+ */
+export function getUserOptions() {
+  return request.get<UserListItem[]>('/api/v1/users/options')
+}

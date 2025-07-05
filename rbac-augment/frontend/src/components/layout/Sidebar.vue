@@ -118,6 +118,33 @@ const menuRoutes = computed(() => {
             icon: 'Menu',
             permissions: ['menu:read']
           }
+        },
+        {
+          path: '/system/departments',
+          name: 'SystemDepartment',
+          meta: {
+            title: '部门管理',
+            icon: 'OfficeBuilding',
+            permissions: ['department:read']
+          }
+        },
+        {
+          path: '/system/data-permissions',
+          name: 'SystemDataPermission',
+          meta: {
+            title: '数据权限管理',
+            icon: 'Key',
+            permissions: ['data_permission:read']
+          }
+        },
+        {
+          path: '/system/audit-logs',
+          name: 'SystemAuditLog',
+          meta: {
+            title: '审计日志',
+            icon: 'Document',
+            permissions: ['audit_log:read']
+          }
         }
       ]
     }

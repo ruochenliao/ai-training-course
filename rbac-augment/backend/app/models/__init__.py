@@ -9,6 +9,7 @@ from .role import Role
 from .permission import Permission
 from .menu import Menu
 from .department import Department
+from .data_permission import DataPermission, UserDataPermission, RoleDataPermission
 
 __all__ = [
     "BaseModel",
@@ -16,5 +17,8 @@ __all__ = [
     "Role",
     "Permission",
     "Menu",
-    "Department"
+    "Department",
+    "DataPermission",
+    "UserDataPermission",
+    "RoleDataPermission"
 ]

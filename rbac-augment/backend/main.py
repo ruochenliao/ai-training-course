@@ -14,6 +14,7 @@ from app.core.config import settings
 from app.middleware.exception import ExceptionMiddleware
 from app.middleware.auth import AuthMiddleware
 from app.middleware.security import SecurityMiddleware
+from app.middleware.audit import AuditMiddleware
 from app.api.v1 import api_router
 
 
@@ -38,7 +39,8 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     
-    # 添加自定义中间件（注意顺序：安全中间件 -> 异常处理 -> 认证）
+    # 添加自定义中间件（注意顺序：安全中间件 -> 异常处理 -> 认证 -> 审计）
+    # app.add_middleware(AuditMiddleware)  # 暂时禁用审计中间件
     app.add_middleware(ExceptionMiddleware)
     app.add_middleware(AuthMiddleware)
     app.add_middleware(SecurityMiddleware)

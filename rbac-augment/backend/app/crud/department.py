@@ -335,6 +335,10 @@ class CRUDDepartment(CRUDBase[Department, DepartmentCreate, DepartmentUpdate]):
             "top_departments_by_users": top_departments_by_users
         }
 
+    async def get_all_active(self) -> List[Department]:
+        """获取所有活跃的部门"""
+        return await Department.filter(is_deleted=False, is_active=True).order_by("sort_order").all()
+
 
 # 创建CRUD实例
 crud_department = CRUDDepartment(Department)
