@@ -84,3 +84,10 @@ export function assignDataPermissionToRoles(id: number, data: DataPermissionAssi
 export function checkDataPermission(data: DataPermissionCheckRequest) {
   return request.post('/api/v1/data-permissions/check', data)
 }
+
+/**
+ * 分配数据权限（通用函数）
+ */
+export function assignDataPermission(id: number, data: DataPermissionAssignRequest) {
+  return request.post(`/api/v1/data-permissions/${id}/assign`, data)
+}

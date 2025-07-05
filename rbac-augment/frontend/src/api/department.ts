@@ -137,3 +137,10 @@ export function getDepartmentOptions() {
 export function bulkDeleteDepartments(data: BulkOperationRequest) {
   return request.post<BulkOperationResponse>('/api/v1/departments/bulk-delete', data)
 }
+
+/**
+ * 获取部门员工列表（别名函数）
+ */
+export function getDepartmentEmployees(id: number, params?: PaginationParams) {
+  return getDepartmentUsers(id, params)
+}

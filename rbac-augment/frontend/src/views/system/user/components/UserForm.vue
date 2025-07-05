@@ -116,6 +116,8 @@ import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { createUser, updateUser } from '@/api/user'
 import { getRoleOptions } from '@/api/role'
 import { isValidEmail, isValidPhone } from '@/utils'
+import { commonRules, validateEmail, validatePhone, validatePassword } from '@/utils/validation'
+import { loadingManager } from '@/utils/performance'
 import type { UserCreateRequest, UserUpdateRequest, RoleSelectOption } from '@/types'
 
 interface Props {
@@ -159,32 +161,13 @@ const form = reactive<UserCreateRequest & { confirm_password?: string }>({
   role_ids: []
 })
 
-// 表单验证规则
+// 表单验证规则 - 使用新的验证规则库
 const formRules: FormRules = {
-  username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 50, message: '用户名长度在 3 到 50 个字符', trigger: 'blur' },
-    { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含字母、数字和下划线', trigger: 'blur' }
-  ],
-  email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    {
-      validator: (rule, value, callback) => {
-        if (!isValidEmail(value)) {
-          callback(new Error('请输入正确的邮箱格式'))
-        } else {
-          callback()
-        }
-      },
-      trigger: 'blur'
-    }
-  ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, max: 50, message: '密码长度在 6 到 50 个字符', trigger: 'blur' }
-  ],
+  username: commonRules.username(),
+  email: commonRules.email(),
+  password: commonRules.password(),
   confirm_password: [
-    { required: true, message: '请确认密码', trigger: 'blur' },
+    commonRules.required('请确认密码'),
     {
       validator: (rule, value, callback) => {
         if (value !== form.password) {
@@ -196,17 +179,10 @@ const formRules: FormRules = {
       trigger: 'blur'
     }
   ],
-  phone: [
-    {
-      validator: (rule, value, callback) => {
-        if (value && !isValidPhone(value)) {
-          callback(new Error('请输入正确的手机号格式'))
-        } else {
-          callback()
-        }
-      },
-      trigger: 'blur'
-    }
+  phone: commonRules.phone(false), // 手机号非必填
+  full_name: [
+    commonRules.required('请输入姓名'),
+    commonRules.length(2, 50, '姓名长度在 2 到 50 个字符')
   ]
 }
 
@@ -240,34 +216,35 @@ const resetForm = () => {
 }
 
 /**
- * 处理提交
+ * 处理提交 - 使用增强的加载管理和错误处理
  */
 const handleSubmit = async () => {
   if (!formRef.value) return
 
   try {
+    // 表单验证
     await formRef.value.validate()
-    
-    loading.value = true
 
-    if (props.formType === 'add') {
-      // 新增用户
-      const { confirm_password, ...createData } = form
-      await createUser(createData as UserCreateRequest)
-      ElMessage.success('用户创建成功')
-    } else {
-      // 编辑用户
-      const { password, confirm_password, username, ...updateData } = form
-      await updateUser(props.formData.id, updateData as UserUpdateRequest)
-      ElMessage.success('用户更新成功')
-    }
+    // 使用加载管理器包装异步操作
+    await loadingManager.wrap(async () => {
+      if (props.formType === 'add') {
+        // 新增用户
+        const { confirm_password, ...createData } = form
+        await createUser(createData as UserCreateRequest)
+        ElMessage.success('用户创建成功')
+      } else {
+        // 编辑用户
+        const { password, confirm_password, username, ...updateData } = form
+        await updateUser(props.formData.id, updateData as UserUpdateRequest)
+        ElMessage.success('用户更新成功')
+      }
+    }, 'user-form-submit')
 
     emit('success')
     handleClose()
   } catch (error) {
     console.error('Failed to submit user form:', error)
-  } finally {
-    loading.value = false
+    // 错误处理已由全局错误处理器处理
   }
 }
 

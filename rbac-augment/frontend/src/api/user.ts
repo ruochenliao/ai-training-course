@@ -60,6 +60,13 @@ export function resetUserPassword(id: number, data: PasswordResetRequest) {
 }
 
 /**
+ * 更新用户状态
+ */
+export function updateUserStatus(id: number, data: { is_active: boolean }) {
+  return request.put(`/api/v1/users/${id}/status`, data)
+}
+
+/**
  * 分配用户角色
  */
 export function assignUserRoles(id: number, data: RoleAssignRequest) {

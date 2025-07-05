@@ -1,104 +1,156 @@
 /**
- * 全局样式变量配置文件
- * 参考 vue-fastapi-admin 项目的设计风格
- * 定义了整个应用的颜色、尺寸、阴影等设计规范
+ * 企业级设计系统变量配置
+ * 基于现代化设计原则，提供完整的设计令牌系统
+ * 支持明暗主题、响应式设计和无障碍访问
  */
 
-// ==================== 颜色系统 ====================
+// ==================== 设计令牌系统 ====================
 
-// 主色调 - 参考 vue-fastapi-admin 的绿色主题
-$primary-color: #18a058;           // 主要颜色 - 绿色主题
-$primary-color-hover: #36ad6a;     // 主要颜色悬停态
-$primary-color-pressed: #0c7a43;   // 主要颜色按下态
-$primary-color-suppl: #36ad6a;     // 主要颜色补充色
+// 主色调系统 - 现代化蓝绿色主题
+$primary-color: #1890ff;           // 主要颜色 - 现代蓝色
+$primary-color-hover: #40a9ff;     // 主要颜色悬停态
+$primary-color-active: #096dd9;    // 主要颜色激活态
+$primary-color-light: #e6f7ff;     // 主要颜色浅色
+$primary-color-dark: #0050b3;      // 主要颜色深色
 
-// 信息色彩
-$info-color: #2080f0;              // 信息色
-$info-color-hover: #4098fc;        // 信息色悬停态
-$info-color-pressed: #1060c9;      // 信息色按下态
+// 语义色彩系统
+$success-color: #52c41a;           // 成功色
+$success-color-hover: #73d13d;     // 成功色悬停态
+$success-color-active: #389e0d;    // 成功色激活态
+$success-color-light: #f6ffed;     // 成功色浅色
 
-$success-color: #18a058;           // 成功色
-$success-color-hover: #36ad6a;     // 成功色悬停态
-$success-color-pressed: #0c7a43;   // 成功色按下态
+$warning-color: #faad14;           // 警告色
+$warning-color-hover: #ffc53d;     // 警告色悬停态
+$warning-color-active: #d48806;    // 警告色激活态
+$warning-color-light: #fffbe6;     // 警告色浅色
 
-$warning-color: #f0a020;           // 警告色
-$warning-color-hover: #fcb040;     // 警告色悬停态
-$warning-color-pressed: #c97c10;   // 警告色按下态
+$error-color: #ff4d4f;             // 错误色
+$error-color-hover: #ff7875;       // 错误色悬停态
+$error-color-active: #d9363e;      // 错误色激活态
+$error-color-light: #fff2f0;       // 错误色浅色
 
-$error-color: #d03050;             // 错误色
-$error-color-hover: #de576d;       // 错误色悬停态
-$error-color-pressed: #ab1f3f;     // 错误色按下态
+$info-color: #1890ff;              // 信息色
+$info-color-hover: #40a9ff;        // 信息色悬停态
+$info-color-active: #096dd9;       // 信息色激活态
+$info-color-light: #e6f7ff;        // 信息色浅色
 
-// 中性色彩
-$text-color-base: #000000d9;       // 基础文本色
-$text-color-1: #262626;            // 一级文本色
-$text-color-2: #525252;            // 二级文本色
-$text-color-3: #8c8c8c;            // 三级文本色
-$text-color-disabled: #c2c2c2;     // 禁用文本色
+// 中性色彩系统
+$text-color-1: #262626;            // 标题文本色
+$text-color-2: #595959;            // 主要文本色
+$text-color-3: #8c8c8c;            // 次要文本色
+$text-color-4: #bfbfbf;            // 禁用文本色
+$text-color-inverse: #ffffff;      // 反色文本
 
-// 背景色彩
-$body-color: #f6f9f8;              // 页面背景色
+// 背景色彩系统
+$bg-color: #f0f2f5;                // 页面背景色
+$bg-color-page: #ffffff;           // 内容背景色
 $card-color: #ffffff;              // 卡片背景色
 $modal-color: #ffffff;             // 模态框背景色
-$popover-color: #ffffff;           // 弹出框背景色
 
-// 边框色彩
-$border-color: #e0e0e6;            // 边框色
-$divider-color: #e0e0e6;           // 分割线色
-$table-border-color: #e0e0e6;      // 表格边框色
+// 边框色彩系统
+$border-color: #d9d9d9;            // 默认边框色
+$border-color-light: #e8e8e8;      // 浅色边框
+$border-color-dark: #bfbfbf;       // 深色边框
+$divider-color: #f0f0f0;           // 分割线色
 
-// ==================== 布局尺寸 ====================
+// ==================== 布局系统 ====================
 
 // 头部导航栏
 $header-height: 64px;              // 头部高度
 $header-padding: 0 24px;           // 头部内边距
-$header-z-index: 1001;             // 头部层级
 
 // 侧边栏
-$sidebar-width: 240px;             // 侧边栏宽度
+$sidebar-width: 256px;             // 侧边栏宽度
 $sidebar-collapsed-width: 64px;    // 侧边栏折叠宽度
-$sidebar-z-index: 1000;            // 侧边栏层级
 
 // 主内容区域
-$main-padding: 24px;               // 主内容区域内边距
-$content-max-width: 1200px;        // 内容最大宽度
+$content-padding: 24px;            // 内容区域内边距
+$content-max-width: 1440px;        // 内容最大宽度
 
-// 间距变量
-$spacing-xs: 4px;
-$spacing-sm: 8px;
-$spacing-md: 16px;
-$spacing-lg: 24px;
-$spacing-xl: 32px;
+// ==================== 间距系统 ====================
+$spacing-xs: 4px;                  // 超小间距
+$spacing-sm: 8px;                  // 小间距
+$spacing-md: 16px;                 // 中等间距
+$spacing-lg: 24px;                 // 大间距
+$spacing-xl: 32px;                 // 超大间距
+$spacing-xxl: 48px;                // 特大间距
 
-// 圆角变量
-$border-radius-base: 4px;
-$border-radius-small: 2px;
-$border-radius-large: 6px;
+// ==================== 圆角系统 ====================
+$border-radius-sm: 2px;            // 小圆角
+$border-radius-base: 6px;          // 基础圆角
+$border-radius-lg: 8px;            // 大圆角
+$border-radius-xl: 12px;           // 超大圆角
 
-// 阴影变量
-$box-shadow-base: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
-$box-shadow-light: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+// ==================== 阴影系统 ====================
+$box-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02);
+$box-shadow-base: 0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px rgba(0, 0, 0, 0.02);
+$box-shadow-light: 0 4px 12px rgba(0, 0, 0, 0.15);
+$box-shadow-heavy: 0 8px 24px rgba(0, 0, 0, 0.12);
 
-// 字体变量
-$font-size-xs: 12px;
-$font-size-sm: 13px;
-$font-size-base: 14px;
-$font-size-lg: 16px;
-$font-size-xl: 18px;
+// ==================== 字体系统 ====================
+$font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+$font-family-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
 
-// 层级变量
-$z-index-normal: 1;
-$z-index-top: 1000;
-$z-index-popper: 2000;
+$font-size-xs: 12px;               // 超小字体
+$font-size-sm: 13px;               // 小字体
+$font-size-base: 14px;             // 基础字体
+$font-size-lg: 16px;               // 大字体
+$font-size-xl: 18px;               // 超大字体
+$font-size-xxl: 20px;              // 特大字体
 
-// 动画变量
-$transition-base: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-$transition-fade: opacity 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-$transition-md-fade: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+$font-weight-normal: 400;          // 正常字重
+$font-weight-medium: 500;          // 中等字重
+$font-weight-semibold: 600;        // 半粗字重
+$font-weight-bold: 700;            // 粗体字重
 
-// 暗色主题变量
-$dark-bg-color: #1d1e1f;
-$dark-bg-color-light: #2b2b2b;
-$dark-text-color: #e5eaf3;
-$dark-text-color-light: #a3a6ad;
-$dark-border-color: #4c4d4f;
+$line-height-base: 1.5715;         // 基础行高
+$line-height-lg: 1.5;              // 大行高
+$line-height-sm: 1.66;             // 小行高
+
+// ==================== 层级系统 ====================
+$z-index-dropdown: 1050;           // 下拉菜单
+$z-index-sticky: 1020;             // 粘性定位
+$z-index-fixed: 1030;              // 固定定位
+$z-index-modal-backdrop: 1040;     // 模态框背景
+$z-index-modal: 1050;              // 模态框
+$z-index-popover: 1060;            // 弹出框
+$z-index-tooltip: 1070;            // 工具提示
+$z-index-toast: 1080;              // 消息提示
+
+// 布局层级
+$z-index-sidebar: 1001;            // 侧边栏
+$z-index-header: 1002;             // 头部
+$z-index-overlay: 1003;            // 遮罩层
+$z-index-loading: 9999;            // 加载层
+
+// ==================== 动画系统 ====================
+$transition-duration: 0.3s;        // 动画持续时间
+$transition-timing: cubic-bezier(0.4, 0, 0.2, 1); // 动画缓动函数
+
+$transition-base: all $transition-duration $transition-timing;
+$transition-fade: opacity $transition-duration $transition-timing;
+$transition-slide: transform $transition-duration $transition-timing;
+
+// ==================== 暗色主题系统 ====================
+$dark-bg-color: #141414;           // 暗色页面背景
+$dark-bg-color-page: #1f1f1f;      // 暗色内容背景
+$dark-card-color: #262626;         // 暗色卡片背景
+$dark-modal-color: #262626;        // 暗色模态框背景
+
+$dark-text-color-1: #ffffff;       // 暗色标题文本
+$dark-text-color-2: #e8e8e8;       // 暗色主要文本
+$dark-text-color-3: #a6a6a6;       // 暗色次要文本
+$dark-text-color-4: #595959;       // 暗色禁用文本
+
+$dark-border-color: #434343;       // 暗色边框
+$dark-border-color-light: #303030; // 暗色浅边框
+$dark-border-color-dark: #595959;  // 暗色深边框
+$dark-divider-color: #303030;      // 暗色分割线
+
+// ==================== 响应式断点 ====================
+$breakpoint-xs: 480px;             // 超小屏幕
+$breakpoint-sm: 576px;             // 小屏幕
+$breakpoint-md: 768px;             // 中等屏幕
+$breakpoint-lg: 992px;             // 大屏幕
+$breakpoint-xl: 1200px;            // 超大屏幕
+$breakpoint-xxl: 1600px;           // 特大屏幕

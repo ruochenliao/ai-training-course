@@ -17,43 +17,43 @@
   --el-color-primary-light-7: #{rgba($primary-color, 0.3)};
   --el-color-primary-light-8: #{rgba($primary-color, 0.2)};
   --el-color-primary-light-9: #{rgba($primary-color, 0.1)};
-  --el-color-primary-dark-2: #{$primary-color-pressed};
+  --el-color-primary-dark-2: #{$primary-color-active};
 
   // 成功色
   --el-color-success: #{$success-color};
   --el-color-success-light-3: #{$success-color-hover};
-  --el-color-success-dark-2: #{$success-color-pressed};
+  --el-color-success-dark-2: #{$success-color-active};
 
   // 警告色
   --el-color-warning: #{$warning-color};
   --el-color-warning-light-3: #{$warning-color-hover};
-  --el-color-warning-dark-2: #{$warning-color-pressed};
+  --el-color-warning-dark-2: #{$warning-color-active};
 
   // 危险色
   --el-color-danger: #{$error-color};
   --el-color-danger-light-3: #{$error-color-hover};
-  --el-color-danger-dark-2: #{$error-color-pressed};
+  --el-color-danger-dark-2: #{$error-color-active};
 
   // 信息色
   --el-color-info: #{$info-color};
   --el-color-info-light-3: #{$info-color-hover};
-  --el-color-info-dark-2: #{$info-color-pressed};
+  --el-color-info-dark-2: #{$info-color-active};
 
   // 文本颜色
   --el-text-color-primary: #{$text-color-1};
   --el-text-color-regular: #{$text-color-2};
   --el-text-color-secondary: #{$text-color-3};
-  --el-text-color-placeholder: #{$text-color-disabled};
+  --el-text-color-placeholder: #{$text-color-4};
 
   // 边框颜色
   --el-border-color: #{$border-color};
-  --el-border-color-light: #{rgba($border-color, 0.7)};
+  --el-border-color-light: #{$border-color-light};
   --el-border-color-lighter: #{rgba($border-color, 0.5)};
   --el-border-color-extra-light: #{rgba($border-color, 0.3)};
 
   // 背景颜色
   --el-bg-color: #{$card-color};
-  --el-bg-color-page: #{$body-color};
+  --el-bg-color-page: #{$bg-color};
   --el-bg-color-overlay: #{$modal-color};
 
   // 圆角
@@ -72,7 +72,7 @@
 // ==================== 明亮主题 ====================
 .light {
   // 页面背景
-  background-color: $body-color;
+  background-color: $bg-color;
   color: $text-color-1;
 
   // 卡片样式
@@ -165,44 +165,44 @@
 // ==================== 暗色主题 ====================
 .dark {
   // 页面背景
-  background-color: #0f0f0f;
-  color: #e5eaf3;
+  background-color: $dark-bg-color;
+  color: $dark-text-color-1;
 
   // 覆盖 Element Plus 暗色主题变量
-  --el-text-color-primary: #e5eaf3;
-  --el-text-color-regular: #a3a6ad;
-  --el-text-color-secondary: #6c6e72;
-  --el-text-color-placeholder: #6c6e72;
+  --el-text-color-primary: #{$dark-text-color-1};
+  --el-text-color-regular: #{$dark-text-color-2};
+  --el-text-color-secondary: #{$dark-text-color-3};
+  --el-text-color-placeholder: #{$dark-text-color-4};
 
-  --el-bg-color: #1a1a1a;
-  --el-bg-color-page: #0f0f0f;
-  --el-bg-color-overlay: #1a1a1a;
+  --el-bg-color: #{$dark-card-color};
+  --el-bg-color-page: #{$dark-bg-color};
+  --el-bg-color-overlay: #{$dark-modal-color};
 
-  --el-border-color: #333;
-  --el-border-color-light: #2a2a2a;
-  --el-border-color-lighter: #262626;
-  --el-border-color-extra-light: #1f1f1f;
+  --el-border-color: #{$dark-border-color};
+  --el-border-color-light: #{$dark-border-color-light};
+  --el-border-color-lighter: #{rgba($dark-border-color, 0.5)};
+  --el-border-color-extra-light: #{rgba($dark-border-color, 0.3)};
 
   // 卡片样式
   .el-card {
-    background-color: #1a1a1a;
-    border-color: #333;
+    background-color: $dark-card-color;
+    border-color: $dark-border-color;
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.3);
 
     .el-card__header {
       background-color: rgba($primary-color, 0.1);
-      border-bottom-color: #333;
-      color: #e5eaf3;
+      border-bottom-color: $dark-border-color;
+      color: $dark-text-color-1;
     }
   }
 
   // 表格样式
   .el-table {
-    background-color: #1a1a1a;
-    color: #e5eaf3;
+    background-color: $dark-card-color;
+    color: $dark-text-color-1;
 
     .el-table__header {
-      background-color: #2a2a2a;
+      background-color: $dark-bg-color-page;
     }
 
     .el-table__row {
@@ -216,28 +216,28 @@
     }
 
     .el-table__border {
-      border-color: #333;
+      border-color: $dark-border-color;
     }
   }
 
   // 表单样式
   .el-form {
     .el-form-item__label {
-      color: #e5eaf3;
+      color: $dark-text-color-1;
     }
   }
 
   // 输入框样式
   .el-input {
     .el-input__wrapper {
-      background-color: #2a2a2a;
-      border-color: #333;
+      background-color: $dark-bg-color-page;
+      border-color: $dark-border-color;
 
       .el-input__inner {
-        color: #e5eaf3;
+        color: $dark-text-color-1;
 
         &::placeholder {
-          color: #6c6e72;
+          color: $dark-text-color-4;
         }
       }
 
@@ -255,63 +255,63 @@
   // 选择器样式
   .el-select {
     .el-select__wrapper {
-      background-color: #2a2a2a;
-      border-color: #333;
+      background-color: $dark-bg-color-page;
+      border-color: $dark-border-color;
     }
   }
 
   // 下拉菜单样式
   .el-dropdown-menu {
-    background-color: #2a2a2a;
-    border-color: #333;
+    background-color: $dark-bg-color-page;
+    border-color: $dark-border-color;
 
     .el-dropdown-menu__item {
-      color: #a3a6ad;
+      color: $dark-text-color-2;
 
       &:hover {
         background-color: rgba($primary-color, 0.1);
-        color: #e5eaf3;
+        color: $dark-text-color-1;
       }
     }
   }
 
   // 对话框样式
   .el-dialog {
-    background-color: #1a1a1a;
-    border: 1px solid #333;
+    background-color: $dark-card-color;
+    border: 1px solid $dark-border-color;
 
     .el-dialog__header {
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid $dark-border-color;
 
       .el-dialog__title {
-        color: #e5eaf3;
+        color: $dark-text-color-1;
       }
     }
 
     .el-dialog__body {
-      color: #a3a6ad;
+      color: $dark-text-color-2;
     }
   }
 
   // 消息提示样式
   .el-message {
-    background-color: #2a2a2a;
-    border-color: #333;
-    color: #e5eaf3;
+    background-color: $dark-bg-color-page;
+    border-color: $dark-border-color;
+    color: $dark-text-color-1;
   }
 
   // 通知样式
   .el-notification {
-    background-color: #2a2a2a;
-    border-color: #333;
-    color: #e5eaf3;
+    background-color: $dark-bg-color-page;
+    border-color: $dark-border-color;
+    color: $dark-text-color-1;
 
     .el-notification__title {
-      color: #e5eaf3;
+      color: $dark-text-color-1;
     }
 
     .el-notification__content {
-      color: #a3a6ad;
+      color: $dark-text-color-2;
     }
   }
 }
