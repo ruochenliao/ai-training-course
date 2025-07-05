@@ -210,7 +210,7 @@ import { onMounted, ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Key, Plus, Refresh, Menu, Grid, Collection,
-  View, Edit, Delete, Expand, Fold
+  View, Edit, Delete, Expand, Fold, Download
 } from '@element-plus/icons-vue'
 import {
   getPermissionList,

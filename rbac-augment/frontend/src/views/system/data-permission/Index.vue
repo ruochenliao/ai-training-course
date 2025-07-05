@@ -300,7 +300,7 @@ import { onMounted, ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Lock, Plus, Refresh, DocumentCopy, Setting,
-  View, Edit, Delete, UserFilled, Key, Database
+  View, Edit, Delete, UserFilled, Key, DataBoard
 } from '@element-plus/icons-vue'
 import {
   getDataPermissionList,

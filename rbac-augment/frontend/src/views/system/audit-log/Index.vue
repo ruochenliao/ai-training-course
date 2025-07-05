@@ -234,9 +234,9 @@ import {
   Warning, Search, View
 } from '@element-plus/icons-vue'
 import {
-  getAuditLogs,
-  getAuditStats,
-  exportAuditLogs
+  getAuditLogList,
+  getAuditLogStats,
+  exportAuditLogsCSV
 } from '@/api/audit-log'
 import { formatDateTime } from '@/utils'
 import { useAuthStore } from '@/stores/auth'
@@ -405,7 +405,7 @@ const fetchAuditLogs = async () => {
       page_size: pagination.page_size,
       ...searchForm
     }
-    const response = await getAuditLogs(params)
+    const response = await getAuditLogList(params)
     auditLogs.value = response.data.items
     pagination.total = response.data.total
   } catch (error) {
@@ -421,7 +421,7 @@ const fetchAuditLogs = async () => {
  */
 const fetchStats = async () => {
   try {
-    const response = await getAuditStats()
+    const response = await getAuditLogStats()
     stats.value = response.data
   } catch (error) {
     console.error('Failed to fetch audit stats:', error)
@@ -483,7 +483,7 @@ const handleExport = async () => {
   try {
     loading.value = true
     const params = { ...searchForm }
-    await exportAuditLogs(params)
+    await exportAuditLogsCSV(params)
     ElMessage.success('导出成功')
   } catch (error) {
     console.error('Failed to export audit logs:', error)
