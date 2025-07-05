@@ -136,13 +136,128 @@
         </el-table>
       </el-card>
     </div>
+
+    <!-- 菜单表单对话框 -->
+    <el-dialog
+      v-model="dialogVisible"
+      :title="dialogTitle"
+      width="800px"
+      :close-on-click-modal="false"
+      @close="handleDialogClose"
+    >
+      <el-form
+        ref="formRef"
+        :model="formData"
+        :rules="formRules"
+        label-width="100px"
+        :disabled="!isEdit && dialogTitle.includes('查看')"
+      >
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="菜单名称" prop="title">
+              <el-input v-model="formData.title" placeholder="请输入菜单名称" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="路由名称" prop="name">
+              <el-input v-model="formData.name" placeholder="请输入路由名称" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="路由路径" prop="path">
+              <el-input v-model="formData.path" placeholder="请输入路由路径" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="组件路径">
+              <el-input v-model="formData.component" placeholder="请输入组件路径" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="父级菜单">
+              <el-cascader
+                v-model="formData.parent_id"
+                :options="menuOptions"
+                :props="{ checkStrictly: true, emitPath: false }"
+                placeholder="请选择父级菜单"
+                clearable
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="菜单图标">
+              <el-input v-model="formData.icon" placeholder="请输入图标名称" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="排序">
+              <el-input-number
+                v-model="formData.sort_order"
+                :min="0"
+                :max="999"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="是否显示">
+              <el-switch v-model="formData.is_visible" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="外部链接">
+              <el-switch v-model="formData.is_external" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="页面缓存">
+              <el-switch v-model="formData.cache" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="重定向">
+              <el-input v-model="formData.redirect" placeholder="请输入重定向路径" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-form-item label="菜单描述">
+          <el-input
+            v-model="formData.description"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入菜单描述"
+          />
+        </el-form-item>
+      </el-form>
+
+      <template #footer v-if="isEdit || !dialogTitle.includes('查看')">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleSubmit">
+          {{ isEdit ? '更新' : '创建' }}
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getMenuTree, deleteMenu } from '@/api/menu'
+import { getMenuTree, deleteMenu, createMenu, updateMenu } from '@/api/menu'
 import { formatDateTime } from '@/utils'
 import type { MenuTreeNode } from '@/types'
 
@@ -171,25 +286,104 @@ const fetchMenuTree = async () => {
   }
 }
 
+// 对话框状态
+const dialogVisible = ref(false)
+const dialogTitle = ref('')
+const isEdit = ref(false)
+const currentMenuId = ref<number>()
+
+// 表单引用
+const formRef = ref()
+
+// 表单数据
+const formData = ref({
+  title: '',
+  name: '',
+  path: '',
+  component: '',
+  parent_id: null as number | null,
+  icon: '',
+  sort_order: 0,
+  is_visible: true,
+  is_external: false,
+  cache: false,
+  redirect: '',
+  description: ''
+})
+
+// 表单验证规则
+const formRules = {
+  title: [
+    { required: true, message: '请输入菜单名称', trigger: 'blur' },
+    { min: 2, max: 50, message: '菜单名称长度在 2 到 50 个字符', trigger: 'blur' }
+  ],
+  name: [
+    { required: true, message: '请输入路由名称', trigger: 'blur' },
+    { pattern: /^[a-zA-Z][a-zA-Z0-9_]*$/, message: '路由名称只能包含字母、数字和下划线，且以字母开头', trigger: 'blur' }
+  ],
+  path: [
+    { required: true, message: '请输入路由路径', trigger: 'blur' }
+  ]
+}
+
+// 菜单选项（用于父菜单选择）
+const menuOptions = ref<any[]>([])
+
+/**
+ * 获取菜单选项
+ */
+const fetchMenuOptions = async () => {
+  try {
+    const response = await getMenuTree()
+    menuOptions.value = buildMenuOptions(response.data)
+  } catch (error) {
+    console.error('Failed to fetch menu options:', error)
+  }
+}
+
+/**
+ * 构建菜单选项树
+ */
+const buildMenuOptions = (menus: MenuTreeNode[]): any[] => {
+  return menus.map(menu => ({
+    value: menu.id,
+    label: menu.title,
+    children: menu.children && menu.children.length > 0 ? buildMenuOptions(menu.children) : undefined
+  }))
+}
+
 /**
  * 处理新增
  */
 const handleAdd = () => {
-  ElMessage.info('菜单新增功能开发中...')
+  dialogTitle.value = '新增菜单'
+  isEdit.value = false
+  resetForm()
+  fetchMenuOptions()
+  dialogVisible.value = true
 }
 
 /**
  * 处理查看
  */
 const handleView = (row: MenuTreeNode) => {
-  ElMessage.info('菜单详情功能开发中...')
+  dialogTitle.value = '查看菜单'
+  isEdit.value = false
+  fillForm(row)
+  fetchMenuOptions()
+  dialogVisible.value = true
 }
 
 /**
  * 处理编辑
  */
 const handleEdit = (row: MenuTreeNode) => {
-  ElMessage.info('菜单编辑功能开发中...')
+  dialogTitle.value = '编辑菜单'
+  isEdit.value = true
+  currentMenuId.value = row.id
+  fillForm(row)
+  fetchMenuOptions()
+  dialogVisible.value = true
 }
 
 /**
@@ -255,6 +449,82 @@ const handleCollapseAll = () => {
  */
 const handleRefresh = () => {
   fetchMenuTree()
+}
+
+/**
+ * 重置表单
+ */
+const resetForm = () => {
+  formData.value = {
+    title: '',
+    name: '',
+    path: '',
+    component: '',
+    parent_id: null,
+    icon: '',
+    sort_order: 0,
+    is_visible: true,
+    is_external: false,
+    cache: false,
+    redirect: '',
+    description: ''
+  }
+  if (formRef.value) {
+    formRef.value.clearValidate()
+  }
+}
+
+/**
+ * 填充表单数据
+ */
+const fillForm = (menu: MenuTreeNode) => {
+  formData.value = {
+    title: menu.title,
+    name: menu.name,
+    path: menu.path,
+    component: menu.component || '',
+    parent_id: menu.parent_id,
+    icon: menu.icon || '',
+    sort_order: menu.sort_order,
+    is_visible: menu.is_visible,
+    is_external: menu.is_external || false,
+    cache: menu.cache || false,
+    redirect: menu.redirect || '',
+    description: menu.description || ''
+  }
+}
+
+/**
+ * 处理表单提交
+ */
+const handleSubmit = async () => {
+  if (!formRef.value) return
+
+  try {
+    await formRef.value.validate()
+
+    if (isEdit.value && currentMenuId.value) {
+      await updateMenu(currentMenuId.value, formData.value)
+      ElMessage.success('菜单更新成功')
+    } else {
+      await createMenu(formData.value)
+      ElMessage.success('菜单创建成功')
+    }
+
+    dialogVisible.value = false
+    fetchMenuTree()
+  } catch (error) {
+    console.error('Failed to submit menu:', error)
+    ElMessage.error(isEdit.value ? '菜单更新失败' : '菜单创建失败')
+  }
+}
+
+/**
+ * 处理对话框关闭
+ */
+const handleDialogClose = () => {
+  resetForm()
+  currentMenuId.value = undefined
 }
 
 onMounted(() => {

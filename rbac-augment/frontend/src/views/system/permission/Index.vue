@@ -188,17 +188,108 @@
         </el-table>
       </el-card>
     </div>
+
+    <!-- 权限表单对话框 -->
+    <el-dialog
+      v-model="dialogVisible"
+      :title="dialogTitle"
+      width="600px"
+      :close-on-click-modal="false"
+      @close="handleDialogClose"
+    >
+      <el-form
+        ref="formRef"
+        :model="formData"
+        :rules="formRules"
+        label-width="100px"
+        :disabled="!isEdit && dialogTitle.includes('查看')"
+      >
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="权限名称" prop="name">
+              <el-input v-model="formData.name" placeholder="请输入权限名称" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="权限代码" prop="code">
+              <el-input v-model="formData.code" placeholder="请输入权限代码" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="资源" prop="resource">
+              <el-input v-model="formData.resource" placeholder="请输入资源名称" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="操作" prop="action">
+              <el-input v-model="formData.action" placeholder="请输入操作名称" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="权限分组">
+              <el-input v-model="formData.group" placeholder="请输入权限分组" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="排序">
+              <el-input-number
+                v-model="formData.sort_order"
+                :min="0"
+                :max="999"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-form-item label="父级权限">
+          <el-cascader
+            v-model="formData.parent_id"
+            :options="permissionOptions"
+            :props="{ checkStrictly: true, emitPath: false }"
+            placeholder="请选择父级权限"
+            clearable
+            style="width: 100%"
+          />
+        </el-form-item>
+
+        <el-form-item label="权限描述">
+          <el-input
+            v-model="formData.description"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入权限描述"
+          />
+        </el-form-item>
+      </el-form>
+
+      <template #footer v-if="isEdit || !dialogTitle.includes('查看')">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleSubmit">
+          {{ isEdit ? '更新' : '创建' }}
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  getPermissionList, 
-  getPermissionTree, 
+import {
+  getPermissionList,
+  getPermissionTree,
   getPermissionGroups,
-  deletePermission 
+  deletePermission,
+  createPermission,
+  updatePermission,
+  getPermissionDetail
 } from '@/api/permission'
 import { formatDateTime } from '@/utils'
 import type { PermissionListItem, PermissionTreeNode, PermissionGroup } from '@/types'
@@ -285,25 +376,115 @@ const handleViewModeChange = (mode: string) => {
   }
 }
 
+// 对话框状态
+const dialogVisible = ref(false)
+const dialogTitle = ref('')
+const isEdit = ref(false)
+const currentPermissionId = ref<number>()
+
+// 表单引用
+const formRef = ref()
+
+// 表单数据
+const formData = ref({
+  name: '',
+  code: '',
+  resource: '',
+  action: '',
+  description: '',
+  parent_id: null as number | null,
+  sort_order: 0,
+  group: ''
+})
+
+// 表单验证规则
+const formRules = {
+  name: [
+    { required: true, message: '请输入权限名称', trigger: 'blur' },
+    { min: 2, max: 50, message: '权限名称长度在 2 到 50 个字符', trigger: 'blur' }
+  ],
+  code: [
+    { required: true, message: '请输入权限代码', trigger: 'blur' },
+    { pattern: /^[a-zA-Z][a-zA-Z0-9_:]*$/, message: '权限代码只能包含字母、数字、下划线和冒号，且以字母开头', trigger: 'blur' }
+  ],
+  resource: [
+    { required: true, message: '请输入资源名称', trigger: 'blur' }
+  ],
+  action: [
+    { required: true, message: '请输入操作名称', trigger: 'blur' }
+  ]
+}
+
+// 权限选项（用于父权限选择）
+const permissionOptions = ref<any[]>([])
+
+/**
+ * 获取权限选项
+ */
+const fetchPermissionOptions = async () => {
+  try {
+    const response = await getPermissionTree()
+    permissionOptions.value = buildPermissionOptions(response.data)
+  } catch (error) {
+    console.error('Failed to fetch permission options:', error)
+  }
+}
+
+/**
+ * 构建权限选项树
+ */
+const buildPermissionOptions = (permissions: PermissionTreeNode[]): any[] => {
+  return permissions.map(permission => ({
+    value: permission.id,
+    label: permission.name,
+    children: permission.children && permission.children.length > 0 ? buildPermissionOptions(permission.children) : undefined
+  }))
+}
+
 /**
  * 处理新增
  */
 const handleAdd = () => {
-  ElMessage.info('权限新增功能开发中...')
+  dialogTitle.value = '新增权限'
+  isEdit.value = false
+  resetForm()
+  fetchPermissionOptions()
+  dialogVisible.value = true
 }
 
 /**
  * 处理查看
  */
-const handleView = (row: any) => {
-  ElMessage.info('权限详情功能开发中...')
+const handleView = async (row: any) => {
+  try {
+    dialogTitle.value = '查看权限'
+    isEdit.value = false
+    const response = await getPermissionDetail(row.id)
+    fillForm(response.data)
+    fetchPermissionOptions()
+    dialogVisible.value = true
+  } catch (error) {
+    console.error('Failed to fetch permission detail:', error)
+    ElMessage.error('获取权限详情失败')
+  }
 }
 
 /**
  * 处理编辑
  */
-const handleEdit = (row: any) => {
-  ElMessage.info('权限编辑功能开发中...')
+const handleEdit = async (row: any) => {
+  try {
+    dialogTitle.value = '编辑权限'
+    isEdit.value = true
+    currentPermissionId.value = row.id
+    const response = await getPermissionDetail(row.id)
+    fillForm(response.data)
+    fetchPermissionOptions()
+    dialogVisible.value = true
+  } catch (error) {
+    console.error('Failed to fetch permission detail:', error)
+    ElMessage.error('获取权限详情失败')
+  }
 }
 
 /**
@@ -339,6 +520,74 @@ const handleDelete = async (row: any) => {
  */
 const handleRefreshTree = () => {
   handleViewModeChange(viewMode.value)
+}
+
+/**
+ * 重置表单
+ */
+const resetForm = () => {
+  formData.value = {
+    name: '',
+    code: '',
+    resource: '',
+    action: '',
+    description: '',
+    parent_id: null,
+    sort_order: 0,
+    group: ''
+  }
+  if (formRef.value) {
+    formRef.value.clearValidate()
+  }
+}
+
+/**
+ * 填充表单数据
+ */
+const fillForm = (permission: any) => {
+  formData.value = {
+    name: permission.name,
+    code: permission.code,
+    resource: permission.resource || '',
+    action: permission.action || '',
+    description: permission.description || '',
+    parent_id: permission.parent_id,
+    sort_order: permission.sort_order || 0,
+    group: permission.group || ''
+  }
+}
+
+/**
+ * 处理表单提交
+ */
+const handleSubmit = async () => {
+  if (!formRef.value) return
+
+  try {
+    await formRef.value.validate()
+
+    if (isEdit.value && currentPermissionId.value) {
+      await updatePermission(currentPermissionId.value, formData.value)
+      ElMessage.success('权限更新成功')
+    } else {
+      await createPermission(formData.value)
+      ElMessage.success('权限创建成功')
+    }
+
+    dialogVisible.value = false
+    handleViewModeChange(viewMode.value)
+  } catch (error) {
+    console.error('Failed to submit permission:', error)
+    ElMessage.error(isEdit.value ? '权限更新失败' : '权限创建失败')
+  }
+}
+
+/**
+ * 处理对话框关闭
+ */
+const handleDialogClose = () => {
+  resetForm()
+  currentPermissionId.value = undefined
 }
 
 onMounted(() => {

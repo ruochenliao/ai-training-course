@@ -202,6 +202,54 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- 部门详情对话框 -->
+    <el-dialog
+      v-model="detailDialogVisible"
+      title="部门详情"
+      width="600px"
+      :close-on-click-modal="false"
+    >
+      <div v-if="currentDepartment" class="department-detail">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="部门名称">
+            {{ currentDepartment.name }}
+          </el-descriptions-item>
+          <el-descriptions-item label="部门编码">
+            {{ currentDepartment.code }}
+          </el-descriptions-item>
+          <el-descriptions-item label="负责人">
+            {{ currentDepartment.manager_name || '未设置' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="人员数量">
+            {{ currentDepartment.user_count }}
+          </el-descriptions-item>
+          <el-descriptions-item label="排序">
+            {{ currentDepartment.sort_order }}
+          </el-descriptions-item>
+          <el-descriptions-item label="创建时间">
+            {{ formatDate(currentDepartment.created_at) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="部门描述" :span="2">
+            {{ currentDepartment.description || '暂无描述' }}
+          </el-descriptions-item>
+        </el-descriptions>
+
+        <!-- 子部门列表 -->
+        <div v-if="currentDepartment.children && currentDepartment.children.length > 0" class="sub-departments">
+          <h4>子部门</h4>
+          <el-table :data="currentDepartment.children" style="width: 100%">
+            <el-table-column prop="name" label="部门名称" />
+            <el-table-column prop="code" label="部门编码" />
+            <el-table-column prop="user_count" label="人员数量" />
+          </el-table>
+        </div>
+      </div>
+
+      <template #footer>
+        <el-button @click="detailDialogVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -313,8 +361,13 @@ const handleEdit = (row: DepartmentTreeNode) => {
   dialogVisible.value = true
 }
 
+// 详情对话框状态
+const detailDialogVisible = ref(false)
+const currentDepartment = ref<DepartmentTreeNode | null>(null)
+
 const handleView = (row: DepartmentTreeNode) => {
-  ElMessage.info('查看功能开发中...')
+  currentDepartment.value = row
+  detailDialogVisible.value = true
 }
 
 const handleDelete = async (row: DepartmentTreeNode) => {
