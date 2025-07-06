@@ -12,6 +12,7 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 
 // 权限指令
 import { setupPermissionDirectives } from '@/directives/permission'
@@ -30,7 +31,9 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 // 使用插件
 app.use(pinia)
 app.use(router)
-app.use(ElementPlus)
+app.use(ElementPlus, {
+  locale: zhCn,
+})
 
 // 设置权限指令
 setupPermissionDirectives(app)

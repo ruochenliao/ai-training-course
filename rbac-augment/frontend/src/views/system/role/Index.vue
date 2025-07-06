@@ -33,13 +33,18 @@
       :pagination="pagination"
       :show-selection="true"
       :show-index="true"
+      :action-width="320"
       @sort-change="handleSortChange"
       @page-change="handlePageChange"
       @size-change="handleSizeChange"
     >
       <!-- 状态列自定义渲染 -->
       <template #status="{ row }">
-        <StatusTag :status="row.is_active" />
+        <StatusTag
+          :status="row.is_active"
+          size="small"
+          :show-icon="true"
+        />
       </template>
 
       <!-- 操作列 -->
@@ -49,6 +54,7 @@
           :permissions="userPermissions"
           size="small"
           compact
+          :max-visible="4"
           @action="handleRowAction"
         />
       </template>
@@ -248,13 +254,12 @@ const tableColumns = [
   { prop: 'id', label: 'ID', width: 80, sortable: true },
   { prop: 'name', label: '角色名称', minWidth: 120 },
   { prop: 'code', label: '角色代码', minWidth: 120 },
-  { prop: 'description', label: '描述', minWidth: 200, showOverflowTooltip: true },
+  { prop: 'description', label: '描述', minWidth: 180, showOverflowTooltip: true },
   { prop: 'user_count', label: '用户数量', width: 100 },
   { prop: 'permission_count', label: '权限数量', width: 100 },
-  { prop: 'is_active', label: '状态', width: 80, slot: 'status' },
+  { prop: 'is_active', label: '状态', width: 100, slot: 'status', align: 'center' },
   { prop: 'sort_order', label: '排序', width: 80 },
-  { prop: 'created_at', label: '创建时间', width: 160, formatter: (row: any) => formatDateTime(row.created_at) },
-  { prop: 'actions', label: '操作', width: 280, fixed: 'right', slot: 'actions' }
+  { prop: 'created_at', label: '创建时间', width: 160, formatter: (row: any) => formatDateTime(row.created_at) }
 ]
 
 // 头部操作按钮
@@ -289,35 +294,40 @@ const getRowActions = (row: RoleListItem): ActionButton[] => [
     label: '查看',
     type: 'primary',
     icon: View,
-    permission: 'role:read'
+    permission: 'role:read',
+    row
   },
   {
     key: 'edit',
     label: '编辑',
     type: 'warning',
     icon: Edit,
-    permission: 'role:update'
+    permission: 'role:update',
+    row
   },
   {
     key: 'permissions',
     label: '权限分配',
     type: 'success',
     icon: Key,
-    permission: 'role:update'
+    permission: 'role:update',
+    row
   },
   {
     key: 'menus',
     label: '菜单分配',
     type: 'info',
     icon: Menu,
-    permission: 'role:update'
+    permission: 'role:update',
+    row
   },
   {
     key: 'delete',
     label: '删除',
     type: 'danger',
     icon: Delete,
-    permission: 'role:delete'
+    permission: 'role:delete',
+    row
   }
 ]
 
@@ -740,9 +750,7 @@ const resetForm = () => {
     is_active: true,
     sort_order: 0
   }
-  if (roleFormRef.value) {
-    roleFormRef.value.clearValidate()
-  }
+  // 表单验证会在FormDialog组件内部处理
 }
 
 /**
@@ -868,6 +876,67 @@ onMounted(() => {
   fetchRoleList()
 })
 </script>
+
+<style lang="scss" scoped>
+// 表格样式优化
+:deep(.el-table) {
+  .table-actions {
+    .el-button + .el-button {
+      margin-left: 6px;
+    }
+
+    // 确保操作列有足够的空间
+    .action-buttons {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 6px;
+
+      .el-button {
+        flex-shrink: 0;
+        min-width: auto;
+        padding: 5px 8px;
+
+        &.el-button--small {
+          padding: 4px 6px;
+          font-size: 12px;
+        }
+      }
+    }
+  }
+
+  // 状态列样式
+  .el-table__cell {
+    &:has(.status-tag) {
+      text-align: center;
+    }
+  }
+}
+
+// 状态标签样式优化
+:deep(.status-tag) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+
+  .el-tag {
+    min-width: 60px;
+    text-align: center;
+  }
+}
+
+// 操作列样式优化
+:deep(.el-table__fixed-right) {
+  .el-table__cell {
+    padding: 8px 12px;
+
+    .action-buttons {
+      justify-content: center;
+    }
+  }
+}
+</style>
 
 <style lang="scss" scoped>
 // 权限对话框样式

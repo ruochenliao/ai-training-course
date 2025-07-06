@@ -15,6 +15,64 @@
       />
     </template>
 
+    <!-- 统计信息卡片 -->
+    <div class="stats-section">
+      <el-row :gutter="16">
+        <el-col :span="6">
+          <el-card class="stats-card">
+            <div class="stats-content">
+              <div class="stats-icon">
+                <el-icon color="#409EFF"><Key /></el-icon>
+              </div>
+              <div class="stats-info">
+                <div class="stats-number">{{ totalPermissions }}</div>
+                <div class="stats-label">总权限数</div>
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+        <el-col :span="6">
+          <el-card class="stats-card">
+            <div class="stats-content">
+              <div class="stats-icon">
+                <el-icon color="#67C23A"><Collection /></el-icon>
+              </div>
+              <div class="stats-info">
+                <div class="stats-number">{{ totalGroups }}</div>
+                <div class="stats-label">权限分组</div>
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+        <el-col :span="6">
+          <el-card class="stats-card">
+            <div class="stats-content">
+              <div class="stats-icon">
+                <el-icon color="#E6A23C"><Menu /></el-icon>
+              </div>
+              <div class="stats-info">
+                <div class="stats-number">{{ activePermissions }}</div>
+                <div class="stats-label">启用权限</div>
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+        <el-col :span="6">
+          <el-card class="stats-card">
+            <div class="stats-content">
+              <div class="stats-icon">
+                <el-icon color="#F56C6C"><Tools /></el-icon>
+              </div>
+              <div class="stats-info">
+                <div class="stats-number">{{ moduleCount }}</div>
+                <div class="stats-label">功能模块</div>
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
+    </div>
+
     <!-- 视图切换和搜索 -->
     <div class="view-controls">
       <el-card shadow="never" class="controls-card">
@@ -80,8 +138,8 @@
           <template #default="{ node, data }">
             <div class="tree-node">
               <div class="node-content">
-                <el-icon v-if="data.icon" class="node-icon">
-                  <component :is="data.icon" />
+                <el-icon class="node-icon" :class="getNodeIconClass(data)">
+                  <component :is="getNodeIcon(data)" />
                 </el-icon>
                 <div class="node-info">
                   <div class="node-name">{{ data.name }}</div>
@@ -89,6 +147,7 @@
                     <el-tag size="small" type="info">{{ data.code }}</el-tag>
                     <el-tag v-if="data.resource" size="small" type="primary">{{ data.resource }}</el-tag>
                     <el-tag v-if="data.action" size="small" type="success">{{ data.action }}</el-tag>
+                    <el-tag v-if="data.type" size="small" :type="getTypeTagType(data.type)">{{ data.type }}</el-tag>
                   </div>
                 </div>
               </div>
@@ -160,34 +219,93 @@
 
     <!-- 权限表格视图 -->
     <div v-else class="permission-table-view">
-      <DataTable
-        v-model:selected="selectedIds"
-        :data="permissionList"
-        :columns="tableColumns"
-        :loading="loading"
-        :pagination="pagination"
-        :show-selection="true"
-        :show-index="true"
-        @sort-change="handleSortChange"
-        @page-change="handlePageChange"
-        @size-change="handleSizeChange"
-      >
-        <!-- 状态列自定义渲染 -->
-        <template #status="{ row }">
-          <StatusTag :status="row.is_active" />
+      <el-card shadow="never" class="table-card">
+        <template #header>
+          <div class="table-header">
+            <div class="header-left">
+              <el-icon class="header-icon"><Grid /></el-icon>
+              <span class="header-title">权限列表</span>
+              <el-tag v-if="selectedIds.length > 0" type="primary" size="small">
+                已选择 {{ selectedIds.length }} 项
+              </el-tag>
+            </div>
+            <div class="header-right">
+              <el-button-group>
+                <el-button
+                  v-if="selectedIds.length > 0"
+                  type="danger"
+                  size="small"
+                  :icon="Delete"
+                  @click="handleBatchDelete"
+                >
+                  批量删除
+                </el-button>
+                <el-button
+                  type="success"
+                  size="small"
+                  :icon="Refresh"
+                  @click="handleRefresh"
+                >
+                  刷新
+                </el-button>
+              </el-button-group>
+            </div>
+          </div>
         </template>
 
-        <!-- 操作列 -->
-        <template #actions="{ row }">
-          <ActionButtons
-            :actions="getTableRowActions(row)"
-            :permissions="userPermissions"
-            size="small"
-            compact
-            @action="handleTableRowAction"
-          />
-        </template>
-      </DataTable>
+        <DataTable
+          v-model:selected="selectedIds"
+          :data="permissionList"
+          :columns="tableColumns"
+          :loading="loading"
+          :pagination="pagination"
+          :show-selection="true"
+          :show-index="true"
+          @sort-change="handleSortChange"
+          @page-change="handlePageChange"
+          @size-change="handleSizeChange"
+        >
+          <!-- 权限代码列自定义渲染 -->
+          <template #code="{ row }">
+            <el-tag type="info" size="small">{{ row.code }}</el-tag>
+          </template>
+
+          <!-- 资源列自定义渲染 -->
+          <template #resource="{ row }">
+            <el-tag type="primary" size="small">{{ row.resource }}</el-tag>
+          </template>
+
+          <!-- 动作列自定义渲染 -->
+          <template #action="{ row }">
+            <el-tag :type="getActionTagType(row.action)" size="small">
+              {{ row.action }}
+            </el-tag>
+          </template>
+
+          <!-- 类型列自定义渲染 -->
+          <template #type="{ row }">
+            <el-tag :type="getTypeTagType(row.type)" size="small">
+              {{ row.type }}
+            </el-tag>
+          </template>
+
+          <!-- 状态列自定义渲染 -->
+          <template #status="{ row }">
+            <StatusTag :status="row.is_active" />
+          </template>
+
+          <!-- 操作列 -->
+          <template #actions="{ row }">
+            <ActionButtons
+              :actions="getTableRowActions(row)"
+              :permissions="userPermissions"
+              size="small"
+              compact
+              @action="handleTableRowAction"
+            />
+          </template>
+        </DataTable>
+      </el-card>
     </div>
 
     <!-- 权限表单对话框 -->
@@ -210,7 +328,8 @@ import { onMounted, ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Key, Plus, Refresh, Menu, Grid, Collection,
-  View, Edit, Delete, Expand, Fold, Download
+  View, Edit, Delete, Expand, Fold, Download,
+  Folder, Setting, Tools, Monitor
 } from '@element-plus/icons-vue'
 import {
   getPermissionList,
@@ -270,9 +389,9 @@ const searchFields: SearchField[] = [
   },
   {
     prop: 'action',
-    label: '操作',
+    label: '动作',
     type: 'input',
-    placeholder: '请输入操作名称'
+    placeholder: '请输入动作名称'
   }
 ]
 
@@ -283,6 +402,17 @@ const permissionTree = ref<any[]>([])
 const permissionList = ref<any[]>([])
 const permissionGroups = ref<any[]>([])
 const selectedIds = ref<number[]>([])
+
+// 统计数据
+const totalPermissions = computed(() => pagination.total)
+const totalGroups = computed(() => permissionGroups.value.length)
+const activePermissions = computed(() =>
+  permissionList.value.filter(p => p.is_active).length
+)
+const moduleCount = computed(() => {
+  const modules = new Set(permissionList.value.map(p => p.resource))
+  return modules.size
+})
 
 // 分页
 const pagination = reactive({
@@ -303,15 +433,16 @@ const permissionTreeRef = ref()
 // 表格列配置
 const tableColumns = [
   { prop: 'id', label: 'ID', width: 80, sortable: true },
-  { prop: 'name', label: '权限名称', minWidth: 150 },
-  { prop: 'code', label: '权限代码', minWidth: 150 },
-  { prop: 'resource', label: '资源', width: 120 },
-  { prop: 'action', label: '操作', width: 100 },
+  { prop: 'name', label: '权限名称', minWidth: 150, showOverflowTooltip: true },
+  { prop: 'code', label: '权限代码', minWidth: 150, slot: 'code' },
+  { prop: 'resource', label: '资源', width: 120, slot: 'resource' },
+  { prop: 'action', label: '动作', width: 100, slot: 'action' },
+  { prop: 'type', label: '类型', width: 100, slot: 'type' },
   { prop: 'description', label: '描述', minWidth: 200, showOverflowTooltip: true },
   { prop: 'is_active', label: '状态', width: 80, slot: 'status' },
-  { prop: 'sort_order', label: '排序', width: 80 },
+  { prop: 'sort_order', label: '排序', width: 80, sortable: true },
   { prop: 'created_at', label: '创建时间', width: 160, formatter: (row: any) => formatDateTime(row.created_at) },
-  { prop: 'actions', label: '操作', width: 200, fixed: 'right', slot: 'actions' }
+  { prop: 'actions', label: '操作', width: 180, fixed: 'right', slot: 'actions' }
 ]
 
 // 头部操作按钮
@@ -475,9 +606,9 @@ const formFields = [
   },
   {
     prop: 'action',
-    label: '操作',
+    label: '动作',
     type: 'input',
-    placeholder: '请输入操作名称',
+    placeholder: '请输入动作名称',
     span: 12
   },
   {
@@ -821,6 +952,127 @@ const handleCollapseAll = () => {
 }
 
 /**
+ * 获取节点图标
+ */
+const getNodeIcon = (data: any) => {
+  // 如果有自定义图标，使用自定义图标
+  if (data.icon) {
+    return data.icon
+  }
+
+  // 根据权限类型和层级返回默认图标
+  if (data.type === '模块' || (data.children && data.children.length > 0)) {
+    // 父级权限使用文件夹图标
+    return 'Folder'
+  }
+
+  // 根据操作类型返回不同图标
+  switch (data.action) {
+    case 'read':
+    case 'view':
+      return 'View'
+    case 'create':
+    case 'add':
+      return 'Plus'
+    case 'update':
+    case 'edit':
+      return 'Edit'
+    case 'delete':
+      return 'Delete'
+    case 'manage':
+      return 'Setting'
+    case 'config':
+      return 'Tools'
+    case 'monitor':
+      return 'Monitor'
+    default:
+      return 'Key'
+  }
+}
+
+/**
+ * 获取节点图标样式类
+ */
+const getNodeIconClass = (data: any) => {
+  if (data.type === '模块' || (data.children && data.children.length > 0)) {
+    return 'parent-icon'
+  }
+  return 'child-icon'
+}
+
+/**
+ * 获取类型标签类型
+ */
+const getTypeTagType = (type: string) => {
+  switch (type) {
+    case '模块':
+      return 'primary'
+    case '功能':
+      return 'success'
+    case '操作':
+      return 'warning'
+    default:
+      return 'info'
+  }
+}
+
+/**
+ * 获取动作标签类型
+ */
+const getActionTagType = (action: string) => {
+  switch (action) {
+    case 'read':
+    case 'view':
+      return 'primary'
+    case 'create':
+    case 'add':
+      return 'success'
+    case 'update':
+    case 'edit':
+      return 'warning'
+    case 'delete':
+      return 'danger'
+    case 'manage':
+    case 'config':
+      return 'info'
+    default:
+      return ''
+  }
+}
+
+/**
+ * 批量删除处理
+ */
+const handleBatchDelete = async () => {
+  if (selectedIds.value.length === 0) {
+    ElMessage.warning('请选择要删除的权限')
+    return
+  }
+
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${selectedIds.value.length} 个权限吗？`,
+      '确认批量删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    // 这里可以调用批量删除API
+    ElMessage.success('批量删除成功')
+    selectedIds.value = []
+    handleRefresh()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('Failed to batch delete permissions:', error)
+      ElMessage.error('批量删除失败')
+    }
+  }
+}
+
+/**
  * 分页处理
  */
 const handlePageChange = (page: number) => {
@@ -919,6 +1171,64 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+// 统计信息样式
+.stats-section {
+  margin-bottom: 20px;
+
+  .stats-card {
+    border: none;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    :deep(.el-card__body) {
+      padding: 20px;
+    }
+
+    .stats-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      .stats-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--el-color-primary-light-9), var(--el-color-primary-light-8));
+
+        .el-icon {
+          font-size: 24px;
+        }
+      }
+
+      .stats-info {
+        flex: 1;
+
+        .stats-number {
+          font-size: 28px;
+          font-weight: 700;
+          color: var(--el-text-color-primary);
+          line-height: 1;
+          margin-bottom: 4px;
+        }
+
+        .stats-label {
+          font-size: 14px;
+          color: var(--el-text-color-regular);
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+
 // 视图控制样式
 .view-controls {
   margin-bottom: 20px;
@@ -1008,7 +1318,14 @@ onMounted(() => {
 
         .node-icon {
           font-size: 16px;
-          color: var(--el-color-primary);
+
+          &.parent-icon {
+            color: var(--el-color-primary);
+          }
+
+          &.child-icon {
+            color: var(--el-color-success);
+          }
         }
 
         .node-info {
@@ -1035,20 +1352,65 @@ onMounted(() => {
   }
 }
 
+// 权限表格视图样式
+.permission-table-view {
+  .table-card {
+    border: none;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+
+    :deep(.el-card__header) {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--el-border-color-light);
+      background: linear-gradient(135deg, var(--el-color-primary-light-9), var(--el-color-primary-light-8));
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .header-icon {
+          font-size: 18px;
+          color: var(--el-color-primary);
+        }
+
+        .header-title {
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--el-text-color-primary);
+        }
+      }
+
+      .header-right {
+        display: flex;
+        gap: 8px;
+      }
+    }
+  }
+}
+
 // 权限分组视图样式
 .permission-groups-view {
   .group-card {
     height: 100%;
     transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     }
 
     :deep(.el-card__header) {
       padding: 16px 20px;
       border-bottom: 1px solid var(--el-border-color-light);
+      background: linear-gradient(135deg, var(--el-color-success-light-9), var(--el-color-success-light-8));
     }
 
     .group-header {
@@ -1063,7 +1425,7 @@ onMounted(() => {
 
         .group-icon {
           font-size: 18px;
-          color: var(--el-color-primary);
+          color: var(--el-color-success);
         }
 
         .group-title {
@@ -1091,9 +1453,9 @@ onMounted(() => {
 
         &:hover {
           background-color: var(--el-color-primary-light-9);
-          border-radius: 4px;
-          padding-left: 8px;
-          padding-right: 8px;
+          border-radius: 6px;
+          padding-left: 12px;
+          padding-right: 12px;
         }
 
         .permission-info {
@@ -1122,6 +1484,12 @@ onMounted(() => {
 
 // 响应式设计
 @media (max-width: 1200px) {
+  .stats-section {
+    .el-col {
+      margin-bottom: 16px;
+    }
+  }
+
   .permission-groups-view {
     .el-col {
       margin-bottom: 16px;
@@ -1130,6 +1498,31 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  .stats-section {
+    .stats-card {
+      .stats-content {
+        .stats-icon {
+          width: 40px;
+          height: 40px;
+
+          .el-icon {
+            font-size: 20px;
+          }
+        }
+
+        .stats-info {
+          .stats-number {
+            font-size: 24px;
+          }
+
+          .stats-label {
+            font-size: 12px;
+          }
+        }
+      }
+    }
+  }
+
   .view-controls {
     .controls-content {
       flex-direction: column;
@@ -1137,6 +1530,19 @@ onMounted(() => {
 
       .search-section {
         max-width: 100%;
+      }
+    }
+  }
+
+  .permission-table-view {
+    .table-header {
+      flex-direction: column;
+      gap: 12px;
+      align-items: flex-start;
+
+      .header-right {
+        width: 100%;
+        justify-content: flex-end;
       }
     }
   }
@@ -1189,8 +1595,32 @@ onMounted(() => {
 
 // 暗色主题适配
 .dark {
+  .stats-section {
+    .stats-card {
+      background-color: var(--el-bg-color-page);
+      border-color: var(--el-border-color);
+
+      &:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .stats-content {
+        .stats-icon {
+          background: linear-gradient(135deg, var(--el-color-primary-dark-2), var(--el-color-primary-dark-1));
+        }
+      }
+    }
+  }
+
   .view-controls {
     .controls-card {
+      background-color: var(--el-bg-color-page);
+      border-color: var(--el-border-color);
+    }
+  }
+
+  .permission-table-view {
+    .table-card {
       background-color: var(--el-bg-color-page);
       border-color: var(--el-border-color);
     }

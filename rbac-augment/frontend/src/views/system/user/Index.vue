@@ -103,6 +103,7 @@
       show-selection
       show-index
       :show-batch-delete="true"
+      :action-width="280"
       @refresh="fetchUserList"
       @batch-delete="handleBatchDelete"
       @selection-change="handleSelectionChange"
@@ -147,47 +148,14 @@
 
       <!-- 操作列 -->
       <template #actions="{ row }">
-        <div class="action-buttons">
-          <el-tooltip content="查看详情" placement="top">
-            <el-button
-              type="primary"
-              :icon="View"
-              size="small"
-              text
-              @click="handleView(row)"
-            />
-          </el-tooltip>
-          <el-tooltip content="编辑用户" placement="top">
-            <el-button
-              v-permission="['user:update']"
-              type="warning"
-              :icon="Edit"
-              size="small"
-              text
-              @click="handleEdit(row)"
-            />
-          </el-tooltip>
-          <el-tooltip content="重置密码" placement="top">
-            <el-button
-              v-permission="['user:reset_password']"
-              type="info"
-              :icon="Key"
-              size="small"
-              text
-              @click="handleResetPassword(row)"
-            />
-          </el-tooltip>
-          <el-tooltip content="删除用户" placement="top">
-            <el-button
-              v-permission="['user:delete']"
-              type="danger"
-              :icon="Delete"
-              size="small"
-              text
-              @click="handleDelete(row)"
-            />
-          </el-tooltip>
-        </div>
+        <ActionButtons
+          :actions="getRowActions(row)"
+          :permissions="userPermissions"
+          size="small"
+          compact
+          :max-visible="4"
+          @action="handleRowAction"
+        />
       </template>
     </DataTable>
 
@@ -268,11 +236,18 @@ import {
 } from '@element-plus/icons-vue'
 import { getUserList, deleteUser, bulkDeleteUsers, resetUserPassword, updateUserStatus } from '@/api/user'
 import { formatDateTime } from '@/utils'
-import type { UserListItem, PaginationParams, TableColumn } from '@/types'
+import type { UserListItem, PaginationParams, TableColumn, ActionButton } from '@/types'
 import PageContainer from '@/components/common/PageContainer.vue'
 import DataTable from '@/components/common/DataTable.vue'
+import ActionButtons from '@/components/common/ActionButtons.vue'
 import UserForm from './components/UserForm.vue'
 import UserDetail from './components/UserDetail.vue'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
+
+// 用户权限
+const userPermissions = computed(() => authStore.permissions)
 
 // 搜索表单
 const searchFormRef = ref<FormInstance>()
@@ -290,7 +265,7 @@ const selectedRows = ref<UserListItem[]>([])
 // 分页数据
 const pagination = reactive({
   page: 1,
-  pageSize: 20,
+  page_size: 20,
   total: 0
 })
 
@@ -400,7 +375,7 @@ const fetchUserList = async () => {
 
     const params: PaginationParams = {
       page: pagination.page,
-      page_size: pagination.pageSize,
+      page_size: pagination.page_size,
       search: searchForm.username || searchForm.email || undefined
     }
 
@@ -478,6 +453,62 @@ const handleEdit = (row: UserListItem) => {
 const handleView = (row: UserListItem) => {
   selectedUserId.value = row.id
   detailVisible.value = true
+}
+
+// 行操作按钮配置
+const getRowActions = (row: UserListItem): ActionButton[] => [
+  {
+    key: 'view',
+    label: '查看',
+    type: 'primary',
+    icon: View,
+    permission: 'user:read',
+    row
+  },
+  {
+    key: 'edit',
+    label: '编辑',
+    type: 'warning',
+    icon: Edit,
+    permission: 'user:update',
+    row
+  },
+  {
+    key: 'reset_password',
+    label: '重置密码',
+    type: 'info',
+    icon: Key,
+    permission: 'user:reset_password',
+    row
+  },
+  {
+    key: 'delete',
+    label: '删除',
+    type: 'danger',
+    icon: Delete,
+    permission: 'user:delete',
+    row
+  }
+]
+
+// 处理行操作
+const handleRowAction = (action: ActionButton) => {
+  const { key, row } = action
+
+  switch (key) {
+    case 'view':
+      handleView(row)
+      break
+    case 'edit':
+      handleEdit(row)
+      break
+    case 'reset_password':
+      handleResetPassword(row)
+      break
+    case 'delete':
+      handleDelete(row)
+      break
+  }
 }
 
 /**
@@ -613,7 +644,7 @@ const handleSortChange = ({ prop, order }: any) => {
  * 处理页面大小变化
  */
 const handleSizeChange = (size: number) => {
-  pagination.pageSize = size
+  pagination.page_size = size
   pagination.page = 1
   fetchUserList()
 }

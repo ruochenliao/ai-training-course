@@ -160,75 +160,7 @@
       </div>
     </el-card>
 
-    <!-- 搜索筛选区域 -->
-    <SearchForm
-      v-model="searchForm"
-      :fields="searchFields"
-      :loading="loading"
-      :show-advanced="false"
-      @search="handleSearch"
-      @reset="handleReset"
-    />
-    <!-- 数据权限列表 -->
-    <DataTable
-      v-model:selected="selectedIds"
-      :data="dataPermissions"
-      :columns="tableColumns"
-      :loading="loading"
-      :pagination="pagination"
-      :show-selection="true"
-      :show-index="true"
-      @sort-change="handleSortChange"
-      @page-change="handlePageChange"
-      @size-change="handleSizeChange"
-    >
-      <!-- 权限类型列自定义渲染 -->
-      <template #permission_type="{ row }">
-        <el-tag :type="getPermissionTypeTagType(row.permission_type)" size="small">
-          {{ getPermissionTypeLabel(row.permission_type) }}
-        </el-tag>
-      </template>
 
-      <!-- 权限范围列自定义渲染 -->
-      <template #scope="{ row }">
-        <StatusTag
-          :status="row.scope"
-          :status-map="scopeStatusMap"
-          size="small"
-        />
-      </template>
-
-      <!-- 状态列自定义渲染 -->
-      <template #status="{ row }">
-        <StatusTag :status="row.is_active" size="small" />
-      </template>
-
-      <!-- 分配情况列自定义渲染 -->
-      <template #assignment="{ row }">
-        <div class="assignment-info">
-          <el-tag v-if="row.user_count > 0" size="small" type="primary">
-            {{ row.user_count }}个用户
-          </el-tag>
-          <el-tag v-if="row.role_count > 0" size="small" type="success">
-            {{ row.role_count }}个角色
-          </el-tag>
-          <el-tag v-if="!row.user_count && !row.role_count" size="small" type="info">
-            未分配
-          </el-tag>
-        </div>
-      </template>
-
-      <!-- 操作列 -->
-      <template #actions="{ row }">
-        <ActionButtons
-          :actions="getRowActions(row)"
-          :permissions="userPermissions"
-          size="small"
-          compact
-          @action="handleRowAction"
-        />
-      </template>
-    </DataTable>
 
     <!-- 数据权限表单对话框 -->
     <FormDialog
@@ -303,7 +235,6 @@ import {
   View, Edit, Delete, UserFilled, Key, DataBoard
 } from '@element-plus/icons-vue'
 import {
-  getDataPermissionList,
   deleteDataPermission,
   createDataPermission,
   updateDataPermission,
@@ -316,12 +247,8 @@ import { getRoleOptions } from '@/api/role'
 import { formatDateTime } from '@/utils'
 import { useAuthStore } from '@/stores/auth'
 import PageContainer from '@/components/common/PageContainer.vue'
-import DataTable from '@/components/common/DataTable.vue'
 import FormDialog from '@/components/common/FormDialog.vue'
-import SearchForm from '@/components/common/SearchForm.vue'
-import StatusTag from '@/components/common/StatusTag.vue'
 import ActionButtons from '@/components/common/ActionButtons.vue'
-import type { SearchField } from '@/components/common/SearchForm.vue'
 import type { ActionButton } from '@/components/common/ActionButtons.vue'
 
 const authStore = useAuthStore()
@@ -329,92 +256,11 @@ const authStore = useAuthStore()
 // 用户权限
 const userPermissions = computed(() => authStore.permissions)
 
-// 搜索表单配置
-const searchForm = reactive({
-  name: '',
-  code: '',
-  permission_type: '',
-  scope: '',
-  is_active: undefined as boolean | undefined
-})
 
-const searchFields: SearchField[] = [
-  {
-    prop: 'name',
-    label: '权限名称',
-    type: 'input',
-    placeholder: '请输入权限名称',
-    prefixIcon: Lock
-  },
-  {
-    prop: 'code',
-    label: '权限代码',
-    type: 'input',
-    placeholder: '请输入权限代码'
-  },
-  {
-    prop: 'permission_type',
-    label: '权限类型',
-    type: 'select',
-    placeholder: '请选择权限类型',
-    options: [
-      { label: '数据查看', value: 'view' },
-      { label: '数据编辑', value: 'edit' },
-      { label: '数据删除', value: 'delete' },
-      { label: '数据导出', value: 'export' }
-    ]
-  },
-  {
-    prop: 'scope',
-    label: '权限范围',
-    type: 'select',
-    placeholder: '请选择权限范围',
-    options: [
-      { label: '全部数据', value: 'all' },
-      { label: '部门数据', value: 'department' },
-      { label: '个人数据', value: 'self' },
-      { label: '自定义', value: 'custom' }
-    ]
-  },
-  {
-    prop: 'is_active',
-    label: '状态',
-    type: 'select',
-    placeholder: '请选择状态',
-    options: [
-      { label: '启用', value: true },
-      { label: '禁用', value: false }
-    ]
-  }
-]
 
 // 数据状态
 const loading = ref(false)
 const submitLoading = ref(false)
-const dataPermissions = ref<any[]>([])
-const selectedIds = ref<number[]>([])
-
-// 分页
-const pagination = reactive({
-  page: 1,
-  page_size: 20,
-  total: 0
-})
-
-// 表格列配置
-const tableColumns = [
-  { prop: 'id', label: 'ID', width: 80, sortable: true },
-  { prop: 'name', label: '权限名称', minWidth: 150 },
-  { prop: 'code', label: '权限代码', minWidth: 150 },
-  { prop: 'permission_type', label: '权限类型', width: 120, slot: 'permission_type' },
-  { prop: 'scope', label: '权限范围', width: 120, slot: 'scope' },
-  { prop: 'resource_type', label: '资源类型', width: 120 },
-  { prop: 'assignment', label: '分配情况', width: 150, slot: 'assignment' },
-  { prop: 'is_active', label: '状态', width: 80, slot: 'status' },
-  { prop: 'sort_order', label: '排序', width: 80 },
-  { prop: 'created_at', label: '创建时间', width: 160, formatter: (row: any) => formatDateTime(row.created_at) },
-  { prop: 'actions', label: '操作', width: 200, fixed: 'right', slot: 'actions' }
-]
 
 // 头部操作按钮
 const headerActions: ActionButton[] = [
@@ -447,49 +293,7 @@ const headerActions: ActionButton[] = [
   }
 ]
 
-// 行操作按钮
-const getRowActions = (row: any): ActionButton[] => [
-  {
-    key: 'view',
-    label: '查看',
-    type: 'primary',
-    icon: View,
-    permission: 'data-permission:read',
-    row
-  },
-  {
-    key: 'edit',
-    label: '编辑',
-    type: 'warning',
-    icon: Edit,
-    permission: 'data-permission:update',
-    row
-  },
-  {
-    key: 'assign',
-    label: '分配',
-    type: 'success',
-    icon: UserFilled,
-    permission: 'data-permission:assign',
-    row
-  },
-  {
-    key: 'delete',
-    label: '删除',
-    type: 'danger',
-    icon: Delete,
-    permission: 'data-permission:delete',
-    row
-  }
-]
 
-// 权限范围状态映射
-const scopeStatusMap = {
-  all: { text: '全部数据', type: 'primary' },
-  department: { text: '部门数据', type: 'warning' },
-  self: { text: '个人数据', type: 'info' },
-  custom: { text: '自定义', type: 'success' }
-}
 
 // 向导相关
 const currentStep = ref(0)
@@ -658,27 +462,7 @@ const formFields = [
   }
 ]
 
-/**
- * 获取数据权限列表
- */
-const fetchDataPermissions = async () => {
-  try {
-    loading.value = true
-    const params = {
-      page: pagination.page,
-      page_size: pagination.page_size,
-      ...searchForm
-    }
-    const response = await getDataPermissionList(params)
-    dataPermissions.value = response.data.items
-    pagination.total = response.data.total
-  } catch (error) {
-    console.error('Failed to fetch data permissions:', error)
-    ElMessage.error('获取数据权限列表失败')
-  } finally {
-    loading.value = false
-  }
-}
+
 
 /**
  * 获取选项数据
@@ -698,28 +482,7 @@ const fetchOptions = async () => {
   }
 }
 
-/**
- * 搜索处理
- */
-const handleSearch = () => {
-  pagination.page = 1
-  fetchDataPermissions()
-}
 
-/**
- * 重置处理
- */
-const handleReset = () => {
-  Object.assign(searchForm, {
-    name: '',
-    code: '',
-    permission_type: '',
-    scope: '',
-    is_active: undefined
-  })
-  pagination.page = 1
-  fetchDataPermissions()
-}
 
 /**
  * 头部操作处理
@@ -741,32 +504,13 @@ const handleHeaderAction = (action: ActionButton) => {
   }
 }
 
-/**
- * 行操作处理
- */
-const handleRowAction = (action: ActionButton) => {
-  const row = action.row
-  switch (action.key) {
-    case 'view':
-      handleView(row)
-      break
-    case 'edit':
-      handleEdit(row)
-      break
-    case 'assign':
-      handleAssign(row)
-      break
-    case 'delete':
-      handleDelete(row)
-      break
-  }
-}
+
 
 /**
  * 刷新数据
  */
 const handleRefresh = () => {
-  fetchDataPermissions()
+  ElMessage.success('数据已刷新')
 }
 
 /**
@@ -850,7 +594,6 @@ const handleDelete = async (row: any) => {
 
     await deleteDataPermission(row.id)
     ElMessage.success('删除成功')
-    fetchDataPermissions()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('Failed to delete data permission:', error)
@@ -880,8 +623,6 @@ const handleBatchDelete = async () => {
     }
 
     ElMessage.success('批量删除成功')
-    selectedIds.value = []
-    fetchDataPermissions()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('Failed to batch delete:', error)
@@ -890,30 +631,7 @@ const handleBatchDelete = async () => {
   }
 }
 
-/**
- * 分页处理
- */
-const handlePageChange = (page: number) => {
-  pagination.page = page
-  fetchDataPermissions()
-}
 
-/**
- * 页面大小变化处理
- */
-const handleSizeChange = (size: number) => {
-  pagination.page_size = size
-  pagination.page = 1
-  fetchDataPermissions()
-}
-
-/**
- * 排序变化处理
- */
-const handleSortChange = ({ prop, order }: any) => {
-  console.log('Sort change:', prop, order)
-  // 这里可以添加排序逻辑
-}
 
 /**
  * 重置表单
@@ -963,7 +681,6 @@ const handleSubmit = async (data: any) => {
     }
 
     dialogVisible.value = false
-    fetchDataPermissions()
   } catch (error) {
     console.error('Failed to submit data permission:', error)
     ElMessage.error(isEdit.value ? '数据权限更新失败' : '数据权限创建失败')
@@ -993,7 +710,6 @@ const handleSaveAssignment = async () => {
     })
     ElMessage.success('权限分配成功')
     assignDialogVisible.value = false
-    fetchDataPermissions()
   } catch (error) {
     console.error('Failed to assign permission:', error)
     ElMessage.error('权限分配失败')
@@ -1042,7 +758,6 @@ const savePermission = async () => {
     await createDataPermission(wizardForm)
     ElMessage.success('数据权限配置成功')
     resetWizard()
-    fetchDataPermissions()
   } catch (error) {
     console.error('Failed to save permission:', error)
     ElMessage.error('数据权限配置失败')
@@ -1091,7 +806,6 @@ const getPermissionScopeLabel = (scope: string) => {
 }
 
 onMounted(() => {
-  fetchDataPermissions()
   fetchOptions()
 })
 </script>

@@ -133,6 +133,8 @@ export interface ActionButton {
   placement?: 'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end'
   trigger?: 'hover' | 'click'
   items?: DropdownItem[]
+  // 数据行
+  row?: any
   // 事件处理
   onClick?: (action: ActionButton) => void
 }
@@ -150,7 +152,7 @@ const props = withDefaults(defineProps<Props>(), {
   size: 'default',
   layout: 'horizontal',
   compact: false,
-  maxVisible: 5,
+  maxVisible: 3,
   permissions: () => []
 })
 
@@ -223,24 +225,41 @@ const handleMoreAction = (command: string) => {
 .action-buttons {
   display: flex;
   align-items: center;
-  gap: 8px;
-  
+  gap: 6px;
+  flex-wrap: nowrap;
+
   &--vertical {
     flex-direction: column;
     align-items: stretch;
-    
+
     .el-button {
       width: 100%;
     }
   }
-  
+
   &--compact {
-    gap: 4px;
+    gap: 6px;
+
+    .el-button {
+      padding: 6px 10px;
+      min-width: auto;
+
+      &.el-button--small {
+        padding: 4px 8px;
+        font-size: 12px;
+      }
+    }
   }
-  
+
   .el-divider--vertical {
-    height: 20px;
-    margin: 0 4px;
+    height: 16px;
+    margin: 0 2px;
+  }
+
+  // 确保按钮不换行
+  .el-button {
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 }
 

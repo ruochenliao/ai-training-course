@@ -188,7 +188,7 @@
     <div v-if="showPagination && pagination" class="table-pagination">
       <el-pagination
         v-model:current-page="pagination.page"
-        v-model:page-size="pagination.pageSize"
+        v-model:page-size="pagination.page_size"
         :total="pagination.total"
         :page-sizes="pageSizes"
         :layout="paginationLayout"
@@ -421,7 +421,7 @@ const toggleFullscreen = () => {
 
 const getIndex = (index: number) => {
   if (props.pagination) {
-    return (props.pagination.page - 1) * props.pagination.pageSize + index + 1
+    return (props.pagination.page - 1) * props.pagination.page_size + index + 1
   }
   return index + 1
 }
@@ -554,6 +554,26 @@ defineExpose({
   padding: $spacing-md $spacing-lg;
   border-top: 1px solid $border-color-light;
   background: $bg-color-page;
+
+  :deep(.el-pagination) {
+    .el-pagination__total {
+      color: var(--el-text-color-regular);
+      font-size: 14px;
+    }
+
+    .el-pagination__sizes {
+      .el-select {
+        .el-input__inner {
+          font-size: 14px;
+        }
+      }
+    }
+
+    .el-pagination__jump {
+      color: var(--el-text-color-regular);
+      font-size: 14px;
+    }
+  }
 }
 
 .table-empty {
