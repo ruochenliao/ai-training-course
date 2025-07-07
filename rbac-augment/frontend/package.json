@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
+    "@stagewise-plugins/vue": "^0.5.0",
+    "@stagewise/toolbar-vue": "^0.5.0",
     "axios": "^1.6.2",
     "element-plus": "^2.4.4",
     "js-cookie": "^3.0.5",

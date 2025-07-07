@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <router-view />
+    <StagewiseToolbar v-if="isDev" :config="{ plugins: [VuePlugin] }" />
   </div>
 </template>
 
@@ -8,9 +9,14 @@
 import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { StagewiseToolbar } from '@stagewise/toolbar-vue'
+import VuePlugin from '@stagewise-plugins/vue'
+import { ref } from 'vue'
 
 const authStore = useAuthStore()
 const appStore = useAppStore()
+
+const isDev = ref(import.meta.env.DEV)
 
 onMounted(async () => {
   // 初始化应用设置
