@@ -4,7 +4,7 @@
     参考 vue-fastapi-admin 的设计风格
     包含侧边栏折叠按钮、面包屑导航、搜索框、通知、用户操作区域等功能
   -->
-  <div class="layout-header">
+  <div class="layout-header" style="width: 100%; height: 100%;">
     <!-- 左侧功能区域 -->
     <div class="header-left">
       <!-- 侧边栏折叠/展开按钮 -->
@@ -20,42 +20,17 @@
         </el-icon>
       </el-button>
 
-      <!-- 面包屑导航 - 显示当前页面路径 -->
-      <el-breadcrumb separator="/" class="breadcrumb">
-        <el-breadcrumb-item
-          v-for="item in breadcrumbList"
-          :key="item.path"
-          :to="item.path === route.path ? undefined : item.path"
-          class="breadcrumb-item"
-        >
-          <el-icon v-if="item.icon" class="breadcrumb-icon">
-            <component :is="item.icon" />
-          </el-icon>
-          {{ item.title }}
-        </el-breadcrumb-item>
-      </el-breadcrumb>
+
     </div>
 
     <!-- 右侧操作区域 -->
     <div class="header-right">
-      <!-- 搜索框 -->
-      <div class="search-box">
-        <el-input
-          v-model="searchKeyword"
-          placeholder="搜索菜单..."
-          :prefix-icon="Search"
-          clearable
-          @keyup.enter="handleSearch"
-          @input="handleSearchInput"
-          class="search-input"
-          size="small"
-        />
-      </div>
+
 
       <!-- 通知消息 -->
       <el-tooltip content="消息通知" placement="bottom">
         <el-badge :value="notificationCount" :hidden="notificationCount === 0" class="notification-badge">
-          <el-button type="text" @click="showNotifications" class="header-btn">
+          <el-button type="link" @click="showNotifications" class="header-btn">
             <el-icon size="18">
               <Bell />
             </el-icon>
@@ -66,7 +41,7 @@
       <!-- 全屏切换按钮 -->
       <el-tooltip content="全屏" placement="bottom">
         <el-button
-          type="text"
+          type="link"
           class="header-btn"
           @click="toggleFullscreen"
         >

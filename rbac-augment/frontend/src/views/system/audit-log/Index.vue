@@ -538,7 +538,7 @@ const getActionTagType = (action: string) => {
     login: 'primary',
     logout: 'info'
   }
-  return typeMap[action] || 'default'
+  return typeMap[action] || 'info'
 }
 
 /**

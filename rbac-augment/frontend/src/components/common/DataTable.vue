@@ -31,7 +31,7 @@
           <!-- 密度切换 -->
           <el-tooltip content="密度" placement="top">
             <el-dropdown @command="handleDensityChange">
-              <el-button type="text" :icon="Operation" />
+              <el-button type="link" :icon="Operation" />
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item command="default" :class="{ active: density === 'default' }">
@@ -250,7 +250,7 @@ import {
   FullScreen,
   Rank
 } from '@element-plus/icons-vue'
-// import draggable from 'vuedraggable' // 暂时移除拖拽功能
+import draggable from 'vuedraggable'
 
 // 类型定义
 interface TableColumn {

@@ -17,6 +17,7 @@ class PermissionBase(BaseModel):
     action: str = Field(..., min_length=1, max_length=50, description="操作")
     parent_id: Optional[int] = Field(None, description="父权限ID")
     sort_order: int = Field(0, description="排序")
+    is_active: bool = Field(True, description="是否启用")
     
     @validator('code')
     def validate_code(cls, v):
@@ -48,6 +49,7 @@ class PermissionUpdate(BaseModel):
     description: Optional[str] = Field(None, description="权限描述")
     parent_id: Optional[int] = Field(None, description="父权限ID")
     sort_order: Optional[int] = Field(None, description="排序")
+    is_active: Optional[bool] = Field(None, description="是否启用")
 
 
 class PermissionResponse(BaseModel):
@@ -60,6 +62,7 @@ class PermissionResponse(BaseModel):
     action: str = Field(..., description="操作")
     parent_id: Optional[int] = Field(None, description="父权限ID")
     sort_order: int = Field(..., description="排序")
+    is_active: bool = Field(..., description="是否启用")
     created_at: datetime = Field(..., description="创建时间")
     updated_at: datetime = Field(..., description="更新时间")
     
@@ -76,6 +79,7 @@ class PermissionTreeResponse(BaseModel):
     resource: str = Field(..., description="资源")
     action: str = Field(..., description="操作")
     sort_order: int = Field(..., description="排序")
+    is_active: bool = Field(..., description="是否启用")
     children: List["PermissionTreeResponse"] = Field(default_factory=list, description="子权限")
     
     class Config:
@@ -93,6 +97,7 @@ class PermissionListResponse(BaseModel):
     parent_id: Optional[int] = Field(None, description="父权限ID")
     parent_name: Optional[str] = Field(None, description="父权限名称")
     sort_order: int = Field(..., description="排序")
+    is_active: bool = Field(..., description="是否启用")
     created_at: datetime = Field(..., description="创建时间")
     role_count: int = Field(0, description="拥有此权限的角色数量")
     

@@ -295,8 +295,41 @@ async def assign_role_menus(
             )
     
     await crud_role.assign_menus(role, menu_data.menu_ids)
-    
+
     return BaseResponse(message="菜单分配成功")
+
+
+@router.get("/{role_id}/users", response_model=BaseResponse, summary="获取角色关联的用户")
+async def get_role_users(
+    role_id: int,
+    current_user: User = Depends(require_role_read)
+):
+    """获取角色关联的用户列表"""
+    role = await crud_role.get(role_id)
+    if not role:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="角色不存在"
+        )
+
+    # 获取角色关联的用户
+    users = await crud_role.get_role_users(role_id)
+
+    user_list = []
+    for user in users:
+        user_list.append({
+            "id": user.id,
+            "username": user.username,
+            "nickname": user.nickname,
+            "email": user.email,
+            "is_active": user.is_active,
+            "created_at": user.created_at.isoformat() if user.created_at else None
+        })
+
+    return BaseResponse(
+        message="获取角色用户成功",
+        data=user_list
+    )
 
 
 @router.get("/options/select", response_model=BaseResponse, summary="获取角色选择选项")

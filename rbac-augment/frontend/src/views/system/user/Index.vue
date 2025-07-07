@@ -62,7 +62,7 @@
                   v-model="searchForm.is_active"
                   placeholder="请选择用户状态"
                   clearable
-                  style="width: 100%"
+                  style="width:200px"
                 >
                   <el-option label="激活" :value="true">
                     <span class="status-option">
@@ -247,7 +247,12 @@ import { useAuthStore } from '@/stores/auth'
 const authStore = useAuthStore()
 
 // 用户权限
-const userPermissions = computed(() => authStore.permissions)
+const userPermissions = computed(() => {
+  console.log('Current user permissions:', authStore.permissions)
+  console.log('Is superuser:', authStore.isSuperUser)
+  console.log('User info:', authStore.userInfo)
+  return authStore.permissions
+})
 
 // 搜索表单
 const searchFormRef = ref<FormInstance>()

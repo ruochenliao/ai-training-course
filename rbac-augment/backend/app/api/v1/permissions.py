@@ -146,7 +146,7 @@ async def update_permission(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="权限不存在"
         )
-    
+
     # 验证父权限是否存在（如果指定了）
     if permission_data.parent_id:
         # 不能将自己设为父权限
@@ -155,14 +155,14 @@ async def update_permission(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="不能将自己设为父权限"
             )
-        
+
         parent = await crud_permission.get(permission_data.parent_id)
         if not parent:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="父权限不存在"
             )
-        
+
         # 检查是否会形成循环引用
         ancestors = await parent.get_ancestors()
         if permission in ancestors:
@@ -170,11 +170,32 @@ async def update_permission(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="不能设置会形成循环引用的父权限"
             )
-    
+
     # 更新权限
     await crud_permission.update(permission, permission_data)
-    
+
     return BaseResponse(message="权限更新成功")
+
+
+@router.patch("/{permission_id}/status", response_model=BaseResponse, summary="更新权限状态")
+async def update_permission_status(
+    permission_id: int,
+    status_data: dict,
+    current_user: User = Depends(require_permission_write)
+):
+    """更新权限状态"""
+    permission = await crud_permission.get(permission_id)
+    if not permission:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="权限不存在"
+        )
+
+    # 更新状态
+    permission.is_active = status_data.get('is_active', permission.is_active)
+    await permission.save()
+
+    return BaseResponse(message="权限状态更新成功")
 
 
 @router.delete("/{permission_id}", response_model=BaseResponse, summary="删除权限")

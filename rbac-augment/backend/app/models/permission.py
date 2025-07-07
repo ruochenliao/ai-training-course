@@ -19,6 +19,7 @@ class Permission(BaseModel):
     action = fields.CharField(max_length=50, description="操作")
     type = fields.CharField(max_length=20, description="权限类型", default="功能")
     sort_order = fields.IntField(default=0, description="排序")
+    is_active = fields.BooleanField(default=True, description="是否启用")
 
     # 自关联（父子权限）
     parent = fields.ForeignKeyField(

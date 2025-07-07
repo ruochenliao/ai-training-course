@@ -174,12 +174,12 @@ const emit = defineEmits<Emits>()
  */
 const getLevelTagType = (level: string) => {
   const typeMap: Record<string, string> = {
-    low: '',
+    low: 'info',
     medium: 'warning',
     high: 'danger',
     critical: 'danger'
   }
-  return typeMap[level] || ''
+  return typeMap[level] || 'info'
 }
 
 /**

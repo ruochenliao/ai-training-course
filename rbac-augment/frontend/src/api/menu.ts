@@ -63,6 +63,13 @@ export function updateMenu(id: number, data: MenuUpdateRequest) {
 }
 
 /**
+ * 更新菜单状态
+ */
+export function updateMenuStatus(id: number, data: { is_active: boolean }) {
+  return request.patch(`/api/v1/menus/${id}/status`, data)
+}
+
+/**
  * 删除菜单
  */
 export function deleteMenu(id: number) {

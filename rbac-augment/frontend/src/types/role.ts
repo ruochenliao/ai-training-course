@@ -18,6 +18,7 @@ export interface Role {
 export interface RoleListItem extends Role {
   user_count: number
   permission_count: number
+  statusLoading?: boolean
 }
 
 // 角色详情

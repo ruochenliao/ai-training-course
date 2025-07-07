@@ -29,13 +29,29 @@ async def get_audit_logs(
     user_id: Optional[int] = Query(None, description="用户ID"),
     level: Optional[str] = Query(None, description="日志级别"),
     result: Optional[str] = Query(None, description="操作结果"),
-    start_time: Optional[datetime] = Query(None, description="开始时间"),
-    end_time: Optional[datetime] = Query(None, description="结束时间"),
+    start_time: Optional[str] = Query(None, description="开始时间"),
+    end_time: Optional[str] = Query(None, description="结束时间"),
     ip_address: Optional[str] = Query(None, description="IP地址"),
     current_user: User = Depends(get_current_user)
 ):
     """获取审计日志列表"""
-    
+
+    # 处理日期时间参数
+    start_datetime = None
+    end_datetime = None
+
+    if start_time and start_time.strip():
+        try:
+            start_datetime = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
+        except ValueError:
+            pass  # 忽略无效的日期格式
+
+    if end_time and end_time.strip():
+        try:
+            end_datetime = datetime.fromisoformat(end_time.replace('Z', '+00:00'))
+        except ValueError:
+            pass  # 忽略无效的日期格式
+
     # 暂时返回模拟数据
     mock_data = {
         "items": [
@@ -168,8 +184,8 @@ async def cleanup_audit_logs(
 
 @router.get("/export/csv")
 async def export_audit_logs_csv(
-    start_time: Optional[datetime] = Query(None, description="开始时间"),
-    end_time: Optional[datetime] = Query(None, description="结束时间"),
+    start_time: Optional[str] = Query(None, description="开始时间"),
+    end_time: Optional[str] = Query(None, description="结束时间"),
     current_user: User = Depends(get_current_user)
 ):
     """导出审计日志为CSV格式"""
@@ -177,6 +193,22 @@ async def export_audit_logs_csv(
     from fastapi.responses import StreamingResponse
     import csv
     import io
+
+    # 处理日期时间参数
+    start_datetime = None
+    end_datetime = None
+
+    if start_time and start_time.strip():
+        try:
+            start_datetime = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
+        except ValueError:
+            pass  # 忽略无效的日期格式
+
+    if end_time and end_time.strip():
+        try:
+            end_datetime = datetime.fromisoformat(end_time.replace('Z', '+00:00'))
+        except ValueError:
+            pass  # 忽略无效的日期格式
 
     # 模拟数据
     logs = [

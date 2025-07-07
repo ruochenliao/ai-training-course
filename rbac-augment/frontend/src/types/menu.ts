@@ -30,6 +30,12 @@ export interface MenuTreeNode extends Menu {
   children: MenuTreeNode[]
 }
 
+// 菜单树项（用于表格显示）
+export interface MenuTreeItem extends Menu {
+  children?: MenuTreeItem[]
+  statusLoading?: boolean
+}
+
 // 菜单创建请求
 export interface MenuCreateRequest {
   name: string

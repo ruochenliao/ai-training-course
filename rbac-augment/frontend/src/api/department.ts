@@ -59,6 +59,13 @@ export function updateDepartment(id: number, data: DepartmentUpdateRequest) {
 }
 
 /**
+ * 更新部门状态
+ */
+export function updateDepartmentStatus(id: number, data: { is_active: boolean }) {
+  return request.patch(`/api/v1/departments/${id}/status`, data)
+}
+
+/**
  * 删除部门
  */
 export function deleteDepartment(id: number) {

@@ -12,7 +12,7 @@
       <div class="header-right">
         <el-button
           v-if="showClearAll && activeFilterCount > 0"
-          type="text"
+          type="link"
           size="small"
           @click.stop="handleClearAll"
         >
@@ -212,7 +212,7 @@
         <div v-if="showAppliedFilters && appliedFilters.length > 0" class="applied-filters">
           <div class="applied-header">
             <span class="applied-label">已应用筛选：</span>
-            <el-button type="text" size="small" @click="handleClearAll">
+            <el-button type="link" size="small" @click="handleClearAll">
               清空全部
             </el-button>
           </div>

@@ -61,6 +61,13 @@ export function updatePermission(id: number, data: PermissionUpdateRequest) {
 }
 
 /**
+ * 更新权限状态
+ */
+export function updatePermissionStatus(id: number, data: { is_active: boolean }) {
+  return request.patch(`/api/v1/permissions/${id}/status`, data)
+}
+
+/**
  * 删除权限
  */
 export function deletePermission(id: number) {

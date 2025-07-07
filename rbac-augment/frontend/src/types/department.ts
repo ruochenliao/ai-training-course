@@ -28,23 +28,36 @@ export interface DepartmentListItem extends DepartmentBase {
   updated_at: string
 }
 
+// 部门树项（用于表格显示）
+export interface DepartmentTreeItem extends Department {
+  children?: DepartmentTreeItem[]
+  statusLoading?: boolean
+  user_count?: number
+  parent_name?: string
+}
+
 // 部门详情
 export interface DepartmentDetail extends DepartmentListItem {
   parent?: DepartmentListItem
+  parent_name?: string
   manager?: {
     id: number
     username: string
     full_name: string
     email: string
   }
+  manager_name?: string
   children: DepartmentListItem[]
+  children_count?: number
   users: Array<{
     id: number
     username: string
     full_name: string
     email: string
     phone?: string
+    is_active: boolean
   }>
+  is_active: boolean
 }
 
 // 部门树节点

@@ -109,7 +109,7 @@
             </el-button>
             <el-button
               v-if="showAdvanced && hasAdvancedFields"
-              type="text"
+              type="link"
               :icon="isAdvancedVisible ? ArrowUp : ArrowDown"
               @click="toggleAdvanced"
             >

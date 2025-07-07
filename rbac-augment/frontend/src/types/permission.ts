@@ -12,6 +12,7 @@ export interface Permission {
   action: string
   parent_id?: number
   sort_order: number
+  is_active: boolean
   created_at: string
   updated_at: string
 }
@@ -20,6 +21,7 @@ export interface Permission {
 export interface PermissionListItem extends Permission {
   parent_name?: string
   role_count: number
+  statusLoading?: boolean
 }
 
 // 权限树节点

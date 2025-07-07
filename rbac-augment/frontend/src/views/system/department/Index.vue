@@ -1,23 +1,23 @@
 <template>
   <PageContainer
-    title="菜单管理"
-    description="管理系统菜单结构，包括菜单的创建、编辑、删除和排序"
-    :icon="Menu"
+    title="部门管理"
+    description="管理组织架构和部门信息，支持层级结构和人员分配"
+    :icon="OfficeBuilding"
     badge="Beta"
     badge-type="primary"
   >
     <!-- 操作按钮 -->
     <template #actions>
       <el-button
-        v-permission="['menu:create']"
+        v-permission="['department:create']"
         type="primary"
         :icon="Plus"
         @click="handleAdd"
       >
-        新增菜单
+        新增部门
       </el-button>
       <el-button
-        v-permission="['menu:export']"
+        v-permission="['department:export']"
         :icon="DocumentCopy"
         @click="handleExport"
       >
@@ -37,22 +37,22 @@
         >
           <el-row :gutter="16">
             <el-col :span="6">
-              <el-form-item label="菜单名称">
+              <el-form-item label="部门名称">
                 <el-input
-                  v-model="searchForm.title"
-                  placeholder="请输入菜单名称"
+                  v-model="searchForm.name"
+                  placeholder="请输入部门名称"
                   clearable
                   :prefix-icon="Search"
                 />
               </el-form-item>
             </el-col>
             <el-col :span="6">
-              <el-form-item label="路由路径">
+              <el-form-item label="部门代码">
                 <el-input
-                  v-model="searchForm.path"
-                  placeholder="请输入路由路径"
+                  v-model="searchForm.code"
+                  placeholder="请输入部门代码"
                   clearable
-                  :prefix-icon="Link"
+                  :prefix-icon="Key"
                 />
               </el-form-item>
             </el-col>
@@ -60,7 +60,7 @@
               <el-form-item label="状态">
                 <el-select
                   v-model="searchForm.is_active"
-                  placeholder="请选择菜单状态"
+                  placeholder="请选择部门状态"
                   clearable
                   style="width:200px"
                 >
@@ -100,35 +100,40 @@
       </el-card>
     </div>
 
-    <!-- 菜单树表格 -->
-    <el-card shadow="never" class="menu-tree-card">
+    <!-- 部门树表格 -->
+    <el-card shadow="never" class="department-tree-card">
       <el-table
         ref="tableRef"
         v-loading="loading"
-        :data="filteredMenuTree"
+        :data="filteredDepartmentTree"
         row-key="id"
         :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
         stripe
         border
-        class="menu-tree-table"
+        class="department-tree-table"
       >
-        <el-table-column prop="title" label="菜单名称" min-width="200">
+        <el-table-column prop="name" label="部门名称" min-width="200">
           <template #default="{ row }">
-            <div class="menu-title">
-              <el-icon v-if="row.icon" class="menu-icon">
-                <component :is="row.icon" />
+            <div class="department-name">
+              <el-icon class="department-icon">
+                <OfficeBuilding />
               </el-icon>
-              <span>{{ row.title }}</span>
-              <el-tag v-if="row.type" :type="getTypeTagType(row.type)" size="small">
-                {{ row.type }}
-              </el-tag>
+              <span>{{ row.name }}</span>
             </div>
           </template>
         </el-table-column>
 
-        <el-table-column prop="path" label="路由路径" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="code" label="部门代码" min-width="120" show-overflow-tooltip />
         
-        <el-table-column prop="component" label="组件路径" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="manager_name" label="负责人" min-width="100" show-overflow-tooltip />
+        
+        <el-table-column prop="phone" label="联系电话" min-width="120" show-overflow-tooltip />
+        
+        <el-table-column prop="user_count" label="人员数量" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag type="primary" size="small">{{ row.user_count || 0 }} 人</el-tag>
+          </template>
+        </el-table-column>
         
         <el-table-column prop="sort_order" label="排序" width="80" align="center" />
         
@@ -139,14 +144,6 @@
               :loading="row.statusLoading"
               @change="handleStatusChange(row)"
             />
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="is_hidden" label="隐藏" width="80" align="center">
-          <template #default="{ row }">
-            <el-tag :type="row.is_hidden ? 'danger' : 'success'" size="small">
-              {{ row.is_hidden ? '隐藏' : '显示' }}
-            </el-tag>
           </template>
         </el-table-column>
 
@@ -167,18 +164,18 @@
       </el-table>
     </el-card>
 
-    <!-- 菜单表单对话框 -->
-    <MenuForm
+    <!-- 部门表单对话框 -->
+    <DepartmentForm
       v-model:visible="formVisible"
       :form-data="formData"
       :form-type="formType"
       @success="handleFormSuccess"
     />
 
-    <!-- 菜单详情对话框 -->
-    <MenuDetail
+    <!-- 部门详情对话框 -->
+    <DepartmentDetail
       v-model:visible="detailVisible"
-      :menu-id="selectedMenuId"
+      :department-id="selectedDepartmentId"
     />
   </PageContainer>
 </template>
@@ -187,11 +184,11 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
 import {
-  Menu,
+  OfficeBuilding,
   Plus,
   DocumentCopy,
   Search,
-  Link,
+  Key,
   Refresh,
   CircleCheck,
   CircleClose,
@@ -201,13 +198,13 @@ import {
   Edit,
   Delete
 } from '@element-plus/icons-vue'
-import { getMenuTree, deleteMenu, updateMenuStatus } from '@/api/menu'
+import { getDepartmentTree, deleteDepartment, updateDepartmentStatus } from '@/api/department'
 import { formatDateTime } from '@/utils'
-import type { MenuTreeItem, ActionButton } from '@/types'
+import type { DepartmentTreeItem, ActionButton } from '@/types'
 import PageContainer from '@/components/common/PageContainer.vue'
 import ActionButtons from '@/components/common/ActionButtons.vue'
-import MenuForm from './components/MenuForm.vue'
-import MenuDetail from './components/MenuDetail.vue'
+import DepartmentForm from './components/DepartmentForm.vue'
+import DepartmentDetail from './components/DepartmentDetail.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
@@ -218,15 +215,15 @@ const userPermissions = computed(() => authStore.permissions)
 // 搜索表单
 const searchFormRef = ref<FormInstance>()
 const searchForm = reactive({
-  title: '',
-  path: '',
+  name: '',
+  code: '',
   is_active: undefined as boolean | undefined
 })
 
 // 表格数据
 const loading = ref(false)
 const tableRef = ref()
-const menuTree = ref<MenuTreeItem[]>([])
+const departmentTree = ref<DepartmentTreeItem[]>([])
 
 // 表单对话框
 const formVisible = ref(false)
@@ -235,23 +232,23 @@ const formData = ref<any>({})
 
 // 详情对话框
 const detailVisible = ref(false)
-const selectedMenuId = ref<number>()
+const selectedDepartmentId = ref<number>()
 
-// 过滤后的菜单树
-const filteredMenuTree = computed(() => {
-  if (!searchForm.title && !searchForm.path && searchForm.is_active === undefined) {
-    return menuTree.value
+// 过滤后的部门树
+const filteredDepartmentTree = computed(() => {
+  if (!searchForm.name && !searchForm.code && searchForm.is_active === undefined) {
+    return departmentTree.value
   }
 
-  const filterTree = (nodes: MenuTreeItem[]): MenuTreeItem[] => {
+  const filterTree = (nodes: DepartmentTreeItem[]): DepartmentTreeItem[] => {
     return nodes.filter(node => {
-      const matchTitle = !searchForm.title || node.title.includes(searchForm.title)
-      const matchPath = !searchForm.path || (node.path && node.path.includes(searchForm.path))
+      const matchName = !searchForm.name || node.name.includes(searchForm.name)
+      const matchCode = !searchForm.code || (node.code && node.code.includes(searchForm.code))
       const matchStatus = searchForm.is_active === undefined || node.is_active === searchForm.is_active
 
       const hasMatchingChildren = node.children && filterTree(node.children).length > 0
 
-      if (matchTitle && matchPath && matchStatus) {
+      if (matchName && matchCode && matchStatus) {
         return true
       }
 
@@ -262,23 +259,23 @@ const filteredMenuTree = computed(() => {
     }))
   }
 
-  return filterTree(menuTree.value)
+  return filterTree(departmentTree.value)
 })
 
 /**
- * 获取菜单树
+ * 获取部门树
  */
-const fetchMenuTree = async () => {
+const fetchDepartmentTree = async () => {
   try {
     loading.value = true
-    const response = await getMenuTree()
-    menuTree.value = response.data.map(item => ({
+    const response = await getDepartmentTree()
+    departmentTree.value = response.data.map(item => ({
       ...item,
       statusLoading: false
     }))
   } catch (error) {
-    console.error('Failed to fetch menu tree:', error)
-    ElMessage.error('获取菜单列表失败')
+    console.error('Failed to fetch department tree:', error)
+    ElMessage.error('获取部门列表失败')
   } finally {
     loading.value = false
   }
@@ -297,8 +294,8 @@ const handleSearch = () => {
 const handleReset = () => {
   searchFormRef.value?.resetFields()
   Object.assign(searchForm, {
-    title: '',
-    path: '',
+    name: '',
+    code: '',
     is_active: undefined
   })
 }
@@ -322,7 +319,7 @@ const handleAdd = () => {
 /**
  * 处理编辑
  */
-const handleEdit = (row: MenuTreeItem) => {
+const handleEdit = (row: DepartmentTreeItem) => {
   formType.value = 'edit'
   formData.value = { ...row }
   formVisible.value = true
@@ -331,35 +328,19 @@ const handleEdit = (row: MenuTreeItem) => {
 /**
  * 处理查看
  */
-const handleView = (row: MenuTreeItem) => {
-  selectedMenuId.value = row.id
+const handleView = (row: DepartmentTreeItem) => {
+  selectedDepartmentId.value = row.id
   detailVisible.value = true
 }
 
-/**
- * 获取类型标签类型
- */
-const getTypeTagType = (type: string) => {
-  switch (type) {
-    case '目录':
-      return 'primary'
-    case '菜单':
-      return 'success'
-    case '按钮':
-      return 'warning'
-    default:
-      return 'info'
-  }
-}
-
 // 行操作按钮配置
-const getRowActions = (row: MenuTreeItem): ActionButton[] => [
+const getRowActions = (row: DepartmentTreeItem): ActionButton[] => [
   {
     key: 'view',
     label: '查看',
     type: 'primary',
     icon: View,
-    permission: 'menu:read',
+    permission: 'department:read',
     row
   },
   {
@@ -367,7 +348,7 @@ const getRowActions = (row: MenuTreeItem): ActionButton[] => [
     label: '编辑',
     type: 'warning',
     icon: Edit,
-    permission: 'menu:update',
+    permission: 'department:update',
     row
   },
   {
@@ -375,7 +356,7 @@ const getRowActions = (row: MenuTreeItem): ActionButton[] => [
     label: '删除',
     type: 'danger',
     icon: Delete,
-    permission: 'menu:delete',
+    permission: 'department:delete',
     row
   }
 ]
@@ -400,15 +381,15 @@ const handleRowAction = (action: ActionButton) => {
 /**
  * 处理状态切换
  */
-const handleStatusChange = async (row: MenuTreeItem) => {
+const handleStatusChange = async (row: DepartmentTreeItem) => {
   try {
     row.statusLoading = true
-    await updateMenuStatus(row.id, { is_active: row.is_active })
-    ElMessage.success(`菜单已${row.is_active ? '启用' : '禁用'}`)
+    await updateDepartmentStatus(row.id, { is_active: row.is_active })
+    ElMessage.success(`部门已${row.is_active ? '启用' : '禁用'}`)
   } catch (error) {
     // 恢复原状态
     row.is_active = !row.is_active
-    console.error('Update menu status error:', error)
+    console.error('Update department status error:', error)
   } finally {
     row.statusLoading = false
   }
@@ -417,10 +398,10 @@ const handleStatusChange = async (row: MenuTreeItem) => {
 /**
  * 处理删除
  */
-const handleDelete = async (row: MenuTreeItem) => {
+const handleDelete = async (row: DepartmentTreeItem) => {
   try {
     await ElMessageBox.confirm(
-      `确定要删除菜单 "${row.title}" 吗？`,
+      `确定要删除部门 "${row.name}" 吗？`,
       '确认删除',
       {
         confirmButtonText: '确定',
@@ -429,19 +410,19 @@ const handleDelete = async (row: MenuTreeItem) => {
         dangerouslyUseHTMLString: true,
         message: `
           <div>
-            <p>此操作将永久删除该菜单，是否继续？</p>
+            <p>此操作将永久删除该部门，是否继续？</p>
             <p style="color: #f56c6c; font-size: 12px;">注意：删除后无法恢复</p>
           </div>
         `
       }
     )
 
-    await deleteMenu(row.id)
+    await deleteDepartment(row.id)
     ElMessage.success('删除成功')
-    fetchMenuTree()
+    fetchDepartmentTree()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('Failed to delete menu:', error)
+      console.error('Failed to delete department:', error)
       ElMessage.error('删除失败')
     }
   }
@@ -451,7 +432,7 @@ const handleDelete = async (row: MenuTreeItem) => {
  * 展开全部
  */
 const handleExpandAll = () => {
-  const expandAll = (data: MenuTreeItem[]) => {
+  const expandAll = (data: DepartmentTreeItem[]) => {
     data.forEach(item => {
       tableRef.value?.toggleRowExpansion(item, true)
       if (item.children && item.children.length > 0) {
@@ -459,14 +440,14 @@ const handleExpandAll = () => {
       }
     })
   }
-  expandAll(menuTree.value)
+  expandAll(departmentTree.value)
 }
 
 /**
  * 收起全部
  */
 const handleCollapseAll = () => {
-  const collapseAll = (data: MenuTreeItem[]) => {
+  const collapseAll = (data: DepartmentTreeItem[]) => {
     data.forEach(item => {
       tableRef.value?.toggleRowExpansion(item, false)
       if (item.children && item.children.length > 0) {
@@ -474,18 +455,18 @@ const handleCollapseAll = () => {
       }
     })
   }
-  collapseAll(menuTree.value)
+  collapseAll(departmentTree.value)
 }
 
 /**
  * 处理表单成功
  */
 const handleFormSuccess = () => {
-  fetchMenuTree()
+  fetchDepartmentTree()
 }
 
 onMounted(() => {
-  fetchMenuTree()
+  fetchDepartmentTree()
 })
 </script>
 
@@ -517,17 +498,17 @@ onMounted(() => {
   }
 }
 
-// ==================== 菜单树表格样式 ====================
-.menu-tree-card {
+// ==================== 部门树表格样式 ====================
+.department-tree-card {
   border: 1px solid $border-color-light;
 
-  .menu-tree-table {
-    .menu-title {
+  .department-tree-table {
+    .department-name {
       display: flex;
       align-items: center;
       gap: 8px;
 
-      .menu-icon {
+      .department-icon {
         font-size: 16px;
         color: var(--el-color-primary);
       }
@@ -577,7 +558,7 @@ onMounted(() => {
     }
   }
 
-  .menu-tree-card {
+  .department-tree-card {
     background: $dark-card-color;
     border-color: $dark-border-color;
   }

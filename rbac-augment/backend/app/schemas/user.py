@@ -153,7 +153,7 @@ class UserOption(BaseModel):
     """用户选项模式（用于下拉选择等）"""
     id: int = Field(..., description="用户ID")
     username: str = Field(..., description="用户名")
-    real_name: Optional[str] = Field(None, description="真实姓名")
+    full_name: Optional[str] = Field(None, description="真实姓名")
     email: str = Field(..., description="邮箱")
 
 

@@ -189,6 +189,17 @@ class CRUDRole(CRUDBase[Role, RoleCreate, RoleUpdate]):
         # 构建返回数据
         result = []
         for role in roles:
+            # 安全地获取关联数据的数量
+            try:
+                user_count = await role.users.all().count()
+            except:
+                user_count = 0
+
+            try:
+                permission_count = await role.permissions.all().count()
+            except:
+                permission_count = 0
+
             role_data = {
                 "id": role.id,
                 "name": role.name,
@@ -198,8 +209,8 @@ class CRUDRole(CRUDBase[Role, RoleCreate, RoleUpdate]):
                 "sort_order": role.sort_order,
                 "created_at": role.created_at,
                 "updated_at": role.updated_at,
-                "user_count": len(role.users),
-                "permission_count": len(role.permissions)
+                "user_count": user_count,
+                "permission_count": permission_count
             }
             result.append(role_data)
         
@@ -217,6 +228,11 @@ class CRUDRole(CRUDBase[Role, RoleCreate, RoleUpdate]):
             }
             for role in roles
         ]
+
+    async def get_role_users(self, role_id: int) -> List:
+        """获取角色关联的用户列表"""
+        from ..models.user import User
+        return await User.filter(roles__id=role_id, is_active=True).all()
 
     async def get_active_roles(self) -> List[Role]:
         """获取所有活跃的角色"""

@@ -69,13 +69,13 @@ import { useRoute } from 'vue-router'
 interface BreadcrumbItem {
   title: string
   path: string
-  icon?: string
+  icon?: string | object
 }
 
 interface Props {
   title?: string
   description?: string
-  icon?: string
+  icon?: string | object
   badge?: string
   badgeType?: 'primary' | 'success' | 'warning' | 'danger' | 'info'
   showHeader?: boolean

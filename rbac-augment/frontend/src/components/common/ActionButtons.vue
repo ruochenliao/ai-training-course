@@ -99,6 +99,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { ArrowDown, MoreFilled } from '@element-plus/icons-vue'
+import { useAuthStore } from '@/stores/auth'
 
 export interface DropdownItem {
   key?: string
@@ -164,6 +165,15 @@ const emit = defineEmits<{
 // 检查权限
 const hasPermission = (permission?: string | string[]) => {
   if (!permission) return true
+
+  // 导入 auth store 来检查超级用户状态
+  const authStore = useAuthStore()
+
+  // 超级用户拥有所有权限
+  if (authStore.isSuperUser) {
+    return true
+  }
+
   if (typeof permission === 'string') {
     return props.permissions.includes(permission)
   }

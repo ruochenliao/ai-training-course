@@ -47,6 +47,13 @@ export function updateRole(id: number, data: RoleUpdateRequest) {
 }
 
 /**
+ * 更新角色状态
+ */
+export function updateRoleStatus(id: number, data: { is_active: boolean }) {
+  return request.patch(`/api/v1/roles/${id}/status`, data)
+}
+
+/**
  * 删除角色
  */
 export function deleteRole(id: number) {
@@ -93,4 +100,11 @@ export function getRolePermissions(id: number) {
  */
 export function getRoleMenus(id: number) {
   return request.get<{ menu_ids: number[] }>(`/api/v1/roles/${id}/menus`)
+}
+
+/**
+ * 获取角色关联的用户列表
+ */
+export function getRoleUsers(id: number) {
+  return request.get<{ data: any[] }>(`/api/v1/roles/${id}/users`)
 }

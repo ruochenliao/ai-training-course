@@ -208,7 +208,7 @@ const loadUserOptions = async () => {
     const response = await getUserOptions()
     userOptions.value = response.data.map((user: any) => ({
       key: user.id,
-      label: user.real_name || user.username,
+      label: user.full_name || user.username,
       username: user.username,
       disabled: false
     }))
