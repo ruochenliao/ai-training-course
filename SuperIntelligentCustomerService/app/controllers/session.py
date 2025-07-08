@@ -22,7 +22,7 @@ class SessionController(CRUDBase[ChatSession, SessionCreate, SessionUpdate]):
         if session_title:
             q &= Q(session_title__contains=session_title)
         
-        return await self.list(page=page, page_size=page_size, search=q, order=["-create_time"])
+        return await self.list(page=page, page_size=page_size, search=q, order=["-created_at"])
 
     async def get_user_session(self, session_id: int, user_id: int) -> Optional[ChatSession]:
         """获取用户的特定会话"""

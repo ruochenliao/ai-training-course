@@ -1,10 +1,12 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 
 
 class GetSessionListVO(BaseModel):
     """模型列表返回对象"""
+    model_config = ConfigDict(protected_namespaces=())
+
     id: Optional[int] = Field(None, description="模型ID")
     category: Optional[str] = Field(None, description="模型分类")
     model_name: Optional[str] = Field(None, description="模型名称")
@@ -20,6 +22,8 @@ class GetSessionListVO(BaseModel):
 
 class ModelCreate(BaseModel):
     """创建模型请求对象"""
+    model_config = ConfigDict(protected_namespaces=())
+
     category: str = Field(..., description="模型分类")
     model_name: str = Field(..., description="模型名称")
     model_describe: Optional[str] = Field(None, description="模型描述")
@@ -35,6 +39,8 @@ class ModelCreate(BaseModel):
 
 class ModelUpdate(BaseModel):
     """更新模型请求对象"""
+    model_config = ConfigDict(protected_namespaces=())
+
     id: int = Field(..., description="模型ID")
     category: Optional[str] = Field(None, description="模型分类")
     model_name: Optional[str] = Field(None, description="模型名称")

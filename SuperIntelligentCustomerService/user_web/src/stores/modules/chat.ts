@@ -54,7 +54,6 @@ export const useChatStore = defineStore('chat', () => {
     try {
       const res = await getChatList({
         sessionId,
-        userId: userStore.userInfo?.userId as number,
       });
       if (res.rows) {
         setChatMap(sessionId, res.rows);

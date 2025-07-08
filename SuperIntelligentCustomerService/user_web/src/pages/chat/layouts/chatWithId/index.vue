@@ -8,7 +8,7 @@ import type { FilesCardProps } from 'vue-element-plus-x/types/FilesCard';
 import type { ThinkingStatus } from 'vue-element-plus-x/types/Thinking';
 import { useHookFetch } from 'hook-fetch/vue';
 import { useRoute } from 'vue-router';
-import { send } from '@/api';
+import { sendStream, parseStreamResponse } from '@/api';
 import FilesSelect from '@/components/FilesSelect/index.vue';
 import ModelSelect from '@/components/ModelSelect/index.vue';
 import { useChatStore } from '@/stores/modules/chat';
@@ -41,12 +41,9 @@ const senderRef = ref<InstanceType<typeof Sender> | null>(null);
 const bubbleItems = ref<MessageItem[]>([]);
 const bubbleListRef = ref<BubbleListInstance | null>(null);
 
-const { stream, loading: isLoading, cancel } = useHookFetch({
-  request: send,
-  onError: (err) => {
-    console.warn('测试错误拦截', err);
-  },
-});
+// 流式聊天状态管理
+const isLoading = ref(false);
+let abortController: AbortController | null = null;
 // 记录进入思考中
 let isThinking = false;
 
@@ -95,53 +92,86 @@ watch(
 // 封装数据处理逻辑
 function handleDataChunk(chunk: AnyObject) {
   try {
-    const reasoningChunk = chunk.choices?.[0].delta.reasoning_content;
-    if (reasoningChunk) {
-      // 开始思考链状态
-      bubbleItems.value[bubbleItems.value.length - 1].thinkingStatus = 'thinking';
-      bubbleItems.value[bubbleItems.value.length - 1].loading = true;
-      bubbleItems.value[bubbleItems.value.length - 1].thinlCollapse = true;
-      if (bubbleItems.value.length) {
-        bubbleItems.value[bubbleItems.value.length - 1].reasoning_content += reasoningChunk;
-      }
+    console.log('收到流式数据:', chunk);
+
+    // 处理OpenAI格式的流式数据
+    if (!chunk || !chunk.choices || !chunk.choices[0]) {
+      return;
     }
 
-    // 另一种思考中形式，content中有 <think></think> 的格式
-    // 一开始匹配到 <think> 开始，匹配到 </think> 结束，并处理标签中的内容为思考内容
-    const parsedChunk = chunk.choices?.[0].delta.content;
-    if (parsedChunk) {
-      const thinkStart = parsedChunk.includes('<think>');
-      const thinkEnd = parsedChunk.includes('</think>');
+    const choice = chunk.choices[0];
+
+    const delta = choice.delta;
+
+    if (!delta) {
+      return;
+    }
+
+    // 获取最后一条消息（AI回复）
+    if (!bubbleItems.value || bubbleItems.value.length === 0) {
+      return;
+    }
+    const lastMessage = bubbleItems.value[bubbleItems.value.length - 1];
+    if (!lastMessage || (lastMessage.role !== 'assistant' && lastMessage.role !== 'system')) {
+      return;
+    }
+
+    // 处理思考内容（reasoning_content）
+    const reasoningChunk = delta.reasoning_content;
+    if (reasoningChunk) {
+      // 开始思考链状态
+      lastMessage.thinkingStatus = 'thinking';
+      lastMessage.loading = true;
+      lastMessage.thinlCollapse = true;
+      lastMessage.reasoning_content = (lastMessage.reasoning_content || '') + reasoningChunk;
+    }
+
+    // 处理正常内容
+    const contentChunk = delta.content;
+    if (contentChunk) {
+      // 检查是否包含思考标签
+      const thinkStart = contentChunk.includes('<think>');
+      const thinkEnd = contentChunk.includes('</think>');
+
       if (thinkStart) {
         isThinking = true;
       }
       if (thinkEnd) {
         isThinking = false;
       }
+
       if (isThinking) {
-        // 开始思考链状态
-        bubbleItems.value[bubbleItems.value.length - 1].thinkingStatus = 'thinking';
-        bubbleItems.value[bubbleItems.value.length - 1].loading = true;
-        bubbleItems.value[bubbleItems.value.length - 1].thinlCollapse = true;
-        if (bubbleItems.value.length) {
-          bubbleItems.value[bubbleItems.value.length - 1].reasoning_content += parsedChunk
-            .replace('<think>', '')
-            .replace('</think>', '');
-        }
-      }
-      else {
-        // 结束 思考链状态
-        bubbleItems.value[bubbleItems.value.length - 1].thinkingStatus = 'end';
-        bubbleItems.value[bubbleItems.value.length - 1].loading = false;
-        if (bubbleItems.value.length) {
-          bubbleItems.value[bubbleItems.value.length - 1].content += parsedChunk;
-        }
+        // 处理思考内容
+        lastMessage.thinkingStatus = 'thinking';
+        lastMessage.loading = true;
+        lastMessage.thinlCollapse = true;
+        const thinkingContent = contentChunk
+          .replace('<think>', '')
+          .replace('</think>', '');
+        lastMessage.reasoning_content = (lastMessage.reasoning_content || '') + thinkingContent;
+      } else {
+        // 处理正常回复内容
+        lastMessage.thinkingStatus = 'end';
+        lastMessage.loading = false;
+        lastMessage.typing = true;
+        lastMessage.content = (lastMessage.content || '') + contentChunk;
       }
     }
-  }
-  catch (err) {
-    // 这里如果使用了中断，会有报错，可以忽略不管
-    console.error('解析数据时出错:', err);
+
+    // 处理完成状态
+    if (choice.finish_reason === 'stop' || choice.finish_reason === 'end' || choice.finish_reason === 'complete') {
+      lastMessage.loading = false;
+      lastMessage.typing = false;
+      lastMessage.thinkingStatus = 'end';
+    }
+
+    // 自动滚动到底部
+    nextTick(() => {
+      bubbleListRef.value?.scrollToBottom();
+    });
+
+  } catch (err) {
+    console.error('解析流式数据时出错:', err);
   }
 }
 
@@ -151,54 +181,107 @@ function handleError(err: any) {
 }
 
 async function startSSE(chatContent: string) {
+  if (isLoading.value) {
+    console.warn('正在处理中，请稍等...');
+    return;
+  }
+
   try {
+    isLoading.value = true;
+    abortController = new AbortController();
+
     // 添加用户输入的消息
-    // console.log('chatContent', chatContent);
-    // 清空输入框
     inputValue.value = '';
     addMessage(chatContent, true);
     addMessage('', false);
 
-    // 这里有必要调用一下 BubbleList 组件的滚动到底部 手动触发 自动滚动
+    // 滚动到底部
     bubbleListRef.value?.scrollToBottom();
 
-    for await (const chunk of stream({
-      messages: bubbleItems.value
-        .filter((item: any) => item.role === 'user')
-        .map((item: any) => ({
-          role: item.role,
-          content: item.content,
-        })),
-      sessionId: route.params?.id !== 'not_login' ? String(route.params?.id) : undefined,
-      userId: userStore.userInfo?.userId,
-      model: modelStore.currentModelInfo.modelName ?? '',
-    })) {
-      handleDataChunk(chunk.result as AnyObject);
+    // 准备发送的消息数据，匹配后端SendDTO格式
+    // 只发送当前用户的消息，避免发送整个对话历史
+    const sendData = {
+      messages: [
+        {
+          role: 'user',
+          content: chatContent,
+        }
+      ],
+      sessionId: route.params?.id !== 'not_login' ? String(route.params?.id) : '1', // 确保有sessionId
+      model: modelStore.currentModelInfo.modelName ?? 'deepseek-chat',
+      stream: true,
+    };
+
+    console.log('发送流式聊天请求:', sendData);
+
+    // 使用新的流式API
+    const stream = await sendStream(sendData);
+
+    // 解析流式响应
+    for await (const chunk of parseStreamResponse(stream)) {
+      // 检查是否被中断
+      if (abortController?.signal.aborted) {
+        console.log('流式聊天被用户中断');
+        break;
+      }
+      handleDataChunk(chunk);
     }
   }
   catch (err) {
+    console.error('流式聊天错误:', err);
     handleError(err);
+
+    // 如果流式聊天失败，显示错误消息
+    if (bubbleItems.value && bubbleItems.value.length > 0) {
+      const lastMessage = bubbleItems.value[bubbleItems.value.length - 1];
+      if (lastMessage && (lastMessage.role === 'assistant' || lastMessage.role === 'system')) {
+        lastMessage.content = '抱歉，我暂时无法回复您的消息，请稍后重试。';
+        lastMessage.loading = false;
+        lastMessage.typing = false;
+      }
+    }
   }
   finally {
-    console.log('数据接收完毕');
+    console.log('流式数据接收完毕');
+    isLoading.value = false;
+    abortController = null;
+
     // 停止打字器状态
-    if (bubbleItems.value.length) {
-      bubbleItems.value[bubbleItems.value.length - 1].typing = false;
+    if (bubbleItems.value && bubbleItems.value.length > 0) {
+      const lastMessage = bubbleItems.value[bubbleItems.value.length - 1];
+      if (lastMessage) {
+        lastMessage.typing = false;
+        lastMessage.loading = false;
+      }
     }
   }
 }
 
 // 中断请求
 async function cancelSSE() {
-  cancel();
+  // 中断流式请求
+  if (abortController) {
+    abortController.abort();
+    abortController = null;
+  }
+  isLoading.value = false;
+
   // 结束最后一条消息打字状态
-  if (bubbleItems.value.length) {
-    bubbleItems.value[bubbleItems.value.length - 1].typing = false;
+  if (bubbleItems.value && bubbleItems.value.length > 0) {
+    const lastMessage = bubbleItems.value[bubbleItems.value.length - 1];
+    if (lastMessage) {
+      lastMessage.typing = false;
+    }
   }
 }
 
 // 添加消息 - 维护聊天记录
 function addMessage(message: string, isUser: boolean) {
+  // 确保bubbleItems.value存在且为数组
+  if (!bubbleItems.value || !Array.isArray(bubbleItems.value)) {
+    bubbleItems.value = [];
+  }
+
   const i = bubbleItems.value.length;
   const obj: MessageItem = {
     key: i,
@@ -206,7 +289,7 @@ function addMessage(message: string, isUser: boolean) {
       ? avatar.value
       : 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
     avatarSize: '32px',
-    role: isUser ? 'user' : 'system',
+    role: isUser ? 'user' : 'assistant',
     placement: isUser ? 'end' : 'start',
     isMarkdown: !isUser,
     loading: !isUser,

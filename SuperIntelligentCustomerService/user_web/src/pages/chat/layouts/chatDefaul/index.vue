@@ -18,9 +18,8 @@ const senderRef = ref();
 async function handleSend() {
   localStorage.setItem('chatContent', senderValue.value);
   await sessionStore.createSessionList({
-    userId: userStore.userInfo?.userId as number,
-    sessionContent: senderValue.value,
-    sessionTitle: senderValue.value.slice(0, 10),
+    session_content: senderValue.value,
+    session_title: senderValue.value.slice(0, 10),
     remark: senderValue.value.slice(0, 10),
   });
 }

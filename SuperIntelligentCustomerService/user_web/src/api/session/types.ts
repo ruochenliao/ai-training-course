@@ -91,7 +91,11 @@ export interface ChatSessionVo {
   /**
    * 创建时间
    */
-  createTime?: Date;
+  created_at?: string;
+  /**
+   * 更新时间
+   */
+  updated_at?: string;
   /**
    * 自定义的消息前缀图标字段
    */
@@ -105,19 +109,18 @@ export interface CreateSessionDTO {
   /**
    * 创建者
    */
-  createBy?: number;
+  create_by?: number;
   /**
    * 创建部门
    */
-  createDept?: number;
+  create_dept?: number;
   /**
    * 创建时间
    */
-  createTime?: Date;
+  create_time?: Date;
   /**
    * 主键
    */
-  // id?: number;
   id?: string;
   /**
    * 请求参数
@@ -130,23 +133,23 @@ export interface CreateSessionDTO {
   /**
    * 会话内容
    */
-  sessionContent?: string;
+  session_content?: string;
   /**
    * 会话标题
    */
-  sessionTitle: string;
+  session_title: string;
   /**
    * 更新者
    */
-  updateBy?: number;
+  update_by?: number;
   /**
    * 更新时间
    */
-  updateTime?: Date;
+  update_time?: Date;
   /**
-   * 用户id
+   * 用户id（可选，使用当前登录用户）
    */
-  userId: number;
+  user_id?: number;
 }
 
 // export interface CreateSessionVO {

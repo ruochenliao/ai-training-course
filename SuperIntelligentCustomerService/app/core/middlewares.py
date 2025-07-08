@@ -160,7 +160,13 @@ class HttpAuditLogMiddleware(BaseHTTPMiddleware):
             data["response_time"] = process_time
 
             data["request_args"] = request.state.request_args
-            data["response_body"] = await self.get_response_body(request, response)
+
+            # 对于流式响应，不记录完整的响应体，避免数据过大
+            if response.headers.get("content-type", "").startswith("text/event-stream"):
+                data["response_body"] = {"type": "stream", "message": "流式响应内容"}
+            else:
+                data["response_body"] = await self.get_response_body(request, response)
+
             await AuditLog.create(**data)
 
         return response

@@ -10,13 +10,14 @@ from app.schemas.chat import (
     ChatMessageVo,
     ChatMessageCreate
 )
+from app.utils.serializer import safe_serialize
 
 router = APIRouter()
 
 
 @router.get("/list", summary="获取聊天记录列表")
 async def get_chat_list(
-    session_id: Optional[str] = Query(None, description="会话ID"),
+    sessionId: Optional[str] = Query(None, description="会话ID"),
     page_num: int = Query(1, description="页码"),
     page_size: int = Query(50, description="每页数量"),
     role: Optional[str] = Query(None, description="对话角色"),
@@ -26,10 +27,10 @@ async def get_chat_list(
     user_id = current_user.id
     try:
         user_id = current_user.id
-        if not session_id:
+        if not sessionId or sessionId.strip() == "":
             return Fail(msg="会话ID不能为空")
 
-        session_id_int = int(session_id)
+        session_id_int = int(sessionId)
         total, messages = await chat_controller.get_session_messages(
             session_id=session_id_int,
             user_id=user_id,
@@ -42,7 +43,21 @@ async def get_chat_list(
         message_list = []
         for message in messages:
             message_dict = await message.to_dict()
-            message_list.append(message_dict)
+            # 转换字段名为前端期望的驼峰命名，并处理Decimal类型
+            formatted_message = {
+                "id": message_dict.get("id"),
+                "content": message_dict.get("content", ""),
+                "role": message_dict.get("role", ""),
+                "sessionId": message_dict.get("session_id"),
+                "userId": message_dict.get("user_id"),
+                "modelName": message_dict.get("model_name", ""),
+                "totalTokens": message_dict.get("total_tokens", 0),
+                "deductCost": safe_serialize(message_dict.get("deduct_cost", 0)),
+                "remark": message_dict.get("remark", ""),
+                "created_at": message_dict.get("created_at"),
+                "updated_at": message_dict.get("updated_at")
+            }
+            message_list.append(formatted_message)
         
         return SuccessExtra(
             data=message_list,

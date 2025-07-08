@@ -1,14 +1,14 @@
 <p align="center">
-  <a href="https://github.com/mizhexiaoxiao/vue-fastapi-admin">
-    <img alt="Vue FastAPI Admin Logo" width="200" src="https://github.com/mizhexiaoxiao/vue-fastapi-admin/blob/main/deploy/sample-picture/logo.svg">
+  <a href="#">
+    <img alt="Super Intelligent Customer Service Logo" width="200" src="./deploy/sample-picture/logo.svg">
   </a>
 </p>
 
-<h1 align="center">vue-fastapi-admin</h1>
+<h1 align="center">Super Intelligent Customer Service</h1>
 
 English | [简体中文](README.md)
 
-vue-fastapi-admin is a modern front-end and back-end separation development platform that combines FastAPI, Vue3, and Naive UI. It incorporates RBAC (Role-Based Access Control) management, dynamic routing, and JWT (JSON Web Token) authentication, making it ideal for rapid development of small to medium-sized applications and also serves as a valuable learning resource.
+Super Intelligent Customer Service is a modern front-end and back-end separation development platform that combines FastAPI, Vue3, and Naive UI. It incorporates RBAC (Role-Based Access Control) management, dynamic routing, and JWT (JSON Web Token) authentication, providing comprehensive intelligent customer service solutions for enterprises.
 
 ### Features
 - **Popular Tech Stack**: The backend is developed with the high-performance asynchronous framework FastAPI using Python 3.11, while the front-end is powered by cutting-edge technologies such as Vue3 and Vite, complemented by the efficient package manager, pnpm.
@@ -25,22 +25,22 @@ vue-fastapi-admin is a modern front-end and back-end separation development plat
 ### Screenshots
 
 #### Login Page
-![Login Page](https://github.com/mizhexiaoxiao/vue-fastapi-admin/blob/main/deploy/sample-picture/login.jpg)
+![Login Page](./deploy/sample-picture/login.jpg)
 
 #### Workbench
-![Workbench](https://github.com/mizhexiaoxiao/vue-fastapi-admin/blob/main/deploy/sample-picture/workbench.jpg)
+![Workbench](./deploy/sample-picture/workbench.jpg)
 
 #### User Management
-![User Management](https://github.com/mizhexiaoxiao/vue-fastapi-admin/blob/main/deploy/sample-picture/user.jpg)
+![User Management](./deploy/sample-picture/user.jpg)
 
 #### Role Management
-![Role Management](https://github.com/mizhexiaoxiao/vue-fastapi-admin/blob/main/deploy/sample-picture/role.jpg)
+![Role Management](./deploy/sample-picture/role.jpg)
 
 #### Menu Management
-![Menu Management](https://github.com/mizhexiaoxiao/vue-fastapi-admin/blob/main/deploy/sample-picture/menu.jpg)
+![Menu Management](./deploy/sample-picture/menu.jpg)
 
 #### API Management
-![API Management](https://github.com/mizhexiaoxiao/vue-fastapi-admin/blob/main/deploy/sample-picture/api.jpg)
+![API Management](./deploy/sample-picture/api.jpg)
 
 ### Quick Start
 Please follow the instructions below for installation and configuration:
@@ -214,6 +214,8 @@ pnpm dev
             └── workbench  // Workbench page
 ```
 
-### Visitors Count
+### Technical Support
 
-<img align="left" src = "https://profile-counter.glitch.me/vue-fastapi-admin/count.svg" alt="Loading">
+If you encounter any issues while using the Super Intelligent Customer Service system, please feel free to submit an Issue or contact our technical support team.
+
+We are committed to providing users with the highest quality intelligent customer service solutions.

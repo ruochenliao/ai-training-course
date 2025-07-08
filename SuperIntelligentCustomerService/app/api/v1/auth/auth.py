@@ -85,16 +85,15 @@ async def register(register_data: RegisterDTO):
         # 这里应该验证验证码的有效性
         
         # 创建新用户
-        hashed_password = get_password_hash(register_data.password)
-        user_data = {
-            "username": register_data.username.split("@")[0],  # 使用邮箱前缀作为用户名
-            "email": register_data.username,
-            "password": hashed_password,
-            "is_active": True,
-            "is_superuser": False
-        }
-        
-        user = await user_controller.create_user(user_data)
+        user_create = UserCreate(
+            username=register_data.username.split("@")[0],  # 使用邮箱前缀作为用户名
+            email=register_data.username,
+            password=register_data.password,
+            is_active=True,
+            is_superuser=False
+        )
+
+        user = await user_controller.create_user(user_create)
         
         return Success(msg="注册成功", data={"user_id": user.id})
         
@@ -138,11 +137,6 @@ async def get_by_email(email: str) -> Optional[User]:
     return await User.filter(email=email).first()
 
 
-async def create_user_account(user_data: dict) -> User:
-    """创建用户"""
-    return await User.create(**user_data)
-
-
 async def update_last_login(user_id: int):
     """更新最后登录时间"""
     from datetime import datetime
@@ -152,5 +146,4 @@ async def update_last_login(user_id: int):
 # 将方法添加到用户控制器
 user_controller.authenticate_by_username = authenticate_by_username
 user_controller.get_by_email = get_by_email
-user_controller.create_user = create_user_account
 user_controller.update_last_login = update_last_login

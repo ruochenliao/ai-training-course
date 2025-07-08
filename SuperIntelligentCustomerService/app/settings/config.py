@@ -6,9 +6,9 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     VERSION: str = "0.1.0"
-    APP_TITLE: str = "Vue FastAPI Admin"
-    PROJECT_NAME: str = "Vue FastAPI Admin"
-    APP_DESCRIPTION: str = "Description"
+    APP_TITLE: str = "超级智能客服"
+    PROJECT_NAME: str = "超级智能客服"
+    APP_DESCRIPTION: str = "超级智能客服系统 - 为企业提供全面的智能客服解决方案"
 
     CORS_ORIGINS: typing.List = ["*"]
     CORS_ALLOW_CREDENTIALS: bool = True

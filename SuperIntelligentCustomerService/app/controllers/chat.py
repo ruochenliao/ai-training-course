@@ -24,7 +24,7 @@ class ChatController(CRUDBase[ChatMessage, ChatMessageCreate, ChatMessageUpdate]
         if role:
             q &= Q(role=role)
         
-        return await self.list(page=page, page_size=page_size, search=q, order=["create_time"])
+        return await self.list(page=page, page_size=page_size, search=q, order=["created_at"])
 
     async def create_message(self, message_data: ChatMessageCreate) -> ChatMessage:
         """创建聊天消息"""
@@ -40,7 +40,7 @@ class ChatController(CRUDBase[ChatMessage, ChatMessageCreate, ChatMessageUpdate]
         messages = await self.model.filter(
             session_id=session_id, 
             user_id=user_id
-        ).order_by("-create_time").limit(limit)
+        ).order_by("-created_at").limit(limit)
         return list(reversed(messages))  # 按时间正序返回
 
     async def delete_session_messages(self, session_id: int, user_id: int) -> int:

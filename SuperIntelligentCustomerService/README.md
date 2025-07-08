@@ -1,14 +1,14 @@
 <p align="center">
-  <a href="https://gitee.com/mizhexiaoxiao/vue-fastapi-admin">
-    <img alt="Vue FastAPI Admin Logo" width="200" src="https://gitee.com/mizhexiaoxiao/vue-fastapi-admin/raw/main/deploy/sample-picture/logo.svg">
+  <a href="#">
+    <img alt="超级智能客服 Logo" width="200" src="./deploy/sample-picture/logo.svg">
   </a>
 </p>
 
-<h1 align="center">vue-fastapi-admin</h1>
+<h1 align="center">超级智能客服</h1>
 
 [English](README-en.md) | 简体中文
 
-基于 FastAPI + Vue3 + Naive UI 的现代化前后端分离开发平台，融合了 RBAC 权限管理、动态路由和 JWT 鉴权，助力中小型应用快速搭建，也可用于学习参考。
+基于 FastAPI + Vue3 + Naive UI 的现代化超级智能客服系统，融合了 RBAC 权限管理、动态路由和 JWT 鉴权，为企业提供全面的智能客服解决方案。
 
 ### 特性
 - **最流行技术栈**：基于 Python 3.11 和 FastAPI 高性能异步框架，结合 Vue3 和 Vite 等前沿技术进行开发，同时使用高效的 npm 包管理器 pnpm。
@@ -24,25 +24,25 @@
 
 ### 登录页
 
-![image](https://gitee.com/mizhexiaoxiao/vue-fastapi-admin/raw/main/deploy/sample-picture/login.jpg)
+![image](./deploy/sample-picture/login.jpg)
 ### 工作台
 
-![image](https://gitee.com/mizhexiaoxiao/vue-fastapi-admin/raw/main/deploy/sample-picture/workbench.jpg)
+![image](./deploy/sample-picture/workbench.jpg)
 
 ### 用户管理
 
-![image](https://gitee.com/mizhexiaoxiao/vue-fastapi-admin/raw/main/deploy/sample-picture/user.jpg)
+![image](./deploy/sample-picture/user.jpg)
 ### 角色管理
 
-![image](https://gitee.com/mizhexiaoxiao/vue-fastapi-admin/raw/main/deploy/sample-picture/role.jpg)
+![image](./deploy/sample-picture/role.jpg)
 
 ### 菜单管理
 
-![image](https://gitee.com/mizhexiaoxiao/vue-fastapi-admin/raw/main/deploy/sample-picture/menu.jpg)
+![image](./deploy/sample-picture/menu.jpg)
 
 ### API管理
 
-![image](https://gitee.com/mizhexiaoxiao/vue-fastapi-admin/raw/main/deploy/sample-picture/api.jpg)
+![image](./deploy/sample-picture/api.jpg)
 
 ### 快速开始
 #### 方法一：dockerhub拉取镜像
@@ -63,7 +63,7 @@ systemctl start docker
 ##### 构建镜像
 
 ```sh
-git clone https://gitee.com/mizhexiaoxiao/vue-fastapi-admin.git
+git clone https://github.com/your-repo/SuperIntelligentCustomerService.git
 cd SuperIntelligentCustomerService
 docker build --no-cache . -t SuperIntelligentCustomerService
 ```
@@ -219,20 +219,10 @@ pnpm dev
             └── workbench  // 工作台页面
 ```
 
-### 进群交流
-进群的条件是给项目一个star，小小的star是作者维护下去的动力。
+### 技术支持
+如果您在使用超级智能客服系统过程中遇到任何问题，欢迎提交Issue或联系技术支持团队。
 
-你可以在群里提出任何疑问，我会尽快回复答疑。
-
-<img width="300" src="https://gitee.com/mizhexiaoxiao/vue-fastapi-admin/raw/main/deploy/sample-picture/group.jpg">
-
-## 打赏
-如果项目有帮助到你，可以请作者喝杯咖啡~
-
-<div style="display: flex">
-    <img src="https://gitee.com/mizhexiaoxiao/vue-fastapi-admin/raw/main/deploy/sample-picture/1.jpg" width="300">
-    <img src="https://gitee.com/mizhexiaoxiao/vue-fastapi-admin/raw/main/deploy/sample-picture/2.jpg" width="300">
-</div>
+我们致力于为用户提供最优质的智能客服解决方案。
 
 ## 定制开发
 如果有基于该项目的定制需求或其他合作，请添加下方微信，备注来意

@@ -1,22 +1,22 @@
 {
-  "name": "ruoyi-element-ai",
+  "name": "super-intelligent-customer-service-user",
   "type": "module",
   "version": "0.0.0",
   "private": true,
-  "description": "ruoyi-element-ai open-source PC AI template",
+  "description": "超级智能客服用户端",
   "author": {
-    "name": "HeJiaYue520",
-    "email": "2834007710@qq.com",
-    "url": "https://github.com/HeJiaYue520/HeJiaYue520"
+    "name": "SuperIntelligentCustomerService Team",
+    "email": "support@superics.com",
+    "url": "#"
   },
   "license": "MIT",
-  "homepage": "https://github.com/element-plus-x/ruoyi-element-ai",
+  "homepage": "#",
   "repository": {
     "type": "git",
-    "url": "git@github.com:element-plus-x/ruoyi-element-ai.git"
+    "url": "#"
   },
   "bugs": {
-    "url": "https://github.com/element-plus-x/ruoyi-element-ai/issues"
+    "url": "#"
   },
   "scripts": {
     "dev": "vite",

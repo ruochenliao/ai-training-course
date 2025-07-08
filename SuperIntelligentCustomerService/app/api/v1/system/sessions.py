@@ -38,8 +38,17 @@ async def get_session_list(
         session_list = []
         for session in sessions:
             session_dict = await session.to_dict()
-            session_dict["id"] = str(session_dict["id"])  # 转换为字符串
-            session_list.append(session_dict)
+            # 转换字段名为前端期望的驼峰命名
+            formatted_session = {
+                "id": str(session_dict["id"]),
+                "sessionTitle": session_dict.get("session_title", ""),
+                "sessionContent": session_dict.get("session_content", ""),
+                "userId": session_dict.get("user_id"),
+                "remark": session_dict.get("remark", ""),
+                "created_at": session_dict.get("created_at"),
+                "updated_at": session_dict.get("updated_at")
+            }
+            session_list.append(formatted_session)
         
         return SuccessExtra(
             data=session_list,
@@ -70,9 +79,18 @@ async def create_session(
         
         session = await session_controller.create_user_session(session_create)
         session_dict = await session.to_dict()
-        session_dict["id"] = str(session_dict["id"])  # 转换为字符串
-        
-        return Success(data=session_dict, msg="会话创建成功")
+        # 转换字段名为前端期望的驼峰命名
+        formatted_session = {
+            "id": str(session_dict["id"]),
+            "sessionTitle": session_dict.get("session_title", ""),
+            "sessionContent": session_dict.get("session_content", ""),
+            "userId": session_dict.get("user_id"),
+            "remark": session_dict.get("remark", ""),
+            "created_at": session_dict.get("created_at"),
+            "updated_at": session_dict.get("updated_at")
+        }
+
+        return Success(data=formatted_session, msg="会话创建成功")
         
     except Exception as e:
         return Fail(msg=f"创建会话失败: {str(e)}")
@@ -92,8 +110,8 @@ async def update_session(
 
         session_update = SessionUpdate(
             id=session_id,
-            session_title=session_data.session_title,
-            session_content=session_data.session_content,
+            session_title=session_data.sessionTitle,
+            session_content=session_data.sessionContent,
             remark=session_data.remark
         )
 
@@ -107,9 +125,18 @@ async def update_session(
             return Fail(msg="会话不存在或无权限修改")
         
         session_dict = await updated_session.to_dict()
-        session_dict["id"] = str(session_dict["id"])
-        
-        return Success(data=session_dict, msg="会话更新成功")
+        # 转换字段名为前端期望的驼峰命名
+        formatted_session = {
+            "id": str(session_dict["id"]),
+            "sessionTitle": session_dict.get("session_title", ""),
+            "sessionContent": session_dict.get("session_content", ""),
+            "userId": session_dict.get("user_id"),
+            "remark": session_dict.get("remark", ""),
+            "created_at": session_dict.get("created_at"),
+            "updated_at": session_dict.get("updated_at")
+        }
+
+        return Success(data=formatted_session, msg="会话更新成功")
         
     except Exception as e:
         return Fail(msg=f"更新会话失败: {str(e)}")
@@ -130,9 +157,18 @@ async def get_session(
             return Fail(msg="会话不存在或无权限访问")
         
         session_dict = await session.to_dict()
-        session_dict["id"] = str(session_dict["id"])
-        
-        return Success(data=session_dict)
+        # 转换字段名为前端期望的驼峰命名
+        formatted_session = {
+            "id": str(session_dict["id"]),
+            "sessionTitle": session_dict.get("session_title", ""),
+            "sessionContent": session_dict.get("session_content", ""),
+            "userId": session_dict.get("user_id"),
+            "remark": session_dict.get("remark", ""),
+            "created_at": session_dict.get("created_at"),
+            "updated_at": session_dict.get("updated_at")
+        }
+
+        return Success(data=formatted_session)
         
     except ValueError:
         return Fail(msg="无效的会话ID")

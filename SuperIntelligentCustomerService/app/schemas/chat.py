@@ -21,7 +21,7 @@ class SendDTO(BaseModel):
     model: Optional[str] = Field(None, description="模型名称")
     prompt: Optional[str] = Field(None, description="提示词")
     search: Optional[bool] = Field(False, description="是否开启联网搜索")
-    session_id: Optional[str] = Field(None, description="会话ID")
+    session_id: Optional[str] = Field(None, description="会话ID", alias="sessionId")
     stream: Optional[bool] = Field(False, description="是否开启流式对话")
     sys_prompt: Optional[str] = Field(None, description="系统提示词")
     user_id: Optional[int] = Field(None, description="用户ID")
@@ -37,7 +37,7 @@ class GetChatListParams(BaseModel):
     id: Optional[int] = Field(None, description="主键")
     is_asc: Optional[str] = Field("desc", description="排序方向")
     model_name: Optional[str] = Field(None, description="模型名称")
-    order_by_column: Optional[str] = Field("create_time", description="排序列")
+    order_by_column: Optional[str] = Field("created_at", description="排序列")
     page_num: Optional[int] = Field(1, description="当前页数")
     page_size: Optional[int] = Field(10, description="分页大小")
     params: Optional[Dict[str, Any]] = Field(None, description="请求参数")
@@ -60,8 +60,8 @@ class ChatMessageVo(BaseModel):
     session_id: Optional[int] = Field(None, description="会话ID")
     total_tokens: Optional[int] = Field(None, description="累计Tokens")
     user_id: Optional[int] = Field(None, description="用户ID")
-    create_time: Optional[datetime] = Field(None, description="创建时间")
-    update_time: Optional[datetime] = Field(None, description="更新时间")
+    created_at: Optional[datetime] = Field(None, description="创建时间")
+    updated_at: Optional[datetime] = Field(None, description="更新时间")
 
 
 class ChatMessageCreate(BaseModel):

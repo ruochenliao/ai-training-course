@@ -45,31 +45,35 @@ export const useSessionStore = defineStore('session', () => {
 
   // 获取会话列表（核心分页方法）
   const requestSessionList = async (page: number = currentPage.value, force: boolean = false) => {
+    console.log('requestSessionList 开始:', { page, force, token: userStore.token });
+
     // 如果没有token就直接清空
     if (!userStore.token) {
+      console.log('没有token，清空会话列表');
       sessionList.value = [];
       return;
     }
 
-    if (!force && ((page > 1 && !hasMore.value) || isLoading.value || isLoadingMore.value))
+    if (!force && ((page > 1 && !hasMore.value) || isLoading.value || isLoadingMore.value)) {
+      console.log('跳过请求:', { hasMore: hasMore.value, isLoading: isLoading.value, isLoadingMore: isLoadingMore.value });
       return;
+    }
 
     isLoading.value = page === 1; // 第一页时标记为全局加载
     isLoadingMore.value = page > 1; // 非第一页时标记为加载更多
 
     try {
-      const params: GetSessionListParams = {
-        userId: userStore.userInfo?.userId as number,
-        pageNum: page,
-        pageSize: pageSize.value,
-        isAsc: 'desc',
-        orderByColumn: 'createTime',
+      const params = {
+        page_num: page,
+        page_size: pageSize.value,
       };
 
+      console.log('发送会话列表请求:', params);
       const resArr = await get_session_list(params);
+      console.log('会话列表响应:', resArr);
 
       // 预处理会话分组 并添加前缀图标
-      const res = processSessions(resArr.rows);
+      const res = processSessions(resArr.data || []);
 
       const allSessions = new Map(sessionList.value.map(item => [item.id, item])); // 现有所有数据
       res.forEach(item => allSessions.set(item.id, { ...item })); // 更新/添加数据
@@ -120,25 +124,22 @@ export const useSessionStore = defineStore('session', () => {
 
     try {
       const res = await create_session(data);
-      // 创建会话后立刻查询列表会话
-      // 1. 先找到被修改会话在 sessionList 中的索引（假设 sessionList 是按服务端排序的完整列表）
-      const targetIndex = sessionList.value.findIndex(session => session.id === `${res.data}`);
-      // 2. 计算该会话所在的页码（页大小固定为 pageSize.value）
-      const targetPage
-        = targetIndex >= 0
-          ? Math.floor(targetIndex / pageSize.value) + 1 // 索引从0开始，页码从1开始
-          : 1; // 未找到时默认刷新第一页（可能因排序变化导致位置改变）
-      // 3. 刷新目标页数据
-      await requestSessionList(targetPage, true);
-      // 并将当前勾选信息设置为新增的会话信息
-      const newSessionRes = await get_session(`${res.data}`);
-      setCurrentSession(newSessionRes.data);
+      // 后端返回完整的会话对象
+      const newSession = res.data;
 
-      // 跳转聊天页
-      router.replace({
-        name: 'chatWithId',
-        params: { id: `${res.data}` },
-      });
+      if (newSession && newSession.id) {
+        // 刷新会话列表
+        await requestSessionList(1, true);
+
+        // 设置当前会话
+        setCurrentSession(newSession);
+
+        // 跳转聊天页
+        router.replace({
+          name: 'chatWithId',
+          params: { id: newSession.id },
+        });
+      }
     }
     catch (error) {
       console.error('createSessionList错误:', error);
@@ -194,7 +195,7 @@ export const useSessionStore = defineStore('session', () => {
     const currentDate = new Date();
 
     return sessions.map((session) => {
-      const createDate = new Date(session.createTime!);
+      const createDate = new Date(session.created_at!);
       const diffDays = Math.floor(
         (currentDate.getTime() - createDate.getTime()) / (1000 * 60 * 60 * 24),
       );

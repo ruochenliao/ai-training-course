@@ -219,4 +219,12 @@ export interface ChatMessageVo {
    * 用户id
    */
   userId?: number;
+  /**
+   * 创建时间
+   */
+  created_at?: string;
+  /**
+   * 更新时间
+   */
+  updated_at?: string;
 }

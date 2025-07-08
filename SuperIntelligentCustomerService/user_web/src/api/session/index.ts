@@ -6,7 +6,7 @@ import type {
 } from './types';
 import { del, get, post, put } from '@/utils/request';
 
-export function get_session_list(params: GetSessionListParams) {
+export function get_session_list(params: { page_num: number; page_size: number; session_title?: string }) {
   return get<ChatSessionVo[]>('/system/session/list', params);
 }
 
