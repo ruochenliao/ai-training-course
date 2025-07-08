@@ -1,6 +1,6 @@
 import { defineConfig, loadEnv } from "vite";
-import path from "path";
-import plugins from "./.build/plugins/index";
+import { resolve } from "node:path";
+import plugins from "./.build/plugins/index.js";
 
 // https://vite.dev/config/
 export default defineConfig((cnf) => {
@@ -12,7 +12,7 @@ export default defineConfig((cnf) => {
     plugins: plugins(cnf),
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "./src"),
+        "@": resolve(import.meta.dirname, "./src"),
       },
     },
     css: {

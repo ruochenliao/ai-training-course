@@ -1,23 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import StreamingResponse
-import json
 import asyncio
-from typing import AsyncGenerator, Dict, List
+import json
 from datetime import datetime
+from typing import AsyncGenerator, Dict, Optional
 
-from app.controllers.chat import chat_controller
 from app.controllers.model import model_controller
-from app.core.dependency import DependAuth
-from app.models.admin import User
-from app.schemas import Success, Fail
-from app.schemas.chat import SendDTO, ChatMessageCreate
 from app.utils.serializer import safe_serialize
-
+from autogen_agentchat.agents import AssistantAgent
 # 导入Deepseek配置和autogen
 from autogen_core.models import ModelInfo, ModelFamily
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 from autogen_ext.models.openai._model_info import _MODEL_INFO, _MODEL_TOKEN_LIMITS
-from autogen_agentchat.agents import AssistantAgent
+from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
+
+from app.controllers.chat import chat_controller
+from app.core.dependency import DependAuth
+from app.models.admin import User
+from app.schemas import Success, Fail
+from app.schemas.chat import SendDTO, ChatMessageCreate
 
 router = APIRouter()
 
@@ -78,6 +78,14 @@ async def send_message(
         if not send_data.session_id:
             return Fail(msg="会话ID不能为空")
 
+        # 验证会话ID格式
+        try:
+            session_id_int = int(send_data.session_id)
+            if session_id_int <= 0:
+                return Fail(msg="无效的会话ID")
+        except (ValueError, TypeError):
+            return Fail(msg="会话ID格式错误")
+
         # 获取用户消息（最后一条通常是用户输入）
         user_message = None
         for msg in reversed(send_data.messages):
@@ -88,17 +96,24 @@ async def send_message(
         if not user_message or not user_message.content:
             return Fail(msg="未找到有效的用户消息")
 
+        # 验证消息内容
+        if not user_message.content.strip():
+            return Fail(msg="消息内容不能为空")
+
         # 保存用户消息到数据库
-        user_message_create = ChatMessageCreate(
-            session_id=int(send_data.session_id),
-            user_id=user_id,
-            role="user",
-            content=user_message.content,
-            model_name=send_data.model,
-            total_tokens=0,
-            deduct_cost=0
-        )
-        await chat_controller.create_message(user_message_create)
+        try:
+            user_message_create = ChatMessageCreate(
+                session_id=session_id_int,
+                user_id=user_id,
+                role="user",
+                content=user_message.content.strip(),
+                model_name=send_data.model or "deepseek-chat",
+                total_tokens=0,
+                deduct_cost=0
+            )
+            await chat_controller.create_message(user_message_create)
+        except Exception as save_error:
+            return Fail(msg=f"保存消息失败: {str(save_error)}")
 
         # 只支持流式响应
         return StreamingResponse(
@@ -110,31 +125,47 @@ async def send_message(
                 "Content-Type": "text/event-stream"
             }
         )
-            
+
     except Exception as e:
         return Fail(msg=f"发送消息失败: {str(e)}")
 
 
 async def generate_stream_response(send_data: SendDTO, user_id: int) -> AsyncGenerator[str, None]:
     """生成流式响应 - 使用autogen AssistantAgent"""
+    session_id_int = None
+    full_response = ""
+    chunk_id = f"chatcmpl-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+
     try:
+        # 验证会话ID
+        try:
+            session_id_int = int(send_data.session_id)
+        except (ValueError, TypeError):
+            error_chunk = {
+                "error": {
+                    "message": "无效的会话ID",
+                    "type": "validation_error"
+                }
+            }
+            yield f"data: {json.dumps(error_chunk, ensure_ascii=False)}\n\n"
+            return
+
         # 构建用户任务内容
         user_task = ""
         if send_data.messages:
             # 获取最后一条用户消息
             for msg in reversed(send_data.messages):
                 if msg.role == "user" and msg.content:
-                    user_task = msg.content
+                    user_task = msg.content.strip()
                     break
 
         if not user_task:
             user_task = "你好"
 
+
+
         # 创建助手代理
         agent = create_assistant_agent()
-
-        full_response = ""
-        chunk_id = f"chatcmpl-{datetime.now().strftime('%Y%m%d%H%M%S')}"
 
         try:
             # 使用autogen的流式输出
@@ -188,7 +219,6 @@ async def generate_stream_response(send_data: SendDTO, user_id: int) -> AsyncGen
 
         except Exception as api_error:
             # 如果autogen调用失败，使用备用响应
-            print(f"AutoGen流式调用失败: {api_error}")
             fallback_response = f"我是超级智能客服，很高兴为您服务！\n\n您的问题：{user_task}\n\n我正在为您查找相关信息，请稍等..."
 
             # 分块发送备用响应
@@ -224,19 +254,6 @@ async def generate_stream_response(send_data: SendDTO, user_id: int) -> AsyncGen
         yield f"data: {json.dumps(end_chunk, ensure_ascii=False)}\n\n"
         yield "data: [DONE]\n\n"
 
-        # 保存AI回复到数据库
-        if full_response and send_data.session_id:
-            ai_message_create = ChatMessageCreate(
-                session_id=int(send_data.session_id),
-                user_id=user_id,
-                role="assistant",
-                content=full_response,
-                model_name=send_data.model or "deepseek-chat",
-                total_tokens=len(full_response.split()),
-                deduct_cost=0.001
-            )
-            await chat_controller.create_message(ai_message_create)
-
     except Exception as e:
         error_chunk = {
             "error": {
@@ -246,8 +263,76 @@ async def generate_stream_response(send_data: SendDTO, user_id: int) -> AsyncGen
         }
         yield f"data: {json.dumps(error_chunk, ensure_ascii=False)}\n\n"
 
+    finally:
+        # 无论成功还是失败，都尝试保存AI回复到数据库
+        if full_response and session_id_int:
+            try:
+                ai_message_create = ChatMessageCreate(
+                    session_id=session_id_int,
+                    user_id=user_id,
+                    role="assistant",
+                    content=full_response.strip(),
+                    model_name=send_data.model or "deepseek-chat",
+                    total_tokens=len(full_response.split()),
+                    deduct_cost=0.001
+                )
+                await chat_controller.create_message(ai_message_create)
+            except Exception as save_error:
+                pass  # 静默处理保存错误，不影响用户体验
 
 
+
+
+
+@router.post("/session/validate", summary="验证或创建会话")
+async def validate_or_create_session(
+    session_id: Optional[str] = None,
+    current_user: User = DependAuth
+):
+    """验证会话是否存在，如果不存在则创建新会话"""
+    try:
+        from app.controllers.session import session_controller
+        from app.schemas.session import SessionCreate
+
+        user_id = current_user.id
+
+        # 如果没有提供session_id或session_id无效，创建新会话
+        if not session_id or session_id.strip() in ["", "not_login", "undefined", "null"]:
+            session_data = SessionCreate(
+                session_title="新对话",
+                user_id=user_id,
+                session_content=""
+            )
+            new_session = await session_controller.create_user_session(session_data)
+            session_dict = await new_session.to_dict()
+            return Success(data={
+                "session_id": session_dict["id"],
+                "session_title": session_dict["session_title"],
+                "created": True
+            })
+
+        # 验证现有会话
+        try:
+            session_id_int = int(session_id.strip())
+            if session_id_int <= 0:
+                raise ValueError("会话ID必须为正整数")
+        except (ValueError, TypeError):
+            return Fail(msg="会话ID格式错误")
+
+        # 检查会话是否存在且属于当前用户
+        session = await session_controller.get_user_session(session_id_int, user_id)
+        if session:
+            session_dict = await session.to_dict()
+            return Success(data={
+                "session_id": session_dict["id"],
+                "session_title": session_dict["session_title"],
+                "created": False
+            })
+        else:
+            return Fail(msg="会话不存在或无权访问")
+
+    except Exception as e:
+        return Fail(msg=f"验证会话失败: {str(e)}")
 
 
 @router.get("/models", summary="获取可用模型列表")
@@ -258,7 +343,7 @@ async def get_available_models():
             model_type="chat",
             page_size=100
         )
-        
+
         model_list = []
         for model in models:
             model_dict = await model.to_dict()
@@ -268,8 +353,8 @@ async def get_available_models():
                 "description": model_dict["model_describe"],
                 "price": safe_serialize(model_dict["model_price"])
             })
-        
+
         return Success(data=model_list)
-        
+
     except Exception as e:
         return Fail(msg=f"获取模型列表失败: {str(e)}")

@@ -9,10 +9,9 @@ interface BaseResponse {
   code: number;
   data: never;
   msg: string;
-  rows: never;
 }
 
-export const request = hookFetch.create<BaseResponse, 'data' | 'rows'>({
+export const request = hookFetch.create<BaseResponse, 'data'>({
   baseURL: import.meta.env.VITE_API_URL,
   headers: {
     'Content-Type': 'application/json',

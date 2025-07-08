@@ -47,41 +47,60 @@ let abortController: AbortController | null = null;
 // 记录进入思考中
 let isThinking = false;
 
+// 验证会话ID是否有效
+function isValidSessionId(id: string | string[]): boolean {
+  if (!id || Array.isArray(id)) return false;
+  const sessionId = String(id).trim();
+  if (sessionId === 'not_login' || sessionId === 'undefined' || sessionId === 'null' || sessionId === '') {
+    return false;
+  }
+  const numId = parseInt(sessionId, 10);
+  return !isNaN(numId) && numId > 0;
+}
+
 watch(
   () => route.params?.id,
   async (_id_) => {
     if (_id_) {
-      if (_id_ !== 'not_login') {
-        // 判断的当前会话id是否有聊天记录，有缓存则直接赋值展示
-        if (chatStore.chatMap[`${_id_}`] && chatStore.chatMap[`${_id_}`].length) {
-          bubbleItems.value = chatStore.chatMap[`${_id_}`] as MessageItem[];
-          // 滚动到底部
-          setTimeout(() => {
-            bubbleListRef.value!.scrollToBottom();
-          }, 350);
-          return;
-        }
+      // 验证会话ID
+      if (!isValidSessionId(_id_)) {
+        // 清空聊天记录
+        bubbleItems.value = [];
+        return;
+      }
 
-        // 无缓存则请求聊天记录
-        await chatStore.requestChatList(`${_id_}`);
+      const sessionId = String(_id_);
+
+      // 判断的当前会话id是否有聊天记录，有缓存则直接赋值展示
+      if (chatStore.chatMap[sessionId] && chatStore.chatMap[sessionId].length) {
+        bubbleItems.value = chatStore.chatMap[sessionId] as MessageItem[];
+        // 滚动到底部
+        setTimeout(() => {
+          bubbleListRef.value!.scrollToBottom();
+        }, 350);
+        return;
+      }
+
+      // 无缓存则请求聊天记录
+      try {
+        await chatStore.requestChatList(sessionId);
         // 请求聊天记录后，赋值回显，并滚动到底部
-        bubbleItems.value = chatStore.chatMap[`${_id_}`] as MessageItem[];
+        bubbleItems.value = chatStore.chatMap[sessionId] as MessageItem[] || [];
 
         // 滚动到底部
         setTimeout(() => {
           bubbleListRef.value!.scrollToBottom();
         }, 350);
+      } catch (error) {
+        bubbleItems.value = [];
       }
 
       // 如果本地有发送内容 ，则直接发送
       const v = localStorage.getItem('chatContent');
       if (v) {
-        // 发送消息
-        console.log('发送消息 v', v);
         setTimeout(() => {
           startSSE(v);
         }, 350);
-
         localStorage.removeItem('chatContent');
       }
     }
@@ -92,7 +111,6 @@ watch(
 // 封装数据处理逻辑
 function handleDataChunk(chunk: AnyObject) {
   try {
-    console.log('收到流式数据:', chunk);
 
     // 处理OpenAI格式的流式数据
     if (!chunk || !chunk.choices || !chunk.choices[0]) {
@@ -198,6 +216,13 @@ async function startSSE(chatContent: string) {
     // 滚动到底部
     bubbleListRef.value?.scrollToBottom();
 
+    // 验证会话ID
+    const currentSessionId = route.params?.id;
+    if (!isValidSessionId(currentSessionId)) {
+      handleError(new Error('无效的会话ID，请刷新页面重试'));
+      return;
+    }
+
     // 准备发送的消息数据，匹配后端SendDTO格式
     // 只发送当前用户的消息，避免发送整个对话历史
     const sendData = {
@@ -207,12 +232,12 @@ async function startSSE(chatContent: string) {
           content: chatContent,
         }
       ],
-      sessionId: route.params?.id !== 'not_login' ? String(route.params?.id) : '1', // 确保有sessionId
+      sessionId: String(currentSessionId), // 确保有效的sessionId
       model: modelStore.currentModelInfo.modelName ?? 'deepseek-chat',
       stream: true,
     };
 
-    console.log('发送流式聊天请求:', sendData);
+
 
     // 使用新的流式API
     const stream = await sendStream(sendData);
@@ -221,14 +246,12 @@ async function startSSE(chatContent: string) {
     for await (const chunk of parseStreamResponse(stream)) {
       // 检查是否被中断
       if (abortController?.signal.aborted) {
-        console.log('流式聊天被用户中断');
         break;
       }
       handleDataChunk(chunk);
     }
   }
   catch (err) {
-    console.error('流式聊天错误:', err);
     handleError(err);
 
     // 如果流式聊天失败，显示错误消息
@@ -242,7 +265,6 @@ async function startSSE(chatContent: string) {
     }
   }
   finally {
-    console.log('流式数据接收完毕');
     isLoading.value = false;
     abortController = null;
 

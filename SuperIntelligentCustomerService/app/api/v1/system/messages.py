@@ -26,11 +26,23 @@ async def get_chat_list(
     """获取聊天记录列表"""
     user_id = current_user.id
     try:
-        user_id = current_user.id
+        # 验证会话ID
         if not sessionId or sessionId.strip() == "":
             return Fail(msg="会话ID不能为空")
 
-        session_id_int = int(sessionId)
+        # 检查特殊值
+        if sessionId.strip() in ["not_login", "undefined", "null"]:
+            return Fail(msg="无效的会话ID")
+
+        try:
+            session_id_int = int(sessionId.strip())
+            if session_id_int <= 0:
+                return Fail(msg="会话ID必须为正整数")
+        except (ValueError, TypeError):
+            return Fail(msg="会话ID格式错误")
+
+
+
         total, messages = await chat_controller.get_session_messages(
             session_id=session_id_int,
             user_id=user_id,
@@ -43,19 +55,19 @@ async def get_chat_list(
         message_list = []
         for message in messages:
             message_dict = await message.to_dict()
-            # 转换字段名为前端期望的驼峰命名，并处理Decimal类型
+            # 转换字段名为驼峰命名格式
             formatted_message = {
-                "id": message_dict.get("id"),
-                "content": message_dict.get("content", ""),
-                "role": message_dict.get("role", ""),
-                "sessionId": message_dict.get("session_id"),
-                "userId": message_dict.get("user_id"),
+                "id": message_dict["id"],
+                "content": message_dict["content"],
+                "role": message_dict["role"],
+                "sessionId": message_dict["session_id"],
+                "userId": message_dict["user_id"],
                 "modelName": message_dict.get("model_name", ""),
                 "totalTokens": message_dict.get("total_tokens", 0),
                 "deductCost": safe_serialize(message_dict.get("deduct_cost", 0)),
-                "remark": message_dict.get("remark", ""),
-                "created_at": message_dict.get("created_at"),
-                "updated_at": message_dict.get("updated_at")
+                "remark": message_dict.get("remark"),
+                "created_at": message_dict["created_at"],
+                "updated_at": message_dict["updated_at"]
             }
             message_list.append(formatted_message)
         

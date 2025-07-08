@@ -49,18 +49,31 @@ export const useChatStore = defineStore('chat', () => {
   // 获取当前会话的聊天记录
   const requestChatList = async (sessionId: string) => {
     // 如果没有 token 则不查询聊天记录
-    if (!userStore.token)
+    if (!userStore.token) {
       return;
+    }
+
+    // 验证会话ID
+    if (!sessionId || sessionId.trim() === '' || sessionId === 'not_login' || sessionId === 'undefined') {
+      return;
+    }
+
     try {
       const res = await getChatList({
-        sessionId,
+        sessionId: sessionId.trim(),
       });
-      if (res.rows) {
-        setChatMap(sessionId, res.rows);
+
+      if (res.data && Array.isArray(res.data)) {
+        setChatMap(sessionId, res.data);
+      } else {
+        setChatMap(sessionId, []);
       }
     }
     catch (error) {
-      console.error('getChatList:', error);
+      console.error('获取聊天记录失败:', error);
+      // 设置空数组避免重复请求
+      setChatMap(sessionId, []);
+      throw error; // 重新抛出错误供调用方处理
     }
   };
 
