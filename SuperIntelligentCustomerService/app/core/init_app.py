@@ -22,7 +22,7 @@ from app.core.exceptions import (
     ResponseValidationHandle,
 )
 from app.log import logger
-from app.models.admin import Api, Menu, Role
+from app.models.admin import Api, Menu, Role, Model
 from app.schemas.menus import MenuType
 from app.settings.config import settings
 
@@ -151,9 +151,20 @@ async def init_menus():
             ),
             Menu(
                 menu_type=MenuType.MENU,
+                name="模型管理",
+                path="model",
+                order=6,
+                parent_id=parent_menu.id,
+                icon="material-symbols:model-training",
+                is_hidden=False,
+                component="/system/model",
+                keepalive=False,
+            ),
+            Menu(
+                menu_type=MenuType.MENU,
                 name="审计日志",
                 path="auditlog",
-                order=6,
+                order=7,
                 parent_id=parent_menu.id,
                 icon="ph:clipboard-text-bold",
                 is_hidden=False,
@@ -225,9 +236,45 @@ async def init_roles():
         await user_role.apis.add(*basic_apis)
 
 
+async def init_models():
+    """初始化模型数据"""
+    models = await Model.exists()
+    if not models:
+        # 创建deepseek模型
+        await Model.create(
+            category="对话模型",
+            model_name="deepseek-chat",
+            model_describe="Deepseek Chat 模型，专业的对话AI助手",
+            model_price=0.001,
+            model_type="chat",
+            model_show="Deepseek Chat",
+            system_prompt="你是超级智能客服，专业、友好、乐于助人。请用中文回复用户的问题。",
+            api_host="https://api.deepseek.com/v1",
+            api_key="sk-56f5743d59364543a00109a4c1c10a56",
+            is_active=True,
+            remark="默认对话模型"
+        )
+
+        # 创建其他示例模型
+        await Model.create(
+            category="对话模型",
+            model_name="gpt-3.5-turbo",
+            model_describe="OpenAI GPT-3.5 Turbo 模型，适用于对话和文本生成",
+            model_price=0.002,
+            model_type="chat",
+            model_show="GPT-3.5",
+            system_prompt="你是一个有用的AI助手。",
+            api_host="https://api.openai.com",
+            api_key="",
+            is_active=False,
+            remark="OpenAI对话模型"
+        )
+
+
 async def init_data():
     await init_db()
     await init_superuser()
     await init_menus()
     await init_apis()
     await init_roles()
+    await init_models()

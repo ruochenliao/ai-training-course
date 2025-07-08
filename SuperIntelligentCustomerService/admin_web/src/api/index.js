@@ -39,4 +39,10 @@ export default {
   deleteDept: (params = {}) => request.delete('/dept/delete', { params }),
   // auditlog
   getAuditLogList: (params = {}) => request.get('/auditlog/list', { params }),
+  // models
+  getModelList: (params = {}) => request.get('/system/model/list', { params }),
+  getModelById: (params = {}) => request.get('/system/model/get', { params }),
+  createModel: (data = {}) => request.post('/system/model/create', data),
+  updateModel: (data = {}) => request.post('/system/model/update', data),
+  deleteModel: (params = {}) => request.delete('/system/model/delete', { params }),
 }
