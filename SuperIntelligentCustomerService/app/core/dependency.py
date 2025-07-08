@@ -10,26 +10,16 @@ from app.settings import settings
 
 class AuthControl:
     @classmethod
-    async def is_authed(cls,
-                       token: str = Header(None, description="token验证"),
-                       authorization: str = Header(None, description="Bearer token验证")) -> Optional["User"]:
+    async def is_authed(cls, token: str = Header(..., description="token验证")) -> Optional["User"]:
         try:
-            # 优先使用token头，如果没有则尝试从authorization头提取
-            auth_token = token
-            if not auth_token and authorization:
-                if authorization.startswith("Bearer "):
-                    auth_token = authorization[7:]  # 移除 "Bearer " 前缀
-                else:
-                    auth_token = authorization
-
-            if not auth_token:
+            if not token:
                 raise HTTPException(status_code=401, detail="缺少认证token")
 
-            if auth_token == "dev":
+            if token == "dev":
                 user = await User.filter().first()
                 user_id = user.id
             else:
-                decode_data = jwt.decode(auth_token, settings.SECRET_KEY, algorithms=settings.JWT_ALGORITHM)
+                decode_data = jwt.decode(token, settings.SECRET_KEY, algorithms=settings.JWT_ALGORITHM)
                 user_id = decode_data.get("user_id")
             user = await User.filter(id=user_id).first()
             if not user:
@@ -63,4 +53,4 @@ class PermissionControl:
 
 
 DependAuth = Depends(AuthControl.is_authed)
-DependPermisson = Depends(PermissionControl.has_permission)
+DependPermission = Depends(PermissionControl.has_permission)

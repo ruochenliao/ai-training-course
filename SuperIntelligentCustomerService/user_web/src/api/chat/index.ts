@@ -8,12 +8,17 @@ import { useUserStore } from '@/stores';
 export const sendStream = async (data: SendDTO): Promise<ReadableStream> => {
   const userStore = useUserStore();
 
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  if (userStore.token) {
+    headers['token'] = userStore.token;
+  }
+
   const response = await fetch('/api/v1/chat/send', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'authorization': `Bearer ${userStore.token}`, // 使用与项目一致的认证格式
-    },
+    headers,
     body: JSON.stringify({
       ...data,
       stream: true, // 启用流式响应

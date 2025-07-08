@@ -25,7 +25,9 @@ function jwtPlugin(): HookFetchPlugin<BaseResponse> {
     name: 'jwt',
     beforeRequest: async (config) => {
       config.headers = new Headers(config.headers);
-      config.headers.set('authorization', `Bearer ${userStore.token}`);
+      if (userStore.token) {
+        config.headers.set('token', userStore.token);
+      }
       return config;
     },
     afterResponse: async (response) => {
