@@ -142,7 +142,7 @@ python run.py
 
 1. 进入前端目录
 ```sh
-cd web
+cd admin_web
 ```
 
 2. 安装依赖(建议使用pnpm: https://pnpm.io/zh/installation)

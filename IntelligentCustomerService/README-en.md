@@ -137,7 +137,7 @@ The frontend project requires a Node.js environment (recommended version 18.8.0 
 
 1. Navigate to the frontend project directory:
 ```sh
-cd web
+cd admin_web
 ```
 
 2. Install project dependencies (pnpm is recommended: https://pnpm.io/zh/installation)

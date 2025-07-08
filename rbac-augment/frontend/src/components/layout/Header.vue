@@ -1,7 +1,7 @@
 <template>
   <!--
     应用头部导航栏组件
-    参考 vue-fastapi-admin 的设计风格
+    参考 SuperIntelligentCustomerService 的设计风格
     包含侧边栏折叠按钮、面包屑导航、搜索框、通知、用户操作区域等功能
   -->
   <div class="layout-header" style="width: 100%; height: 100%;">
@@ -406,7 +406,7 @@ document.addEventListener('fullscreenchange', () => {
 <style lang="scss" scoped>
 /**
  * 头部导航栏样式
- * 参考 vue-fastapi-admin 的设计风格
+ * 参考 SuperIntelligentCustomerService 的设计风格
  * 包含响应式设计和暗色主题支持
  */
 @import '@/styles/variables.scss';

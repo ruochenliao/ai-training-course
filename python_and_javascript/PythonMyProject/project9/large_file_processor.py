@@ -190,7 +190,7 @@ Python is cross-platform and runs on Windows, macOS, Linux, and many other opera
 Data science and machine learning are major application areas for Python.
 Libraries like NumPy, Pandas, Matplotlib, and Scikit-learn make Python powerful for data analysis.
 Python's simplicity makes it an excellent choice for beginners learning programming.
-Python is also used in web development with frameworks like Django and Flask.
+Python is also used in admin_web development with frameworks like Django and Flask.
 Python automation scripts can help streamline repetitive tasks and improve productivity.
 
 人工智能和机器学习是Python的重要应用领域。

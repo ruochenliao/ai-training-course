@@ -1,7 +1,7 @@
 <template>
   <!-- 
     设计风格展示页面
-    参考 vue-fastapi-admin 的设计风格
+    参考 SuperIntelligentCustomerService 的设计风格
     展示各种组件和交互效果的统一设计
   -->
   <div class="design-showcase">
@@ -313,7 +313,7 @@ const getStatusClass = (status: boolean) => {
 <style lang="scss" scoped>
 /**
  * 设计风格展示页面样式
- * 参考 vue-fastapi-admin 的设计规范
+ * 参考 SuperIntelligentCustomerService 的设计规范
  */
 @import '@/styles/variables.scss';
 

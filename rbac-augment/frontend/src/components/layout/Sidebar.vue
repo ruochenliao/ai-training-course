@@ -174,7 +174,7 @@ watch(
 <style lang="scss" scoped>
 /**
  * 侧边栏样式
- * 参考 vue-fastapi-admin 的设计风格
+ * 参考 SuperIntelligentCustomerService 的设计风格
  * 包含响应式设计和暗色主题支持
  */
 @import '@/styles/variables.scss';

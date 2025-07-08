@@ -35,7 +35,7 @@
   "temperature": 0.7,
   "max_tokens": 2000,
   "metadata": {
-    "source": "web",
+    "source": "admin_web",
     "user_agent": "Mozilla/5.0..."
   }
 }

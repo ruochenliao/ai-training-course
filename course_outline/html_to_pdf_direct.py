@@ -48,7 +48,7 @@ def convert_html_to_pdf(html_file, output_file, page_size='A4'):
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument('--font-render-hinting=none')  # 改进字体渲染
-        chrome_options.add_argument('--disable-web-security')  # 允许加载本地文件
+        chrome_options.add_argument('--disable-admin_web-security')  # 允许加载本地文件
         chrome_options.add_argument('--allow-file-access-from-files')  # 允许文件访问
         
         # 使用高分辨率设置
