@@ -58,3 +58,12 @@ uvicorn==0.34.0
 uvloop==0.21.0; sys_platform != 'win32'
 watchfiles==1.0.4
 websockets==14.1
+
+# AutoGen dependencies
+autogen-agentchat==0.4.0
+autogen-core==0.4.0
+autogen-ext==0.4.0
+
+# Memory service dependencies
+chromadb==0.5.23
+sentence-transformers==3.3.1

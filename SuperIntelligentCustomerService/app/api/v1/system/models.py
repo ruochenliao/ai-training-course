@@ -1,12 +1,13 @@
 from typing import Optional
-from app.controllers.model import model_controller
+
 from fastapi import APIRouter, Query
 from tortoise.expressions import Q
 
-from app.schemas import Success, Fail
-from app.schemas.models import ModelCreate, ModelUpdate
-from app.core.dependency import DependAuth
-from app.models.admin import User
+from ....controllers.model import model_controller
+from ....core.dependency import DependAuth
+from ....models.admin import User
+from ....schemas import Success, Fail
+from ....schemas.models import ModelCreate, ModelUpdate
 
 router = APIRouter()
 

@@ -1,9 +1,10 @@
-from fastapi import APIRouter
 import random
 import string
 
-from app.schemas import Success, Fail
-from app.schemas.auth import EmailCodeDTO
+from fastapi import APIRouter
+
+from ....schemas import Success, Fail
+from ....schemas.auth import EmailCodeDTO
 
 router = APIRouter()
 

@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
+from .messages import router as messages_router
 from .models import router as models_router
 from .sessions import router as sessions_router
-from .messages import router as messages_router
 
 system_router = APIRouter()
 system_router.include_router(models_router, prefix="/model", tags=["模型管理"])

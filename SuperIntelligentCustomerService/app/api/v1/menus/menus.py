@@ -2,9 +2,9 @@ import logging
 
 from fastapi import APIRouter, Query
 
-from app.controllers.menu import menu_controller
-from app.schemas.base import Fail, Success, SuccessExtra
-from app.schemas.menus import *
+from ....controllers.menu import menu_controller
+from ....schemas.base import Fail, Success, SuccessExtra
+from ....schemas.menus import *
 
 logger = logging.getLogger(__name__)
 

@@ -1,9 +1,10 @@
 from typing import List, Optional, Tuple
+
 from tortoise.expressions import Q
 
-from app.core.crud import CRUDBase
-from app.models.admin import ChatSession
-from app.schemas.session import SessionCreate, SessionUpdate
+from ..core.crud import CRUDBase
+from ..models.admin import ChatSession
+from ..schemas.session import SessionCreate, SessionUpdate
 
 
 class SessionController(CRUDBase[ChatSession, SessionCreate, SessionUpdate]):

@@ -1,6 +1,7 @@
 import jwt
-from app.schemas.login import JWTPayload
-from app.settings.config import settings
+
+from ..schemas.login import JWTPayload
+from ..settings.config import settings
 
 
 def create_access_token(*, data: JWTPayload):

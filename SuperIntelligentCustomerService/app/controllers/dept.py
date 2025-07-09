@@ -1,9 +1,9 @@
 from tortoise.expressions import Q
 from tortoise.transactions import atomic
 
-from app.core.crud import CRUDBase
-from app.models.admin import Dept, DeptClosure
-from app.schemas.depts import DeptCreate, DeptUpdate
+from ..core.crud import CRUDBase
+from ..models.admin import Dept, DeptClosure
+from ..schemas.depts import DeptCreate, DeptUpdate
 
 
 class DeptController(CRUDBase[Dept, DeptCreate, DeptUpdate]):

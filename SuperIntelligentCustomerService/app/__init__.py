@@ -3,8 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from tortoise import Tortoise
 
-from app.core.exceptions import SettingNotFound
-from app.core.init_app import (
+from .core.exceptions import SettingNotFound
+from .core.init_app import (
     init_data,
     make_middlewares,
     register_exceptions,
@@ -12,7 +12,7 @@ from app.core.init_app import (
 )
 
 try:
-    from app.settings.config import settings
+    from .settings.config import settings
 except ImportError:
     raise SettingNotFound("Can not import settings")
 

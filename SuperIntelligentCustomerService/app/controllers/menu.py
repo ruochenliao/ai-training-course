@@ -1,8 +1,8 @@
 from typing import Optional
 
-from app.core.crud import CRUDBase
-from app.models.admin import Menu
-from app.schemas.menus import MenuCreate, MenuUpdate
+from ..core.crud import CRUDBase
+from ..models.admin import Menu
+from ..schemas.menus import MenuCreate, MenuUpdate
 
 
 class MenuController(CRUDBase[Menu, MenuCreate, MenuUpdate]):

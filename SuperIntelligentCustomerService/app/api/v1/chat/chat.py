@@ -1,10 +1,8 @@
 import asyncio
 import json
 from datetime import datetime
-from typing import AsyncGenerator, Dict, Optional
+from typing import AsyncGenerator, Optional
 
-from app.controllers.model import model_controller
-from app.utils.serializer import safe_serialize
 from autogen_agentchat.agents import AssistantAgent
 # 导入Deepseek配置和autogen
 from autogen_core.models import ModelInfo, ModelFamily
@@ -13,11 +11,13 @@ from autogen_ext.models.openai._model_info import _MODEL_INFO, _MODEL_TOKEN_LIMI
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 
-from app.controllers.chat import chat_controller
-from app.core.dependency import DependAuth
-from app.models.admin import User
-from app.schemas import Success, Fail
-from app.schemas.chat import SendDTO, ChatMessageCreate
+from ....controllers.chat import chat_controller
+from ....controllers.model import model_controller
+from ....core.dependency import DependAuth
+from ....models.admin import User
+from ....schemas import Success, Fail
+from ....schemas.chat import SendDTO, ChatMessageCreate
+from ....utils.serializer import safe_serialize
 
 router = APIRouter()
 
@@ -84,15 +84,14 @@ async def create_assistant_agent(model_name: str = None, system_prompt: str = No
     return AssistantAgent(
         "超级智能客服",
         model_client=model_client,
-        model_client_stream=True,  # 启用流式输出
         system_message=system_prompt
     )
 
 
 @router.post("/send", summary="发送聊天消息")
 async def send_message(
-    send_data: SendDTO,
-    current_user: User = DependAuth
+        send_data: SendDTO,
+        current_user: User = DependAuth
 ):
     """发送聊天消息"""
     try:
@@ -197,8 +196,6 @@ async def generate_stream_response(send_data: SendDTO, user_id: int) -> AsyncGen
 
         if not user_task:
             user_task = "你好"
-
-
 
         # 创建助手代理
         try:
@@ -327,18 +324,15 @@ async def generate_stream_response(send_data: SendDTO, user_id: int) -> AsyncGen
                 pass  # 静默处理保存错误，不影响用户体验
 
 
-
-
-
 @router.post("/session/validate", summary="验证或创建会话")
 async def validate_or_create_session(
-    session_id: Optional[str] = None,
-    current_user: User = DependAuth
+        session_id: Optional[str] = None,
+        current_user: User = DependAuth
 ):
     """验证会话是否存在，如果不存在则创建新会话"""
     try:
-        from app.controllers.session import session_controller
-        from app.schemas.session import SessionCreate
+        from ....controllers.session import session_controller
+        from ....schemas.session import SessionCreate
 
         user_id = current_user.id
 

@@ -1,15 +1,14 @@
-from fastapi import APIRouter, Query, Depends, HTTPException
-from typing import List, Optional
+from typing import Optional
 
-from app.controllers.session import session_controller
-from app.core.dependency import DependAuth
-from app.core.ctx import CTX_USER_ID
-from app.models.admin import User
-from app.schemas import Success, Fail, SuccessExtra
-from app.schemas.session import (
-    GetSessionListParams, 
-    ChatSessionVo, 
-    CreateSessionDTO, 
+from fastapi import APIRouter, Query
+
+from ....controllers.session import session_controller
+from ....core.dependency import DependAuth
+from ....models.admin import User
+from ....schemas import Success, Fail, SuccessExtra
+from ....schemas.session import (
+    ChatSessionVo,
+    CreateSessionDTO,
     SessionCreate,
     SessionUpdate
 )

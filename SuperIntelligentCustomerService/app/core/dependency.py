@@ -3,9 +3,9 @@ from typing import Optional
 import jwt
 from fastapi import Depends, Header, HTTPException, Request
 
-from app.core.ctx import CTX_USER_ID
-from app.models import Role, User
-from app.settings import settings
+from .ctx import CTX_USER_ID
+from ..models import Role, User
+from ..settings import settings
 
 
 class AuthControl:

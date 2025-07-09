@@ -81,7 +81,11 @@ class Settings(BaseSettings):
         },
         "apps": {
             "models": {
-                "models": ["app.models", "aerich.models"],
+                "models": [
+                    "app.models.admin",
+                    "app.models.knowledge",
+                    "aerich.models"
+                ],
                 "default_connection": "sqlite",
             },
         },

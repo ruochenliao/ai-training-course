@@ -4,9 +4,9 @@ from fastapi import APIRouter, Query
 from fastapi.exceptions import HTTPException
 from tortoise.expressions import Q
 
-from app.controllers import role_controller
-from app.schemas.base import Success, SuccessExtra
-from app.schemas.roles import *
+from ....controllers import role_controller
+from ....schemas.base import Success, SuccessExtra
+from ....schemas.roles import *
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

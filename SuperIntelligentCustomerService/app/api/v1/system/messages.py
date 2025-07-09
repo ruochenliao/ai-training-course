@@ -1,16 +1,16 @@
-from fastapi import APIRouter, Query, Depends
 from typing import Optional
 
-from app.controllers.chat import chat_controller
-from app.core.dependency import DependAuth
-from app.models.admin import User
-from app.schemas import Success, Fail, SuccessExtra
-from app.schemas.chat import (
-    GetChatListParams,
+from fastapi import APIRouter, Query
+
+from ....controllers.chat import chat_controller
+from ....core.dependency import DependAuth
+from ....models.admin import User
+from ....schemas import Success, Fail, SuccessExtra
+from ....schemas.chat import (
     ChatMessageVo,
     ChatMessageCreate
 )
-from app.utils.serializer import safe_serialize
+from ....utils.serializer import safe_serialize
 
 router = APIRouter()
 

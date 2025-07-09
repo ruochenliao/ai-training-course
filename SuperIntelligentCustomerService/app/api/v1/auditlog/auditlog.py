@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Query
 from tortoise.expressions import Q
 
-from app.models.admin import AuditLog
-from app.schemas import SuccessExtra
-from app.schemas.apis import *
+from ....models.admin import AuditLog
+from ....schemas import SuccessExtra
 
 router = APIRouter()
 

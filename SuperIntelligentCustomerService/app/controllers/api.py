@@ -1,9 +1,9 @@
 from fastapi.routing import APIRoute
 
-from app.core.crud import CRUDBase
-from app.log import logger
-from app.models.admin import Api
-from app.schemas.apis import ApiCreate, ApiUpdate
+from ..core.crud import CRUDBase
+from ..log import logger
+from ..models.admin import Api
+from ..schemas.apis import ApiCreate, ApiUpdate
 
 
 class ApiController(CRUDBase[Api, ApiCreate, ApiUpdate]):
@@ -11,7 +11,7 @@ class ApiController(CRUDBase[Api, ApiCreate, ApiUpdate]):
         super().__init__(model=Api)
 
     async def refresh_api(self):
-        from app import app
+        from .. import app
 
         # 删除废弃API数据
         all_api_list = []

@@ -1,29 +1,52 @@
 """
 聊天记忆服务
-基于现有ChatMessage模型扩展，提供聊天历史记忆功能
+基于SQLite数据库的聊天历史记忆，继承BaseMemoryService抽象基类
+提供会话管理、消息存储和历史检索功能
 """
 import json
 import logging
 import sqlite3
+import time
 from datetime import datetime, timedelta
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Union, Optional
 
 from app.settings import settings
-from .base import MemoryItem
+from .base import BaseMemoryService, MemoryItem, MemoryType, QueryResult, ServiceStatus
 
 logger = logging.getLogger(__name__)
 
 
-class ChatMemoryService:
-    """聊天历史记忆服务"""
+class ChatMemoryService(BaseMemoryService):
+    """
+    聊天历史记忆服务
+    基于SQLite数据库存储聊天消息，支持会话管理和历史检索
+    """
 
     def __init__(self, user_id: str, db_path: str = None):
+        """
+        初始化聊天记忆服务
+
+        Args:
+            user_id: 用户ID
+            db_path: 数据库路径
+        """
+        # 调用父类初始化
+        service_id = f"chat_memory_{user_id}"
+        super().__init__(service_id, MemoryType.CHAT)
+
         self.user_id = user_id
         if db_path is None:
             # 使用项目配置的数据库路径
             db_path = settings.TORTOISE_ORM["connections"]["sqlite"]["credentials"]["file_path"]
         self.db_path = db_path
-        self._init_database()
+
+        # 初始化数据库
+        try:
+            self._init_database()
+            self._set_ready()
+        except Exception as e:
+            self._handle_error(e)
+            raise
     
     def _init_database(self):
         """初始化聊天记忆数据库表"""
@@ -203,12 +226,114 @@ class ChatMemoryService:
         
         return str(content)
     
-    # 实现基类抽象方法
+    # 实现BaseMemoryService抽象方法
+    async def add(self, content: str, metadata: Optional[Dict[str, Any]] = None) -> str:
+        """
+        添加记忆内容（实现基类接口）
+
+        Args:
+            content: 记忆内容
+            metadata: 元数据，应包含session_id和role
+
+        Returns:
+            记忆项ID
+        """
+        try:
+            self._update_access_time()
+            session_id = metadata.get("session_id", "default") if metadata else "default"
+            role = metadata.get("role", "user") if metadata else "user"
+            return await self.add_message(session_id, role, content, metadata)
+        except Exception as e:
+            self._handle_error(e)
+            raise
+
+    async def query(self, query: str, limit: int = 5, **kwargs) -> QueryResult:
+        """
+        查询记忆内容（实现基类接口）
+
+        Args:
+            query: 查询内容
+            limit: 返回数量限制
+            **kwargs: 其他查询参数（如session_id）
+
+        Returns:
+            查询结果
+        """
+        try:
+            start_time = time.time()
+            self._update_access_time()
+
+            session_id = kwargs.get("session_id")
+            if session_id:
+                # 查询特定会话历史
+                memories = await self.get_session_history(session_id, limit)
+            else:
+                # 搜索所有对话
+                memories = await self.search_conversations(query, limit)
+
+            query_time = time.time() - start_time
+
+            return QueryResult(
+                items=memories,
+                total_count=len(memories),
+                query_time=query_time,
+                metadata={
+                    "query_type": "session_history" if session_id else "search",
+                    "session_id": session_id,
+                    "user_id": self.user_id
+                }
+            )
+        except Exception as e:
+            self._handle_error(e)
+            raise
+
+    async def clear(self, **kwargs) -> bool:
+        """
+        清空记忆内容（实现基类接口）
+
+        Args:
+            **kwargs: 清空参数，可包含session_id（清空特定会话）或days（清空N天前的数据）
+
+        Returns:
+            是否成功
+        """
+        try:
+            self._update_access_time()
+
+            session_id = kwargs.get("session_id")
+            days = kwargs.get("days")
+
+            if session_id:
+                # 清空特定会话
+                return await self.clear_session(session_id)
+            elif days:
+                # 清空N天前的数据
+                return await self.cleanup_old_memories(days)
+            else:
+                # 清空所有数据
+                with sqlite3.connect(self.db_path) as conn:
+                    conn.execute("DELETE FROM chat_memories WHERE user_id = ?", (self.user_id,))
+                    conn.commit()
+                logger.info(f"已清空用户 {self.user_id} 的所有聊天记忆")
+                return True
+        except Exception as e:
+            self._handle_error(e)
+            raise
+
+    async def close(self) -> None:
+        """
+        关闭服务，释放资源（实现基类接口）
+        """
+        try:
+            self.status = ServiceStatus.CLOSED
+            logger.info(f"聊天记忆服务 {self.service_id} 已关闭")
+        except Exception as e:
+            logger.error(f"关闭聊天记忆服务时发生错误: {e}")
+
+    # 保持向后兼容的方法
     async def add_memory(self, content: str, metadata: Dict[str, Any] = None) -> str:
-        """添加通用记忆（用于兼容基类接口）"""
-        session_id = metadata.get("session_id", "default") if metadata else "default"
-        role = metadata.get("role", "user") if metadata else "user"
-        return await self.add_message(session_id, role, content, metadata)
+        """添加通用记忆（向后兼容）"""
+        return await self.add(content, metadata)
     
     async def retrieve_memories(self, query: str, limit: int = 5) -> List[MemoryItem]:
         """检索相关记忆"""

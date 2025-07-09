@@ -1,8 +1,8 @@
 from typing import List
 
-from app.core.crud import CRUDBase
-from app.models.admin import Api, Menu, Role
-from app.schemas.roles import RoleCreate, RoleUpdate
+from ..core.crud import CRUDBase
+from ..models.admin import Api, Menu, Role
+from ..schemas.roles import RoleCreate, RoleUpdate
 
 
 class RoleController(CRUDBase[Role, RoleCreate, RoleUpdate]):

@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from tortoise import fields, models
 
-from app.settings import settings
+from ..settings import settings
 
 
 class BaseModel(models.Model):

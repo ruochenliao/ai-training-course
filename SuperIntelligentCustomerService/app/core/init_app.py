@@ -4,12 +4,10 @@ from aerich import Command
 from fastapi import FastAPI
 from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
+from tortoise import Tortoise
 from tortoise.expressions import Q
 
-from app.api import api_router
-from app.controllers.api import api_controller
-from app.controllers.user import UserCreate, user_controller
-from app.core.exceptions import (
+from .exceptions import (
     DoesNotExist,
     DoesNotExistHandle,
     HTTPException,
@@ -21,12 +19,14 @@ from app.core.exceptions import (
     ResponseValidationError,
     ResponseValidationHandle,
 )
-from app.log import logger
-from app.models.admin import Api, Menu, Role, Model
-from app.schemas.menus import MenuType
-from app.settings.config import settings
-
 from .middlewares import BackGroundTaskMiddleware, HttpAuditLogMiddleware
+from ..api import api_router
+from ..controllers.api import api_controller
+from ..controllers.user import UserCreate, user_controller
+from ..log import logger
+from ..models.admin import Api, Menu, Role, Model
+from ..schemas.menus import MenuType
+from ..settings.config import settings
 
 
 def make_middlewares():
@@ -173,11 +173,40 @@ async def init_menus():
             ),
         ]
         await Menu.bulk_create(children_menu)
+
+        # 创建知识库管理菜单
+        knowledge_parent = await Menu.create(
+            menu_type=MenuType.CATALOG,
+            name="知识库管理",
+            path="/knowledge",
+            order=2,
+            parent_id=0,
+            icon="material-symbols:library-books-outline",
+            is_hidden=False,
+            component="Layout",
+            keepalive=False,
+            redirect="/knowledge/base",
+        )
+
+        knowledge_menus = [
+            Menu(
+                menu_type=MenuType.MENU,
+                name="知识库",
+                path="base",
+                order=1,
+                parent_id=knowledge_parent.id,
+                icon="material-symbols:database-outline",
+                is_hidden=False,
+                component="/knowledge",
+                keepalive=False,
+            ),
+        ]
+        await Menu.bulk_create(knowledge_menus)
         await Menu.create(
             menu_type=MenuType.MENU,
             name="一级菜单",
             path="/top-menu",
-            order=2,
+            order=3,
             parent_id=0,
             icon="material-symbols:featured-play-list-outline",
             is_hidden=False,
@@ -194,21 +223,9 @@ async def init_apis():
 
 
 async def init_db():
-    command = Command(tortoise_config=settings.TORTOISE_ORM)
-    try:
-        await command.init_db(safe=True)
-    except FileExistsError:
-        pass
-
-    await command.init()
-    try:
-        await command.migrate()
-    except AttributeError:
-        logger.warning("unable to retrieve model history from database, model history will be created from scratch")
-        shutil.rmtree("migrations")
-        await command.init_db(safe=True)
-
-    await command.upgrade(run_in_transaction=True)
+    # 初始化Tortoise ORM连接
+    await Tortoise.init(config=settings.TORTOISE_ORM)
+    await Tortoise.generate_schemas()
 
 
 async def init_roles():

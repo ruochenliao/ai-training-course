@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from app.models.enums import MethodType
+from ..models.enums import MethodType
 
 
 class BaseApi(BaseModel):

@@ -1,9 +1,10 @@
 from typing import List, Optional, Tuple
+
 from tortoise.expressions import Q
 
-from app.core.crud import CRUDBase
-from app.models.admin import Model
-from app.schemas.models import ModelCreate, ModelUpdate
+from ..core.crud import CRUDBase
+from ..models.admin import Model
+from ..schemas.models import ModelCreate, ModelUpdate
 
 
 class ModelController(CRUDBase[Model, ModelCreate, ModelUpdate]):

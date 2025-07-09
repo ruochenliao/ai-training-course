@@ -1,10 +1,11 @@
 from typing import List, Optional, Tuple
+
 from tortoise.expressions import Q
 from tortoise.functions import Sum
 
-from app.core.crud import CRUDBase
-from app.models.admin import ChatMessage
-from app.schemas.chat import ChatMessageCreate, ChatMessageUpdate
+from ..core.crud import CRUDBase
+from ..models.admin import ChatMessage
+from ..schemas.chat import ChatMessageCreate, ChatMessageUpdate
 
 
 class ChatController(CRUDBase[ChatMessage, ChatMessageCreate, ChatMessageUpdate]):

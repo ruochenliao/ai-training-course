@@ -3,13 +3,12 @@ from typing import List, Optional
 
 from fastapi.exceptions import HTTPException
 
-from app.core.crud import CRUDBase
-from app.models.admin import User
-from app.schemas.login import CredentialsSchema
-from app.schemas.users import UserCreate, UserUpdate
-from app.utils.password import get_password_hash, verify_password
-
 from .role import role_controller
+from ..core.crud import CRUDBase
+from ..models.admin import User
+from ..schemas.login import CredentialsSchema
+from ..schemas.users import UserCreate, UserUpdate
+from ..utils.password import get_password_hash, verify_password
 
 
 class UserController(CRUDBase[User, UserCreate, UserUpdate]):

@@ -10,10 +10,9 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.requests import Request
 from starlette.types import ASGIApp, Receive, Scope, Send
 
-from app.core.dependency import AuthControl
-from app.models.admin import AuditLog, User
-
 from .bgtask import BgTasks
+from .dependency import AuthControl
+from ..models.admin import AuditLog, User
 
 
 class SimpleBaseMiddleware:

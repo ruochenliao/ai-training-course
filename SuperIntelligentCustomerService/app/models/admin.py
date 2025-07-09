@@ -1,9 +1,8 @@
 from tortoise import fields
 
-from app.schemas.menus import MenuType
-
 from .base import BaseModel, TimestampMixin
 from .enums import MethodType
+from ..schemas.menus import MenuType
 
 
 class User(BaseModel, TimestampMixin):
