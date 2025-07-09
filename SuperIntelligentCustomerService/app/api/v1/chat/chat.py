@@ -10,7 +10,7 @@ from autogen_agentchat.agents import AssistantAgent
 from autogen_core.models import ModelInfo, ModelFamily
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 from autogen_ext.models.openai._model_info import _MODEL_INFO, _MODEL_TOKEN_LIMITS
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 
 from app.controllers.chat import chat_controller
@@ -21,8 +21,8 @@ from app.schemas.chat import SendDTO, ChatMessageCreate
 
 router = APIRouter()
 
-# 定义Deepseek模型信息
-deepseek_model_info = ModelInfo(
+# 默认模型信息配置
+DEFAULT_MODEL_INFO = ModelInfo(
     vision=False,  # 不支持视觉功能
     function_calling=True,  # 支持函数调用
     json_output=True,  # 支持JSON输出
@@ -30,36 +30,62 @@ deepseek_model_info = ModelInfo(
     family=ModelFamily.UNKNOWN,  # 模型系列为未知
 )
 
-# Deepseek模型配置字典
-DEEPSEEK_MODELS: Dict[str, ModelInfo] = {
-    "deepseek-chat": deepseek_model_info,  # 将模型信息关联到deepseek-chat模型
-}
+# 默认令牌限制
+DEFAULT_TOKEN_LIMIT = 128000
 
-# Deepseek模型的令牌限制
-DEEPSEEK_TOKEN_LIMITS: Dict[str, int] = {
-    "deepseek-chat": 128000,  # 设置最大令牌数为128000
-}
 
-# 更新全局模型信息和令牌限制
-_MODEL_INFO.update(DEEPSEEK_MODELS)
-_MODEL_TOKEN_LIMITS.update(DEEPSEEK_TOKEN_LIMITS)
+async def get_model_client(model_name: str = None):
+    """动态获取模型客户端"""
+    if not model_name:
+        # 获取默认启用的模型
+        default_model = await model_controller.model.filter(is_active=True).first()
+        if not default_model:
+            raise HTTPException(status_code=400, detail="没有可用的模型")
+        model_name = default_model.model_name
+        api_host = default_model.api_host
+        api_key = default_model.api_key
+    else:
+        # 根据模型名称获取配置
+        model_config = await model_controller.get_model_by_name(model_name)
+        if not model_config:
+            raise HTTPException(status_code=400, detail=f"模型 {model_name} 不存在或未启用")
+        api_host = model_config.api_host
+        api_key = model_config.api_key
 
-# 创建OpenAI兼容的聊天完成客户端
-model_client = OpenAIChatCompletionClient(
-    model="deepseek-chat",  # 使用的模型名称
-    base_url="https://api.deepseek.com/v1",  # Deepseek API的基础URL
-    api_key="sk-56f5743d59364543a00109a4c1c10a56",  # API密钥
-    model_info=deepseek_model_info,  # 指定模型信息
-)
+    # 动态更新模型信息
+    if model_name not in _MODEL_INFO:
+        _MODEL_INFO[model_name] = DEFAULT_MODEL_INFO
+    if model_name not in _MODEL_TOKEN_LIMITS:
+        _MODEL_TOKEN_LIMITS[model_name] = DEFAULT_TOKEN_LIMIT
 
-# 创建支持流式输出的AssistantAgent
-def create_assistant_agent():
+    # 创建模型客户端
+    return OpenAIChatCompletionClient(
+        model=model_name,
+        base_url=api_host,
+        api_key=api_key,
+        model_info=DEFAULT_MODEL_INFO,
+    )
+
+
+async def create_assistant_agent(model_name: str = None, system_prompt: str = None):
     """创建支持流式输出的助手代理"""
+    model_client = await get_model_client(model_name)
+
+    # 如果没有提供系统提示词，使用模型配置中的系统提示词
+    if not system_prompt and model_name:
+        model_config = await model_controller.get_model_by_name(model_name)
+        if model_config and model_config.system_prompt:
+            system_prompt = model_config.system_prompt
+
+    # 使用默认系统提示词
+    if not system_prompt:
+        system_prompt = "你是超级智能客服，专业、友好、乐于助人。请用中文回复用户的问题。"
+
     return AssistantAgent(
         "超级智能客服",
         model_client=model_client,
         model_client_stream=True,  # 启用流式输出
-        system_message="你是超级智能客服，专业、友好、乐于助人。请用中文回复用户的问题。"
+        system_message=system_prompt
     )
 
 
@@ -102,12 +128,22 @@ async def send_message(
 
         # 保存用户消息到数据库
         try:
+            # 获取默认模型名称
+            default_model_name = "default"
+            if send_data.model:
+                default_model_name = send_data.model
+            else:
+                # 获取第一个启用的模型作为默认模型
+                default_model = await model_controller.model.filter(is_active=True).first()
+                if default_model:
+                    default_model_name = default_model.model_name
+
             user_message_create = ChatMessageCreate(
                 session_id=session_id_int,
                 user_id=user_id,
                 role="user",
                 content=user_message.content.strip(),
-                model_name=send_data.model or "deepseek-chat",
+                model_name=default_model_name,
                 total_tokens=0,
                 deduct_cost=0
             )
@@ -165,7 +201,17 @@ async def generate_stream_response(send_data: SendDTO, user_id: int) -> AsyncGen
 
 
         # 创建助手代理
-        agent = create_assistant_agent()
+        try:
+            agent = await create_assistant_agent(send_data.model)
+        except Exception as model_error:
+            error_chunk = {
+                "error": {
+                    "message": f"模型配置错误: {str(model_error)}",
+                    "type": "model_error"
+                }
+            }
+            yield f"data: {json.dumps(error_chunk, ensure_ascii=False)}\n\n"
+            return
 
         try:
             # 使用autogen的流式输出
@@ -208,7 +254,7 @@ async def generate_stream_response(send_data: SendDTO, user_id: int) -> AsyncGen
                         "id": chunk_id,
                         "object": "chat.completion.chunk",
                         "created": int(datetime.now().timestamp()),
-                        "model": send_data.model or "deepseek-chat",
+                        "model": send_data.model or "default",
                         "choices": [{
                             "index": 0,
                             "delta": {"content": content},
@@ -227,7 +273,7 @@ async def generate_stream_response(send_data: SendDTO, user_id: int) -> AsyncGen
                     "id": chunk_id,
                     "object": "chat.completion.chunk",
                     "created": int(datetime.now().timestamp()),
-                    "model": send_data.model or "deepseek-chat",
+                    "model": send_data.model or "default",
                     "choices": [{
                         "index": 0,
                         "delta": {"content": char},
@@ -244,7 +290,7 @@ async def generate_stream_response(send_data: SendDTO, user_id: int) -> AsyncGen
             "id": chunk_id,
             "object": "chat.completion.chunk",
             "created": int(datetime.now().timestamp()),
-            "model": send_data.model or "deepseek-chat",
+            "model": send_data.model or "default",
             "choices": [{
                 "index": 0,
                 "delta": {},
@@ -272,7 +318,7 @@ async def generate_stream_response(send_data: SendDTO, user_id: int) -> AsyncGen
                     user_id=user_id,
                     role="assistant",
                     content=full_response.strip(),
-                    model_name=send_data.model or "deepseek-chat",
+                    model_name=send_data.model or "default",
                     total_tokens=len(full_response.split()),
                     deduct_cost=0.001
                 )
