@@ -36,6 +36,7 @@ class Settings(BaseSettings):
             "models": {
                 "models": [
                     "app.models.admin",
+                    "app.models.knowledge",
                     "aerich.models"
                 ],
                 "default_connection": "sqlite",

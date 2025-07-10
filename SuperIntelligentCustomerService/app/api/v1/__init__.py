@@ -6,7 +6,7 @@ from .auth import auth_router
 from .base import base_router
 from .chat import chat_router
 from .depts import depts_router
-
+from .knowledge import knowledge_router
 from .menus import menus_router
 from .resource import resource_router
 from .roles import roles_router
@@ -28,3 +28,4 @@ v1_router.include_router(apis_router, prefix="/api", dependencies=[DependPermiss
 v1_router.include_router(depts_router, prefix="/dept", dependencies=[DependPermission])
 v1_router.include_router(auditlog_router, prefix="/auditlog", dependencies=[DependPermission])
 v1_router.include_router(system_router, prefix="/system")
+v1_router.include_router(knowledge_router, prefix="/knowledge", dependencies=[DependPermission])

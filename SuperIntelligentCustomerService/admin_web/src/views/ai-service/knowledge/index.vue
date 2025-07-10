@@ -1,9 +1,14 @@
 <template>
   <CommonPage show-footer title="知识库管理">
     <template #action>
-      <n-button v-permission="'post/api/v1/knowledge/create'" type="primary" @click="handleAdd">
-        <TheIcon icon="material-symbols:add" :size="18" class="mr-5" />创建知识库
-      </n-button>
+      <n-space>
+        <n-button @click="showStatistics = true">
+          <TheIcon icon="material-symbols:analytics" :size="18" class="mr-5" />统计信息
+        </n-button>
+        <n-button v-permission="'post/api/v1/knowledge/'" type="primary" @click="handleAdd">
+          <TheIcon icon="material-symbols:add" :size="18" class="mr-5" />创建知识库
+        </n-button>
+      </n-space>
     </template>
 
     <!-- 表格 -->
@@ -160,6 +165,26 @@
         </n-collapse>
       </n-form>
     </CrudModal>
+
+    <!-- 统计信息抽屉 -->
+    <n-drawer v-model:show="showStatistics" :width="400" placement="right">
+      <n-drawer-content title="知识库统计" closable>
+        <KnowledgeStatistics />
+      </n-drawer-content>
+    </n-drawer>
+
+    <!-- 知识库详情 -->
+    <KnowledgeDetail
+      v-model:visible="showDetail"
+      :knowledge-base-id="selectedKbId"
+      @refresh="$table?.handleSearch()"
+    />
+
+    <!-- 文件管理弹窗 -->
+    <FileManagementModal
+      v-model:show="fileModalVisible"
+      :knowledge-base="selectedKnowledgeBase"
+    />
   </CommonPage>
 </template>
 
@@ -185,6 +210,8 @@ import {
   NGridItem,
   NCollapse,
   NCollapseItem,
+  NDrawer,
+  NDrawerContent,
   useMessage
 } from 'naive-ui'
 
@@ -192,6 +219,9 @@ import CommonPage from '@/components/page/CommonPage.vue'
 import QueryBarItem from '@/components/query-bar/QueryBarItem.vue'
 import CrudModal from '@/components/table/CrudModal.vue'
 import CrudTable from '@/components/table/CrudTable.vue'
+import KnowledgeStatistics from './components/KnowledgeStatistics.vue'
+import KnowledgeDetail from './components/KnowledgeDetail.vue'
+import FileManagementModal from './components/FileManagementModal.vue'
 
 import { formatDate, renderIcon } from '@/utils'
 import { useCRUD } from '@/composables'
@@ -205,6 +235,12 @@ const $table = ref(null)
 const queryItems = ref({})
 const vPermission = resolveDirective('permission')
 const router = useRouter()
+const message = useMessage()
+
+// 新增状态
+const showStatistics = ref(false)
+const showDetail = ref(false)
+const selectedKbId = ref(null)
 
 const {
   modalVisible,
@@ -231,8 +267,8 @@ const {
     chunk_overlap: 100
   },
   doCreate: api.createKnowledgeBase,
-  doUpdate: api.updateKnowledgeBase,
-  doDelete: api.deleteKnowledgeBase,
+  doUpdate: (data) => api.updateKnowledgeBase(data.id, data),
+  doDelete: (data) => api.deleteKnowledgeBase(data.id),
   refresh: () => $table.value?.handleSearch(),
 })
 
@@ -327,11 +363,26 @@ const columns = [
   {
     title: '操作',
     key: 'actions',
-    width: 200,
+    width: 280,
     align: 'center',
     fixed: 'right',
     render(row) {
       return [
+        withDirectives(
+          h(
+            NButton,
+            {
+              size: 'small',
+              style: 'margin-right: 8px;',
+              onClick: () => viewDetail(row),
+            },
+            {
+              default: () => '详情',
+              icon: renderIcon('material-symbols:info', { size: 16 }),
+            }
+          ),
+          [[vPermission, 'get/api/v1/knowledge/']]
+        ),
         withDirectives(
           h(
             NButton,
@@ -346,7 +397,7 @@ const columns = [
               icon: renderIcon('material-symbols:folder-open', { size: 16 }),
             }
           ),
-          [[vPermission, 'get/api/v1/knowledge/files']]
+          [[vPermission, 'get/api/v1/knowledge/']]
         ),
         withDirectives(
           h(
@@ -366,7 +417,7 @@ const columns = [
               icon: renderIcon('material-symbols:edit', { size: 16 }),
             }
           ),
-          [[vPermission, 'post/api/v1/knowledge/update']]
+          [[vPermission, 'put/api/v1/knowledge/']]
         ),
         withDirectives(
           h(
@@ -389,21 +440,32 @@ const columns = [
               default: () => `确定要删除知识库"${row.name}"吗？`,
             }
           ),
-          [[vPermission, 'delete/api/v1/knowledge/delete']]
+          [[vPermission, 'delete/api/v1/knowledge/']]
         ),
       ]
     },
   },
 ]
 
+// 查看详情
+const viewDetail = (kb) => {
+  selectedKbId.value = kb.id
+  showDetail.value = true
+}
+
+// 文件管理弹窗相关
+const fileModalVisible = ref(false)
+const selectedKnowledgeBase = ref(null)
+
 // 查看文件
 const viewFiles = (kb) => {
-  router.push({
-    name: 'AiServiceKnowledgeFiles',
-    params: { kbId: kb.id },
-    query: { name: kb.name }
-  })
+  selectedKnowledgeBase.value = kb
+  fileModalVisible.value = true
 }
+
+
+
+
 
 // 格式化文件大小
 const formatFileSize = (bytes) => {
@@ -430,14 +492,27 @@ const handleSaveCustom = async () => {
   }
   delete submitData.max_file_size_mb
 
-  // 更新modalForm以便handleSave使用正确的数据
-  modalForm.value = submitData
-
   // 调用原始的保存方法
-  handleSave(() => {
-    // 成功回调
+  modalLoading.value = true
+  try {
+    if (submitData.id) {
+      // 编辑模式
+      await api.updateKnowledgeBase(submitData.id, submitData)
+      message.success('更新成功')
+    } else {
+      // 创建模式
+      await api.createKnowledgeBase(submitData)
+      message.success('创建成功')
+    }
+    modalVisible.value = false
+    // 刷新表格数据
     $table.value?.handleSearch()
-  })
+  } catch (error) {
+    console.error('保存失败:', error)
+    message.error('操作失败')
+  } finally {
+    modalLoading.value = false
+  }
 }
 
 onMounted(() => {

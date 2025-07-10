@@ -46,4 +46,18 @@ export default {
   updateModel: (data = {}) => request.post('/system/model/update', data),
   deleteModel: (params = {}) => request.delete('/system/model/delete', { params }),
 
+  // knowledge base
+  getKnowledgeBaseList: (params = {}) => request.get('/knowledge/', { params }),
+  getKnowledgeBaseById: (id) => request.get(`/knowledge/${id}`),
+  createKnowledgeBase: (data = {}) => request.post('/knowledge/', data),
+  updateKnowledgeBase: (id, data = {}) => request.put(`/knowledge/${id}`, data),
+  deleteKnowledgeBase: (id) => request.delete(`/knowledge/${id}`),
+  getKnowledgeTypes: () => request.get('/knowledge/types'),
+
+  // knowledge files
+  getKnowledgeFileList: (kbId, params = {}) => request.get(`/knowledge/${kbId}/files`, { params }),
+  uploadKnowledgeFile: (kbId, data = {}) => request.post(`/knowledge/${kbId}/files`, data),
+  deleteKnowledgeFile: (fileId) => request.delete(`/knowledge/files/${fileId}`),
+  getKnowledgeFileStatistics: (kbId) => request.get(`/knowledge/${kbId}/files/statistics`),
+
 }

@@ -166,7 +166,7 @@ const uploadDialogVisible = ref(false)
 const uploadList = ref([])
 const statistics = ref(null)
 
-const uploadUrl = computed(() => `/api/v1/knowledge/files/${kbId.value}/upload`)
+const uploadUrl = computed(() => `/api/v1/knowledge/${kbId.value}/files`)
 const uploadHeaders = computed(() => ({
   'Authorization': `Bearer ${localStorage.getItem('token')}`
 }))
@@ -273,7 +273,7 @@ const columns = [
 
 // 获取数据的函数
 const getData = (params) => {
-  return api.knowledgeFile.getList(kbId.value, params)
+  return api.getKnowledgeFileList(kbId.value, params)
 }
 
 // 上传前检查
@@ -337,11 +337,13 @@ const handleUploadError = (error) => {
 // 重试处理
 const retryProcessing = async (file) => {
   try {
-    const response = await api.knowledgeFile.retry(file.id)
-    if (response.code === 200) {
-      message.success('已重新提交处理')
-      $table.value?.handleSearch()
-    }
+    // TODO: 实现重试处理API
+    message.info('重试功能暂未实现')
+    // const response = await api.retryKnowledgeFile(file.id)
+    // if (response.code === 200) {
+    //   message.success('已重新提交处理')
+    //   $table.value?.handleSearch()
+    // }
   } catch (error) {
     message.error('重试失败')
   }
@@ -350,7 +352,7 @@ const retryProcessing = async (file) => {
 // 删除文件
 const deleteFile = async (file) => {
   try {
-    const response = await api.knowledgeFile.delete(file.id)
+    const response = await api.deleteKnowledgeFile(file.id)
     if (response.code === 200) {
       message.success('删除成功')
       $table.value?.handleSearch()
@@ -358,18 +360,23 @@ const deleteFile = async (file) => {
     }
   } catch (error) {
     message.error('删除失败')
+  }
 }
 
 // 加载文件类型
 const loadFileTypes = async () => {
   try {
-    const response = await api.knowledgeFile.getTypes()
-    if (response.code === 200) {
-      fileTypeOptions.value = response.data.map(type => ({
-        label: type.label,
-        value: type.value
-      }))
-    }
+    // 使用默认的文件类型选项
+    fileTypeOptions.value = [
+      { label: 'PDF', value: 'pdf' },
+      { label: 'Word文档', value: 'docx' },
+      { label: '文本文件', value: 'txt' },
+      { label: 'Markdown', value: 'md' },
+      { label: '图片(JPG)', value: 'jpg' },
+      { label: '图片(PNG)', value: 'png' },
+      { label: 'Excel', value: 'xlsx' },
+      { label: 'PowerPoint', value: 'pptx' }
+    ]
   } catch (error) {
     console.error('加载文件类型失败:', error)
   }
@@ -378,7 +385,7 @@ const loadFileTypes = async () => {
 // 加载统计信息
 const loadStatistics = async () => {
   try {
-    const response = await api.knowledgeFile.getStatistics(kbId.value)
+    const response = await api.getKnowledgeFileStatistics(kbId.value)
     if (response.code === 200) {
       statistics.value = response.data
     }

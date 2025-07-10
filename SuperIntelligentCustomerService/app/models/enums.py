@@ -19,4 +19,31 @@ class MethodType(StrEnum):
     PATCH = "PATCH"
 
 
+class KnowledgeType(StrEnum):
+    """知识库类型枚举"""
+    GENERAL = "general"
+    TECHNICAL = "technical"
+    FAQ = "faq"
+    POLICY = "policy"
+    PRODUCT = "product"
+
+
+class EmbeddingStatus(StrEnum):
+    """嵌入处理状态枚举"""
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
+class FileType(StrEnum):
+    """文件类型枚举"""
+    PDF = "pdf"
+    DOCX = "docx"
+    TXT = "txt"
+    MD = "md"
+    JPG = "jpg"
+    PNG = "png"
+    XLSX = "xlsx"
+    PPTX = "pptx"
 
