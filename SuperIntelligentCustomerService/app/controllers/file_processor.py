@@ -11,7 +11,7 @@ from datetime import datetime
 
 from ..models.knowledge import KnowledgeFile, KnowledgeBase
 from ..models.enums import EmbeddingStatus, FileType
-from ..services.memory import MemoryServiceFactory
+from .memory import MemoryServiceFactory
 
 logger = logging.getLogger(__name__)
 

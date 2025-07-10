@@ -45,4 +45,5 @@ export default {
   createModel: (data = {}) => request.post('/system/model/create', data),
   updateModel: (data = {}) => request.post('/system/model/update', data),
   deleteModel: (params = {}) => request.delete('/system/model/delete', { params }),
+
 }

@@ -30,60 +30,12 @@ class Settings(BaseSettings):
                 "engine": "tortoise.backends.sqlite",
                 "credentials": {"file_path": f"{BASE_DIR}/db.sqlite3"},  # Path to SQLite database file
             },
-            # MySQL/MariaDB configuration
-            # Install with: tortoise-orm[asyncmy]
-            # "mysql": {
-            #     "engine": "tortoise.backends.mysql",
-            #     "credentials": {
-            #         "host": "localhost",  # Database host address
-            #         "port": 3306,  # Database port
-            #         "user": "yourusername",  # Database username
-            #         "password": "yourpassword",  # Database password
-            #         "database": "yourdatabase",  # Database name
-            #     },
-            # },
-            # PostgreSQL configuration
-            # Install with: tortoise-orm[asyncpg]
-            # "postgres": {
-            #     "engine": "tortoise.backends.asyncpg",
-            #     "credentials": {
-            #         "host": "localhost",  # Database host address
-            #         "port": 5432,  # Database port
-            #         "user": "yourusername",  # Database username
-            #         "password": "yourpassword",  # Database password
-            #         "database": "yourdatabase",  # Database name
-            #     },
-            # },
-            # MSSQL/Oracle configuration
-            # Install with: tortoise-orm[asyncodbc]
-            # "oracle": {
-            #     "engine": "tortoise.backends.asyncodbc",
-            #     "credentials": {
-            #         "host": "localhost",  # Database host address
-            #         "port": 1433,  # Database port
-            #         "user": "yourusername",  # Database username
-            #         "password": "yourpassword",  # Database password
-            #         "database": "yourdatabase",  # Database name
-            #     },
-            # },
-            # SQLServer configuration
-            # Install with: tortoise-orm[asyncodbc]
-            # "sqlserver": {
-            #     "engine": "tortoise.backends.asyncodbc",
-            #     "credentials": {
-            #         "host": "localhost",  # Database host address
-            #         "port": 1433,  # Database port
-            #         "user": "yourusername",  # Database username
-            #         "password": "yourpassword",  # Database password
-            #         "database": "yourdatabase",  # Database name
-            #     },
-            # },
+
         },
         "apps": {
             "models": {
                 "models": [
                     "app.models.admin",
-                    "app.models.knowledge",
                     "aerich.models"
                 ],
                 "default_connection": "sqlite",

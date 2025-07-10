@@ -14,7 +14,7 @@ from starlette.responses import Response
 from ....core.dependency import DependAuth
 from ....models.admin import User
 from ....schemas.chat_service import ChatRequest, ChatResponse, SessionInfo, SessionStats
-from ....services.chat_service import chat_service
+from ....controllers.chat_service import chat_service
 from ....utils.response import Success, Fail
 
 logger = logging.getLogger(__name__)
@@ -195,38 +195,6 @@ async def get_service_stats(
         logger.error(f"获取服务统计失败: {e}")
         return Fail(msg=f"获取服务统计失败: {str(e)}")
 
-
-@router.post("/test", summary="测试聊天服务")
-async def test_chat_service(
-    current_user: User = DependAuth
-):
-    """测试聊天服务是否正常工作"""
-    try:
-        # 创建测试请求
-        test_request = ChatRequest(
-            user_id=str(current_user.id),
-            session_id="test_session",
-            message="你好，请介绍一下你自己",
-            stream=False
-        )
-        
-        # 发送测试消息
-        full_response = ""
-        async for chunk in chat_service.send_message(test_request):
-            if chunk.content:
-                full_response += chunk.content
-            if chunk.is_final:
-                break
-        
-        return Success(data={
-            "test_message": test_request.message,
-            "ai_response": full_response,
-            "status": "聊天服务正常工作"
-        })
-    
-    except Exception as e:
-        logger.error(f"测试聊天服务失败: {e}")
-        return Fail(msg=f"测试失败: {str(e)}")
 
 
 @router.get("/health", summary="健康检查")
