@@ -1,0 +1,15 @@
+# 忽略所有模型文件（文件较大）
+*
+!.gitignore
+!README.md
+!DOWNLOAD_INSTRUCTIONS.md
+!quick_download.py
+!qwen_models_config.py
+
+# 保留目录结构
+!embedding/
+!reranker/
+embedding/*
+reranker/*
+!embedding/.gitkeep
+!reranker/.gitkeep

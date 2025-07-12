@@ -13,7 +13,6 @@ from typing import List, Dict, Any, Optional
 
 try:
     import chromadb
-    from chromadb.config import Settings
     from sentence_transformers import SentenceTransformer
     CHROMADB_AVAILABLE = True
 except ImportError:
@@ -57,8 +56,10 @@ class PrivateMemoryService(BaseMemoryService):
             self._init_vector_db()
             self._set_ready()
         except Exception as e:
+            logger.error(f"向量数据库初始化失败: {e}")
             self._handle_error(e)
-            raise
+            # 不抛出异常，允许服务在没有向量数据库的情况下运行
+            self.status = ServiceStatus.ERROR
 
     def _init_vector_db(self):
         """初始化向量数据库"""
@@ -72,23 +73,23 @@ class PrivateMemoryService(BaseMemoryService):
             os.makedirs(self.chroma_path, exist_ok=True)
 
             # 初始化ChromaDB客户端
-            self.chroma_client = chromadb.PersistentClient(
-                path=self.chroma_path,
-                settings=Settings(
-                    anonymized_telemetry=False,
-                    allow_reset=True
-                )
-            )
+            try:
+                # 使用最简单的配置避免兼容性问题
+                self.chroma_client = chromadb.PersistentClient(path=self.chroma_path)
+                logger.info(f"ChromaDB客户端初始化成功: {self.chroma_path}")
+            except Exception as e:
+                logger.error(f"ChromaDB客户端初始化失败: {e}")
+                raise
 
             # 创建或获取集合
             self.collection_name = f"private_memories_{self.user_id}"
             try:
                 self.collection = self.chroma_client.get_collection(self.collection_name)
+                logger.info(f"获取到现有集合: {self.collection_name}")
             except Exception:  # 捕获所有异常，包括NotFoundError
-                self.collection = self.chroma_client.create_collection(
-                    name=self.collection_name,
-                    metadata={"user_id": self.user_id, "type": "private_memory"}
-                )
+                # 直接创建不带metadata的集合，避免ChromaDB版本兼容性问题
+                self.collection = self.chroma_client.create_collection(name=self.collection_name)
+                logger.info(f"创建新集合: {self.collection_name}")
 
             # 初始化嵌入模型 - 使用全局模型管理器
             from ...config.vector_db_config import model_manager
@@ -111,15 +112,22 @@ class PrivateMemoryService(BaseMemoryService):
             # 生成嵌入向量
             embedding = self.embedding_model.encode(content).tolist()
 
-            # 准备元数据
+            # 准备元数据，避免ChromaDB保留字段
             doc_metadata = {
-                "user_id": self.user_id,
+                "user_id": str(self.user_id),
                 "content_type": metadata.get("content_type", "text") if metadata else "text",
                 "category": metadata.get("category", "general") if metadata else "general",
                 "tags": json.dumps(metadata.get("tags", [])) if metadata else "[]",
-                "created_at": datetime.now().isoformat(),
-                **(metadata or {})
+                "created_at": datetime.now().isoformat()
             }
+
+            # 安全地添加其他metadata，过滤掉可能的保留字段
+            if metadata:
+                reserved_fields = {"type", "_type", "id", "_id", "embedding", "_embedding"}
+                for key, value in metadata.items():
+                    if key not in reserved_fields and key not in doc_metadata:
+                        # 确保值是字符串类型
+                        doc_metadata[key] = str(value) if value is not None else ""
 
             # 添加到ChromaDB
             self.collection.add(
@@ -373,8 +381,21 @@ class PrivateMemoryService(BaseMemoryService):
             self._update_access_time()
 
             # 删除集合中的所有数据
-            self.collection.delete()
-            logger.info(f"已清空用户 {self.user_id} 的所有私有记忆")
+            # ChromaDB 1.0+ 需要指定删除条件，获取所有ID然后删除
+            try:
+                # 获取所有文档ID
+                result = self.collection.get()
+                if result['ids']:
+                    self.collection.delete(ids=result['ids'])
+                    logger.info(f"已清空用户 {self.user_id} 的 {len(result['ids'])} 条私有记忆")
+                else:
+                    logger.info(f"用户 {self.user_id} 的私有记忆已经为空")
+            except Exception as delete_error:
+                # 如果获取ID失败，尝试删除整个集合并重新创建
+                logger.warning(f"无法获取文档ID，尝试重新创建集合: {delete_error}")
+                self.chroma_client.delete_collection(self.collection_name)
+                self.collection = self.chroma_client.create_collection(name=self.collection_name)
+                logger.info(f"已重新创建用户 {self.user_id} 的私有记忆集合")
             return True
         except Exception as e:
             self._handle_error(e)

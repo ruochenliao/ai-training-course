@@ -2,12 +2,13 @@
 聊天服务API端点
 基于AutoGen框架的智能体聊天服务接口
 支持文本和多模态内容的智能识别和处理
+集成记忆功能，提供上下文感知的智能对话
 标准化实现，参考roles.py模式
 """
 import asyncio
 import logging
 from io import BytesIO
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Optional
 
 import PIL.Image
 from autogen_agentchat.agents import AssistantAgent
@@ -21,6 +22,8 @@ from fastapi.responses import StreamingResponse
 
 from ....controllers.chat import chat_controller
 from ....controllers.model import model_controller
+from ....controllers.memory.factory import MemoryServiceFactory
+from ....controllers.memory.autogen_memory import AutoGenMemoryAdapter
 from ....core.dependency import DependAuth
 from ....models.admin import User
 from ....schemas import Success, Fail, SuccessExtra
@@ -54,7 +57,7 @@ DEFAULT_TOKEN_LIMIT = 128000
 
 
 class SmartChatSystem:
-    """智能聊天系统 - 根据内容类型自动选择合适的处理方式"""
+    """智能聊天系统 - 根据内容类型自动选择合适的处理方式，集成记忆功能"""
 
     def __init__(self):
         self.text_agent = None
@@ -62,6 +65,11 @@ class SmartChatSystem:
         self.initialized = False
         self.current_text_model = None
         self.current_vision_model = None
+
+        # 记忆功能 - 暂时禁用直到通义千问模型下载完成
+        self.memory_factory = None
+        self.memory_adapters = {}  # 用户ID -> AutoGenMemoryAdapter
+        self.memory_enabled = False  # 暂时禁用记忆功能
 
     def _update_model_info(self, model_name: str, vision_support: bool):
         """更新模型信息到全局缓存"""
@@ -160,70 +168,121 @@ class SmartChatSystem:
                 model_info
             )
 
-    async def initialize_agents(self, text_model_name: str = None, vision_model_name: str = None):
-        """初始化智能体系统"""
+    async def initialize_memory_system(self):
+        """初始化记忆系统"""
         try:
+            if self.memory_factory is None:
+                # 获取数据库路径
+                try:
+                    from ....settings.config import settings
+                    db_path = settings.TORTOISE_ORM["connections"]["sqlite"]["credentials"]["file_path"]
+                except (AttributeError, KeyError):
+                    db_path = "db.sqlite3"
+
+                self.memory_factory = MemoryServiceFactory(db_path)
+                logger.info("记忆系统初始化成功")
+        except Exception as e:
+            logger.warning(f"记忆系统初始化失败，将禁用记忆功能: {e}")
+            self.memory_enabled = False
+
+    async def get_memory_adapter(self, user_id: int, session_id: str = None) -> Optional[AutoGenMemoryAdapter]:
+        """获取用户的记忆适配器"""
+        if not self.memory_enabled:
+            return None
+
+        try:
+            # 确保记忆系统已初始化
+            await self.initialize_memory_system()
+
+            user_key = str(user_id)
+            if user_key not in self.memory_adapters:
+                # 创建新的记忆适配器
+                db_path = None
+                try:
+                    from ....settings.config import settings
+                    db_path = settings.TORTOISE_ORM["connections"]["sqlite"]["credentials"]["file_path"]
+                except (AttributeError, KeyError):
+                    db_path = "db.sqlite3"
+
+                self.memory_adapters[user_key] = AutoGenMemoryAdapter(user_key, db_path)
+                logger.info(f"为用户 {user_id} 创建记忆适配器")
+
+            return self.memory_adapters[user_key]
+        except Exception as e:
+            logger.error(f"获取记忆适配器失败: {e}")
+            return None
+
+    async def initialize_agents(self, text_model_name: str = None, vision_model_name: str = None, user_id: int = None, session_id: str = None):
+        """初始化智能体系统，集成记忆功能"""
+        try:
+            # 初始化记忆系统
+            await self.initialize_memory_system()
+
             # 获取模型客户端
             text_model_client = await self.get_model_client(model_name=text_model_name, vision_support=False)
             vision_model_client = await self.get_model_client(model_name=vision_model_name, vision_support=True)
 
-            # 创建文本智能体
+            # 暂时禁用记忆功能，直到通义千问模型下载完成
+            # 因为记忆功能依赖于嵌入模型，而当前强制使用通义千问模型
+            memory_adapters = []
+            if user_id and self.memory_enabled:
+                try:
+                    memory_adapter = await self.get_memory_adapter(user_id, session_id)
+                    if memory_adapter:
+                        memory_adapters = [memory_adapter]
+                        logger.info(f"为智能体配置记忆适配器 (用户: {user_id}, 会话: {session_id})")
+                except Exception as memory_error:
+                    logger.warning(f"记忆适配器初始化失败，将禁用记忆功能: {memory_error}")
+                    memory_adapters = []
+
+            # 创建文本智能体（暂时不集成记忆功能）
             self.text_agent = AssistantAgent(
                 "text_agent",
                 model_client=text_model_client,
                 model_client_stream=True,  # 启用流式token
+                # memory=memory_adapters,  # 暂时注释掉记忆功能
                 system_message="""你是专门处理文本对话的智能客服助手。你的职责是：
 
 1. 回答用户的文本问题
 2. 提供专业、友好、准确的服务
 3. 理解用户意图并给出有用的建议
 4. 保持对话的连贯性和上下文理解
+5. 利用历史对话记忆和用户偏好提供个性化服务
 
-请用中文回复，语气要专业且友好。"""
+请用中文回复，语气要专业且友好。如果有相关的历史信息或用户偏好，请适当参考。"""
             )
 
-            # 创建多模态智能体
+            # 创建多模态智能体（暂时不集成记忆功能）
             self.vision_agent = AssistantAgent(
                 "vision_agent",
                 model_client=vision_model_client,
                 model_client_stream=True,  # 启用流式token
+                # memory=memory_adapters,  # 暂时注释掉记忆功能
                 system_message="""你是专门处理多模态内容的智能客服助手。你的职责是：
 
 1. 分析和理解图片、视频等多媒体内容
 2. 结合视觉信息和文本描述回答用户问题
 3. 提供基于视觉内容的专业建议
 4. 识别图片中的物品、场景、文字等信息
+5. 利用历史对话记忆和用户偏好提供个性化服务
 
-请用中文回复，详细描述你看到的内容，并提供相关的帮助。"""
+请用中文回复，详细描述你看到的内容，并提供相关的帮助。如果有相关的历史信息，请适当参考。"""
             )
 
             # 记录当前使用的模型
             self.current_text_model = text_model_name
             self.current_vision_model = vision_model_name
             self.initialized = True
-            logger.info(f"智能聊天系统初始化成功 - 文本模型: {text_model_name}, 视觉模型: {vision_model_name}")
+            logger.info(f"智能聊天系统初始化成功 - 文本模型: {text_model_name}, 视觉模型: {vision_model_name}, 记忆: {'启用' if memory_adapters else '禁用'}")
 
         except Exception as e:
             logger.error(f"初始化智能体系统失败: {e}")
             raise
 
-    def detect_multimodal_content(self, message: str, files: List[str] = None) -> bool:
-        """检测是否包含多模态内容"""
-        # 检查是否有文件上传
-        if files and len(files) > 0:
-            return True
 
-        # 检查文本中是否提到图片、视频等
-        multimodal_keywords = [
-            '图片', '照片', '图像', '截图', '视频', '录像',
-            'image', 'photo', 'picture', 'video', 'screenshot'
-        ]
 
-        message_lower = message.lower()
-        return any(keyword in message_lower for keyword in multimodal_keywords)
-
-    async def process_message(self, message: str, files: List[UploadFile] = None, model_name: str = None) -> AsyncGenerator[str, None]:
-        """处理消息并生成流式响应"""
+    async def process_message(self, message: str, files: List[UploadFile] = None, model_name: str = None, user_id: int = None, session_id: str = None) -> AsyncGenerator[str, None]:
+        """处理消息并生成流式响应，集成AutoGen记忆功能"""
         try:
             # 检测是否为多模态内容
             is_multimodal = self.detect_multimodal_content(message, files)
@@ -231,7 +290,7 @@ class SmartChatSystem:
             # 确定需要使用的模型
             target_model = model_name if model_name else None
 
-            # 检查是否需要重新初始化智能体（模型切换）
+            # 检查是否需要重新初始化智能体（模型切换或用户切换）
             need_reinit = False
             if not self.initialized:
                 need_reinit = True
@@ -242,12 +301,12 @@ class SmartChatSystem:
                 need_reinit = True
                 logger.info(f"检测到文本模型切换: {self.current_text_model} -> {target_model}")
 
-            # 重新初始化智能体（如果需要）
+            # 重新初始化智能体（如果需要），传递用户信息以集成记忆
             if need_reinit:
                 if is_multimodal:
-                    await self.initialize_agents(vision_model_name=target_model)
+                    await self.initialize_agents(vision_model_name=target_model, user_id=user_id, session_id=session_id)
                 else:
-                    await self.initialize_agents(text_model_name=target_model)
+                    await self.initialize_agents(text_model_name=target_model, user_id=user_id, session_id=session_id)
 
             # 根据内容类型选择智能体
             if is_multimodal:
@@ -260,6 +319,9 @@ class SmartChatSystem:
                 current_model = self.current_text_model or "默认文本模型"
 
             logger.info(f"选择了{agent_type}({current_model})来处理用户消息: {message[:50]}...")
+
+            # 注意：不再手动添加记忆，AutoGen框架会自动处理
+            # 记忆的添加和检索将通过Memory协议自动完成
 
             # 创建消息对象
             if is_multimodal and files:
@@ -346,6 +408,9 @@ class SmartChatSystem:
                         continue
 
                 logger.info(f"流式处理完成，总长度: {len(full_response)}")
+
+                # 注意：不再手动添加AI回复到记忆
+                # AutoGen框架会自动通过Memory协议处理记忆的添加和管理
 
             except Exception as e:
                 logger.error(f"智能体响应生成失败: {e}")
@@ -560,9 +625,9 @@ async def _generate_stream_response(
             except Exception as save_error:
                 logger.warning(f"保存用户消息失败: {save_error}")
 
-        # 使用智能聊天系统处理消息
+        # 使用智能聊天系统处理消息（集成记忆功能）
         full_response = ""
-        async for content in smart_chat_system.process_message(message, files, model_name):
+        async for content in smart_chat_system.process_message(message, files, model_name, user_id, session_id):
             if content.strip():
                 full_response += content
                 # 直接输出内容
@@ -845,6 +910,104 @@ async def get_available_models(
         raise HTTPException(status_code=500, detail=f"获取模型列表失败: {str(e)}")
 
 
+@router.get("/memory/stats", summary="获取记忆统计信息")
+async def get_memory_stats(
+        current_user: User = DependAuth
+):
+    """获取当前用户的记忆统计信息"""
+    try:
+        memory_adapter = await smart_chat_system.get_memory_adapter(current_user.id)
+        if not memory_adapter:
+            return Success(data={
+                "memory_enabled": False,
+                "message": "记忆功能未启用"
+            })
+
+        # 获取记忆统计
+        health_info = await memory_adapter.health_check()
+
+        return Success(data={
+            "memory_enabled": True,
+            "user_id": current_user.id,
+            "health_info": health_info
+        })
+
+    except Exception as e:
+        logger.error(f"获取记忆统计失败: {e}")
+        raise HTTPException(status_code=500, detail=f"获取记忆统计失败: {str(e)}")
+
+
+@router.post("/memory/query", summary="查询相关记忆")
+async def query_memory(
+        query: str = Query(..., description="查询内容"),
+        limit: int = Query(5, description="返回数量限制"),
+        current_user: User = DependAuth
+):
+    """查询用户的相关记忆"""
+    try:
+        memory_adapter = await smart_chat_system.get_memory_adapter(current_user.id)
+        if not memory_adapter:
+            return Success(data=[], msg="记忆功能未启用")
+
+        # 查询相关记忆
+        memories = await memory_adapter.query(query, limit)
+
+        # 转换为可序列化的格式
+        memory_data = []
+        for memory in memories:
+            memory_info = {
+                "content": memory.content,
+                "metadata": memory.metadata,
+                "relevance_score": memory.metadata.get("relevance_score", 0)
+            }
+            memory_data.append(memory_info)
+
+        return Success(data=memory_data, msg=f"找到 {len(memory_data)} 条相关记忆")
+
+    except Exception as e:
+        logger.error(f"查询记忆失败: {e}")
+        raise HTTPException(status_code=500, detail=f"查询记忆失败: {str(e)}")
+
+
+@router.delete("/memory/clear", summary="清空用户记忆")
+async def clear_user_memory(
+        memory_type: str = Query("private", description="记忆类型: private, chat, all"),
+        current_user: User = DependAuth
+):
+    """清空用户的记忆数据"""
+    try:
+        # 检查是否为管理员或用户本人
+        if not current_user.is_superuser:
+            # 普通用户只能清空自己的私有记忆
+            if memory_type not in ["private"]:
+                raise HTTPException(status_code=403, detail="权限不足，只能清空私有记忆")
+
+        memory_adapter = await smart_chat_system.get_memory_adapter(current_user.id)
+        if not memory_adapter:
+            return Success(msg="记忆功能未启用")
+
+        if memory_type == "all":
+            # 清空所有记忆（仅管理员）
+            await memory_adapter.clear()
+            return Success(msg="已清空所有记忆")
+        elif memory_type == "private":
+            # 清空私有记忆
+            await memory_adapter.private_memory.clear()
+            return Success(msg="已清空私有记忆")
+        elif memory_type == "chat":
+            # 清空聊天记忆
+            await memory_adapter.chat_memory.clear()
+            return Success(msg="已清空聊天记忆")
+        else:
+            raise HTTPException(status_code=400, detail="无效的记忆类型")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"清空记忆失败: {e}")
+        raise HTTPException(status_code=500, detail=f"清空记忆失败: {str(e)}")
+
+
 @router.get("/health", summary="健康检查")
 async def health_check():
     """智能聊天服务健康检查"""
@@ -853,7 +1016,8 @@ async def health_check():
         agent_status = {
             "text_agent": smart_chat_system.text_agent is not None,
             "vision_agent": smart_chat_system.vision_agent is not None,
-            "initialized": smart_chat_system.initialized
+            "initialized": smart_chat_system.initialized,
+            "memory_enabled": smart_chat_system.memory_enabled
         }
 
         all_agents_ready = smart_chat_system.initialized and all([
@@ -861,11 +1025,15 @@ async def health_check():
             smart_chat_system.vision_agent is not None
         ])
 
+        features = ["流式响应", "多模态识别", "智能选择", "图片分析"]
+        if smart_chat_system.memory_enabled:
+            features.extend(["对话记忆", "用户偏好", "知识库检索"])
+
         health_status = HealthStatus(
             status="healthy" if all_agents_ready else "initializing",
-            agent_system="Smart Chat System",
+            agent_system="Smart Chat System with Memory",
             agents_status=agent_status,
-            features=["流式响应", "多模态识别", "智能选择", "图片分析"],
+            features=features,
             service_uptime="正常运行"
         )
 

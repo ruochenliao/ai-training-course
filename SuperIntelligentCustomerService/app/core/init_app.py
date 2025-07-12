@@ -17,6 +17,7 @@ from .exceptions import (
     ResponseValidationHandle,
 )
 from .middlewares import BackGroundTaskMiddleware, HttpAuditLogMiddleware
+from .model_init import init_models as init_ai_models
 from ..api import api_router
 from ..controllers.api import api_controller
 from ..controllers.user import UserCreate, user_controller
@@ -428,3 +429,5 @@ async def init_data():
     await init_roles()
     await init_models()
     await init_depts()
+    # 初始化AI模型（嵌入模型和重排模型）
+    await init_ai_models()

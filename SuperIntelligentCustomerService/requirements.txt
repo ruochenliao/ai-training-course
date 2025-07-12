@@ -65,8 +65,11 @@ autogen-core==0.4.0
 autogen-ext==0.4.0
 
 # Memory service dependencies
-chromadb==0.5.23
-sentence-transformers==3.3.1
+chromadb>=0.5.23
+sentence-transformers>=3.3.1
+
+# Model download dependencies
+modelscope>=1.11.0
 
 # Encryption dependencies
 cryptography>=41.0.0

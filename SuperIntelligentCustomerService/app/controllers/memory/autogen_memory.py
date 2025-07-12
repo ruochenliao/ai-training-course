@@ -4,6 +4,7 @@ AutoGen Memory 适配器
 支持高质量的语义检索和重排
 """
 import logging
+from datetime import datetime
 from typing import List, Dict, Any
 
 try:
@@ -64,8 +65,23 @@ class AutoGenMemoryAdapter(Memory):
         # 初始化各类记忆服务
         try:
             self.chat_memory = self.memory_factory.get_chat_memory_service(user_id)
-            self.private_memory = self.memory_factory.get_private_memory_service(user_id)
-            self.public_memory = self.memory_factory.get_public_memory_service()
+            logger.info("聊天记忆服务初始化成功")
+
+            # 尝试初始化向量记忆服务，如果失败则禁用
+            try:
+                self.private_memory = self.memory_factory.get_private_memory_service(user_id)
+                logger.info("私有记忆服务初始化成功")
+            except Exception as private_error:
+                logger.warning(f"私有记忆服务初始化失败，将禁用: {private_error}")
+                self.private_memory = None
+
+            try:
+                self.public_memory = self.memory_factory.get_public_memory_service()
+                logger.info("公共记忆服务初始化成功")
+            except Exception as public_error:
+                logger.warning(f"公共记忆服务初始化失败，将禁用: {public_error}")
+                self.public_memory = None
+
         except Exception as e:
             logger.error(f"初始化记忆服务失败: {e}")
             raise
@@ -74,6 +90,7 @@ class AutoGenMemoryAdapter(Memory):
         self.context_update_enabled = True
         self.max_context_retries = 3
         self.default_query_limit = 5
+        self.memory_enabled = True  # 记忆功能启用状态
 
         # 统计信息
         self.operation_stats = {
@@ -90,6 +107,9 @@ class AutoGenMemoryAdapter(Memory):
         """
         添加记忆内容（实现AutoGen Memory接口）
 
+        根据Microsoft AutoGen官方文档，这个方法会被框架自动调用
+        来存储对话中的消息和其他相关信息
+
         Args:
             memory_content: 记忆内容对象
         """
@@ -99,33 +119,67 @@ class AutoGenMemoryAdapter(Memory):
             content = memory_content.content
             metadata = memory_content.metadata or {}
 
-            # 根据元数据类型决定存储位置
-            memory_type = metadata.get("memory_type", "private")
+            # 智能检测内容类型和来源
+            # AutoGen框架会自动传入对话消息，我们需要智能分类
+            memory_type = self._detect_memory_type(content, metadata)
+
+            # 增强元数据
+            enhanced_metadata = {
+                **metadata,
+                "timestamp": datetime.now().isoformat(),
+                "user_id": self.user_id,
+                "auto_detected_type": memory_type
+            }
 
             if memory_type == "chat":
                 # 存储到聊天记忆
-                session_id = metadata.get("session_id", "default")
-                role = metadata.get("role", "user")
+                session_id = enhanced_metadata.get("session_id", "default")
+                role = enhanced_metadata.get("role", "user")
                 await self.chat_memory.add(content, {
-                    **metadata,
+                    **enhanced_metadata,
                     "session_id": session_id,
                     "role": role
                 })
 
-            elif memory_type == "public":
-                # 存储到公共记忆
-                await self.public_memory.add(content, metadata)
+            elif memory_type == "public" and self.public_memory:
+                # 存储到公共记忆（如果可用）
+                await self.public_memory.add(content, enhanced_metadata)
 
+            elif self.private_memory:
+                # 默认存储到私有记忆（如果可用）
+                await self.private_memory.add(content, enhanced_metadata)
             else:
-                # 默认存储到私有记忆
-                await self.private_memory.add(content, metadata)
+                # 如果向量记忆不可用，存储到聊天记忆
+                logger.warning("向量记忆服务不可用，将内容存储到聊天记忆")
+                await self.chat_memory.add(content, enhanced_metadata)
 
-            logger.debug(f"成功添加记忆内容到 {memory_type} 存储")
+            logger.debug(f"成功添加记忆内容到 {memory_type} 存储: {content[:50]}...")
 
         except Exception as e:
             self.operation_stats["error_count"] += 1
             logger.error(f"添加记忆内容失败: {e}")
-            raise
+            # 不抛出异常，避免中断AutoGen框架的正常流程
+
+    def _detect_memory_type(self, content: str, metadata: dict) -> str:
+        """智能检测记忆类型"""
+        # 如果元数据中已指定类型，优先使用
+        if "memory_type" in metadata:
+            return metadata["memory_type"]
+
+        # 根据内容和元数据智能判断
+        role = metadata.get("role", "")
+
+        # 如果是对话消息，存储到聊天记忆
+        if role in ["user", "assistant"]:
+            return "chat"
+
+        # 如果包含用户偏好或设置信息，存储到私有记忆
+        preference_keywords = ["偏好", "设置", "配置", "喜欢", "不喜欢", "习惯"]
+        if any(keyword in content for keyword in preference_keywords):
+            return "private"
+
+        # 默认存储到私有记忆
+        return "private"
     
     async def query(self, query: str, limit: int = 5) -> List[MemoryContent]:
         """
@@ -153,8 +207,19 @@ class AutoGenMemoryAdapter(Memory):
 
             # 并行从各个记忆源检索
             chat_query_result = await self.chat_memory.query(query, limit=chat_limit)
-            private_query_result = await self.private_memory.query(query, limit=private_limit)
-            public_query_result = await self.public_memory.query(query, limit=public_limit)
+
+            # 只有在服务可用时才查询向量记忆
+            if self.private_memory:
+                private_query_result = await self.private_memory.query(query, limit=private_limit)
+            else:
+                from .base import QueryResult
+                private_query_result = QueryResult(items=[], total_count=0, query_time=0.0)
+
+            if self.public_memory:
+                public_query_result = await self.public_memory.query(query, limit=public_limit)
+            else:
+                from .base import QueryResult
+                public_query_result = QueryResult(items=[], total_count=0, query_time=0.0)
 
             # 合并结果并重新评分
             all_results = []
@@ -215,8 +280,9 @@ class AutoGenMemoryAdapter(Memory):
     async def update_context(self, messages: Sequence[BaseMessage]) -> Sequence[BaseMessage]:
         """更新上下文，添加相关记忆
 
-        根据autogen 0.6.1官方文档实现Memory协议的update_context方法
+        根据Microsoft AutoGen官方文档实现Memory协议的update_context方法
         这个方法会在AssistantAgent处理消息前被调用，用于注入相关的记忆信息
+        参考: https://microsoft.github.io/autogen/stable/user-guide/agentchat-user-guide/memory.html
         """
         try:
             if not AUTOGEN_AVAILABLE:
@@ -227,8 +293,7 @@ class AutoGenMemoryAdapter(Memory):
                 logger.debug("消息序列为空，跳过上下文更新")
                 return messages
 
-            # 在autogen 0.6.1中，update_context方法负责修改消息序列
-            # 添加相关的记忆信息到上下文中
+            # 根据官方文档，update_context方法应该查询相关记忆并添加到上下文中
             return await self._update_context_with_memory(messages)
 
         except Exception as e:
@@ -239,81 +304,82 @@ class AutoGenMemoryAdapter(Memory):
     async def _update_context_with_memory(self, messages: Sequence[BaseMessage]) -> Sequence[BaseMessage]:
         """使用记忆更新上下文
 
-        根据autogen官方文档的最佳实践实现
+        根据Microsoft AutoGen官方文档的最佳实践实现
+        参考: https://microsoft.github.io/autogen/stable/user-guide/agentchat-user-guide/memory.html
         """
         try:
-            # 获取最后一条消息作为查询
-            # 使用索引访问而不是转换为list
+            # 获取最后一条用户消息作为查询
             if not hasattr(messages, '__len__') or len(messages) == 0:
                 logger.debug("消息序列为空或无法获取长度")
                 return messages
 
-            # 安全地获取最后一条消息
-            try:
-                last_message = messages[-1]
-            except (IndexError, TypeError) as e:
-                logger.debug(f"无法获取最后一条消息: {e}")
-                return messages
+            # 查找最后一条用户消息
+            query_content = ""
+            for message in reversed(messages):
+                if hasattr(message, 'source') and message.source == 'user':
+                    query_content = getattr(message, 'content', '')
+                    break
 
-            # 检查消息类型和内容
-            if not hasattr(last_message, 'content'):
-                logger.debug("最后一条消息没有content属性")
-                return messages
-
-            query = getattr(last_message, 'content', '')
-            if not query or not isinstance(query, str):
-                logger.debug("查询内容为空或不是字符串")
+            if not query_content or not isinstance(query_content, str):
+                logger.debug("没有找到有效的用户消息内容")
                 return messages
 
             # 查询相关记忆
-            logger.debug(f"查询记忆: {query[:50]}...")
-            relevant_memories = await self.query(query, limit=3)
+            logger.debug(f"查询记忆: {query_content[:50]}...")
+            relevant_memories = await self.query(query_content, limit=3)
 
             if not relevant_memories:
                 logger.debug("没有找到相关记忆")
                 return messages
 
-            # 构建记忆上下文
+            # 构建记忆上下文字符串
             memory_context = self._build_memory_context(relevant_memories)
             if not memory_context:
                 logger.debug("记忆上下文构建失败")
                 return messages
 
-            # 将记忆信息注入到现有消息中，而不是创建新的系统消息
+            # 根据AutoGen官方文档，创建系统消息来注入记忆信息
             try:
-                # 在autogen 0.6.1中，为了避免多个系统消息的问题，
-                # 我们将记忆信息添加到用户消息的开头
+                from autogen_agentchat.messages import SystemMessage
+
+                # 创建包含记忆信息的系统消息
+                memory_system_message = SystemMessage(
+                    content=f"\n相关记忆内容（按时间顺序）：\n{memory_context}\n",
+                    type="SystemMessage"
+                )
+
+                # 将系统消息插入到消息序列中
+                # 根据官方文档，系统消息应该在用户消息之后添加
                 updated_messages = list(messages)
+                updated_messages.append(memory_system_message)
 
-                if updated_messages and AUTOGEN_AVAILABLE:
-                    # 找到最后一条用户消息并在其内容前添加记忆信息
-                    for i in range(len(updated_messages) - 1, -1, -1):
-                        message = updated_messages[i]
-                        if hasattr(message, 'source') and message.source == 'user':
-                            # 在用户消息内容前添加记忆上下文
-                            enhanced_content = f"[记忆信息]\n{memory_context}\n\n[用户问题]\n{message.content}"
-
-                            # 创建新的用户消息，包含记忆信息
-                            enhanced_message = TextMessage(
-                                source="user",
-                                content=enhanced_content
-                            )
-                            updated_messages[i] = enhanced_message
-                            logger.debug(f"已将记忆上下文注入到用户消息中，总消息数量: {len(updated_messages)}")
-                            break
-
+                logger.debug(f"已添加记忆系统消息，总消息数量: {len(updated_messages)}")
                 return updated_messages
 
-            except Exception as msg_error:
-                logger.warning(f"注入记忆信息失败: {msg_error}")
-                return messages
+            except ImportError:
+                # 如果无法导入SystemMessage，使用TextMessage作为替代
+                logger.warning("无法导入SystemMessage，使用TextMessage替代")
+
+                memory_message = TextMessage(
+                    source="system",
+                    content=f"\n相关记忆内容（按时间顺序）：\n{memory_context}\n"
+                )
+
+                updated_messages = list(messages)
+                updated_messages.append(memory_message)
+
+                logger.debug(f"已添加记忆文本消息，总消息数量: {len(updated_messages)}")
+                return updated_messages
 
         except Exception as e:
             logger.error(f"更新上下文失败: {e}")
             return messages
     
     def _build_memory_context(self, memories: List[MemoryContent]) -> str:
-        """构建记忆上下文字符串"""
+        """构建记忆上下文字符串
+
+        根据Microsoft AutoGen官方文档的格式构建记忆上下文
+        """
         context_parts = []
 
         try:
@@ -328,23 +394,15 @@ class AutoGenMemoryAdapter(Memory):
                 if not isinstance(metadata, dict):
                     metadata = {}
 
-                memory_type = metadata.get("memory_type", "unknown")
-                relevance_score = metadata.get("relevance_score", 0)
-
-                # 确保相关性分数是数字
-                try:
-                    relevance_score = float(relevance_score)
-                except (ValueError, TypeError):
-                    relevance_score = 0.0
-
-                context_part = f"{i}. [{memory_type}] (相关性: {relevance_score:.3f})\n{content}"
+                # 根据AutoGen官方文档的格式，简化记忆内容的展示
+                context_part = f"{i}. {content}"
                 context_parts.append(context_part)
 
-            return "\n\n".join(context_parts)
+            return "\n".join(context_parts)
 
         except Exception as e:
-            logger.error(f"Failed to build memory context: {e}")
-            return "记忆上下文构建失败"
+            logger.error(f"构建记忆上下文失败: {e}")
+            return ""
     
     async def clear(self) -> None:
         """清空记忆（仅清空当前用户的私有记忆）"""
@@ -362,10 +420,40 @@ class AutoGenMemoryAdapter(Memory):
         try:
             # 清理缓存
             self.memory_factory.clear_cache()
-            
+
         except Exception as e:
             logger.error(f"Failed to close memory: {e}")
             raise
+
+    async def health_check(self) -> Dict[str, Any]:
+        """健康检查"""
+        try:
+            health_info = {
+                "user_id": self.user_id,
+                "memory_enabled": self.memory_enabled,
+                "operation_stats": self.operation_stats.copy(),
+                "services": {}
+            }
+
+            # 检查各个记忆服务的健康状态
+            if self.chat_memory:
+                health_info["services"]["chat_memory"] = await self.chat_memory.health_check()
+
+            if self.private_memory:
+                health_info["services"]["private_memory"] = await self.private_memory.health_check()
+
+            if self.public_memory:
+                health_info["services"]["public_memory"] = await self.public_memory.health_check()
+
+            return health_info
+
+        except Exception as e:
+            logger.error(f"健康检查失败: {e}")
+            return {
+                "user_id": self.user_id,
+                "memory_enabled": False,
+                "error": str(e)
+            }
 
 
 class ConversationMemoryAdapter(AutoGenMemoryAdapter):
@@ -424,7 +512,10 @@ class ConversationMemoryAdapter(AutoGenMemoryAdapter):
 
             # 清空所有记忆服务
             await self.chat_memory.clear()
-            await self.private_memory.clear()
+
+            if self.private_memory:
+                await self.private_memory.clear()
+
             # 注意：通常不清空公共记忆，因为它是共享的
 
             logger.info(f"已清空用户 {self.user_id} 的所有记忆")
