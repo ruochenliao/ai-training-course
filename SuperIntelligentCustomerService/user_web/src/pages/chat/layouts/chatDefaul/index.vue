@@ -6,9 +6,11 @@ import ModelSelect from '@/components/ModelSelect/index.vue';
 import WelecomeText from '@/components/WelecomeText/index.vue';
 import {useFilesStore} from '@/stores/modules/files';
 import {useSessionStore} from '@/stores/modules/session';
+import {useModelStore} from '@/stores/modules/model';
 
 const sessionStore = useSessionStore();
 const filesStore = useFilesStore();
+const modelStore = useModelStore();
 
 const senderValue = ref('');
 const senderRef = ref();
@@ -20,6 +22,8 @@ async function handleSend() {
     session_title: senderValue.value.slice(0, 10),
     remark: senderValue.value.slice(0, 10),
   });
+  // 清除文件列表
+  filesStore.clearAllFiles();
 }
 
 function handleDeleteCard(_item: FilesCardProps, index: number) {

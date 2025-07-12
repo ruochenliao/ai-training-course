@@ -59,6 +59,8 @@ class SmartChatSystem:
         self.text_agent = None
         self.vision_agent = None
         self.initialized = False
+        self.current_text_model = None
+        self.current_vision_model = None
 
     async def get_model_client(self, model_name: str = None, vision_support: bool = False):
         """动态获取模型客户端"""
@@ -131,17 +133,18 @@ class SmartChatSystem:
                 model_info=model_info,
             )
 
-    async def initialize_agents(self):
+    async def initialize_agents(self, text_model_name: str = None, vision_model_name: str = None):
         """初始化智能体系统"""
         try:
             # 获取模型客户端
-            text_model_client = await self.get_model_client(vision_support=False)
-            vision_model_client = await self.get_model_client(vision_support=True)
+            text_model_client = await self.get_model_client(model_name=text_model_name, vision_support=False)
+            vision_model_client = await self.get_model_client(model_name=vision_model_name, vision_support=True)
 
             # 创建文本智能体
             self.text_agent = AssistantAgent(
                 "text_agent",
                 model_client=text_model_client,
+                model_client_stream=True,  # 启用流式token
                 system_message="""你是专门处理文本对话的智能客服助手。你的职责是：
 
 1. 回答用户的文本问题
@@ -156,6 +159,7 @@ class SmartChatSystem:
             self.vision_agent = AssistantAgent(
                 "vision_agent",
                 model_client=vision_model_client,
+                model_client_stream=True,  # 启用流式token
                 system_message="""你是专门处理多模态内容的智能客服助手。你的职责是：
 
 1. 分析和理解图片、视频等多媒体内容
@@ -166,8 +170,11 @@ class SmartChatSystem:
 请用中文回复，详细描述你看到的内容，并提供相关的帮助。"""
             )
 
+            # 记录当前使用的模型
+            self.current_text_model = text_model_name
+            self.current_vision_model = vision_model_name
             self.initialized = True
-            logger.info("智能聊天系统初始化成功")
+            logger.info(f"智能聊天系统初始化成功 - 文本模型: {text_model_name}, 视觉模型: {vision_model_name}")
 
         except Exception as e:
             logger.error(f"初始化智能体系统失败: {e}")
@@ -188,25 +195,44 @@ class SmartChatSystem:
         message_lower = message.lower()
         return any(keyword in message_lower for keyword in multimodal_keywords)
 
-    async def process_message(self, message: str, files: List[UploadFile] = None) -> AsyncGenerator[str, None]:
+    async def process_message(self, message: str, files: List[UploadFile] = None, model_name: str = None) -> AsyncGenerator[str, None]:
         """处理消息并生成流式响应"""
         try:
-            # 确保系统已初始化
-            if not self.initialized:
-                await self.initialize_agents()
-
             # 检测是否为多模态内容
             is_multimodal = self.detect_multimodal_content(message, files)
+
+            # 确定需要使用的模型
+            target_model = model_name if model_name else None
+
+            # 检查是否需要重新初始化智能体（模型切换）
+            need_reinit = False
+            if not self.initialized:
+                need_reinit = True
+            elif is_multimodal and self.current_vision_model != target_model:
+                need_reinit = True
+                logger.info(f"检测到视觉模型切换: {self.current_vision_model} -> {target_model}")
+            elif not is_multimodal and self.current_text_model != target_model:
+                need_reinit = True
+                logger.info(f"检测到文本模型切换: {self.current_text_model} -> {target_model}")
+
+            # 重新初始化智能体（如果需要）
+            if need_reinit:
+                if is_multimodal:
+                    await self.initialize_agents(vision_model_name=target_model)
+                else:
+                    await self.initialize_agents(text_model_name=target_model)
 
             # 根据内容类型选择智能体
             if is_multimodal:
                 selected_agent = self.vision_agent
                 agent_type = "多模态智能体"
+                current_model = self.current_vision_model or "默认视觉模型"
             else:
                 selected_agent = self.text_agent
                 agent_type = "文本智能体"
+                current_model = self.current_text_model or "默认文本模型"
 
-            logger.info(f"选择了{agent_type}来处理用户消息: {message[:50]}...")
+            logger.info(f"选择了{agent_type}({current_model})来处理用户消息: {message[:50]}...")
 
             # 创建消息对象
             if is_multimodal and files:
@@ -218,46 +244,81 @@ class SmartChatSystem:
 
             # 使用选定的智能体生成流式响应
             try:
-                # 使用 run_stream 方法进行流式处理
-                full_content = ""
-                has_streamed_content = False
+                logger.info("开始流式处理...")
 
-                async for chunk in selected_agent.run_stream(task=user_message):
-                    # 处理流式内容块
-                    if hasattr(chunk, 'content') and chunk.content:
-                        # 这是流式内容块
-                        content = str(chunk.content)
-                        if content.strip():
-                            # 过滤掉用户输入的内容，只保留AI回复
-                            if not content.startswith(message.strip()):
-                                full_content += content
-                                has_streamed_content = True
-                                yield content
-                                await asyncio.sleep(0.02)
-                    elif hasattr(chunk, 'messages') and chunk.messages:
-                        # 这是 TaskResult，包含最终消息
-                        for msg in chunk.messages:
-                            # 只返回 source='assistant' 的消息内容
-                            if hasattr(msg, 'content') and msg.content and hasattr(msg, 'source') and msg.source == 'assistant':
-                                content = str(msg.content)
-                                if content.strip():
-                                    # 确保不包含用户输入的内容
-                                    if content.startswith(message.strip()):
-                                        # 如果内容以用户消息开头，则移除用户消息部分
-                                        content = content[len(message.strip()):].strip()
+                # 根据官方文档，run_stream返回异步迭代器，产生消息和最终TaskResult
+                full_response = ""
+
+                async for message in selected_agent.run_stream(task=user_message):
+                    try:
+                        # 检查消息类型
+                        message_type = getattr(message, 'type', None)
+
+                        # 处理流式token块 (ModelClientStreamingChunkEvent)
+                        if message_type == 'ModelClientStreamingChunkEvent':
+                            if hasattr(message, 'content') and message.content:
+                                content = str(message.content)
+                                if content:
+                                    full_response += content
+                                    yield content
+                                    await asyncio.sleep(0.01)
+
+                        # 处理文本消息 (TextMessage)
+                        elif message_type == 'TextMessage':
+                            if (hasattr(message, 'source') and message.source == 'assistant' and
+                                hasattr(message, 'content') and message.content):
+                                content = str(message.content).strip()
+
+                                # 过滤掉用户输入的内容
+                                if content and content != user_message:
+                                    # 如果内容以用户消息开头，移除用户消息部分
+                                    if isinstance(user_message, str) and content.startswith(user_message):
+                                        content = content[len(user_message):].strip()
 
                                     if content:
-                                        # 如果已经有流式内容，只输出差异部分
-                                        if has_streamed_content and content != full_content:
-                                            remaining_content = content[len(full_content):] if content.startswith(full_content) else content
-                                            if remaining_content.strip():
-                                                yield remaining_content
-                                                await asyncio.sleep(0.02)
-                                        elif not has_streamed_content:
-                                            # 如果没有流式内容，直接输出完整内容
+                                        # 如果没有流式内容，直接输出完整内容
+                                        if not full_response:
+                                            full_response = content
                                             yield content
-                                            await asyncio.sleep(0.02)
-                        break  # TaskResult 是最后一个项目
+                                            await asyncio.sleep(0.01)
+                                        # 如果有流式内容但不匹配，可能是最终的完整响应
+                                        elif content != full_response and len(content) > len(full_response):
+                                            # 输出剩余部分
+                                            remaining = content[len(full_response):]
+                                            if remaining:
+                                                full_response = content
+                                                yield remaining
+                                                await asyncio.sleep(0.01)
+
+                        # 处理TaskResult（最终结果）
+                        elif hasattr(message, 'messages'):
+                            # 这是TaskResult，包含完整的对话历史
+                            logger.debug("收到TaskResult")
+                            # 如果没有收到任何流式内容，从TaskResult中提取
+                            if not full_response:
+                                for msg in message.messages:
+                                    if (hasattr(msg, 'source') and msg.source == 'assistant' and
+                                        hasattr(msg, 'content') and msg.content):
+                                        content = str(msg.content).strip()
+                                        if content and content != user_message:
+                                            # 过滤用户输入
+                                            if isinstance(user_message, str) and content.startswith(user_message):
+                                                content = content[len(user_message):].strip()
+                                            if content:
+                                                full_response = content
+                                                yield content
+                                                await asyncio.sleep(0.01)
+                                                break
+
+                        # 处理其他类型的消息（如工具调用等）
+                        else:
+                            logger.debug(f"收到其他类型消息: {message_type}")
+
+                    except Exception as chunk_error:
+                        logger.warning(f"处理消息时出错: {chunk_error}")
+                        continue
+
+                logger.info(f"流式处理完成，总长度: {len(full_response)}")
 
             except Exception as e:
                 logger.error(f"智能体响应生成失败: {e}")
@@ -344,6 +405,7 @@ async def send_chat_message(
                 message=message_data["message"],
                 session_id=message_data.get("session_id"),
                 files=message_data.get("files", []),
+                model_name=message_data.get("model_name"),
                 user_id=current_user.id
             ),
             media_type="text/plain",
@@ -380,6 +442,7 @@ async def _parse_request_data(request: Request, content_type: str) -> Optional[d
                     return {
                         "message": user_message["content"].strip(),
                         "session_id": json_data.get("session_id"),
+                        "model_name": json_data.get("model_name"),
                         "files": []
                     }
             elif "message" in json_data:
@@ -387,6 +450,7 @@ async def _parse_request_data(request: Request, content_type: str) -> Optional[d
                 return {
                     "message": json_data["message"].strip(),
                     "session_id": json_data.get("session_id"),
+                    "model_name": json_data.get("model_name"),
                     "files": []
                 }
 
@@ -407,9 +471,19 @@ async def _parse_request_data(request: Request, content_type: str) -> Optional[d
                             continue
                         uploaded_files.append(file)
 
+                # 处理 session_id 类型转换
+                session_id = form_data.get("session_id")
+                if session_id:
+                    try:
+                        session_id = int(session_id)
+                    except (ValueError, TypeError):
+                        logger.warning(f"无效的session_id格式: {session_id}")
+                        session_id = None
+
                 return {
                     "message": message.strip(),
-                    "session_id": form_data.get("session_id"),
+                    "session_id": session_id,
+                    "model_name": form_data.get("model_name"),
                     "files": uploaded_files
                 }
 
@@ -423,6 +497,7 @@ async def _generate_stream_response(
         message: str,
         session_id: Optional[str],
         files: List[UploadFile],
+        model_name: Optional[str],
         user_id: int
 ) -> AsyncGenerator[str, None]:
     """生成流式响应"""
@@ -460,7 +535,7 @@ async def _generate_stream_response(
 
         # 使用智能聊天系统处理消息
         full_response = ""
-        async for content in smart_chat_system.process_message(message, files):
+        async for content in smart_chat_system.process_message(message, files, model_name):
             if content.strip():
                 full_response += content
                 # 直接输出内容

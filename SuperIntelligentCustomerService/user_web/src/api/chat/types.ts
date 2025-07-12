@@ -64,6 +64,10 @@ export interface ChatSendRequest {
    */
   sessionId?: string;
   /**
+   * 指定的模型名称
+   */
+  model_name?: string;
+  /**
    * 上传的文件列表（多模态支持）
    */
   files?: File[];

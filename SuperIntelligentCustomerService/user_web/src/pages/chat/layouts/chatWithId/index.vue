@@ -12,6 +12,7 @@ import ModelSelect from '@/components/ModelSelect/index.vue';
 import {useChatStore} from '@/stores/modules/chat';
 import {useFilesStore} from '@/stores/modules/files';
 import {useUserStore} from '@/stores/modules/user';
+import {useModelStore} from '@/stores/modules/model';
 
 type MessageItem = BubbleProps & {
   key: number;
@@ -25,6 +26,7 @@ const route = useRoute();
 const chatStore = useChatStore();
 const filesStore = useFilesStore();
 const userStore = useUserStore();
+const modelStore = useModelStore();
 
 // 用户头像
 const avatar = computed(() => {
@@ -120,14 +122,6 @@ async function startSSE(chatContent: string) {
     isLoading.value = true;
     abortController = new AbortController();
 
-    // 添加用户输入的消息
-    inputValue.value = '';
-    addMessage(chatContent, true);
-    addMessage('', false);
-
-    // 滚动到底部
-    bubbleListRef.value?.scrollToBottom();
-
     // 验证会话ID
     const currentSessionId = route.params?.id;
     if (!isValidSessionId(currentSessionId)) {
@@ -135,12 +129,23 @@ async function startSSE(chatContent: string) {
       return;
     }
 
-    // 准备发送的消息数据，匹配后端ChatSendRequest格式
+    // 准备发送的消息数据，匹配后端ChatSendRequest格式（在清除文件列表之前提取文件）
     const sendData = {
       message: chatContent,
       sessionId: String(currentSessionId), // 确保有效的sessionId
+      model_name: modelStore.currentModelInfo?.model_name, // 添加选中的模型
       files: (filesStore.filesList || []).map(item => item.file) // 提取File对象
     };
+
+    // 添加用户输入的消息
+    inputValue.value = '';
+    // 清除文件列表（在提取文件对象之后）
+    filesStore.clearAllFiles();
+    addMessage(chatContent, true);
+    addMessage('', false);
+
+    // 滚动到底部
+    bubbleListRef.value?.scrollToBottom();
 
 
 

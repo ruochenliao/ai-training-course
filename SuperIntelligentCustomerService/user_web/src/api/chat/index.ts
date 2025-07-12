@@ -8,25 +8,51 @@ import {useUserStore} from '@/stores';
 export const sendStream = async (data: ChatSendRequest): Promise<ReadableStream> => {
   const userStore = useUserStore();
 
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  // 检查是否有文件需要上传
+  const hasFiles = data.files && data.files.length > 0;
+
+  let headers: Record<string, string> = {};
+  let body: string | FormData;
 
   if (userStore.token) {
     headers['token'] = userStore.token;
   }
 
-  // 构建符合后端期望的请求体
-  const requestBody = {
-    message: data.message,
-    session_id: data.sessionId ? parseInt(data.sessionId) : undefined,
-    files: data.files || []
-  };
+  if (hasFiles) {
+    // 有文件时使用 FormData 格式
+    const formData = new FormData();
+    formData.append('message', data.message);
+
+    if (data.sessionId) {
+      formData.append('session_id', data.sessionId);
+    }
+
+    if (data.model_name) {
+      formData.append('model_name', data.model_name);
+    }
+
+    // 添加文件
+    data.files.forEach((file) => {
+      formData.append('files', file);
+    });
+
+    body = formData;
+    // 不设置 Content-Type，让浏览器自动设置 multipart/form-data 边界
+  } else {
+    // 无文件时使用 JSON 格式
+    headers['Content-Type'] = 'application/json';
+    body = JSON.stringify({
+      message: data.message,
+      session_id: data.sessionId ? parseInt(data.sessionId) : undefined,
+      model_name: data.model_name,
+      files: []
+    });
+  }
 
   const response = await fetch('/api/v1/chat/send', {
     method: 'POST',
     headers,
-    body: JSON.stringify(requestBody),
+    body,
   });
 
   if (!response.ok) {

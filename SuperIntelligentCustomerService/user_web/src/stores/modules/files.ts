@@ -15,9 +15,15 @@ export const useFilesStore = defineStore('files', () => {
     filesList.value.splice(index, 1);
   };
 
+  // 清除所有文件
+  const clearAllFiles = () => {
+    filesList.value = [];
+  };
+
   return {
     filesList,
     setFilesList,
     deleteFileByIndex,
+    clearAllFiles,
   };
 });
