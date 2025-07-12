@@ -2,13 +2,14 @@
 知识库管理API路由
 """
 from typing import Optional, List
-from fastapi import APIRouter, Query, Depends, UploadFile, File
+
+from fastapi import APIRouter, Query, UploadFile, File
 from pydantic import BaseModel, Field
 
-from ....core.dependency import DependAuth
-from ....models.admin import User
 from ....controllers.knowledge_base import KnowledgeBaseController
 from ....controllers.knowledge_file import KnowledgeFileController
+from ....core.dependency import DependAuth
+from ....models.admin import User
 
 router = APIRouter()
 

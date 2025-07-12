@@ -3,7 +3,6 @@
 基于Tortoise ORM的知识库和知识文件模型定义
 """
 from tortoise import fields
-from tortoise.models import Model
 
 from .base import BaseModel, TimestampMixin
 from .enums import KnowledgeType, EmbeddingStatus, FileType

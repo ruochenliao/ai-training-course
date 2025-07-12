@@ -11,6 +11,7 @@
 - AutoGenMemoryAdapter: AutoGen Memory协议适配器
 """
 
+from .autogen_memory import AutoGenMemoryAdapter, ConversationMemoryAdapter
 # 导入基础类和枚举
 from .base import (
     BaseMemoryService,
@@ -19,15 +20,12 @@ from .base import (
     ServiceStatus,
     QueryResult
 )
-
 # 导入具体实现
 from .chat_memory import ChatMemoryService
-from .private_memory import PrivateMemoryService
-from .public_memory import PublicMemoryService
-
 # 导入工厂和适配器
 from .factory import MemoryServiceFactory
-from .autogen_memory import AutoGenMemoryAdapter, ConversationMemoryAdapter
+from .private_memory import PrivateMemoryService
+from .public_memory import PublicMemoryService
 
 # 导出所有公共接口
 __all__ = [

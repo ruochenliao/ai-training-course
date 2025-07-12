@@ -2,9 +2,10 @@
 聊天服务相关数据模型
 """
 from datetime import datetime
-from typing import List, Optional, Dict, Any, Union
-from pydantic import BaseModel, Field
 from enum import Enum
+from typing import List, Optional, Dict, Any
+
+from pydantic import BaseModel, Field
 
 
 class MessageRole(str, Enum):

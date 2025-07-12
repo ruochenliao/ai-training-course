@@ -3,14 +3,15 @@
 提供知识库的CRUD操作和权限管理
 """
 import logging
-from typing import List, Optional, Dict, Any
-from tortoise.expressions import Q
-from tortoise.exceptions import DoesNotExist, IntegrityError
+from typing import Optional, Dict, Any
 
+from tortoise.exceptions import DoesNotExist
+from tortoise.expressions import Q
+
+from ..models.enums import EmbeddingStatus
 from ..models.knowledge import KnowledgeBase, KnowledgeFile
-from ..models.enums import KnowledgeType, EmbeddingStatus
-from ..utils.response import Success, Fail
 from ..schemas.base import SuccessExtra
+from ..utils.response import Success, Fail
 
 logger = logging.getLogger(__name__)
 

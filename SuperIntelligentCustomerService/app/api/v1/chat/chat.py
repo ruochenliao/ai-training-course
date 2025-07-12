@@ -88,12 +88,16 @@ async def create_assistant_agent(model_name: str = None, system_prompt: str = No
     )
 
 
-@router.post("/send", summary="发送聊天消息")
+@router.post("/send", summary="发送聊天消息（AutoGen版本）")
 async def send_message(
         send_data: SendDTO,
         current_user: User = DependAuth
 ):
-    """发送聊天消息"""
+    """
+    发送聊天消息（基于AutoGen框架）
+    支持多轮对话历史和流式响应
+    适用于复杂的AI对话场景
+    """
     try:
         user_id = current_user.id
         # 验证必要参数
@@ -324,12 +328,15 @@ async def generate_stream_response(send_data: SendDTO, user_id: int) -> AsyncGen
                 pass  # 静默处理保存错误，不影响用户体验
 
 
-@router.post("/session/validate", summary="验证或创建会话")
+@router.post("/session/validate", summary="智能会话验证")
 async def validate_or_create_session(
         session_id: Optional[str] = None,
         current_user: User = DependAuth
 ):
-    """验证会话是否存在，如果不存在则创建新会话"""
+    """
+    智能验证会话是否存在，如果不存在则自动创建新会话
+    适用于需要自动处理会话状态的场景
+    """
     try:
         from ....controllers.session import session_controller
         from ....schemas.session import SessionCreate

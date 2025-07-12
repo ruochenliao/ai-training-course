@@ -129,14 +129,20 @@ async def delete_model(
         return Fail(msg=f"删除模型失败: {str(e)}")
 
 
-@router.get("/modelList", summary="获取可用模型列表")
-async def get_available_models():
+@router.get("/available", summary="获取可用模型列表")
+async def get_available_models(
+    model_type: Optional[str] = Query(None, description="模型类型过滤")
+):
     """
     获取可用的模型列表（用于聊天页面选择）
+    支持按模型类型过滤
     """
     try:
         # 获取启用的模型
-        total, models = await model_controller.get_active_models(page_size=100)
+        total, models = await model_controller.get_active_models(
+            model_type=model_type,
+            page_size=100
+        )
 
         if models:
             model_list = []

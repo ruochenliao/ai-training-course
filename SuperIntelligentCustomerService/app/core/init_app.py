@@ -1,6 +1,3 @@
-import shutil
-
-from aerich import Command
 from fastapi import FastAPI
 from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,7 +20,6 @@ from .middlewares import BackGroundTaskMiddleware, HttpAuditLogMiddleware
 from ..api import api_router
 from ..controllers.api import api_controller
 from ..controllers.user import UserCreate, user_controller
-from ..log import logger
 from ..models.admin import Api, Menu, Role, Model, Dept
 from ..schemas.menus import MenuType
 from ..settings.config import settings
@@ -263,6 +259,36 @@ async def init_models():
     """初始化模型数据"""
     models = await Model.exists()
     if not models:
+        # 创建阿里云通义千问文本模型
+        await Model.create(
+            category="对话模型",
+            model_name="qwen-plus-latest",
+            model_describe="阿里云通义千问Plus模型，专业的对话AI助手，支持中文优化",
+            model_price=0.001,
+            model_type="chat",
+            model_show="通义千问Plus",
+            system_prompt="你是超级智能客服，专业、友好、乐于助人。请用中文回复用户的问题。",
+            api_host="https://dashscope.aliyuncs.com/compatible-mode/v1",
+            api_key="sk-aeb8d69039b14320b0fe58cb8285d8b1",
+            is_active=True,
+            remark="阿里云通义千问文本模型"
+        )
+
+        # 创建阿里云通义千问多模态模型
+        await Model.create(
+            category="多模态模型",
+            model_name="qwen-vl-max",
+            model_describe="阿里云通义千问VL-Max模型，支持图像理解和多模态对话",
+            model_price=0.002,
+            model_type="multimodal",
+            model_show="通义千问VL-Max",
+            system_prompt="你是超级智能客服，专业、友好、乐于助人。你可以理解图像内容并用中文回复用户的问题。",
+            api_host="https://dashscope.aliyuncs.com/compatible-mode/v1",
+            api_key="sk-aeb8d69039b14320b0fe58cb8285d8b1",
+            is_active=True,
+            remark="阿里云通义千问多模态模型"
+        )
+
         # 创建deepseek模型
         await Model.create(
             category="对话模型",
@@ -276,21 +302,6 @@ async def init_models():
             api_key="sk-56f5743d59364543a00109a4c1c10a56",
             is_active=True,
             remark="默认对话模型"
-        )
-
-        # 创建其他示例模型
-        await Model.create(
-            category="对话模型",
-            model_name="gpt-3.5-turbo",
-            model_describe="OpenAI GPT-3.5 Turbo 模型，适用于对话和文本生成",
-            model_price=0.002,
-            model_type="chat",
-            model_show="GPT-3.5",
-            system_prompt="你是一个有用的AI助手。",
-            api_host="https://api.openai.com",
-            api_key="",
-            is_active=False,
-            remark="OpenAI对话模型"
         )
 
 

@@ -7,13 +7,14 @@ import logging
 import os
 from pathlib import Path
 from typing import Dict, Any, Optional
+
 from fastapi import UploadFile
 from tortoise.exceptions import DoesNotExist
 
-from ..models.knowledge import KnowledgeBase, KnowledgeFile
 from ..models.enums import FileType, EmbeddingStatus
-from ..utils.response import Success, Fail
+from ..models.knowledge import KnowledgeBase, KnowledgeFile
 from ..schemas.base import SuccessExtra
+from ..utils.response import Success, Fail
 
 logger = logging.getLogger(__name__)
 

@@ -5,8 +5,8 @@
 import asyncio
 import logging
 import uuid
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, AsyncGenerator, Any
+from datetime import datetime
+from typing import Dict, List, Optional, AsyncGenerator
 
 try:
     from autogen_ext.models.openai import OpenAIChatCompletionClient
@@ -19,8 +19,8 @@ except ImportError:
 
 from .chat_session import ChatSession
 from ..schemas.chat_service import (
-    ChatRequest, ChatResponse, StreamChunk, SessionInfo, 
-    SessionStats, ChatServiceConfig, ChatMessage, MessageRole
+    ChatRequest, StreamChunk, SessionInfo,
+    SessionStats, ChatServiceConfig
 )
 
 logger = logging.getLogger(__name__)

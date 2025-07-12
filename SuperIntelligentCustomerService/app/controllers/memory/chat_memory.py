@@ -10,8 +10,8 @@ import time
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Union, Optional
 
-from ...settings.config import settings
 from .base import BaseMemoryService, MemoryItem, MemoryType, QueryResult, ServiceStatus
+from ...settings.config import settings
 
 logger = logging.getLogger(__name__)
 

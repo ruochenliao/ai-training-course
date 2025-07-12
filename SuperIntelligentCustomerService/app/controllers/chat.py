@@ -58,12 +58,16 @@ class ChatController(CRUDBase[ChatMessage, ChatMessageCreate, ChatMessageUpdate]
         total_cost = await self.model.filter(user_id=user_id).aggregate(
             total_cost_sum=Sum("deduct_cost")
         )
-        
+
         return {
             "total_messages": total_messages,
             "total_tokens": total_tokens.get("total_tokens_sum", 0) or 0,
             "total_cost": float(total_cost.get("total_cost_sum", 0) or 0)
         }
+
+    async def get_total_message_count(self) -> int:
+        """获取系统总消息数量"""
+        return await self.model.all().count()
 
 
 chat_controller = ChatController()

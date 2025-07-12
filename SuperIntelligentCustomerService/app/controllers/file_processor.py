@@ -5,13 +5,11 @@
 import asyncio
 import logging
 import os
-from pathlib import Path
-from typing import Optional, Dict, Any
 from datetime import datetime
 
-from ..models.knowledge import KnowledgeFile, KnowledgeBase
-from ..models.enums import EmbeddingStatus, FileType
 from .memory import MemoryServiceFactory
+from ..models.enums import EmbeddingStatus, FileType
+from ..models.knowledge import KnowledgeFile, KnowledgeBase
 
 logger = logging.getLogger(__name__)
 

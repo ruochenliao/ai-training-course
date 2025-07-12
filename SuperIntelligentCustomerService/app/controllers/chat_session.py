@@ -2,11 +2,9 @@
 聊天会话管理类
 管理单用户对话状态，集成多记忆服务
 """
-import asyncio
 import logging
-import uuid
 from datetime import datetime, timedelta
-from typing import List, Optional, Dict, Any, AsyncGenerator
+from typing import List, Optional, Any, AsyncGenerator
 
 try:
     from autogen_agentchat.agents import AssistantAgent

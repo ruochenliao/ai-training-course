@@ -101,21 +101,7 @@ async def register(register_data: RegisterDTO):
         return Fail(msg=f"注册失败: {str(e)}")
 
 
-@router.post("/email/code", summary="发送邮箱验证码")
-async def send_email_code(email_data: EmailCodeDTO):
-    """发送邮箱验证码"""
-    try:
-        # TODO: 实现邮箱验证码发送逻辑
-        # 这里应该：
-        # 1. 生成6位数字验证码
-        # 2. 将验证码存储到Redis或数据库中，设置过期时间
-        # 3. 发送邮件
-        
-        # 模拟发送成功
-        return Success(msg="验证码已发送到您的邮箱，请查收")
-        
-    except Exception as e:
-        return Fail(msg=f"发送验证码失败: {str(e)}")
+# 邮箱验证码功能已移至 /api/v1/resource/code 接口
 
 
 # 添加用户控制器的辅助方法

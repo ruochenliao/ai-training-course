@@ -16,14 +16,17 @@ from ....schemas.session import (
 router = APIRouter()
 
 
-@router.get("/list", summary="获取会话列表")
+@router.get("/list", summary="获取会话列表（管理端）")
 async def get_session_list(
     page_num: int = Query(1, description="页码"),
     page_size: int = Query(10, description="每页数量"),
     session_title: Optional[str] = Query(None, description="会话标题"),
     current_user: User = DependAuth
 ):
-    """获取用户的会话列表"""
+    """
+    获取用户的会话列表（管理端使用）
+    支持分页和搜索功能
+    """
     try:
         user_id = current_user.id
         total, sessions = await session_controller.get_user_sessions(
