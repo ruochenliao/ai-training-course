@@ -26,6 +26,7 @@ from ....models.admin import User
 from ....schemas import Success, Fail, SuccessExtra
 from ....schemas.chat_service import *
 from ....utils.serializer import safe_serialize
+from ....utils.encryption import decrypt_api_key, is_api_key_encrypted
 
 logger = logging.getLogger(__name__)
 
@@ -62,75 +63,101 @@ class SmartChatSystem:
         self.current_text_model = None
         self.current_vision_model = None
 
+    def _update_model_info(self, model_name: str, vision_support: bool):
+        """更新模型信息到全局缓存"""
+        model_info = DEFAULT_VISION_MODEL_INFO if vision_support else DEFAULT_TEXT_MODEL_INFO
+        if model_name not in _MODEL_INFO:
+            _MODEL_INFO[model_name] = model_info
+        if model_name not in _MODEL_TOKEN_LIMITS:
+            _MODEL_TOKEN_LIMITS[model_name] = DEFAULT_TOKEN_LIMIT
+        return model_info
+
+    def _create_model_client(self, model_name: str, api_host: str, api_key: str, model_info):
+        """创建模型客户端"""
+        return OpenAIChatCompletionClient(
+            model=model_name,
+            base_url=api_host,
+            api_key=api_key,
+            model_info=model_info,
+        )
+
+    def _get_default_config(self, vision_support: bool):
+        """获取默认模型配置"""
+        return {
+            "model_name": "gpt-3.5-turbo",
+            "api_host": "https://api.openai.com/v1",
+            "api_key": "sk-default-key"
+        }
+
+    async def _get_model_config(self, model_name: str = None, vision_support: bool = False):
+        """获取模型配置"""
+        if not model_name:
+            # 根据是否需要视觉支持选择默认模型
+            model_type = "multimodal" if vision_support else "chat"
+            default_model = await model_controller.model.filter(
+                is_active=True,
+                model_type=model_type
+            ).first()
+
+            if not default_model:
+                logger.warning("数据库中没有找到可用模型，使用默认配置")
+                return self._get_default_config(vision_support)
+
+            # 验证API密钥必须是加密的
+            if not is_api_key_encrypted(default_model.api_key):
+                raise Exception(f"模型 {default_model.model_name} 的API密钥未加密")
+
+            return {
+                "model_name": default_model.model_name,
+                "api_host": default_model.api_host,
+                "api_key": decrypt_api_key(default_model.api_key)
+            }
+        else:
+            # 根据模型名称获取配置
+            try:
+                model_config = await model_controller.get_model_by_name(model_name)
+                if not model_config:
+                    raise Exception(f"模型 {model_name} 不存在或未启用")
+
+                # 验证API密钥必须是加密的
+                if not is_api_key_encrypted(model_config.api_key):
+                    raise Exception(f"模型 {model_name} 的API密钥未加密")
+
+                return {
+                    "model_name": model_name,
+                    "api_host": model_config.api_host,
+                    "api_key": decrypt_api_key(model_config.api_key)
+                }
+            except Exception:
+                logger.warning(f"获取模型 {model_name} 配置失败，使用默认配置")
+                default_config = self._get_default_config(vision_support)
+                default_config["model_name"] = model_name  # 保持用户指定的模型名
+                return default_config
+
     async def get_model_client(self, model_name: str = None, vision_support: bool = False):
         """动态获取模型客户端"""
         try:
-            if not model_name:
-                # 根据是否需要视觉支持选择默认模型
-                if vision_support:
-                    default_model = await model_controller.model.filter(
-                        is_active=True,
-                        model_type="multimodal"
-                    ).first()
-                else:
-                    default_model = await model_controller.model.filter(
-                        is_active=True,
-                        model_type="chat"
-                    ).first()
+            # 获取模型配置
+            config = await self._get_model_config(model_name, vision_support)
 
-                if not default_model:
-                    # 如果数据库中没有模型，使用默认配置
-                    logger.warning("数据库中没有找到可用模型，使用默认配置")
-                    model_name = "gpt-3.5-turbo"
-                    api_host = "https://api.openai.com/v1"
-                    api_key = "sk-default-key"
-                else:
-                    model_name = default_model.model_name
-                    api_host = default_model.api_host
-                    api_key = default_model.api_key
-            else:
-                # 根据模型名称获取配置
-                try:
-                    model_config = await model_controller.get_model_by_name(model_name)
-                    if not model_config:
-                        raise Exception(f"模型 {model_name} 不存在或未启用")
-                    api_host = model_config.api_host
-                    api_key = model_config.api_key
-                except Exception:
-                    # 如果获取失败，使用默认配置
-                    logger.warning(f"获取模型 {model_name} 配置失败，使用默认配置")
-                    api_host = "https://api.openai.com/v1"
-                    api_key = "sk-default-key"
-
-            # 动态更新模型信息
-            model_info = DEFAULT_VISION_MODEL_INFO if vision_support else DEFAULT_TEXT_MODEL_INFO
-            if model_name not in _MODEL_INFO:
-                _MODEL_INFO[model_name] = model_info
-            if model_name not in _MODEL_TOKEN_LIMITS:
-                _MODEL_TOKEN_LIMITS[model_name] = DEFAULT_TOKEN_LIMIT
-
-            # 创建模型客户端
-            return OpenAIChatCompletionClient(
-                model=model_name,
-                base_url=api_host,
-                api_key=api_key,
-                model_info=model_info,
+            # 更新模型信息并创建客户端
+            model_info = self._update_model_info(config["model_name"], vision_support)
+            return self._create_model_client(
+                config["model_name"],
+                config["api_host"],
+                config["api_key"],
+                model_info
             )
         except Exception as e:
             logger.error(f"创建模型客户端失败: {e}")
-            # 返回一个默认的模型客户端
-            model_name = "gpt-3.5-turbo"
-            model_info = DEFAULT_VISION_MODEL_INFO if vision_support else DEFAULT_TEXT_MODEL_INFO
-            if model_name not in _MODEL_INFO:
-                _MODEL_INFO[model_name] = model_info
-            if model_name not in _MODEL_TOKEN_LIMITS:
-                _MODEL_TOKEN_LIMITS[model_name] = DEFAULT_TOKEN_LIMIT
-
-            return OpenAIChatCompletionClient(
-                model=model_name,
-                base_url="https://api.openai.com/v1",
-                api_key="sk-default-key",
-                model_info=model_info,
+            # 使用默认配置创建客户端
+            default_config = self._get_default_config(vision_support)
+            model_info = self._update_model_info(default_config["model_name"], vision_support)
+            return self._create_model_client(
+                default_config["model_name"],
+                default_config["api_host"],
+                default_config["api_key"],
+                model_info
             )
 
     async def initialize_agents(self, text_model_name: str = None, vision_model_name: str = None):

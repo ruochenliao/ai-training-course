@@ -23,6 +23,7 @@ from ..controllers.user import UserCreate, user_controller
 from ..models.admin import Api, Menu, Role, Model, Dept
 from ..schemas.menus import MenuType
 from ..settings.config import settings
+from ..utils.encryption import encrypt_api_key
 
 
 def make_middlewares():
@@ -269,7 +270,7 @@ async def init_models():
             model_show="通义千问Plus",
             system_prompt="你是超级智能客服，专业、友好、乐于助人。请用中文回复用户的问题。",
             api_host="https://dashscope.aliyuncs.com/compatible-mode/v1",
-            api_key="sk-aeb8d69039b14320b0fe58cb8285d8b1",
+            api_key=encrypt_api_key("sk-aeb8d69039b14320b0fe58cb8285d8b1"),
             is_active=True,
             remark="阿里云通义千问文本模型"
         )
@@ -284,7 +285,7 @@ async def init_models():
             model_show="通义千问VL-Max",
             system_prompt="你是超级智能客服，专业、友好、乐于助人。你可以理解图像内容并用中文回复用户的问题。",
             api_host="https://dashscope.aliyuncs.com/compatible-mode/v1",
-            api_key="sk-aeb8d69039b14320b0fe58cb8285d8b1",
+            api_key=encrypt_api_key("sk-aeb8d69039b14320b0fe58cb8285d8b1"),
             is_active=True,
             remark="阿里云通义千问多模态模型"
         )
@@ -299,7 +300,7 @@ async def init_models():
             model_show="Deepseek Chat",
             system_prompt="你是超级智能客服，专业、友好、乐于助人。请用中文回复用户的问题。",
             api_host="https://api.deepseek.com/v1",
-            api_key="sk-56f5743d59364543a00109a4c1c10a56",
+            api_key=encrypt_api_key("sk-56f5743d59364543a00109a4c1c10a56"),
             is_active=True,
             remark="默认对话模型"
         )

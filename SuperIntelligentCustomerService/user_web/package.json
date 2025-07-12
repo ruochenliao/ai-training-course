@@ -35,6 +35,7 @@
     "@jsonlee_12138/enum": "^1.0.4",
     "@vueuse/core": "^13.3.0",
     "@vueuse/integrations": "^13.3.0",
+    "crypto-js": "^4.2.0",
     "element-plus": "^2.9.11",
     "hook-fetch": "^1.1.3",
     "nprogress": "^0.2.0",

@@ -5,9 +5,11 @@ from tortoise.expressions import Q
 
 from ....controllers.model import model_controller
 from ....core.dependency import DependAuth
+from ....log import logger
 from ....models.admin import User
 from ....schemas import Success, SuccessExtra
 from ....schemas.models import ModelCreate, ModelUpdate
+from ....utils.encryption import is_api_key_encrypted, decrypt_api_key
 
 router = APIRouter()
 
@@ -45,6 +47,11 @@ async def get_model_list(
         model_list = []
         for model in models:
             model_dict = await model.to_dict()
+            # 验证API密钥已加密，但不解密，直接返回加密值给前端
+            if model_dict.get('api_key'):
+                if not is_api_key_encrypted(model_dict['api_key']):
+                    raise HTTPException(status_code=500, detail=f"模型 {model.model_name} 的API密钥未加密")
+                # 保持加密状态，让前端处理解密
             model_list.append(model_dict)
 
         return SuccessExtra(data=model_list, total=total, page=page, page_size=page_size)
@@ -66,6 +73,11 @@ async def get_model_by_id(
         if not model:
             raise HTTPException(status_code=404, detail="模型不存在")
         model_dict = await model.to_dict()
+        # 验证API密钥已加密，但不解密，直接返回加密值给前端
+        if model_dict.get('api_key'):
+            if not is_api_key_encrypted(model_dict['api_key']):
+                raise HTTPException(status_code=500, detail=f"模型 {model.model_name} 的API密钥未加密")
+            # 保持加密状态，让前端处理解密
         return Success(data=model_dict)
     except HTTPException:
         raise
@@ -89,6 +101,11 @@ async def create_model(
 
         model = await model_controller.create(model_data)
         model_dict = await model.to_dict()
+        # 验证API密钥已加密，但不解密，直接返回加密值给前端
+        if model_dict.get('api_key'):
+            if not is_api_key_encrypted(model_dict['api_key']):
+                raise HTTPException(status_code=500, detail="新创建的模型API密钥未正确加密")
+            # 保持加密状态，让前端处理解密
         return Success(data=model_dict, msg="创建模型成功")
     except HTTPException:
         raise
@@ -115,6 +132,11 @@ async def update_model(
 
         model = await model_controller.update(id=model_data.id, obj_in=model_data)
         model_dict = await model.to_dict()
+        # 验证API密钥已加密，但不解密，直接返回加密值给前端
+        if model_dict.get('api_key'):
+            if not is_api_key_encrypted(model_dict['api_key']):
+                raise HTTPException(status_code=500, detail="更新后的模型API密钥未正确加密")
+            # 保持加密状态，让前端处理解密
         return Success(data=model_dict, msg="更新模型成功")
     except HTTPException:
         raise
@@ -156,6 +178,11 @@ async def get_available_models(
             model_list = []
             for model in models:
                 model_dict = await model.to_dict()
+                # 验证API密钥已加密，但不解密，直接返回加密值给前端
+                if model_dict.get('api_key'):
+                    if not is_api_key_encrypted(model_dict['api_key']):
+                        raise HTTPException(status_code=500, detail=f"模型 {model.model_name} 的API密钥未加密")
+                    # 保持加密状态，让前端处理解密
                 # 直接返回下划线命名的字段，保持与数据库一致
                 model_list.append(model_dict)
             return Success(data=model_list)
@@ -165,3 +192,32 @@ async def get_available_models(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"获取模型列表失败: {str(e)}")
+
+
+@router.post("/decrypt-api-key", summary="解密API密钥", dependencies=[DependAuth])
+async def decrypt_api_key_endpoint(
+    request: dict
+):
+    """
+    解密API密钥的专用端点
+    前端可以调用此接口来解密API密钥
+    """
+    try:
+        encrypted_key = request.get("encrypted_key")
+        if not encrypted_key:
+            raise HTTPException(status_code=400, detail="缺少encrypted_key参数")
+
+        # 验证密钥已加密
+        if not is_api_key_encrypted(encrypted_key):
+            raise HTTPException(status_code=400, detail="提供的密钥未加密")
+
+        # 解密密钥
+        decrypted_key = decrypt_api_key(encrypted_key)
+
+        return Success(data={"decrypted_key": decrypted_key}, msg="解密成功")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"解密API密钥失败: {e}")
+        raise HTTPException(status_code=500, detail=f"解密失败: {str(e)}")
