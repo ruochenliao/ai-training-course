@@ -45,7 +45,7 @@
     "radash": "^12.1.0",
     "reset-css": "^5.0.2",
     "vue": "^3.5.16",
-    "vue-element-plus-x": "1.2.0",
+    "vue-element-plus-x": "1.2.29-beta",
     "vue-router": "4"
   },
   "devDependencies": {

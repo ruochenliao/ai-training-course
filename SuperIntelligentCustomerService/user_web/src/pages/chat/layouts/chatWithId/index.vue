@@ -13,6 +13,7 @@ import {useChatStore} from '@/stores/modules/chat';
 import {useFilesStore} from '@/stores/modules/files';
 import {useUserStore} from '@/stores/modules/user';
 import {useModelStore} from '@/stores/modules/model';
+import {XMarkdown} from 'vue-element-plus-x';
 
 type MessageItem = BubbleProps & {
   key: number;
@@ -286,6 +287,27 @@ watch(
             :status="item.thinkingStatus" class="thinking-chain-warp" @change="handleChange"
           />
         </template>
+        <template #content="{ item }">
+          <!-- 如果是助手消息且标记为 Markdown，使用 XMarkdown 组件渲染 -->
+          <XMarkdown
+            v-if="item.isMarkdown && item.role === 'assistant'"
+            :markdown="item.content"
+            :enable-latex="true"
+            :enable-breaks="true"
+            :allow-html="true"
+            :themes="{
+              light: 'vitesse-light',
+              dark: 'vitesse-dark'
+            }"
+            :default-theme-mode="'light'"
+            :need-view-code-btn="false"
+            class="markdown-content"
+          />
+          <!-- 否则使用普通文本显示 -->
+          <div v-else class="text-content">
+            {{ item.content }}
+          </div>
+        </template>
       </BubbleList>
 
       <Sender
@@ -367,6 +389,204 @@ watch(
     }
     .markdown-body {
       background-color: transparent;
+    }
+
+    // Markdown 内容样式优化
+    .markdown-content {
+      // 基础样式
+      font-size: 14px;
+      line-height: 1.6;
+      color: #24292f;
+      word-wrap: break-word;
+      max-width: 100%;
+      overflow-wrap: break-word;
+
+      // 图片样式
+      :deep(img) {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 8px 0;
+        display: block;
+      }
+
+      // 代码块容器样式 - 使用 :deep() 来穿透 XMarkdown 组件的样式
+      :deep(.shiki) {
+        background-color: #f6f8fa !important;
+        border: 1px solid #d0d7de;
+        border-radius: 6px;
+        padding: 16px;
+        margin: 12px 0;
+        overflow-x: auto;
+        font-size: 13px;
+        line-height: 1.45;
+        max-width: 100%;
+
+        code {
+          background: transparent !important;
+          padding: 0;
+          border-radius: 0;
+          font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        }
+      }
+
+      // 行内代码样式
+      :deep(code:not(.shiki code)) {
+        background-color: rgba(175, 184, 193, 0.2);
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        font-size: 85%;
+        color: #d73a49;
+      }
+
+      // 表格样式
+      :deep(table) {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 16px 0;
+        border-spacing: 0;
+        font-size: 13px;
+
+        th, td {
+          border: 1px solid #d0d7de;
+          padding: 6px 13px;
+          text-align: left;
+        }
+
+        th {
+          background-color: #f6f8fa;
+          font-weight: 600;
+        }
+
+        tr:nth-child(2n) {
+          background-color: #f6f8fa;
+        }
+      }
+
+      // 引用样式
+      :deep(blockquote) {
+        border-left: 4px solid #d0d7de;
+        padding: 0 16px;
+        margin: 16px 0;
+        color: #656d76;
+
+        p {
+          margin: 8px 0;
+        }
+      }
+
+      // 列表样式
+      :deep(ul), :deep(ol) {
+        padding-left: 24px;
+        margin: 16px 0;
+
+        li {
+          margin: 4px 0;
+        }
+      }
+
+      // 标题样式
+      :deep(h1), :deep(h2), :deep(h3), :deep(h4), :deep(h5), :deep(h6) {
+        margin: 24px 0 16px 0;
+        font-weight: 600;
+        line-height: 1.25;
+
+        &:first-child {
+          margin-top: 0;
+        }
+      }
+
+      :deep(h1) { font-size: 1.8em; }
+      :deep(h2) { font-size: 1.5em; }
+      :deep(h3) { font-size: 1.25em; }
+      :deep(h4) { font-size: 1em; }
+      :deep(h5) { font-size: 0.875em; }
+      :deep(h6) { font-size: 0.85em; }
+
+      // 段落样式
+      :deep(p) {
+        margin: 16px 0;
+        line-height: 1.6;
+
+        &:first-child {
+          margin-top: 0;
+        }
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+
+      // 水平分割线
+      :deep(hr) {
+        height: 1px;
+        background-color: #d0d7de;
+        border: none;
+        margin: 24px 0;
+      }
+
+      // 链接样式
+      :deep(a) {
+        color: #0969da;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+
+      // 强调样式
+      :deep(strong), :deep(b) {
+        font-weight: 600;
+      }
+
+      :deep(em), :deep(i) {
+        font-style: italic;
+      }
+
+      // 删除线
+      :deep(del), :deep(s) {
+        text-decoration: line-through;
+      }
+
+      // 水平分割线
+      hr {
+        height: 1px;
+        background-color: #d0d7de;
+        border: none;
+        margin: 24px 0;
+      }
+
+      // 链接样式
+      a {
+        color: #0969da;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+
+      // 强调样式
+      strong, b {
+        font-weight: 600;
+      }
+
+      em, i {
+        font-style: italic;
+      }
+
+      // 删除线
+      del, s {
+        text-decoration: line-through;
+      }
+    }
+
+    // 普通文本内容样式
+    .text-content {
+      line-height: 1.6;
+      word-wrap: break-word;
     }
   }
   .chat-defaul-sender {
