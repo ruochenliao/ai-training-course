@@ -1,7 +1,7 @@
 // 引入ElementPlus所有图标
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
-import { ElMessage } from 'element-plus';
-import { createApp } from 'vue';
+import {ElMessage} from 'element-plus';
+import {createApp} from 'vue';
 import ElementPlusX from 'vue-element-plus-x';
 import App from './App.vue';
 import router from './routers';

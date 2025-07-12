@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia';
+import {defineStore} from 'pinia';
 
 // 权限状态管理
 export const useAuthStore = defineStore('auth', () => {

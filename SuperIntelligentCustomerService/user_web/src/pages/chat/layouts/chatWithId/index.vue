@@ -1,24 +1,21 @@
 <!-- 每个回话对应的聊天内容 -->
 <script setup lang="ts">
-import type { AnyObject } from 'typescript-api-pro';
-import type { Sender } from 'vue-element-plus-x';
-import type { BubbleProps } from 'vue-element-plus-x/types/Bubble';
-import type { BubbleListInstance } from 'vue-element-plus-x/types/BubbleList';
-import type { FilesCardProps } from 'vue-element-plus-x/types/FilesCard';
-import type { ThinkingStatus } from 'vue-element-plus-x/types/Thinking';
-import { useHookFetch } from 'hook-fetch/vue';
-import { useRoute } from 'vue-router';
-import { sendStream, parseStreamResponse } from '@/api';
+import type {Sender} from 'vue-element-plus-x';
+import type {BubbleProps} from 'vue-element-plus-x/types/Bubble';
+import type {BubbleListInstance} from 'vue-element-plus-x/types/BubbleList';
+import type {FilesCardProps} from 'vue-element-plus-x/types/FilesCard';
+import type {ThinkingStatus} from 'vue-element-plus-x/types/Thinking';
+import {useRoute} from 'vue-router';
+import {parseStreamResponse, sendStream} from '@/api';
 import FilesSelect from '@/components/FilesSelect/index.vue';
 import ModelSelect from '@/components/ModelSelect/index.vue';
-import { useChatStore } from '@/stores/modules/chat';
-import { useFilesStore } from '@/stores/modules/files';
-import { useModelStore } from '@/stores/modules/model';
-import { useUserStore } from '@/stores/modules/user';
+import {useChatStore} from '@/stores/modules/chat';
+import {useFilesStore} from '@/stores/modules/files';
+import {useUserStore} from '@/stores/modules/user';
 
 type MessageItem = BubbleProps & {
   key: number;
-  role: 'ai' | 'user' | 'system';
+  role: 'ai' | 'user' | 'system' | 'assistant';
   avatar: string;
   thinkingStatus?: ThinkingStatus;
   thinlCollapse?: boolean;
@@ -26,7 +23,6 @@ type MessageItem = BubbleProps & {
 
 const route = useRoute();
 const chatStore = useChatStore();
-const modelStore = useModelStore();
 const filesStore = useFilesStore();
 const userStore = useUserStore();
 
@@ -44,8 +40,6 @@ const bubbleListRef = ref<BubbleListInstance | null>(null);
 // 流式聊天状态管理
 const isLoading = ref(false);
 let abortController: AbortController | null = null;
-// 记录进入思考中
-let isThinking = false;
 
 // 验证会话ID是否有效
 function isValidSessionId(id: string | string[]): boolean {
@@ -108,90 +102,8 @@ watch(
   { immediate: true, deep: true },
 );
 
-// 封装数据处理逻辑
-function handleDataChunk(chunk: AnyObject) {
-  try {
-
-    // 处理OpenAI格式的流式数据
-    if (!chunk || !chunk.choices || !chunk.choices[0]) {
-      return;
-    }
-
-    const choice = chunk.choices[0];
-
-    const delta = choice.delta;
-
-    if (!delta) {
-      return;
-    }
-
-    // 获取最后一条消息（AI回复）
-    if (!bubbleItems.value || bubbleItems.value.length === 0) {
-      return;
-    }
-    const lastMessage = bubbleItems.value[bubbleItems.value.length - 1];
-    if (!lastMessage || (lastMessage.role !== 'assistant' && lastMessage.role !== 'system')) {
-      return;
-    }
-
-    // 处理思考内容（reasoning_content）
-    const reasoningChunk = delta.reasoning_content;
-    if (reasoningChunk) {
-      // 开始思考链状态
-      lastMessage.thinkingStatus = 'thinking';
-      lastMessage.loading = true;
-      lastMessage.thinlCollapse = true;
-      lastMessage.reasoning_content = (lastMessage.reasoning_content || '') + reasoningChunk;
-    }
-
-    // 处理正常内容
-    const contentChunk = delta.content;
-    if (contentChunk) {
-      // 检查是否包含思考标签
-      const thinkStart = contentChunk.includes('<think>');
-      const thinkEnd = contentChunk.includes('</think>');
-
-      if (thinkStart) {
-        isThinking = true;
-      }
-      if (thinkEnd) {
-        isThinking = false;
-      }
-
-      if (isThinking) {
-        // 处理思考内容
-        lastMessage.thinkingStatus = 'thinking';
-        lastMessage.loading = true;
-        lastMessage.thinlCollapse = true;
-        const thinkingContent = contentChunk
-          .replace('<think>', '')
-          .replace('</think>', '');
-        lastMessage.reasoning_content = (lastMessage.reasoning_content || '') + thinkingContent;
-      } else {
-        // 处理正常回复内容
-        lastMessage.thinkingStatus = 'end';
-        lastMessage.loading = false;
-        lastMessage.typing = true;
-        lastMessage.content = (lastMessage.content || '') + contentChunk;
-      }
-    }
-
-    // 处理完成状态
-    if (choice.finish_reason === 'stop' || choice.finish_reason === 'end' || choice.finish_reason === 'complete') {
-      lastMessage.loading = false;
-      lastMessage.typing = false;
-      lastMessage.thinkingStatus = 'end';
-    }
-
-    // 自动滚动到底部
-    nextTick(() => {
-      bubbleListRef.value?.scrollToBottom();
-    });
-
-  } catch (err) {
-    console.error('解析流式数据时出错:', err);
-  }
-}
+// 这个函数已被简化的流式处理逻辑替代，暂时保留以备后用
+// function handleDataChunk(chunk: AnyObject) { ... }
 
 // 封装错误处理逻辑
 function handleError(err: any) {
@@ -223,18 +135,11 @@ async function startSSE(chatContent: string) {
       return;
     }
 
-    // 准备发送的消息数据，匹配后端SendDTO格式
-    // 只发送当前用户的消息，避免发送整个对话历史
+    // 准备发送的消息数据，匹配后端ChatSendRequest格式
     const sendData = {
-      messages: [
-        {
-          role: 'user',
-          content: chatContent,
-        }
-      ],
+      message: chatContent,
       sessionId: String(currentSessionId), // 确保有效的sessionId
-      model: modelStore.currentModelInfo.modelName ?? 'deepseek-chat',
-      stream: true,
+      files: (filesStore.filesList || []).map(item => item.file) // 提取File对象
     };
 
 
@@ -248,7 +153,24 @@ async function startSSE(chatContent: string) {
       if (abortController?.signal.aborted) {
         break;
       }
-      handleDataChunk(chunk);
+
+      // 后端直接返回文本内容，不是JSON格式
+      if (typeof chunk === 'string' && chunk.trim()) {
+        // 获取最后一条消息（AI回复）
+        if (bubbleItems.value && bubbleItems.value.length > 0) {
+          const lastMessage = bubbleItems.value[bubbleItems.value.length - 1];
+          if (lastMessage && (lastMessage.role === 'assistant' || lastMessage.role === 'system')) {
+            lastMessage.content = (lastMessage.content || '') + chunk;
+            lastMessage.loading = false;
+            lastMessage.typing = true;
+
+            // 自动滚动到底部
+            nextTick(() => {
+              bubbleListRef.value?.scrollToBottom();
+            });
+          }
+        }
+      }
     }
   }
   catch (err) {

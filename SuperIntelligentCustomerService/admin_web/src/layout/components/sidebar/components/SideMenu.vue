@@ -13,8 +13,8 @@
 </template>
 
 <script setup>
-import { usePermissionStore, useAppStore } from '@/store'
-import { renderCustomIcon, renderIcon, isExternal } from '@/utils'
+import {useAppStore, usePermissionStore} from '@/store'
+import {isExternal, renderCustomIcon, renderIcon} from '@/utils'
 
 const router = useRouter()
 const curRoute = useRoute()

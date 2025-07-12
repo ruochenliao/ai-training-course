@@ -1,11 +1,11 @@
 <!-- 纵向布局作为基础布局 -->
 <script setup lang="ts">
-import { useSafeArea } from '@/hooks/useSafeArea';
-import { useWindowWidthObserver } from '@/hooks/useWindowWidthObserver';
+import {useSafeArea} from '@/hooks/useSafeArea';
+import {useWindowWidthObserver} from '@/hooks/useWindowWidthObserver';
 import Aside from '@/layouts/components/Aside/index.vue';
 import Header from '@/layouts/components/Header/index.vue';
 import Main from '@/layouts/components/Main/index.vue';
-import { useDesignStore } from '@/stores';
+import {useDesignStore} from '@/stores';
 
 const designStore = useDesignStore();
 

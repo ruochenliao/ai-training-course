@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia';
+import {defineStore} from 'pinia';
 
 export const useKeepAliveStore = defineStore(
   'keep-alive',

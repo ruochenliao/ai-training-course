@@ -1,7 +1,7 @@
 <!-- LoginBtn 登录按钮 -->
 <script setup lang="ts">
 import LoginDialog from '@/components/LoginDialog/index.vue';
-import { useUserStore } from '@/stores';
+import {useUserStore} from '@/stores';
 
 const userStore = useUserStore();
 const isLoginDialogVisible = computed(() => userStore.isLoginDialogVisible);

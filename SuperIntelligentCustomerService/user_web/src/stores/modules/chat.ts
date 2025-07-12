@@ -1,7 +1,7 @@
-import type { ChatMessageVo } from '@/api/chat/types';
-import { defineStore } from 'pinia';
-import { getChatList } from '@/api';
-import { useUserStore } from './user';
+import type {ChatMessageVo} from '@/api/chat/types';
+import {defineStore} from 'pinia';
+import {getChatList} from '@/api';
+import {useUserStore} from './user';
 
 export const useChatStore = defineStore('chat', () => {
   const userStore = useUserStore();
@@ -61,6 +61,8 @@ export const useChatStore = defineStore('chat', () => {
     try {
       const res = await getChatList({
         sessionId: sessionId.trim(),
+        pageNum: 1,
+        pageSize: 100 // 获取更多历史消息
       });
 
       if (res.data && Array.isArray(res.data)) {

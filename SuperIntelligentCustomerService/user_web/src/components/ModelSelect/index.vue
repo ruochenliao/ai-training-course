@@ -1,9 +1,9 @@
 <!-- 切换模型 -->
 <script setup lang="ts">
-import type { GetSessionListVO } from '@/api/model/types';
+import type {GetSessionListVO} from '@/api/model/types';
 import Popover from '@/components/Popover/index.vue';
 import SvgIcon from '@/components/SvgIcon/index.vue';
-import { useModelStore } from '@/stores/modules/model';
+import {useModelStore} from '@/stores/modules/model';
 
 const modelStore = useModelStore();
 
@@ -12,14 +12,14 @@ onMounted(async () => {
   // 设置默认模型
   if (
     modelStore.modelList.length > 0
-    && (!modelStore.currentModelInfo || !modelStore.currentModelInfo.modelName)
+    && (!modelStore.currentModelInfo || !modelStore.currentModelInfo.model_name)
   ) {
     modelStore.setCurrentModelInfo(modelStore.modelList[0]);
   }
 });
 
 const currentModelName = computed(
-  () => modelStore.currentModelInfo && modelStore.currentModelInfo.modelName,
+  () => modelStore.currentModelInfo && modelStore.currentModelInfo.model_name,
 );
 const popoverList = computed(() => modelStore.modelList);
 
@@ -68,7 +68,7 @@ function handleClick(item: GetSessionListVO) {
             <SvgIcon name="models" size="12" />
           </div>
           <div class="model-select-box-text font-size-12px">
-            {{ currentModelName }}
+            {{ modelStore.currentModelInfo?.model_show || currentModelName || '选择模型' }}
           </div>
         </div>
       </template>
@@ -89,10 +89,10 @@ function handleClick(item: GetSessionListVO) {
             <template #trigger>
               <div
                 class="popover-content-box-item p-4px font-size-12px text-overflow line-height-16px"
-                :class="{ 'bg-[rgba(0,0,0,.04)] is-select': item.modelName === currentModelName }"
+                :class="{ 'bg-[rgba(0,0,0,.04)] is-select': item.model_name === currentModelName }"
                 @click="handleClick(item)"
               >
-                {{ item.modelName }}
+                {{ item.model_show || item.model_name }}
               </div>
             </template>
             <div

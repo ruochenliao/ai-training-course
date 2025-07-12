@@ -1,11 +1,11 @@
-import type { ChatMessageVo, GetChatListParams, SendDTO } from './types';
-import { get, post, request } from '@/utils/request';
-import { useUserStore } from '@/stores';
+import type {ChatMessageVo, ChatSendRequest, GetChatListParams} from './types';
+import {get, post} from '@/utils/request';
+import {useUserStore} from '@/stores';
 
 // 发送消息（仅支持流式）
 
-// 发送消息（流式）
-export const sendStream = async (data: SendDTO): Promise<ReadableStream> => {
+// 发送消息（流式）- 更新为匹配后端接口
+export const sendStream = async (data: ChatSendRequest): Promise<ReadableStream> => {
   const userStore = useUserStore();
 
   const headers: Record<string, string> = {
@@ -16,13 +16,17 @@ export const sendStream = async (data: SendDTO): Promise<ReadableStream> => {
     headers['token'] = userStore.token;
   }
 
+  // 构建符合后端期望的请求体
+  const requestBody = {
+    message: data.message,
+    session_id: data.sessionId ? parseInt(data.sessionId) : undefined,
+    files: data.files || []
+  };
+
   const response = await fetch('/api/v1/chat/send', {
     method: 'POST',
     headers,
-    body: JSON.stringify({
-      ...data,
-      stream: true, // 启用流式响应
-    }),
+    body: JSON.stringify(requestBody),
   });
 
   if (!response.ok) {
@@ -37,10 +41,10 @@ export const sendStream = async (data: SendDTO): Promise<ReadableStream> => {
   return response.body;
 };
 
-// 解析流式响应
+// 解析流式响应 - 适配后端SSE格式
 export const parseStreamResponse = async function* (
   stream: ReadableStream
-): AsyncGenerator<any, void, unknown> {
+): AsyncGenerator<string, void, unknown> {
   const reader = stream.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
@@ -72,14 +76,12 @@ export const parseStreamResponse = async function* (
 
         if (trimmedLine.startsWith('data: ')) {
           try {
-            const jsonStr = trimmedLine.slice(6); // 移除 'data: ' 前缀
-            const data = JSON.parse(jsonStr);
+            const content = trimmedLine.slice(6); // 移除 'data: ' 前缀
 
-            if (data.error) {
-              throw new Error(data.error.message || '流式响应错误');
+            // 后端直接返回文本内容，不是JSON格式
+            if (content && content !== '[DONE]') {
+              yield content;
             }
-
-            yield data;
           } catch (parseError) {
             console.warn('解析流式数据失败:', parseError, '原始数据:', trimmedLine);
           }
@@ -93,10 +95,31 @@ export const parseStreamResponse = async function* (
 
 // 新增对应会话聊天记录
 export function addChat(data: ChatMessageVo) {
-  return post('/system/message', data);
+  return post('/api/v1/system/message', data);
 }
 
 // 获取当前会话的聊天记录
 export function getChatList(params: GetChatListParams) {
-  return get<ChatMessageVo[]>('/system/message/list', params);
+  return get<ChatMessageVo[]>('/api/v1/system/message/list', {
+    session_id: params.sessionId ? parseInt(params.sessionId) : undefined,
+    page: params.pageNum || 1,
+    page_size: params.pageSize || 20,
+    content: params.content,
+    role: params.role
+  });
+}
+
+// 获取聊天服务健康状态
+export function getHealthStatus() {
+  return get('/api/v1/chat/health');
+}
+
+// 获取聊天服务统计信息（管理员功能）
+export function getServiceStats() {
+  return get('/api/v1/chat/stats');
+}
+
+// 获取可用模型列表
+export function getAvailableModels(params?: { page?: number; page_size?: number; model_type?: string }) {
+  return get('/api/v1/chat/models/list', params);
 }

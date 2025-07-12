@@ -1,7 +1,7 @@
 <script setup>
-import { ref } from 'vue'
-import { watchDebounced } from '@vueuse/core'
-import { NInput, NPopover } from 'naive-ui'
+import {ref} from 'vue'
+import {watchDebounced} from '@vueuse/core'
+import {NInput, NPopover} from 'naive-ui'
 
 import TheIcon from './TheIcon.vue'
 import iconData from '@/assets/js/icons'

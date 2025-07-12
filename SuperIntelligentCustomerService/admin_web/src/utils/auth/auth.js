@@ -1,4 +1,4 @@
-import { router } from '@/router'
+import {router} from '@/router'
 
 export function toLogin() {
   const currentRoute = unref(router.currentRoute)

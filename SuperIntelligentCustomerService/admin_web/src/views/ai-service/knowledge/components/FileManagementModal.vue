@@ -113,29 +113,28 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, h } from 'vue'
+import {computed, h, ref, watch} from 'vue'
 import {
-  NModal,
+  NButton,
   NCard,
   NGrid,
   NGridItem,
-  NStatistic,
-  NSpace,
-  NButton,
-  NUpload,
-  NProgress,
   NInput,
-  NSelect,
-  NTag,
+  NModal,
   NPopconfirm,
+  NProgress,
+  NSelect,
+  NSpace,
+  NStatistic,
+  NTag,
+  NUpload,
   useMessage
 } from 'naive-ui'
 
 import CrudTable from '@/components/table/CrudTable.vue'
 import QueryBarItem from '@/components/query-bar/QueryBarItem.vue'
 import TheIcon from '@/components/icon/TheIcon.vue'
-import { formatDate, formatFileSize } from '@/utils'
-import { getToken } from '@/utils'
+import {formatDate, formatFileSize, getToken} from '@/utils'
 import api from '@/api'
 
 defineOptions({ name: 'FileManagementModal' })

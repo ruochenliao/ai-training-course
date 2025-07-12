@@ -1,8 +1,8 @@
 <!-- 欢迎提示词 -->
 <script setup lang="ts">
-import { Typewriter } from 'vue-element-plus-x';
-import { useTimeGreeting } from '@/hooks/useTimeGreeting';
-import { useUserStore } from '@/stores';
+import {Typewriter} from 'vue-element-plus-x';
+import {useTimeGreeting} from '@/hooks/useTimeGreeting';
+import {useUserStore} from '@/stores';
 
 const greeting = useTimeGreeting();
 const userStore = useUserStore();

@@ -1,6 +1,6 @@
 <script setup>
-import { useAppStore } from '@/store'
-import { useDark, useToggle } from '@vueuse/core'
+import {useAppStore} from '@/store'
+import {useDark, useToggle} from '@vueuse/core'
 
 const appStore = useAppStore()
 const isDark = useDark()

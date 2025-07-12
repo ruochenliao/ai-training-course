@@ -1,5 +1,5 @@
-import { defineStore } from 'pinia'
-import { basicRoutes, vueModules } from '@/router/routes'
+import {defineStore} from 'pinia'
+import {basicRoutes, vueModules} from '@/router/routes'
 import Layout from '@/layout/index.vue'
 import api from '@/api'
 

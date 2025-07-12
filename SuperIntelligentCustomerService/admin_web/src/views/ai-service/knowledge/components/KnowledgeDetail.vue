@@ -114,28 +114,27 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import {ref, watch} from 'vue'
 import {
-  NDrawer,
-  NDrawerContent,
-  NSpin,
   NCard,
   NDescriptions,
   NDescriptionsItem,
-  NText,
-  NTag,
+  NDivider,
+  NDrawer,
+  NDrawerContent,
+  NEmpty,
   NGrid,
   NGridItem,
-  NStatistic,
   NIcon,
-  NDivider,
   NSpace,
-  NButton,
-  NEmpty,
-  useMessage,
-  useDialog
+  NSpin,
+  NStatistic,
+  NTag,
+  NText,
+  useDialog,
+  useMessage
 } from 'naive-ui'
-import { renderIcon } from '@/utils'
+import {renderIcon} from '@/utils'
 import api from '@/api'
 
 const props = defineProps({

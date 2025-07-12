@@ -1,5 +1,5 @@
-import type { RouteRecordRaw } from 'vue-router';
-import { HOME_URL } from '@/config';
+import type {RouteRecordRaw} from 'vue-router';
+import {HOME_URL} from '@/config';
 
 // LayoutRouter[布局路由]
 export const layoutRouter: RouteRecordRaw[] = [

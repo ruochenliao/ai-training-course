@@ -1,7 +1,7 @@
-import type { MaybeRef } from 'vue';
-import { onBeforeUnmount, ref, unref, watch } from 'vue';
-import { COLLAPSE_THRESHOLD, SIDE_BAR_WIDTH } from '@/config';
-import { useDesignStore } from '@/stores';
+import type {MaybeRef} from 'vue';
+import {onBeforeUnmount, ref, unref, watch} from 'vue';
+import {COLLAPSE_THRESHOLD, SIDE_BAR_WIDTH} from '@/config';
+import {useDesignStore} from '@/stores';
 
 /**
  * 这里逻辑是研究豆包的折叠逻辑后，设计的折叠方法

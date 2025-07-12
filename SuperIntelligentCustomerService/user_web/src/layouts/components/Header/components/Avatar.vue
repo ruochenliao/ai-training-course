@@ -2,8 +2,8 @@
 <script setup lang="ts">
 import Popover from '@/components/Popover/index.vue';
 import SvgIcon from '@/components/SvgIcon/index.vue';
-import { useUserStore } from '@/stores';
-import { useSessionStore } from '@/stores/modules/session';
+import {useUserStore} from '@/stores';
+import {useSessionStore} from '@/stores/modules/session';
 
 const userStore = useUserStore();
 const sessionStore = useSessionStore();

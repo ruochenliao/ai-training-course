@@ -1,14 +1,15 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi.security import HTTPBearer
 
 from ....controllers.user import user_controller
 from ....models.admin import User
-from ....schemas import Success, Fail
-from ....schemas.auth import LoginDTO, RegisterDTO, EmailCodeDTO, LoginVO, LoginUser
+from ....schemas import Success
+from ....schemas.auth import LoginDTO, RegisterDTO, LoginVO, LoginUser
 from ....schemas.login import JWTPayload
+from ....schemas.users import UserCreate
 from ....settings import settings
 from ....utils.jwt import create_access_token
 from ....utils.password import verify_password
@@ -24,10 +25,10 @@ async def login(credentials: LoginDTO):
         # 验证用户凭据
         user = await user_controller.authenticate_by_username(credentials.username, credentials.password)
         if not user:
-            return Fail(msg="用户名或密码错误")
-        
+            raise HTTPException(status_code=401, detail="用户名或密码错误")
+
         if not user.is_active:
-            return Fail(msg="用户账户已被禁用")
+            raise HTTPException(status_code=403, detail="用户账户已被禁用")
         
         # 更新最后登录时间
         await user_controller.update_last_login(user.id)
@@ -63,9 +64,11 @@ async def login(credentials: LoginDTO):
         )
         
         return Success(data=login_vo.model_dump())
-        
+
+    except HTTPException:
+        raise
     except Exception as e:
-        return Fail(msg=f"登录失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"登录失败: {str(e)}")
 
 
 @router.post("/register", summary="用户注册")
@@ -75,11 +78,11 @@ async def register(register_data: RegisterDTO):
         # 检查用户是否已存在
         existing_user = await user_controller.get_by_email(register_data.username)
         if existing_user:
-            return Fail(msg="该邮箱已被注册")
-        
+            raise HTTPException(status_code=400, detail="该邮箱已被注册")
+
         # 验证密码确认
         if register_data.confirm_password and register_data.password != register_data.confirm_password:
-            return Fail(msg="两次输入的密码不一致")
+            raise HTTPException(status_code=400, detail="两次输入的密码不一致")
         
         # TODO: 验证邮箱验证码
         # 这里应该验证验证码的有效性
@@ -96,9 +99,11 @@ async def register(register_data: RegisterDTO):
         user = await user_controller.create_user(user_create)
         
         return Success(msg="注册成功", data={"user_id": user.id})
-        
+
+    except HTTPException:
+        raise
     except Exception as e:
-        return Fail(msg=f"注册失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"注册失败: {str(e)}")
 
 
 # 邮箱验证码功能已移至 /api/v1/resource/code 接口

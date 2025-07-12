@@ -1,14 +1,17 @@
-import type { HookFetchPlugin } from 'hook-fetch';
-import { ElMessage } from 'element-plus';
+import type {HookFetchPlugin} from 'hook-fetch';
 import hookFetch from 'hook-fetch';
-import { sseTextDecoderPlugin } from 'hook-fetch/plugins';
+import {ElMessage} from 'element-plus';
+import {sseTextDecoderPlugin} from 'hook-fetch/plugins';
 import router from '@/routers';
-import { useUserStore } from '@/stores';
+import {useUserStore} from '@/stores';
 
 interface BaseResponse {
   code: number;
-  data: never;
+  data: any;
   msg: string;
+  total?: number;
+  page?: number;
+  page_size?: number;
 }
 
 export const request = hookFetch.create<BaseResponse, 'data'>({

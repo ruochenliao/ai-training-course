@@ -1,11 +1,11 @@
 from typing import Optional
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
 
 from ....controllers.chat import chat_controller
 from ....core.dependency import DependAuth
 from ....models.admin import User
-from ....schemas import Success, Fail, SuccessExtra
+from ....schemas import Success, SuccessExtra
 from ....schemas.chat import (
     ChatMessageVo,
     ChatMessageCreate
@@ -17,7 +17,7 @@ router = APIRouter()
 
 @router.get("/list", summary="获取聊天记录列表")
 async def get_chat_list(
-    sessionId: Optional[str] = Query(None, description="会话ID"),
+    session_id: Optional[str] = Query(None, description="会话ID"),
     page_num: int = Query(1, description="页码"),
     page_size: int = Query(50, description="每页数量"),
     role: Optional[str] = Query(None, description="对话角色"),
@@ -27,19 +27,19 @@ async def get_chat_list(
     user_id = current_user.id
     try:
         # 验证会话ID
-        if not sessionId or sessionId.strip() == "":
-            return Fail(msg="会话ID不能为空")
+        if not session_id or session_id.strip() == "":
+            raise HTTPException(status_code=400, detail="会话ID不能为空")
 
         # 检查特殊值
-        if sessionId.strip() in ["not_login", "undefined", "null"]:
-            return Fail(msg="无效的会话ID")
+        if session_id.strip() in ["not_login", "undefined", "null"]:
+            raise HTTPException(status_code=400, detail="无效的会话ID")
 
         try:
-            session_id_int = int(sessionId.strip())
+            session_id_int = int(session_id.strip())
             if session_id_int <= 0:
-                return Fail(msg="会话ID必须为正整数")
+                raise HTTPException(status_code=400, detail="会话ID必须为正整数")
         except (ValueError, TypeError):
-            return Fail(msg="会话ID格式错误")
+            raise HTTPException(status_code=400, detail="会话ID格式错误")
 
 
 
@@ -78,10 +78,12 @@ async def get_chat_list(
             page_size=page_size
         )
         
+    except HTTPException:
+        raise
     except ValueError:
-        return Fail(msg="无效的会话ID")
+        raise HTTPException(status_code=400, detail="无效的会话ID")
     except Exception as e:
-        return Fail(msg=f"获取聊天记录失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取聊天记录失败: {str(e)}")
 
 
 @router.post("", summary="新增聊天记录")
@@ -94,11 +96,11 @@ async def add_chat_message(
         user_id = current_user.id
         # 验证必要字段
         if not message_data.session_id:
-            return Fail(msg="会话ID不能为空")
+            raise HTTPException(status_code=400, detail="会话ID不能为空")
         if not message_data.content:
-            return Fail(msg="消息内容不能为空")
+            raise HTTPException(status_code=400, detail="消息内容不能为空")
         if not message_data.role:
-            return Fail(msg="对话角色不能为空")
+            raise HTTPException(status_code=400, detail="对话角色不能为空")
 
         # 创建消息记录
         message_create = ChatMessageCreate(
@@ -117,22 +119,24 @@ async def add_chat_message(
         
         return Success(data=message_dict, msg="聊天记录添加成功")
         
+    except HTTPException:
+        raise
     except ValueError:
-        return Fail(msg="无效的会话ID")
+        raise HTTPException(status_code=400, detail="无效的会话ID")
     except Exception as e:
-        return Fail(msg=f"添加聊天记录失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"添加聊天记录失败: {str(e)}")
 
 
-@router.get("/latest/{session_id}", summary="获取最新聊天记录")
+@router.get("/latest", summary="获取最新聊天记录")
 async def get_latest_messages(
-    session_id: str,
+    session_id: int = Query(..., description="会话ID"),
     limit: int = Query(10, description="获取消息数量"),
     current_user: User = DependAuth
 ):
     """获取会话的最新聊天记录"""
     try:
         user_id = current_user.id
-        session_id_int = int(session_id)
+        session_id_int = session_id
         messages = await chat_controller.get_latest_messages(
             session_id=session_id_int,
             user_id=user_id,
@@ -146,29 +150,32 @@ async def get_latest_messages(
         
         return Success(data=message_list)
         
+    except HTTPException:
+        raise
     except ValueError:
-        return Fail(msg="无效的会话ID")
+        raise HTTPException(status_code=400, detail="无效的会话ID")
     except Exception as e:
-        return Fail(msg=f"获取最新聊天记录失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取最新聊天记录失败: {str(e)}")
 
 
-@router.delete("/{session_id}", summary="删除会话的所有聊天记录")
+@router.delete("/delete", summary="删除会话的所有聊天记录")
 async def delete_session_messages(
-    session_id: str,
+    session_id: int = Query(..., description="会话ID"),
     current_user: User = DependAuth
 ):
     """删除会话的所有聊天记录"""
     try:
         user_id = current_user.id
-        session_id_int = int(session_id)
-        deleted_count = await chat_controller.delete_session_messages(session_id_int, user_id)
+        deleted_count = await chat_controller.delete_session_messages(session_id, user_id)
         
         return Success(msg=f"成功删除 {deleted_count} 条聊天记录")
         
+    except HTTPException:
+        raise
     except ValueError:
-        return Fail(msg="无效的会话ID")
+        raise HTTPException(status_code=400, detail="无效的会话ID")
     except Exception as e:
-        return Fail(msg=f"删除聊天记录失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"删除聊天记录失败: {str(e)}")
 
 
 @router.get("/stats", summary="获取用户聊天统计")
@@ -182,4 +189,4 @@ async def get_user_chat_stats(
         return Success(data=stats)
         
     except Exception as e:
-        return Fail(msg=f"获取统计信息失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取统计信息失败: {str(e)}")

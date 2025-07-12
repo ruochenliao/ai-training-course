@@ -1,24 +1,14 @@
 <script setup>
-import { h, ref, resolveDirective, withDirectives, onMounted } from 'vue'
-import {
-  NButton,
-  NForm,
-  NFormItem,
-  NInput,
-  NInputNumber,
-  NSelect,
-  NSwitch,
-  NTag,
-  useMessage,
-} from 'naive-ui'
+import {h, onMounted, ref, resolveDirective, withDirectives} from 'vue'
+import {NButton, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch, NTag, useMessage,} from 'naive-ui'
 
 import CommonPage from '@/components/page/CommonPage.vue'
 import QueryBarItem from '@/components/query-bar/QueryBarItem.vue'
 import CrudModal from '@/components/table/CrudModal.vue'
 import CrudTable from '@/components/table/CrudTable.vue'
 
-import { formatDate, renderIcon } from '@/utils'
-import { useCRUD } from '@/composables'
+import {formatDate, renderIcon} from '@/utils'
+import {useCRUD} from '@/composables'
 import api from '@/api'
 import TheIcon from '@/components/icon/TheIcon.vue'
 

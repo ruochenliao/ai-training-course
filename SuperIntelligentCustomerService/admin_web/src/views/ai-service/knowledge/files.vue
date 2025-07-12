@@ -125,27 +125,27 @@
 </template>
 
 <script setup>
-import { h, ref, reactive, onMounted, computed, resolveDirective, withDirectives } from 'vue'
-import { useRoute } from 'vue-router'
+import {computed, h, onMounted, ref} from 'vue'
+import {useRoute} from 'vue-router'
 import {
-  NButton,
-  NTag,
-  NSpace,
-  NPopconfirm,
-  NModal,
-  NProgress,
-  NUpload,
   NBreadcrumb,
   NBreadcrumbItem,
-  useMessage,
-  useDialog
+  NButton,
+  NModal,
+  NPopconfirm,
+  NProgress,
+  NSpace,
+  NTag,
+  NUpload,
+  useDialog,
+  useMessage
 } from 'naive-ui'
 
 import CommonPage from '@/components/page/CommonPage.vue'
 import QueryBarItem from '@/components/query-bar/QueryBarItem.vue'
 import CrudTable from '@/components/table/CrudTable.vue'
 import TheIcon from '@/components/icon/TheIcon.vue'
-import { renderIcon, formatDate } from '@/utils'
+import {formatDate} from '@/utils'
 import api from '@/api'
 
 defineOptions({ name: '文件管理' })

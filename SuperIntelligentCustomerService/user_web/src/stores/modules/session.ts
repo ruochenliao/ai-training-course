@@ -1,16 +1,10 @@
-import type { ChatSessionVo, CreateSessionDTO, GetSessionListParams } from '@/api/session/types';
-import { ChatLineRound } from '@element-plus/icons-vue';
-import { defineStore } from 'pinia';
-import { markRaw } from 'vue';
-import { useRouter } from 'vue-router';
-import {
-  create_session,
-  delete_session,
-  get_session,
-  get_session_list,
-  update_session,
-} from '@/api';
-import { useUserStore } from './user';
+import type {ChatSessionVo, CreateSessionDTO} from '@/api/session/types';
+import {ChatLineRound} from '@element-plus/icons-vue';
+import {defineStore} from 'pinia';
+import {markRaw} from 'vue';
+import {useRouter} from 'vue-router';
+import {create_session, delete_session, get_session_list, update_session,} from '@/api';
+import {useUserStore} from './user';
 
 export const useSessionStore = defineStore('session', () => {
   const router = useRouter();
@@ -64,7 +58,7 @@ export const useSessionStore = defineStore('session', () => {
 
     try {
       const params = {
-        page_num: page,
+        page: page,
         page_size: pageSize.value,
       };
 
@@ -72,8 +66,23 @@ export const useSessionStore = defineStore('session', () => {
       const resArr = await get_session_list(params);
       console.log('会话列表响应:', resArr);
 
+      // 处理后端响应数据格式
+      let sessionData: ChatSessionVo[] = [];
+      if (resArr.data && Array.isArray(resArr.data)) {
+        // 转换后端数据格式为前端期望格式
+        sessionData = resArr.data.map((item: any) => ({
+          id: item.id || item.session_id,
+          sessionTitle: item.title || item.sessionTitle || "新对话",
+          sessionContent: item.sessionContent || "",
+          userId: item.userId,
+          created_at: item.updated_at || item.created_at,
+          updated_at: item.updated_at,
+          remark: item.remark || ""
+        }));
+      }
+
       // 预处理会话分组 并添加前缀图标
-      const res = processSessions(resArr.data || []);
+      const res = processSessions(sessionData);
 
       const allSessions = new Map(sessionList.value.map(item => [item.id, item])); // 现有所有数据
       res.forEach(item => allSessions.set(item.id, { ...item })); // 更新/添加数据
@@ -124,10 +133,21 @@ export const useSessionStore = defineStore('session', () => {
 
     try {
       const res = await create_session(data);
-      // 后端返回完整的会话对象
-      const newSession = res.data;
+      // 后端返回会话信息
+      const sessionData = res.data;
 
-      if (newSession && newSession.id) {
+      if (sessionData && (sessionData.session_id || sessionData.id)) {
+        // 构造标准会话对象
+        const newSession = {
+          id: sessionData.session_id || sessionData.id,
+          sessionTitle: sessionData.session_title || data.session_title,
+          sessionContent: data.session_content || "",
+          userId: sessionData.user_id,
+          created_at: sessionData.created_at,
+          updated_at: sessionData.created_at,
+          remark: ""
+        };
+
         // 刷新会话列表
         await requestSessionList(1, true);
 
@@ -174,7 +194,11 @@ export const useSessionStore = defineStore('session', () => {
   // 删除会话（供组件调用）
   const deleteSessions = async (ids: string[]) => {
     try {
-      await delete_session(ids);
+      // 后端只支持单个删除，需要逐个删除
+      for (const id of ids) {
+        await delete_session(id);
+      }
+
       // 1. 先找到被修改会话在 sessionList 中的索引（假设 sessionList 是按服务端排序的完整列表）
       const targetIndex = sessionList.value.findIndex(session => session.id === ids[0]);
       // 2. 计算该会话所在的页码（页大小固定为 pageSize.value）

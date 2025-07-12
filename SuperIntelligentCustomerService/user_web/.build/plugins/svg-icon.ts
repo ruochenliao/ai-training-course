@@ -1,5 +1,5 @@
-import { resolve } from 'node:path';
-import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
+import {resolve} from 'node:path';
+import {createSvgIconsPlugin} from 'vite-plugin-svg-icons';
 
 const root = resolve(import.meta.dirname, '../../');
 

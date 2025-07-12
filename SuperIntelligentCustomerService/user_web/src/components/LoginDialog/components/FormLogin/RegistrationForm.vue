@@ -1,11 +1,11 @@
 <!-- 注册表单 -->
 <script lang="ts" setup>
-import type { FormInstance, FormRules } from 'element-plus';
-import type { RegisterDTO } from '@/api/auth/types';
-import { useCountdown } from '@vueuse/core';
-import { reactive, ref } from 'vue';
-import { emailCode, register } from '@/api';
-import { useLoginFormStore } from '@/stores/modules/loginForm';
+import type {FormInstance, FormRules} from 'element-plus';
+import type {RegisterDTO} from '@/api/auth/types';
+import {useCountdown} from '@vueuse/core';
+import {reactive, ref} from 'vue';
+import {emailCode, register} from '@/api';
+import {useLoginFormStore} from '@/stores/modules/loginForm';
 
 const loginFromStore = useLoginFormStore();
 const countdown = shallowRef(60);

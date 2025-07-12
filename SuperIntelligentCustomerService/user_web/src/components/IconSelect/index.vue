@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useClipboard } from '@vueuse/core';
+import {useClipboard} from '@vueuse/core';
 import SvgIcon from '@/components/SvgIcon/index.vue';
 import icons from './requireIcons';
 

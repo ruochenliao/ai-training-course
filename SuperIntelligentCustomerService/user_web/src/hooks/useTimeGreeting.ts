@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import {ref} from 'vue';
 
 type TimeGreeting = '凌晨' | '清晨' | '早上' | '中午' | '下午' | '傍晚' | '晚上';
 

@@ -7,9 +7,9 @@
 </template>
 
 <script setup>
-import { useI18n } from 'vue-i18n'
-import { useAppStore } from '@/store'
-import { router } from '@/router'
+import {useI18n} from 'vue-i18n'
+import {useAppStore} from '@/store'
+import {router} from '@/router'
 
 const store = useAppStore()
 const { availableLocales, t } = useI18n()

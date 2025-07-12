@@ -1,9 +1,9 @@
 <!-- Header 头部 -->
 <script setup lang="ts">
-import { onKeyStroke } from '@vueuse/core';
-import { SIDE_BAR_WIDTH } from '@/config';
-import { useDesignStore, useUserStore } from '@/stores';
-import { useSessionStore } from '@/stores/modules/session';
+import {onKeyStroke} from '@vueuse/core';
+import {SIDE_BAR_WIDTH} from '@/config';
+import {useDesignStore, useUserStore} from '@/stores';
+import {useSessionStore} from '@/stores/modules/session';
 import Avatar from './components/Avatar.vue';
 import Collapse from './components/Collapse.vue';
 import CreateChat from './components/CreateChat.vue';

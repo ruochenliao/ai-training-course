@@ -1,4 +1,4 @@
-import { getToken, isNullOrWhitespace } from '@/utils'
+import {getToken, isNullOrWhitespace} from '@/utils'
 
 const WHITE_LIST = ['/login', '/404']
 export function createAuthGuard(router) {

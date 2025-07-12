@@ -1,9 +1,9 @@
 <!-- 侧边栏折叠按钮 -->
 <script setup lang="ts">
 import SvgIcon from '@/components/SvgIcon/index.vue';
-import { SIDE_BAR_WIDTH } from '@/config';
-import { useCollapseToggle } from '@/hooks/useCollapseToggle';
-import { useDesignStore } from '@/stores';
+import {SIDE_BAR_WIDTH} from '@/config';
+import {useCollapseToggle} from '@/hooks/useCollapseToggle';
+import {useDesignStore} from '@/stores';
 
 const { changeCollapse } = useCollapseToggle();
 const designStore = useDesignStore();

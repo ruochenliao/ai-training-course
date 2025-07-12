@@ -1,9 +1,9 @@
-import type { NavigationGuardNext, RouteLocationNormalized } from 'vue-router';
-import { useNProgress } from '@vueuse/integrations/useNProgress';
-import { createRouter, createWebHistory } from 'vue-router';
-import { ROUTER_WHITE_LIST } from '@/config';
-import { errorRouter, layoutRouter, staticRouter } from '@/routers/modules/staticRouter';
-import { useUserStore } from '@/stores';
+import type {NavigationGuardNext, RouteLocationNormalized} from 'vue-router';
+import {createRouter, createWebHistory} from 'vue-router';
+import {useNProgress} from '@vueuse/integrations/useNProgress';
+import {ROUTER_WHITE_LIST} from '@/config';
+import {errorRouter, layoutRouter, staticRouter} from '@/routers/modules/staticRouter';
+import {useUserStore} from '@/stores';
 
 const { start, done } = useNProgress(0, {
   showSpinner: false,

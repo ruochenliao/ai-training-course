@@ -1,5 +1,5 @@
-import { useBreakpoints } from '@vueuse/core';
-import { reactive } from 'vue';
+import {useBreakpoints} from '@vueuse/core';
+import {reactive} from 'vue';
 
 export const breakpointsEnum = {
   xl: 1600,

@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { ref, watch } from 'vue';
+import {ref, watch} from 'vue';
 import logoPng from '@/assets/images/logo.png';
 import SvgIcon from '@/components/SvgIcon/index.vue';
-import { useUserStore } from '@/stores';
-import { useLoginFormStore } from '@/stores/modules/loginForm';
+import {useUserStore} from '@/stores';
+import {useLoginFormStore} from '@/stores/modules/loginForm';
 import AccountPassword from './components/FormLogin/AccountPassword.vue';
 import RegistrationForm from './components/FormLogin/RegistrationForm.vue';
 import QrCodeLogin from './components/QrCodeLogin/index.vue';

@@ -1,20 +1,19 @@
 <script setup>
-import { h, onMounted, ref, resolveDirective, withDirectives } from 'vue'
+import {h, onMounted, ref, resolveDirective, withDirectives} from 'vue'
 import {
   NButton,
   NCheckbox,
   NCheckboxGroup,
   NForm,
   NFormItem,
-  NImage,
   NInput,
+  NLayout,
+  NLayoutContent,
+  NLayoutSider,
+  NPopconfirm,
   NSpace,
   NSwitch,
   NTag,
-  NPopconfirm,
-  NLayout,
-  NLayoutSider,
-  NLayoutContent,
   NTreeSelect,
 } from 'naive-ui'
 
@@ -23,12 +22,12 @@ import QueryBarItem from '@/components/query-bar/QueryBarItem.vue'
 import CrudModal from '@/components/table/CrudModal.vue'
 import CrudTable from '@/components/table/CrudTable.vue'
 
-import { formatDate, renderIcon } from '@/utils'
-import { useCRUD } from '@/composables'
+import {formatDate, renderIcon} from '@/utils'
+import {useCRUD} from '@/composables'
 // import { loginTypeMap, loginTypeOptions } from '@/constant/data'
 import api from '@/api'
 import TheIcon from '@/components/icon/TheIcon.vue'
-import { useUserStore } from '@/store'
+import {useUserStore} from '@/store'
 
 defineOptions({ name: '用户管理' })
 

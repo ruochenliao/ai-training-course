@@ -1,6 +1,6 @@
-import type { FilesCardProps } from 'vue-element-plus-x/types/FilesCard';
+import type {FilesCardProps} from 'vue-element-plus-x/types/FilesCard';
 // 对话聊天的文件上传列表
-import { defineStore } from 'pinia';
+import {defineStore} from 'pinia';
 
 export const useFilesStore = defineStore('files', () => {
   const filesList = ref<FilesCardProps & { file: File }[]>([]);

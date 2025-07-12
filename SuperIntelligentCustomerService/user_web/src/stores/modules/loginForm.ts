@@ -1,5 +1,5 @@
 // 登录表单状态管理
-import { defineStore } from 'pinia';
+import {defineStore} from 'pinia';
 
 type LoginFormType = 'AccountPassword' | 'VerificationCode' | 'RegistrationForm';
 

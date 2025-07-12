@@ -1,9 +1,9 @@
 <!-- 主布局 -->
 <script setup lang="ts">
-import type { LayoutType } from '@/config/design';
+import type {LayoutType} from '@/config/design';
 // import { useScreenStore } from '@/hooks/useScreen';
 import LayoutVertical from '@/layouts/LayoutVertical/index.vue';
-import { useDesignStore } from '@/stores';
+import {useDesignStore} from '@/stores';
 
 // 这里添加布局类型
 const LayoutComponent: Record<LayoutType, Component> = {

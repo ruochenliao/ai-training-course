@@ -1,4 +1,4 @@
-import { lStorage } from '@/utils'
+import {lStorage} from '@/utils'
 
 export const activeTag = lStorage.get('activeTag')
 export const tags = lStorage.get('tags')

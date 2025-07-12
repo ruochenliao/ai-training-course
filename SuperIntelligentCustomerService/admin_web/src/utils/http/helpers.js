@@ -1,4 +1,4 @@
-import { useUserStore } from '@/store'
+import {useUserStore} from '@/store'
 
 export function addBaseParams(params) {
   if (!params.userId) {

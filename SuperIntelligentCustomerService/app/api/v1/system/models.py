@@ -1,12 +1,12 @@
 from typing import Optional
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
 from tortoise.expressions import Q
 
 from ....controllers.model import model_controller
 from ....core.dependency import DependAuth
 from ....models.admin import User
-from ....schemas import Success, Fail
+from ....schemas import Success, SuccessExtra
 from ....schemas.models import ModelCreate, ModelUpdate
 
 router = APIRouter()
@@ -47,10 +47,10 @@ async def get_model_list(
             model_dict = await model.to_dict()
             model_list.append(model_dict)
 
-        return Success(data=model_list, total=total)
+        return SuccessExtra(data=model_list, total=total, page=page, page_size=page_size)
 
     except Exception as e:
-        return Fail(msg=f"获取模型列表失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取模型列表失败: {str(e)}")
 
 
 @router.get("/get", summary="获取模型详情")
@@ -63,10 +63,14 @@ async def get_model_by_id(
     """
     try:
         model = await model_controller.get(id=id)
+        if not model:
+            raise HTTPException(status_code=404, detail="模型不存在")
         model_dict = await model.to_dict()
         return Success(data=model_dict)
+    except HTTPException:
+        raise
     except Exception as e:
-        return Fail(msg=f"获取模型详情失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取模型详情失败: {str(e)}")
 
 
 @router.post("/create", summary="创建模型")
@@ -81,13 +85,15 @@ async def create_model(
         # 检查模型名称是否已存在
         existing_model = await model_controller.model.filter(model_name=model_data.model_name).first()
         if existing_model:
-            return Fail(msg="模型名称已存在")
+            raise HTTPException(status_code=400, detail="模型名称已存在")
 
         model = await model_controller.create(model_data)
         model_dict = await model.to_dict()
         return Success(data=model_dict, msg="创建模型成功")
+    except HTTPException:
+        raise
     except Exception as e:
-        return Fail(msg=f"创建模型失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"创建模型失败: {str(e)}")
 
 
 @router.post("/update", summary="更新模型")
@@ -105,13 +111,15 @@ async def update_model(
                 model_name=model_data.model_name
             ).exclude(id=model_data.id).first()
             if existing_model:
-                return Fail(msg="模型名称已存在")
+                raise HTTPException(status_code=400, detail="模型名称已存在")
 
         model = await model_controller.update(id=model_data.id, obj_in=model_data)
         model_dict = await model.to_dict()
         return Success(data=model_dict, msg="更新模型成功")
+    except HTTPException:
+        raise
     except Exception as e:
-        return Fail(msg=f"更新模型失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"更新模型失败: {str(e)}")
 
 
 @router.delete("/delete", summary="删除模型")
@@ -126,7 +134,7 @@ async def delete_model(
         await model_controller.remove(id=id)
         return Success(msg="删除模型成功")
     except Exception as e:
-        return Fail(msg=f"删除模型失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"删除模型失败: {str(e)}")
 
 
 @router.get("/available", summary="获取可用模型列表")
@@ -148,25 +156,12 @@ async def get_available_models(
             model_list = []
             for model in models:
                 model_dict = await model.to_dict()
-                # 转换字段名以匹配前端期望的格式
-                formatted_model = {
-                    "id": model_dict["id"],
-                    "category": model_dict["category"],
-                    "modelName": model_dict["model_name"],
-                    "modelDescribe": model_dict["model_describe"],
-                    "modelPrice": float(model_dict["model_price"]) if model_dict["model_price"] else 0,
-                    "modelType": model_dict["model_type"],
-                    "modelShow": model_dict["model_show"],
-                    "systemPrompt": model_dict["system_prompt"],
-                    "apiHost": model_dict["api_host"],
-                    "apiKey": model_dict["api_key"],
-                    "remark": model_dict["remark"]
-                }
-                model_list.append(formatted_model)
+                # 直接返回下划线命名的字段，保持与数据库一致
+                model_list.append(model_dict)
             return Success(data=model_list)
         else:
             # 如果数据库中没有数据，返回默认模型
             return Success(data=[])
 
     except Exception as e:
-        return Fail(msg=f"获取模型列表失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取模型列表失败: {str(e)}")

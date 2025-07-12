@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { Check, Picture as IconPicture, Refresh } from '@element-plus/icons-vue';
-import { useCountdown } from '@vueuse/core';
-import { useQRCode } from '@vueuse/integrations/useQRCode';
-import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
+import {Check, Picture as IconPicture, Refresh} from '@element-plus/icons-vue';
+import {useCountdown} from '@vueuse/core';
+import {useQRCode} from '@vueuse/integrations/useQRCode';
+import {onBeforeUnmount, onMounted, ref, shallowRef} from 'vue';
 
 // 响应式状态
 const urlText = shallowRef('');

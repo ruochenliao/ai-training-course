@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
+import {useRoute} from 'vue-router';
 import ChatDefaul from '@/pages/chat/layouts/chatDefaul/index.vue';
 import ChatWithId from '@/pages/chat/layouts/chatWithId/index.vue';
 

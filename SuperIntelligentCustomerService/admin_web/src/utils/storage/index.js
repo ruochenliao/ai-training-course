@@ -1,4 +1,4 @@
-import { createStorage } from './storage'
+import {createStorage} from './storage'
 
 const prefixKey = ''
 

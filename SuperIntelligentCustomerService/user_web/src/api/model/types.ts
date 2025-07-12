@@ -2,13 +2,16 @@
 export interface GetSessionListVO {
   id?: number;
   category?: string;
-  modelName?: string;
-  modelDescribe?: string;
-  modelPrice?: number;
-  modelType?: string;
-  modelShow?: string;
-  systemPrompt?: string;
-  apiHost?: string;
-  apiKey?: string;
+  model_name?: string;
+  model_describe?: string;
+  model_price?: number;
+  model_type?: string;
+  model_show?: string;
+  system_prompt?: string;
+  api_host?: string;
+  api_key?: string;
   remark?: string;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }

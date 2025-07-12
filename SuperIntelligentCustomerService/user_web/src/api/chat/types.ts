@@ -52,6 +52,24 @@ export interface SendDTO {
 }
 
 /**
+ * 新的聊天发送请求接口 - 匹配后端API
+ */
+export interface ChatSendRequest {
+  /**
+   * 消息内容
+   */
+  message: string;
+  /**
+   * 会话ID
+   */
+  sessionId?: string;
+  /**
+   * 上传的文件列表（多模态支持）
+   */
+  files?: File[];
+}
+
+/**
  * Message，描述：
  */
 export interface Message {

@@ -1,6 +1,6 @@
 <!-- 深度思考按钮 -->
 <script setup lang="ts">
-import { useChatStore } from '@/stores/modules/chat';
+import {useChatStore} from '@/stores/modules/chat';
 
 const chatStore = useChatStore();
 

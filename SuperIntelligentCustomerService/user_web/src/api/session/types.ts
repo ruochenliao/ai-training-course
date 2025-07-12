@@ -1,4 +1,4 @@
-import type { Component } from 'vue';
+import type {Component} from 'vue';
 
 export interface GetSessionListParams {
   /**
@@ -150,6 +150,20 @@ export interface CreateSessionDTO {
    * 用户id（可选，使用当前登录用户）
    */
   user_id?: number;
+}
+
+/**
+ * 会话验证请求 - 匹配后端接口
+ */
+export interface SessionValidateRequest {
+  /**
+   * 会话ID（可选）
+   */
+  session_id?: string;
+  /**
+   * 默认会话标题（当需要创建新会话时使用）
+   */
+  default_title?: string;
 }
 
 // export interface CreateSessionVO {

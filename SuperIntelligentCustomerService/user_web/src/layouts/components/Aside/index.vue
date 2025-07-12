@@ -1,14 +1,14 @@
 <!-- Aside 侧边栏 -->
 <script setup lang="ts">
-import type { ConversationItem } from 'vue-element-plus-x/types/Conversations';
-import type { ChatSessionVo } from '@/api/session/types';
-import { useRoute, useRouter } from 'vue-router';
-import { get_session } from '@/api';
+import type {ConversationItem} from 'vue-element-plus-x/types/Conversations';
+import type {ChatSessionVo} from '@/api/session/types';
+import {useRoute, useRouter} from 'vue-router';
+import {get_session} from '@/api';
 import logo from '@/assets/images/logo.png';
 import SvgIcon from '@/components/SvgIcon/index.vue';
 import Collapse from '@/layouts/components/Header/components/Collapse.vue';
-import { useDesignStore } from '@/stores';
-import { useSessionStore } from '@/stores/modules/session';
+import {useDesignStore} from '@/stores';
+import {useSessionStore} from '@/stores/modules/session';
 
 const route = useRoute();
 const router = useRouter();

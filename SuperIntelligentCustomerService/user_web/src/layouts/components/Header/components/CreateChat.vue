@@ -1,6 +1,6 @@
 <!-- 添加新会话按钮 -->
 <script setup lang="ts">
-import { useSessionStore } from '@/stores/modules/session';
+import {useSessionStore} from '@/stores/modules/session';
 
 const sessionStore = useSessionStore();
 

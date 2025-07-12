@@ -1,13 +1,13 @@
 <!-- 账号密码登录表单 -->
 <script lang="ts" setup>
-import type { FormInstance, FormRules } from 'element-plus';
-import type { LoginDTO } from '@/api/auth/types';
-import { reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { login } from '@/api';
-import { useUserStore } from '@/stores';
-import { useLoginFormStore } from '@/stores/modules/loginForm';
-import { useSessionStore } from '@/stores/modules/session';
+import type {FormInstance, FormRules} from 'element-plus';
+import type {LoginDTO} from '@/api/auth/types';
+import {reactive, ref} from 'vue';
+import {useRouter} from 'vue-router';
+import {login} from '@/api';
+import {useUserStore} from '@/stores';
+import {useLoginFormStore} from '@/stores/modules/loginForm';
+import {useSessionStore} from '@/stores/modules/session';
 
 const userStore = useUserStore();
 const sessionStore = useSessionStore();

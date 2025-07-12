@@ -1,4 +1,4 @@
-import { request } from '@/utils'
+import {request} from '@/utils'
 
 export default {
   login: (data) => request.post('/base/access_token', data, { noNeedToken: true }),

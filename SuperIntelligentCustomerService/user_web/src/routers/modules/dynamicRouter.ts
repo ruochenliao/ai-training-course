@@ -1,7 +1,7 @@
 // 预留
 import router from '@/routers';
-import { useUserStore } from '@/stores';
-import { useAuthStore } from '@/stores/modules/auth';
+import {useUserStore} from '@/stores';
+import {useAuthStore} from '@/stores/modules/auth';
 
 export async function initDynamicRouter() {
   const userStore = useUserStore();

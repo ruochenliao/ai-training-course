@@ -1,11 +1,11 @@
 <!-- 文件上传 -->
 <script setup lang="ts">
-import type { FilesCardProps } from 'vue-element-plus-x/types/FilesCard';
-import { useFileDialog } from '@vueuse/core';
-import { ElMessage } from 'element-plus';
+import type {FilesCardProps} from 'vue-element-plus-x/types/FilesCard';
+import {useFileDialog} from '@vueuse/core';
+import {ElMessage} from 'element-plus';
 import Popover from '@/components/Popover/index.vue';
 import SvgIcon from '@/components/SvgIcon/index.vue';
-import { useFilesStore } from '@/stores/modules/files';
+import {useFilesStore} from '@/stores/modules/files';
 
 type FilesList = FilesCardProps & {
   file: File;

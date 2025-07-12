@@ -20,21 +20,13 @@
 </template>
 
 <script setup>
-import { defineComponent, h } from 'vue'
-import {
-  zhCN,
-  dateZhCN,
-  darkTheme,
-  useLoadingBar,
-  useDialog,
-  useMessage,
-  useNotification,
-} from 'naive-ui'
-import { useCssVar } from '@vueuse/core'
-import { kebabCase } from 'lodash-es'
-import { setupMessage, setupDialog } from '@/utils'
-import { naiveThemeOverrides } from '~/settings'
-import { useAppStore } from '@/store'
+import {defineComponent, h} from 'vue'
+import {darkTheme, dateZhCN, useDialog, useLoadingBar, useMessage, useNotification, zhCN,} from 'naive-ui'
+import {useCssVar} from '@vueuse/core'
+import {kebabCase} from 'lodash-es'
+import {setupDialog, setupMessage} from '@/utils'
+import {naiveThemeOverrides} from '~/settings'
+import {useAppStore} from '@/store'
 
 const appStore = useAppStore()
 

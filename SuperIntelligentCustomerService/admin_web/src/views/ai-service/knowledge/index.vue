@@ -189,29 +189,27 @@
 </template>
 
 <script setup>
-import { h, onMounted, ref, resolveDirective, withDirectives } from 'vue'
+import {h, onMounted, ref, resolveDirective, withDirectives} from 'vue'
 import {
   NButton,
   NCheckbox,
   NCheckboxGroup,
-  NForm,
-  NFormItem,
-  NImage,
-  NInput,
-  NSpace,
-  NSwitch,
-  NTag,
-  NPopconfirm,
-  NSelect,
-  NRadioGroup,
-  NRadio,
-  NInputNumber,
-  NGrid,
-  NGridItem,
   NCollapse,
   NCollapseItem,
   NDrawer,
   NDrawerContent,
+  NForm,
+  NFormItem,
+  NGrid,
+  NGridItem,
+  NInput,
+  NInputNumber,
+  NPopconfirm,
+  NRadio,
+  NRadioGroup,
+  NSelect,
+  NSpace,
+  NTag,
   useMessage
 } from 'naive-ui'
 
@@ -223,11 +221,11 @@ import KnowledgeStatistics from './components/KnowledgeStatistics.vue'
 import KnowledgeDetail from './components/KnowledgeDetail.vue'
 import FileManagementModal from './components/FileManagementModal.vue'
 
-import { formatDate, renderIcon } from '@/utils'
-import { useCRUD } from '@/composables'
+import {formatDate, renderIcon} from '@/utils'
+import {useCRUD} from '@/composables'
 import api from '@/api'
 import TheIcon from '@/components/icon/TheIcon.vue'
-import { useRouter } from 'vue-router'
+import {useRouter} from 'vue-router'
 
 defineOptions({ name: '知识库管理' })
 

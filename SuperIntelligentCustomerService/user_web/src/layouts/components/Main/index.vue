@@ -1,8 +1,8 @@
 <!-- Main -->
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
-import { useDesignStore } from '@/stores';
-import { useKeepAliveStore } from '@/stores/modules/keepAlive';
+import {useRoute} from 'vue-router';
+import {useDesignStore} from '@/stores';
+import {useKeepAliveStore} from '@/stores/modules/keepAlive';
 
 const designStore = useDesignStore();
 const keepAliveStore = useKeepAliveStore();

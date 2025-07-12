@@ -1,9 +1,9 @@
 import random
 import string
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
-from ....schemas import Success, Fail
+from ....schemas import Success
 from ....schemas.auth import EmailCodeDTO
 
 router = APIRouter()
@@ -14,7 +14,7 @@ async def send_email_code(email_data: EmailCodeDTO):
     """发送邮箱验证码"""
     try:
         if not email_data.username:
-            return Fail(msg="邮箱地址不能为空")
+            raise HTTPException(status_code=400, detail="邮箱地址不能为空")
         
         # 生成6位数字验证码
         code = ''.join(random.choices(string.digits, k=6))
@@ -33,7 +33,7 @@ async def send_email_code(email_data: EmailCodeDTO):
         )
         
     except Exception as e:
-        return Fail(msg=f"发送验证码失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"发送验证码失败: {str(e)}")
 
 
 @router.post("/verify", summary="验证邮箱验证码")
@@ -54,4 +54,4 @@ async def verify_email_code(
         return Success(msg="验证码验证成功")
         
     except Exception as e:
-        return Fail(msg=f"验证码验证失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"验证码验证失败: {str(e)}")

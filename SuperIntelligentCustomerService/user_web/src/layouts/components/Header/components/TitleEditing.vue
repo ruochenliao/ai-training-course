@@ -1,7 +1,7 @@
 <!-- 标题编辑 -->
 <script setup lang="ts">
 import SvgIcon from '@/components/SvgIcon/index.vue';
-import { useSessionStore } from '@/stores/modules/session';
+import {useSessionStore} from '@/stores/modules/session';
 
 const sessionStore = useSessionStore();
 

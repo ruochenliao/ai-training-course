@@ -1,11 +1,11 @@
 from typing import Optional
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
 
 from ....controllers.session import session_controller
 from ....core.dependency import DependAuth
 from ....models.admin import User
-from ....schemas import Success, Fail, SuccessExtra
+from ....schemas import Success, SuccessExtra
 from ....schemas.session import (
     ChatSessionVo,
     CreateSessionDTO,
@@ -60,7 +60,7 @@ async def get_session_list(
         )
         
     except Exception as e:
-        return Fail(msg=f"获取会话列表失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取会话列表失败: {str(e)}")
 
 
 @router.post("", summary="创建会话")
@@ -95,7 +95,7 @@ async def create_session(
         return Success(data=formatted_session, msg="会话创建成功")
         
     except Exception as e:
-        return Fail(msg=f"创建会话失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"创建会话失败: {str(e)}")
 
 
 @router.put("", summary="更新会话")
@@ -108,7 +108,7 @@ async def update_session(
         user_id = current_user.id
         session_id = int(session_data.id) if session_data.id else None
         if not session_id:
-            return Fail(msg="会话ID不能为空")
+            raise HTTPException(status_code=400, detail="会话ID不能为空")
 
         session_update = SessionUpdate(
             id=session_id,
@@ -124,7 +124,7 @@ async def update_session(
         )
         
         if not updated_session:
-            return Fail(msg="会话不存在或无权限修改")
+            raise HTTPException(status_code=404, detail="会话不存在或无权限修改")
         
         session_dict = await updated_session.to_dict()
         # 转换字段名为前端期望的驼峰命名
@@ -140,23 +140,24 @@ async def update_session(
 
         return Success(data=formatted_session, msg="会话更新成功")
         
+    except HTTPException:
+        raise
     except Exception as e:
-        return Fail(msg=f"更新会话失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"更新会话失败: {str(e)}")
 
 
-@router.get("/{session_id}", summary="获取单个会话")
+@router.get("/get", summary="获取单个会话")
 async def get_session(
-    session_id: str,
+    session_id: int = Query(..., description="会话ID"),
     current_user: User = DependAuth
 ):
     """获取单个会话详情"""
     try:
         user_id = current_user.id
-        session_id_int = int(session_id)
-        session = await session_controller.get_user_session(session_id_int, user_id)
-        
+        session = await session_controller.get_user_session(session_id, user_id)
+
         if not session:
-            return Fail(msg="会话不存在或无权限访问")
+            raise HTTPException(status_code=404, detail="会话不存在或无权限访问")
         
         session_dict = await session.to_dict()
         # 转换字段名为前端期望的驼峰命名
@@ -172,15 +173,15 @@ async def get_session(
 
         return Success(data=formatted_session)
         
-    except ValueError:
-        return Fail(msg="无效的会话ID")
+    except HTTPException:
+        raise
     except Exception as e:
-        return Fail(msg=f"获取会话失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取会话失败: {str(e)}")
 
 
-@router.delete("/{session_ids}", summary="删除会话")
+@router.delete("/delete", summary="删除会话")
 async def delete_sessions(
-    session_ids: str,
+    session_ids: str = Query(..., description="会话ID列表，逗号分隔"),
     current_user: User = DependAuth
 ):
     """删除会话（支持批量删除）"""
@@ -190,13 +191,15 @@ async def delete_sessions(
         id_list = [int(id.strip()) for id in session_ids.split(",") if id.strip()]
 
         if not id_list:
-            return Fail(msg="请提供要删除的会话ID")
+            raise HTTPException(status_code=400, detail="请提供要删除的会话ID")
 
         deleted_count = await session_controller.delete_user_sessions(id_list, user_id)
-        
+
         return Success(msg=f"成功删除 {deleted_count} 个会话")
-        
+
+    except HTTPException:
+        raise
     except ValueError:
-        return Fail(msg="无效的会话ID格式")
+        raise HTTPException(status_code=400, detail="无效的会话ID格式")
     except Exception as e:
-        return Fail(msg=f"删除会话失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"删除会话失败: {str(e)}")

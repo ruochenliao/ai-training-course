@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { CSSProperties } from 'vue';
-import { arrow, autoUpdate, flip, offset, shift, useFloating } from '@floating-ui/vue';
-import { onClickOutside } from '@vueuse/core';
+import type {CSSProperties} from 'vue';
+import {arrow, autoUpdate, flip, offset, shift, useFloating} from '@floating-ui/vue';
+import {onClickOutside} from '@vueuse/core';
 
 export type PopoverPlacement
   = | 'top'

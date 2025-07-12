@@ -2,27 +2,30 @@
 聊天服务API端点
 基于AutoGen框架的智能体聊天服务接口
 支持文本和多模态内容的智能识别和处理
+标准化实现，参考roles.py模式
 """
 import asyncio
 import logging
-import base64
 from io import BytesIO
-from typing import AsyncGenerator, List, Optional
+from typing import AsyncGenerator
 
 import PIL.Image
 from autogen_agentchat.agents import AssistantAgent
-from autogen_agentchat.messages import TextMessage, MultiModalMessage
-from autogen_core.models import ModelInfo, ModelFamily
+from autogen_agentchat.messages import MultiModalMessage
 from autogen_core import Image
+from autogen_core.models import ModelInfo, ModelFamily
 from autogen_ext.models.openai import OpenAIChatCompletionClient
 from autogen_ext.models.openai._model_info import _MODEL_INFO, _MODEL_TOKEN_LIMITS
-from fastapi import APIRouter, Request, UploadFile, File, Form
+from fastapi import APIRouter, Request, Query, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 
+from ....controllers.chat import chat_controller
 from ....controllers.model import model_controller
 from ....core.dependency import DependAuth
 from ....models.admin import User
-from ....schemas import Success, Fail
+from ....schemas import Success, Fail, SuccessExtra
+from ....schemas.chat_service import *
+from ....utils.serializer import safe_serialize
 
 logger = logging.getLogger(__name__)
 
@@ -216,20 +219,44 @@ class SmartChatSystem:
             # 使用选定的智能体生成流式响应
             try:
                 # 使用 run_stream 方法进行流式处理
+                full_content = ""
+                has_streamed_content = False
+
                 async for chunk in selected_agent.run_stream(task=user_message):
+                    # 处理流式内容块
                     if hasattr(chunk, 'content') and chunk.content:
+                        # 这是流式内容块
                         content = str(chunk.content)
                         if content.strip():
-                            yield content
-                            await asyncio.sleep(0.02)  # 小延迟提供更好的流式体验
+                            # 过滤掉用户输入的内容，只保留AI回复
+                            if not content.startswith(message.strip()):
+                                full_content += content
+                                has_streamed_content = True
+                                yield content
+                                await asyncio.sleep(0.02)
                     elif hasattr(chunk, 'messages') and chunk.messages:
                         # 这是 TaskResult，包含最终消息
                         for msg in chunk.messages:
-                            if hasattr(msg, 'content') and msg.content and msg.source == 'assistant':
+                            # 只返回 source='assistant' 的消息内容
+                            if hasattr(msg, 'content') and msg.content and hasattr(msg, 'source') and msg.source == 'assistant':
                                 content = str(msg.content)
                                 if content.strip():
-                                    yield content
-                                    await asyncio.sleep(0.02)
+                                    # 确保不包含用户输入的内容
+                                    if content.startswith(message.strip()):
+                                        # 如果内容以用户消息开头，则移除用户消息部分
+                                        content = content[len(message.strip()):].strip()
+
+                                    if content:
+                                        # 如果已经有流式内容，只输出差异部分
+                                        if has_streamed_content and content != full_content:
+                                            remaining_content = content[len(full_content):] if content.startswith(full_content) else content
+                                            if remaining_content.strip():
+                                                yield remaining_content
+                                                await asyncio.sleep(0.02)
+                                        elif not has_streamed_content:
+                                            # 如果没有流式内容，直接输出完整内容
+                                            yield content
+                                            await asyncio.sleep(0.02)
                         break  # TaskResult 是最后一个项目
 
             except Exception as e:
@@ -302,84 +329,21 @@ async def send_chat_message(
         content_type = request.headers.get("content-type", "")
         logger.info(f"收到请求，Content-Type: {content_type}")
 
-        if "application/json" in content_type:
-            # JSON格式输入（纯文本）
-            json_data = await request.json()
-            logger.info(f"解析JSON数据: {json_data}")
+        # 解析请求数据
+        message_data = await _parse_request_data(request, content_type)
+        if not message_data:
+            return Fail(msg="请求数据解析失败")
 
-            # 验证数据格式
-            if "messages" not in json_data or not json_data["messages"]:
-                logger.warning(f"消息验证失败: messages={json_data.get('messages')}")
-                return Fail(msg="消息内容不能为空")
-
-            # 获取用户消息
-            user_message = None
-            for msg in reversed(json_data["messages"]):
-                if msg.get("role") == "user":
-                    user_message = msg
-                    break
-
-            logger.info(f"找到用户消息: {user_message}")
-
-            if not user_message or not user_message.get("content"):
-                logger.warning(f"用户消息验证失败: {user_message}")
-                return Fail(msg="未找到有效的用户消息")
-
-            final_message = user_message["content"].strip()
-            final_session_id = json_data.get("session_id")
-            file_paths = []  # JSON格式不支持文件
-
-            logger.info(f"处理JSON请求: message='{final_message}', session_id='{final_session_id}'")
-
-        elif "multipart/form-data" in content_type or "application/x-www-form-urlencoded" in content_type:
-            # Form格式输入（支持多模态）
-            try:
-                form_data = await request.form()
-            except Exception as e:
-                logger.error(f"解析Form数据失败: {e}")
-                return Fail(msg="Form数据解析失败")
-
-            message = form_data.get("message")
-            if not message or not message.strip():
-                return Fail(msg="消息内容不能为空")
-
-            final_message = message.strip()
-            final_session_id = form_data.get("session_id")
-
-            # 处理上传的文件
-            uploaded_files = []
-            files = form_data.getlist("files")
-            for file in files:
-                if hasattr(file, 'filename') and file.filename:
-                    # 验证文件类型（如果有文件的话）
-                    if file.content_type and not file.content_type.startswith('image/'):
-                        return Fail(msg=f"不支持的文件类型: {file.content_type}，目前仅支持图片文件")
-                    uploaded_files.append(file)
-
-            logger.info(f"接收到Form请求: 消息='{final_message}', 文件数量={len(uploaded_files)}")
-        else:
-            # 尝试作为JSON处理（兼容性处理）
-            try:
-                json_data = await request.json()
-                logger.info(f"尝试作为JSON解析: {json_data}")
-
-                # 检查是否是简单的消息格式
-                if "message" in json_data:
-                    final_message = json_data["message"].strip()
-                    final_session_id = json_data.get("session_id")
-                    uploaded_files = []
-                    logger.info(f"处理简单JSON请求: message='{final_message}', session_id='{final_session_id}'")
-                else:
-                    return Fail(msg="不支持的内容类型或数据格式")
-            except:
-                return Fail(msg="不支持的内容类型，请使用JSON或Form格式")
+        # 验证消息内容
+        if not message_data.get("message") or not message_data["message"].strip():
+            return Fail(msg="消息内容不能为空")
 
         # 返回流式响应
         return StreamingResponse(
             _generate_stream_response(
-                message=final_message,
-                session_id=final_session_id,
-                files=uploaded_files if 'uploaded_files' in locals() else [],
+                message=message_data["message"],
+                session_id=message_data.get("session_id"),
+                files=message_data.get("files", []),
                 user_id=current_user.id
             ),
             media_type="text/plain",
@@ -393,6 +357,66 @@ async def send_chat_message(
     except Exception as e:
         logger.error(f"发送聊天消息失败: {e}")
         return Fail(msg=f"发送消息失败: {str(e)}")
+
+
+async def _parse_request_data(request: Request, content_type: str) -> Optional[dict]:
+    """解析请求数据的辅助函数"""
+    try:
+        if "application/json" in content_type:
+            # JSON格式输入（纯文本）
+            json_data = await request.json()
+            logger.info(f"解析JSON数据: {json_data}")
+
+            # 验证数据格式
+            if "messages" in json_data and json_data["messages"]:
+                # 获取用户消息
+                user_message = None
+                for msg in reversed(json_data["messages"]):
+                    if msg.get("role") == "user":
+                        user_message = msg
+                        break
+
+                if user_message and user_message.get("content"):
+                    return {
+                        "message": user_message["content"].strip(),
+                        "session_id": json_data.get("session_id"),
+                        "files": []
+                    }
+            elif "message" in json_data:
+                # 简单消息格式
+                return {
+                    "message": json_data["message"].strip(),
+                    "session_id": json_data.get("session_id"),
+                    "files": []
+                }
+
+        elif "multipart/form-data" in content_type or "application/x-www-form-urlencoded" in content_type:
+            # Form格式输入（支持多模态）
+            form_data = await request.form()
+            message = form_data.get("message")
+
+            if message and message.strip():
+                # 处理上传的文件
+                uploaded_files = []
+                files = form_data.getlist("files")
+                for file in files:
+                    if hasattr(file, 'filename') and file.filename:
+                        # 验证文件类型
+                        if file.content_type and not file.content_type.startswith('image/'):
+                            logger.warning(f"不支持的文件类型: {file.content_type}")
+                            continue
+                        uploaded_files.append(file)
+
+                return {
+                    "message": message.strip(),
+                    "session_id": form_data.get("session_id"),
+                    "files": uploaded_files
+                }
+
+        return None
+    except Exception as e:
+        logger.error(f"解析请求数据失败: {e}")
+        return None
 
 
 async def _generate_stream_response(
@@ -410,8 +434,19 @@ async def _generate_stream_response(
                 from ....controllers.chat import chat_controller
                 from ....schemas.chat import ChatMessageCreate
 
+                # 安全地转换session_id为整数
+                try:
+                    if isinstance(session_id, int):
+                        session_id_int = session_id
+                    elif isinstance(session_id, str) and session_id.isdigit():
+                        session_id_int = int(session_id)
+                    else:
+                        session_id_int = 1
+                except (ValueError, AttributeError):
+                    session_id_int = 1
+
                 user_message_create = ChatMessageCreate(
-                    session_id=int(session_id) if session_id.isdigit() else 1,
+                    session_id=session_id_int,
                     user_id=user_id,
                     role="user",
                     content=message,
@@ -437,8 +472,19 @@ async def _generate_stream_response(
         # 保存AI回复到数据库
         if session_id and full_response:
             try:
+                # 安全地转换session_id为整数
+                try:
+                    if isinstance(session_id, int):
+                        session_id_int = session_id
+                    elif isinstance(session_id, str) and session_id.isdigit():
+                        session_id_int = int(session_id)
+                    else:
+                        session_id_int = 1
+                except (ValueError, AttributeError):
+                    session_id_int = 1
+
                 ai_message_create = ChatMessageCreate(
-                    session_id=int(session_id) if session_id.isdigit() else 1,
+                    session_id=session_id_int,
                     user_id=user_id,
                     role="assistant",
                     content=full_response.strip(),
@@ -457,107 +503,100 @@ async def _generate_stream_response(
         yield "data: [DONE]\n\n"
 
 
-@router.get("/session/{session_id}", summary="获取会话信息")
+@router.get("/session/get", summary="获取会话信息")
 async def get_session_info(
-        session_id: str,
+        session_id: int = Query(..., description="会话ID"),
         current_user: User = DependAuth
 ):
     """获取指定会话的信息"""
     try:
         from ....controllers.session import session_controller
 
-        session_id_int = int(session_id)
-        session = await session_controller.get_user_session(session_id_int, current_user.id)
-
+        session = await session_controller.get_user_session(session_id, current_user.id)
         if not session:
-            return Fail(msg="会话不存在或无权限访问")
+            raise HTTPException(status_code=404, detail="会话不存在或无权限访问")
 
         session_dict = await session.to_dict()
         return Success(data=session_dict)
 
-    except ValueError:
-        return Fail(msg="无效的会话ID")
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"获取会话信息失败: {e}")
-        return Fail(msg=f"获取会话信息失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取会话信息失败: {str(e)}")
 
 
-@router.get("/sessions", summary="获取用户会话列表（聊天端）")
+@router.get("/session/list", summary="获取用户会话列表")
 async def list_user_sessions(
+        page: int = Query(1, description="页码"),
+        page_size: int = Query(20, description="每页数量"),
         current_user: User = DependAuth
 ):
-    """
-    获取当前用户的所有会话列表（聊天端使用）
-    返回简化的会话信息，适用于聊天界面
-    """
+    """获取当前用户的会话列表"""
     try:
         from ....controllers.session import session_controller
 
         total, sessions = await session_controller.get_user_sessions(
             user_id=current_user.id,
-            page=1,
-            page_size=100  # 聊天端显示更多会话
+            page=page,
+            page_size=page_size
         )
 
-        # 转换为简化格式
+        # 转换为标准格式
         session_list = []
         for session in sessions:
             session_dict = await session.to_dict()
-            simplified_session = {
+            session_list.append({
                 "id": str(session_dict["id"]),
                 "title": session_dict.get("session_title", "新对话"),
                 "updated_at": session_dict.get("updated_at")
-            }
-            session_list.append(simplified_session)
+            })
 
-        return Success(data=session_list)
+        return SuccessExtra(data=session_list, total=total, page=page, page_size=page_size)
 
     except Exception as e:
         logger.error(f"获取会话列表失败: {e}")
-        return Fail(msg=f"获取会话列表失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取会话列表失败: {str(e)}")
 
 
-@router.delete("/session/{session_id}", summary="关闭会话")
-async def close_session(
-        session_id: str,
+@router.delete("/session/delete", summary="删除会话")
+async def delete_session(
+        session_id: int = Query(..., description="会话ID"),
         current_user: User = DependAuth
 ):
-    """关闭指定的会话"""
+    """删除指定的会话"""
     try:
         from ....controllers.session import session_controller
 
-        session_id_int = int(session_id)
         deleted_count = await session_controller.delete_user_sessions(
-            [session_id_int],
+            [session_id],
             current_user.id
         )
 
         if deleted_count > 0:
-            return Success(msg="会话已关闭")
+            return Success(msg="会话删除成功")
         else:
-            return Fail(msg="会话不存在或无权限删除")
+            raise HTTPException(status_code=404, detail="会话不存在或无权限删除")
 
-    except ValueError:
-        return Fail(msg="无效的会话ID")
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"关闭会话失败: {e}")
-        return Fail(msg=f"关闭会话失败: {str(e)}")
+        logger.error(f"删除会话失败: {e}")
+        raise HTTPException(status_code=500, detail=f"删除会话失败: {str(e)}")
 
 
-@router.post("/session/create", summary="直接创建新会话")
+@router.post("/session/create", summary="创建新会话")
 async def create_session(
+        session_in: SessionCreate,
         current_user: User = DependAuth
 ):
-    """
-    直接创建新的聊天会话
-    适用于明确需要新会话的场景
-    """
+    """创建新的聊天会话"""
     try:
         from ....controllers.session import session_controller
-        from ....schemas.session import SessionCreate
+        from ....schemas.session import SessionCreate as SessionCreateSchema
 
-        session_data = SessionCreate(
-            session_title="新对话",
+        session_data = SessionCreateSchema(
+            session_title=session_in.session_title,
             user_id=current_user.id,
             session_content=""
         )
@@ -569,13 +608,12 @@ async def create_session(
             "session_id": str(session_dict["id"]),
             "session_title": session_dict["session_title"],
             "user_id": session_dict["user_id"],
-            "created_at": session_dict["created_at"],
-            "message": "会话创建成功"
-        })
+            "created_at": session_dict["created_at"]
+        }, msg="会话创建成功")
 
     except Exception as e:
         logger.error(f"创建会话失败: {e}")
-        return Fail(msg=f"创建会话失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"创建会话失败: {str(e)}")
 
 
 @router.get("/stats", summary="获取服务统计")
@@ -586,10 +624,9 @@ async def get_service_stats(
     try:
         # 检查是否为管理员
         if not current_user.is_superuser:
-            return Fail(msg="权限不足")
+            raise HTTPException(status_code=403, detail="权限不足")
 
         from ....controllers.session import session_controller
-        from ....controllers.chat import chat_controller
 
         # 获取会话统计
         total_sessions, _ = await session_controller.get_user_sessions(
@@ -601,18 +638,109 @@ async def get_service_stats(
         # 获取消息统计
         total_messages = await chat_controller.get_total_message_count()
 
-        return Success(data={
-            "total_sessions": total_sessions,
-            "total_messages": total_messages,
-            "agent_system": "smart-chat-system",
-            "agents": ["text_agent", "vision_agent"],
-            "features": ["流式响应", "多模态识别", "智能选择"]
-        })
+        stats_data = ServiceStats(
+            total_sessions=total_sessions,
+            total_messages=total_messages,
+            agent_system="smart-chat-system",
+            agents=["text_agent", "vision_agent"],
+            features=["流式响应", "多模态识别", "智能选择"]
+        )
 
+        return Success(data=stats_data.model_dump())
+
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"获取服务统计失败: {e}")
-        return Fail(msg=f"获取服务统计失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取服务统计失败: {str(e)}")
 
+
+@router.post("/session/validate", summary="智能会话验证")
+async def validate_or_create_session(
+        validate_request: SessionValidateRequest,
+        current_user: User = DependAuth
+):
+    """智能验证会话是否存在，如果不存在则自动创建新会话"""
+    try:
+        from ....controllers.session import session_controller
+        from ....schemas.session import SessionCreate
+
+        user_id = current_user.id
+        session_id = validate_request.session_id
+
+        # 如果没有提供session_id或session_id无效，创建新会话
+        if not session_id or session_id.strip() in ["", "not_login", "undefined", "null"]:
+            session_data = SessionCreate(
+                session_title="新对话",
+                user_id=user_id,
+                session_content=""
+            )
+            new_session = await session_controller.create_user_session(session_data)
+            session_dict = await new_session.to_dict()
+            return Success(data={
+                "session_id": session_dict["id"],
+                "session_title": session_dict["session_title"],
+                "created": True
+            })
+
+        # 验证现有会话
+        try:
+            session_id_int = int(session_id.strip())
+            if session_id_int <= 0:
+                raise ValueError("会话ID必须为正整数")
+        except (ValueError, TypeError):
+            raise HTTPException(status_code=400, detail="会话ID格式错误")
+
+        # 检查会话是否存在且属于当前用户
+        session = await session_controller.get_user_session(session_id_int, user_id)
+        if session:
+            session_dict = await session.to_dict()
+            return Success(data={
+                "session_id": session_dict["id"],
+                "session_title": session_dict["session_title"],
+                "created": False
+            })
+        else:
+            raise HTTPException(status_code=404, detail="会话不存在或无权访问")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"验证会话失败: {e}")
+        raise HTTPException(status_code=500, detail=f"验证会话失败: {str(e)}")
+
+
+@router.get("/models/list", summary="获取可用模型列表")
+async def get_available_models(
+        page: int = Query(1, description="页码"),
+        page_size: int = Query(50, description="每页数量"),
+        model_type: str = Query("chat", description="模型类型")
+):
+    """获取可用的聊天模型列表"""
+    try:
+        total, models = await model_controller.get_active_models(
+            model_type=model_type,
+            page=page,
+            page_size=page_size
+        )
+
+        model_list = []
+        for model in models:
+            model_dict = await model.to_dict()
+            model_info = ChatModelInfo(
+                id=model_dict["model_name"],
+                name=model_dict["model_show"],
+                description=model_dict["model_describe"],
+                price=safe_serialize(model_dict["model_price"]),
+                model_type=model_dict["model_type"]
+            )
+            model_list.append(model_info.model_dump())
+
+        return SuccessExtra(data=model_list, total=total, page=page, page_size=page_size)
+
+    except Exception as e:
+        logger.error(f"获取模型列表失败: {e}")
+        raise HTTPException(status_code=500, detail=f"获取模型列表失败: {str(e)}")
 
 
 @router.get("/health", summary="健康检查")
@@ -631,14 +759,16 @@ async def health_check():
             smart_chat_system.vision_agent is not None
         ])
 
-        return Success(data={
-            "status": "healthy" if all_agents_ready else "initializing",
-            "agent_system": "Smart Chat System",
-            "agents_status": agent_status,
-            "features": ["流式响应", "多模态识别", "智能选择", "图片分析"],
-            "service_uptime": "正常运行"
-        })
+        health_status = HealthStatus(
+            status="healthy" if all_agents_ready else "initializing",
+            agent_system="Smart Chat System",
+            agents_status=agent_status,
+            features=["流式响应", "多模态识别", "智能选择", "图片分析"],
+            service_uptime="正常运行"
+        )
+
+        return Success(data=health_status.model_dump())
 
     except Exception as e:
         logger.error(f"健康检查失败: {e}")
-        return Fail(msg=f"服务异常: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"服务异常: {str(e)}")

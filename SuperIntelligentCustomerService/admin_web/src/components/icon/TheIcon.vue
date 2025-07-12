@@ -1,5 +1,5 @@
 <script setup>
-import { renderIcon } from '@/utils'
+import {renderIcon} from '@/utils'
 
 defineProps({
   icon: {

@@ -1,6 +1,6 @@
-import type { GetSessionListVO } from '@/api/model/types';
-import { defineStore } from 'pinia';
-import { getModelList } from '@/api';
+import type {GetSessionListVO} from '@/api/model/types';
+import {defineStore} from 'pinia';
+import {getModelList} from '@/api';
 
 // 模型管理
 export const useModelStore = defineStore('model', () => {

@@ -1,14 +1,12 @@
 <!-- 默认消息列表页 -->
 <script setup lang="ts">
-import type { FilesCardProps } from 'vue-element-plus-x/types/FilesCard';
+import type {FilesCardProps} from 'vue-element-plus-x/types/FilesCard';
 import FilesSelect from '@/components/FilesSelect/index.vue';
 import ModelSelect from '@/components/ModelSelect/index.vue';
 import WelecomeText from '@/components/WelecomeText/index.vue';
-import { useUserStore } from '@/stores';
-import { useFilesStore } from '@/stores/modules/files';
-import { useSessionStore } from '@/stores/modules/session';
+import {useFilesStore} from '@/stores/modules/files';
+import {useSessionStore} from '@/stores/modules/session';
 
-const userStore = useUserStore();
 const sessionStore = useSessionStore();
 const filesStore = useFilesStore();
 

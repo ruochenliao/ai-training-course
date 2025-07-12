@@ -1,6 +1,6 @@
-import type { CollapseType, LayoutType } from '@/config/design';
-import { defineStore } from 'pinia';
+import type {CollapseType, LayoutType} from '@/config/design';
 import designSetting from '@/config/design';
+import {defineStore} from 'pinia';
 
 const {
   darkMode: reDarkMode,

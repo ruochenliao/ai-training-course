@@ -127,22 +127,22 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import {
-  NCard,
   NButton,
-  NIcon,
-  NSpin,
+  NCard,
+  NEmpty,
   NGrid,
   NGridItem,
-  NStatistic,
+  NIcon,
   NProgress,
+  NSpin,
+  NStatistic,
   NTimeline,
   NTimelineItem,
-  NEmpty,
   useMessage
 } from 'naive-ui'
-import { renderIcon } from '@/utils'
+import {renderIcon} from '@/utils'
 import api from '@/api'
 
 const message = useMessage()

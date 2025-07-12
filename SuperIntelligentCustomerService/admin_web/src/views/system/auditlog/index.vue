@@ -1,6 +1,6 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import { NInput, NSelect, NPopover } from 'naive-ui'
+import {onMounted, ref} from 'vue'
+import {NInput, NPopover, NSelect} from 'naive-ui'
 import TheIcon from '@/components/icon/TheIcon.vue'
 
 import CommonPage from '@/components/page/CommonPage.vue'

@@ -97,22 +97,22 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import {computed, ref, watch} from 'vue'
 import {
-  NModal,
-  NUpload,
-  NUploadDragger,
-  NIcon,
-  NText,
-  NP,
-  NSpace,
-  NTag,
   NButton,
   NDivider,
+  NIcon,
+  NModal,
+  NP,
   NProgress,
+  NSpace,
+  NTag,
+  NText,
+  NUpload,
+  NUploadDragger,
   useMessage
 } from 'naive-ui'
-import { renderIcon } from '@/utils'
+import {renderIcon} from '@/utils'
 
 const props = defineProps({
   visible: {
