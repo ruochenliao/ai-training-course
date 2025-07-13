@@ -8,8 +8,7 @@ import os
 import time
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from datetime import datetime
-from typing import List, Dict, Any, Optional
-from pathlib import Path
+from typing import List, Dict, Any
 
 from .memory.factory import MemoryServiceFactory
 from ..models.enums import EmbeddingStatus, FileType

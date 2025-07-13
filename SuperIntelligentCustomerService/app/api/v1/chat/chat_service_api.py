@@ -11,7 +11,6 @@ from io import BytesIO
 from typing import AsyncGenerator
 
 import PIL.Image
-from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.messages import MultiModalMessage
 from autogen_core import Image
 from autogen_core.models import ModelInfo, ModelFamily
@@ -24,8 +23,8 @@ from ....controllers.chat import chat_controller
 from ....controllers.memory.autogen_memory import AutoGenMemoryAdapter
 from ....controllers.memory.factory import MemoryServiceFactory
 from ....controllers.model import model_controller
-from ....core.dependency import DependAuth
 from ....core.custom_context import create_safe_assistant_with_memory
+from ....core.dependency import DependAuth
 from ....models.admin import User
 from ....schemas import Success, Fail, SuccessExtra
 from ....schemas.chat_service import *
