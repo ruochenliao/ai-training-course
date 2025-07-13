@@ -143,6 +143,37 @@ class KnowledgeFile(BaseModel, TimestampMixin):
         """检查用户是否可以修改此文件"""
         kb = await self.knowledge_base
         return await kb.can_modify(user_id)
+
+    async def mark_processing(self):
+        """标记为处理中"""
+        self.embedding_status = EmbeddingStatus.PROCESSING
+        self.error_message = None
+        await self.save(update_fields=["embedding_status", "error_message", "updated_at"])
+
+    async def mark_completed(self, chunk_count: int = 0, embedding_model: str = None):
+        """标记处理完成"""
+        from datetime import datetime
+        self.embedding_status = EmbeddingStatus.COMPLETED
+        self.chunk_count = chunk_count
+        self.processed_at = datetime.now()
+        self.error_message = None
+        await self.save(update_fields=["embedding_status", "chunk_count", "processed_at", "error_message", "updated_at"])
+
+    async def mark_failed(self, error_message: str):
+        """标记处理失败"""
+        self.embedding_status = EmbeddingStatus.FAILED
+        self.error_message = error_message
+        await self.save(update_fields=["embedding_status", "error_message", "updated_at"])
+
+    @property
+    def is_document(self) -> bool:
+        """是否为文档类型"""
+        return self.file_type in [FileType.TXT, FileType.MD, FileType.PDF, FileType.DOCX, FileType.DOC, FileType.HTML]
+
+    @property
+    def is_image(self) -> bool:
+        """是否为图片类型"""
+        return self.file_type in [FileType.JPG, FileType.JPEG, FileType.PNG, FileType.GIF, FileType.BMP]
     
     async def to_dict(self) -> dict:
         """转换为字典格式"""

@@ -177,6 +177,20 @@ async def get_file_statistics(
     return await KnowledgeFileController.get_file_statistics(kb_id, current_user.id)
 
 
+@router.post("/{kb_id}/files/{file_id}/retry", summary="重试文件处理")
+async def retry_file_processing(
+    kb_id: int,
+    file_id: int,
+    current_user: User = DependAuth
+):
+    """重试文件处理"""
+    return await KnowledgeFileController.retry_file_processing(
+        knowledge_id=kb_id,
+        file_id=file_id,
+        user_id=current_user.id
+    )
+
+
 @router.delete("/files/{file_id}", summary="删除文件")
 async def delete_file(
     file_id: int,

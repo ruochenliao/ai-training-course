@@ -59,5 +59,6 @@ export default {
   uploadKnowledgeFile: (kbId, data = {}) => request.post(`/knowledge/${kbId}/files`, data),
   deleteKnowledgeFile: (fileId) => request.delete(`/knowledge/files/${fileId}`),
   getKnowledgeFileStatistics: (kbId) => request.get(`/knowledge/${kbId}/files/statistics`),
+  retryKnowledgeFile: (kbId, fileId) => request.post(`/knowledge/${kbId}/files/${fileId}/retry`),
 
 }

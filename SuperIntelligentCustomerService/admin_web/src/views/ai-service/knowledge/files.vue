@@ -136,6 +136,7 @@ import {
   NProgress,
   NSpace,
   NTag,
+  NTooltip,
   NUpload,
   useDialog,
   useMessage
@@ -213,10 +214,22 @@ const columns = [
     key: 'embedding_status',
     width: 120,
     render(row) {
-      return h(NTag, {
+      const tag = h(NTag, {
         type: getStatusType(row.embedding_status),
         size: 'small'
       }, { default: () => getStatusText(row.embedding_status) })
+
+      // 如果是失败状态且有错误信息，显示tooltip
+      if (row.embedding_status === 'failed' && row.error_message) {
+        return h(NTooltip, {
+          trigger: 'hover'
+        }, {
+          trigger: () => tag,
+          default: () => row.error_message
+        })
+      }
+
+      return tag
     }
   },
   {
@@ -337,14 +350,13 @@ const handleUploadError = (error) => {
 // 重试处理
 const retryProcessing = async (file) => {
   try {
-    // TODO: 实现重试处理API
-    message.info('重试功能暂未实现')
-    // const response = await api.retryKnowledgeFile(file.id)
-    // if (response.code === 200) {
-    //   message.success('已重新提交处理')
-    //   $table.value?.handleSearch()
-    // }
+    const response = await api.retryKnowledgeFile(kbId.value, file.id)
+    if (response.code === 200) {
+      message.success('已重新提交处理')
+      $table.value?.handleSearch()
+    }
   } catch (error) {
+    console.error('重试失败:', error)
     message.error('重试失败')
   }
 }

@@ -147,13 +147,72 @@ class KnowledgeFileController:
             knowledge_base.file_count += 1
             knowledge_base.total_size += file_size
             await knowledge_base.save(update_fields=["file_count", "total_size", "updated_at"])
-            
+
+            # 触发文件处理
+            try:
+                from ..controllers.file_processor import FileProcessor
+                processor = FileProcessor()
+                # 异步处理文件，不阻塞响应
+                import asyncio
+                asyncio.create_task(processor.process_file(knowledge_file.id))
+                logger.info(f"已启动文件处理任务: {knowledge_file.id}")
+            except Exception as e:
+                logger.error(f"启动文件处理失败: {e}")
+
             file_dict = await knowledge_file.to_dict()
             return Success(data=file_dict, msg="文件上传成功")
-            
+
         except Exception as e:
-            logger.error(f"上传文件失败: {e}")
-            return Fail(msg=f"上传文件失败: {str(e)}")
+            logger.error(f"文件上传失败: {e}")
+            return Fail(msg="文件上传失败")
+
+
+    @staticmethod
+    async def retry_file_processing(
+        knowledge_id: int,
+        file_id: int,
+        user_id: int
+    ) -> Dict[str, Any]:
+        """重试文件处理"""
+        try:
+            # 检查知识库权限
+            knowledge_base = await KnowledgeBase.get(id=knowledge_id)
+            if not await knowledge_base.can_modify(user_id):
+                return Fail(msg="无权限操作此知识库")
+
+            # 获取文件信息
+            knowledge_file = await KnowledgeFile.get(id=file_id, knowledge_base_id=knowledge_id)
+
+            # 检查文件状态
+            if knowledge_file.embedding_status not in [EmbeddingStatus.FAILED, EmbeddingStatus.PENDING]:
+                return Fail(msg="只能重试失败或待处理的文件")
+
+            # 重置文件状态为待处理
+            knowledge_file.embedding_status = EmbeddingStatus.PENDING
+            knowledge_file.error_message = None
+            await knowledge_file.save(update_fields=["embedding_status", "error_message", "updated_at"])
+
+            # 触发文件处理
+            try:
+                from .file_processor import file_processor
+                # 异步处理文件，不阻塞响应
+                import asyncio
+                asyncio.create_task(file_processor.process_file(knowledge_file.id))
+                logger.info(f"已启动文件重试处理任务: {knowledge_file.id}")
+            except Exception as e:
+                logger.error(f"启动文件重试处理失败: {e}")
+                return Fail(msg=f"启动处理失败: {str(e)}")
+
+            file_dict = await knowledge_file.to_dict()
+            return Success(data=file_dict, msg="重试处理已启动")
+
+        except KnowledgeBase.DoesNotExist:
+            return Fail(msg="知识库不存在")
+        except KnowledgeFile.DoesNotExist:
+            return Fail(msg="文件不存在")
+        except Exception as e:
+            logger.error(f"重试文件处理失败: {e}")
+            return Fail(msg="重试处理失败")
     
     @staticmethod
     async def list_files(

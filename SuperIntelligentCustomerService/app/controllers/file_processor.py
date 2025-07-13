@@ -7,7 +7,7 @@ import logging
 import os
 from datetime import datetime
 
-from .memory import MemoryServiceFactory
+from .memory.factory import MemoryServiceFactory
 from ..models.enums import EmbeddingStatus, FileType
 from ..models.knowledge import KnowledgeFile, KnowledgeBase
 
@@ -58,6 +58,11 @@ class FileProcessor:
         """将文件加入处理队列"""
         await self.processing_queue.put(file_id)
         logger.info(f"文件 {file_id} 已加入处理队列")
+
+    async def process_file(self, file_id: int):
+        """直接处理文件（不使用队列）"""
+        logger.info(f"开始直接处理文件: {file_id}")
+        await self._process_file(file_id)
     
     async def _worker(self, worker_name: str):
         """工作进程"""
@@ -322,7 +327,7 @@ class FileProcessor:
                 }
                 
                 # 添加到向量数据库
-                await private_memory.add(chunk, metadata)
+                await private_memory.add_memory(chunk, metadata)
                 stored_count += 1
             
             logger.info(f"存储文本块完成: {stored_count} 个块")

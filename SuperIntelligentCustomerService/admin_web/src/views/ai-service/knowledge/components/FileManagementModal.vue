@@ -127,6 +127,7 @@ import {
   NSpace,
   NStatistic,
   NTag,
+  NTooltip,
   NUpload,
   useMessage
 } from 'naive-ui'
@@ -238,6 +239,17 @@ const columns = [
         failed: { text: '处理失败', type: 'error' }
       }
       const status = statusMap[row.embedding_status] || { text: row.embedding_status, type: 'default' }
+
+      // 如果是失败状态且有错误信息，显示tooltip
+      if (row.embedding_status === 'failed' && row.error_message) {
+        return h(NTooltip, {
+          trigger: 'hover'
+        }, {
+          trigger: () => h(NTag, { type: status.type }, { default: () => status.text }),
+          default: () => row.error_message
+        })
+      }
+
       return h(NTag, { type: status.type }, { default: () => status.text })
     }
   },
@@ -382,9 +394,14 @@ const handleUploadError = (error) => {
 // 重试处理
 const retryProcessing = async (file) => {
   try {
-    // TODO: 实现重试处理API
-    message.info('重试功能暂未实现')
+    const response = await api.retryKnowledgeFile(props.knowledgeBase.id, file.id)
+    if (response.code === 200) {
+      message.success('已重新提交处理')
+      $table.value?.handleSearch()
+      loadStatistics()
+    }
   } catch (error) {
+    console.error('重试失败:', error)
     message.error('重试失败')
   }
 }
