@@ -8,7 +8,7 @@
 import asyncio
 import logging
 from io import BytesIO
-from typing import AsyncGenerator, Optional
+from typing import AsyncGenerator
 
 import PIL.Image
 from autogen_agentchat.agents import AssistantAgent
@@ -21,15 +21,15 @@ from fastapi import APIRouter, Request, Query, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 
 from ....controllers.chat import chat_controller
-from ....controllers.model import model_controller
-from ....controllers.memory.factory import MemoryServiceFactory
 from ....controllers.memory.autogen_memory import AutoGenMemoryAdapter
+from ....controllers.memory.factory import MemoryServiceFactory
+from ....controllers.model import model_controller
 from ....core.dependency import DependAuth
 from ....models.admin import User
 from ....schemas import Success, Fail, SuccessExtra
 from ....schemas.chat_service import *
-from ....utils.serializer import safe_serialize
 from ....utils.encryption import decrypt_api_key, is_api_key_encrypted
+from ....utils.serializer import safe_serialize
 
 logger = logging.getLogger(__name__)
 
@@ -250,26 +250,35 @@ class SmartChatSystem:
 5. 利用历史对话记忆和用户偏好提供个性化服务
 
 ## 重要格式要求：
-**必须使用标准 Markdown 格式**输出所有回复，特别注意：
+**必须严格使用标准 Markdown 格式**输出所有回复，确保内容能够正确渲染：
 
-1. **代码块格式**：
+### 1. 代码块格式（严格要求）：
 ```语言名称
-代码内容（必须有正确的换行符和缩进）
+代码内容
 ```
 
-2. **确保代码块内容格式化良好**：
-   - 每行代码独立成行
-   - 保持正确的缩进
-   - 包含适当的注释
-   - 不要将所有代码挤在一行
+**代码块规范**：
+- 必须使用三个反引号开始和结束
+- 必须指定正确的语言名称（如：python, javascript, html, css, sql等）
+- 代码内容必须完整、格式化良好
+- 每行代码独立成行，保持正确的缩进
+- 包含适当的注释说明
 
-3. **使用适当的 Markdown 语法**：
-   - 标题：# ## ###
-   - 列表：- 或 1.
-   - 强调：**粗体** *斜体*
-   - 行内代码：`代码`
+### 2. 文本格式规范：
+- **标题**：使用 # ## ### 层级标题
+- **列表**：使用 - 或 1. 2. 3. 格式
+- **强调**：**粗体** *斜体*
+- **行内代码**：`代码片段`
+- **引用**：> 引用内容
+- **表格**：使用标准Markdown表格格式
 
-请用中文回复，语气要专业且友好。确保所有代码示例都格式化良好。"""
+### 3. 内容完整性要求：
+- 提供完整的代码示例，确保可以直接运行
+- 包含必要的导入语句和依赖
+- 添加清晰的注释和说明
+- 确保所有代码块都有正确的语言标识
+
+请用中文回复，语气要专业且友好。确保所有内容都能在前端正确渲染显示。"""
             )
 
             # 创建多模态智能体（暂时不集成记忆功能）
@@ -287,26 +296,33 @@ class SmartChatSystem:
 5. 利用历史对话记忆和用户偏好提供个性化服务
 
 ## 重要格式要求：
-**必须使用标准 Markdown 格式**输出所有回复，特别注意：
+**必须严格使用标准 Markdown 格式**输出所有回复，确保内容能够正确渲染：
 
-1. **代码块格式**：
+### 1. 代码块格式（严格要求）：
 ```语言名称
-代码内容（必须有正确的换行符和缩进）
+代码内容
 ```
 
-2. **确保代码块内容格式化良好**：
-   - 每行代码独立成行
-   - 保持正确的缩进
-   - 包含适当的注释
-   - 不要将所有代码挤在一行
+**代码块规范**：
+- 必须使用三个反引号开始和结束
+- 必须指定正确的语言名称（如：python, javascript, html, css等）
+- 代码内容必须完整、格式化良好
+- 每行代码独立成行，保持正确的缩进
+- 包含适当的注释说明
 
-3. **使用适当的 Markdown 语法**：
-   - 标题：# ## ###
-   - 列表：- 或 1.
-   - 强调：**粗体** *斜体*
-   - 行内代码：`代码`
+### 2. 图像分析格式：
+- **图像描述**：详细描述图像内容
+- **识别结果**：列出识别到的物品、文字、场景
+- **分析建议**：基于视觉内容提供专业建议
 
-请用中文回复，详细描述你看到的内容，并提供相关的帮助。确保所有代码示例都格式化良好。"""
+### 3. 文本格式规范：
+- **标题**：使用 # ## ### 层级标题
+- **列表**：使用 - 或 1. 2. 3. 格式
+- **强调**：**粗体** *斜体*
+- **行内代码**：`代码片段`
+- **引用**：> 引用内容
+
+请用中文回复，详细描述你看到的内容，并提供相关的帮助。确保所有内容都能在前端正确渲染显示。"""
             )
 
             # 记录当前使用的模型
@@ -375,8 +391,11 @@ class SmartChatSystem:
             try:
                 logger.info("开始流式处理...")
 
-                # 根据官方文档，run_stream返回异步迭代器，产生消息和最终TaskResult
+                # 优化的流式响应处理逻辑
                 full_response = ""
+                content_buffer = ""
+                last_yield_time = 0
+                min_yield_interval = 0.05  # 最小输出间隔50ms，减少渲染频率
 
                 async for message in selected_agent.run_stream(task=user_message):
                     try:
@@ -388,9 +407,17 @@ class SmartChatSystem:
                             if hasattr(message, 'content') and message.content:
                                 content = str(message.content)
                                 if content:
+                                    content_buffer += content
                                     full_response += content
-                                    yield content
-                                    await asyncio.sleep(0.01)
+
+                                    # 控制输出频率，避免过于频繁的渲染
+                                    current_time = asyncio.get_event_loop().time()
+                                    if current_time - last_yield_time >= min_yield_interval or len(content_buffer) > 100:
+                                        logger.debug(f"流式块输出: {content_buffer[:50]}... (缓冲长度: {len(content_buffer)})")
+                                        yield content_buffer
+                                        content_buffer = ""
+                                        last_yield_time = current_time
+                                        await asyncio.sleep(0.01)
 
                         # 处理文本消息 (TextMessage)
                         elif message_type == 'TextMessage':
@@ -398,30 +425,25 @@ class SmartChatSystem:
                                 hasattr(message, 'content') and message.content):
                                 content = str(message.content).strip()
 
-                                # 过滤掉用户输入的内容
-                                if content and content != user_message:
-                                    # 如果内容以用户消息开头，移除用户消息部分
-                                    if isinstance(user_message, str) and content.startswith(user_message):
-                                        content = content[len(user_message):].strip()
-
-                                    if content:
-                                        # 如果没有流式内容，直接输出完整内容
-                                        if not full_response:
+                                # 确保不重复输出用户输入
+                                if content and content != str(user_message).strip():
+                                    # 如果没有流式内容，直接输出完整内容
+                                    if not full_response:
+                                        full_response = content
+                                        logger.debug(f"完整文本消息: {content[:100]}... (总长度: {len(content)})")
+                                        yield content
+                                        await asyncio.sleep(0.01)
+                                    # 如果有流式内容但内容更完整，输出差异部分
+                                    elif len(content) > len(full_response):
+                                        remaining = content[len(full_response):]
+                                        if remaining.strip():
                                             full_response = content
-                                            yield content
+                                            logger.debug(f"补充内容: {remaining[:50]}... (补充长度: {len(remaining)})")
+                                            yield remaining
                                             await asyncio.sleep(0.01)
-                                        # 如果有流式内容但不匹配，可能是最终的完整响应
-                                        elif content != full_response and len(content) > len(full_response):
-                                            # 输出剩余部分
-                                            remaining = content[len(full_response):]
-                                            if remaining:
-                                                full_response = content
-                                                yield remaining
-                                                await asyncio.sleep(0.01)
 
                         # 处理TaskResult（最终结果）
                         elif hasattr(message, 'messages'):
-                            # 这是TaskResult，包含完整的对话历史
                             logger.debug("收到TaskResult")
                             # 如果没有收到任何流式内容，从TaskResult中提取
                             if not full_response:
@@ -429,17 +451,14 @@ class SmartChatSystem:
                                     if (hasattr(msg, 'source') and msg.source == 'assistant' and
                                         hasattr(msg, 'content') and msg.content):
                                         content = str(msg.content).strip()
-                                        if content and content != user_message:
-                                            # 过滤用户输入
-                                            if isinstance(user_message, str) and content.startswith(user_message):
-                                                content = content[len(user_message):].strip()
-                                            if content:
-                                                full_response = content
-                                                yield content
-                                                await asyncio.sleep(0.01)
-                                                break
+                                        if content and content != str(user_message).strip():
+                                            full_response = content
+                                            logger.debug(f"TaskResult内容: {content[:100]}... (总长度: {len(content)})")
+                                            yield content
+                                            await asyncio.sleep(0.01)
+                                            break
 
-                        # 处理其他类型的消息（如工具调用等）
+                        # 处理其他类型的消息
                         else:
                             logger.debug(f"收到其他类型消息: {message_type}")
 
@@ -447,7 +466,32 @@ class SmartChatSystem:
                         logger.warning(f"处理消息时出错: {chunk_error}")
                         continue
 
+                # 输出剩余的缓冲内容
+                if content_buffer:
+                    logger.debug(f"输出剩余缓冲内容: {content_buffer[:50]}... (长度: {len(content_buffer)})")
+                    yield content_buffer
+
                 logger.info(f"流式处理完成，总长度: {len(full_response)}")
+
+                # 检查代码完整性
+                if "```" in full_response:
+                    code_blocks = full_response.count("```")
+                    if code_blocks % 2 != 0:
+                        logger.warning("检测到不完整的代码块，代码块标记数量为奇数")
+                    else:
+                        logger.info(f"代码块完整性检查通过，共 {code_blocks // 2} 个代码块")
+
+                # 检查是否包含函数定义
+                if "def " in full_response:
+                    logger.info("响应包含函数定义")
+                    # 检查是否有完整的函数结构
+                    if full_response.count("def ") > 0:
+                        logger.info(f"检测到 {full_response.count('def ')} 个函数定义")
+                        # 检查第一个函数定义的位置
+                        first_def_pos = full_response.find("def ")
+                        logger.info(f"第一个函数定义位置: {first_def_pos}")
+                        if first_def_pos > 0:
+                            logger.info(f"函数定义前的内容: {repr(full_response[:first_def_pos])}")
 
                 # 注意：不再手动添加AI回复到记忆
                 # AutoGen框架会自动通过Memory协议处理记忆的添加和管理
@@ -544,7 +588,11 @@ async def send_chat_message(
             headers={
                 "Cache-Control": "no-cache",
                 "Connection": "keep-alive",
-                "Content-Type": "text/event-stream"
+                "Content-Type": "text/event-stream",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type, Authorization",
+                "X-Accel-Buffering": "no"  # 禁用Nginx缓冲，确保流式响应实时传输
             }
         )
 
@@ -632,9 +680,33 @@ async def _generate_stream_response(
         model_name: Optional[str],
         user_id: int
 ) -> AsyncGenerator[str, None]:
-    """生成流式响应"""
+    """生成优化的流式响应，包含完整的元数据和状态信息"""
+    import json
+    import time
+    from datetime import datetime
+
+    message_id = f"msg_{int(time.time() * 1000)}"
+    start_time = datetime.now()
+
+    def create_stream_event(event_type: str, data: any = None, **kwargs) -> str:
+        """创建标准化的流式事件"""
+        event = {
+            "id": message_id,
+            "type": event_type,
+            "timestamp": datetime.now().isoformat(),
+            "session_id": session_id,
+            "user_id": user_id,
+            "model_name": model_name or "smart-chat-system",
+            **kwargs
+        }
+        if data is not None:
+            event["data"] = data
+        return f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
 
     try:
+        # 发送开始事件
+        yield create_stream_event("start", {"message": "开始处理您的请求..."})
+
         # 保存用户消息到数据库
         if session_id:
             try:
@@ -662,19 +734,44 @@ async def _generate_stream_response(
                     deduct_cost=0
                 )
                 await chat_controller.create_message(user_message_create)
+                yield create_stream_event("user_message_saved", {"status": "success"})
             except Exception as save_error:
                 logger.warning(f"保存用户消息失败: {save_error}")
+                yield create_stream_event("user_message_saved", {"status": "failed", "error": str(save_error)})
+
+        # 发送处理状态
+        yield create_stream_event("processing", {"message": "AI正在思考中..."})
 
         # 使用智能聊天系统处理消息（集成记忆功能）
         full_response = ""
+        chunk_count = 0
+
         async for content in smart_chat_system.process_message(message, files, model_name, user_id, session_id):
             if content.strip():
                 full_response += content
-                # 直接输出内容
-                yield f"data: {content}\n\n"
+                chunk_count += 1
 
-        # 发送结束标记
-        yield "data: [DONE]\n\n"
+                # 发送内容块事件
+                yield create_stream_event(
+                    "content",
+                    content,
+                    chunk_index=chunk_count,
+                    total_length=len(full_response),
+                    is_markdown=True
+                )
+
+        # 发送完成事件
+        processing_time = (datetime.now() - start_time).total_seconds()
+        yield create_stream_event(
+            "complete",
+            {
+                "full_content": full_response,
+                "total_chunks": chunk_count,
+                "processing_time": processing_time,
+                "word_count": len(full_response.split()),
+                "char_count": len(full_response)
+            }
+        )
 
         # 保存AI回复到数据库
         if session_id and full_response:
@@ -700,14 +797,26 @@ async def _generate_stream_response(
                     deduct_cost=0.001
                 )
                 await chat_controller.create_message(ai_message_create)
+                yield create_stream_event("ai_message_saved", {"status": "success"})
             except Exception as save_error:
                 logger.warning(f"保存AI回复失败: {save_error}")
+                yield create_stream_event("ai_message_saved", {"status": "failed", "error": str(save_error)})
+
+        # 发送结束标记
+        yield create_stream_event("done", {"message": "处理完成"})
 
     except Exception as e:
         logger.error(f"流式响应生成失败: {e}")
-        # 输出错误信息
-        yield f"data: 抱歉，处理您的请求时出现了错误：{str(e)}\n\n"
-        yield "data: [DONE]\n\n"
+        # 发送错误事件
+        yield create_stream_event(
+            "error",
+            {
+                "message": f"抱歉，处理您的请求时出现了错误：{str(e)}",
+                "error_type": type(e).__name__,
+                "recoverable": True
+            }
+        )
+        yield create_stream_event("done", {"message": "处理结束（出现错误）"})
 
 
 @router.get("/session/get", summary="获取会话信息")

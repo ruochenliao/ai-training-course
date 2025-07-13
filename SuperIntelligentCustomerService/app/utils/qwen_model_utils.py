@@ -2,7 +2,6 @@
 通义千问模型工具类
 提供通义千问嵌入模型和重排模型的加载和管理功能
 """
-import os
 import logging
 from pathlib import Path
 from typing import Optional, Dict, Any

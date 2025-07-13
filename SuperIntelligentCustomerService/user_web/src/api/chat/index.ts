@@ -67,19 +67,38 @@ export const sendStream = async (data: ChatSendRequest): Promise<ReadableStream>
   return response.body;
 };
 
-// 解析流式响应 - 适配后端SSE格式
+// 流式事件类型定义
+export interface StreamEvent {
+  id: string;
+  type: 'start' | 'processing' | 'content' | 'complete' | 'error' | 'done' | 'user_message_saved' | 'ai_message_saved';
+  timestamp: string;
+  session_id?: string;
+  user_id?: number;
+  model_name?: string;
+  data?: any;
+  chunk_index?: number;
+  total_length?: number;
+  is_markdown?: boolean;
+}
+
+// 优化的流式响应解析器，支持完整的事件处理和错误恢复
 export const parseStreamResponse = async function* (
   stream: ReadableStream
-): AsyncGenerator<string, void, unknown> {
+): AsyncGenerator<StreamEvent, void, unknown> {
   const reader = stream.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
+  let eventCount = 0;
 
   try {
     while (true) {
       const { done, value } = await reader.read();
 
       if (done) {
+        // 处理剩余的缓冲内容
+        if (buffer.trim()) {
+          console.warn('流结束时仍有未处理的缓冲内容:', buffer);
+        }
         break;
       }
 
@@ -96,24 +115,62 @@ export const parseStreamResponse = async function* (
           continue;
         }
 
-        if (trimmedLine === 'data: [DONE]') {
-          return;
-        }
-
         if (trimmedLine.startsWith('data: ')) {
           try {
-            const content = trimmedLine.slice(6); // 移除 'data: ' 前缀
+            const jsonStr = trimmedLine.slice(6); // 移除 'data: ' 前缀
 
-            // 后端直接返回文本内容，不是JSON格式
-            if (content && content !== '[DONE]') {
-              yield content;
+            // 跳过结束标记
+            if (jsonStr === '[DONE]') {
+              console.log('收到流结束标记');
+              continue;
+            }
+
+            // 尝试解析JSON格式的事件数据
+            if (jsonStr) {
+              try {
+                const event: StreamEvent = JSON.parse(jsonStr);
+                eventCount++;
+
+                // 验证事件格式
+                if (event.type && event.timestamp) {
+                  yield event;
+                } else {
+                  console.warn('收到格式不完整的事件:', event);
+                }
+              } catch (jsonError) {
+                // 如果不是JSON格式，可能是旧版本的纯文本格式，兼容处理
+                console.warn('收到非JSON格式的流式数据，使用兼容模式:', jsonStr.substring(0, 100));
+                yield {
+                  id: `compat_${Date.now()}_${eventCount}`,
+                  type: 'content',
+                  timestamp: new Date().toISOString(),
+                  data: jsonStr,
+                  is_markdown: true
+                };
+                eventCount++;
+              }
             }
           } catch (parseError) {
-            console.warn('解析流式数据失败:', parseError, '原始数据:', trimmedLine);
+            console.error('解析流式数据失败:', parseError, '原始数据:', trimmedLine.substring(0, 100));
+            // 继续处理下一行，不中断整个流
           }
+        } else {
+          // 处理非标准格式的数据
+          console.debug('收到非标准格式数据:', trimmedLine.substring(0, 50));
         }
       }
     }
+
+    console.log(`流式解析完成，共处理 ${eventCount} 个事件`);
+  } catch (error) {
+    console.error('流式解析过程中发生错误:', error);
+    // 发送错误事件
+    yield {
+      id: `error_${Date.now()}`,
+      type: 'error',
+      timestamp: new Date().toISOString(),
+      data: { message: `流式解析错误: ${error.message}` }
+    };
   } finally {
     reader.releaseLock();
   }

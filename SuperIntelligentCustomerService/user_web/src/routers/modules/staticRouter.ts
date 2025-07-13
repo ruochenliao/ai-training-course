@@ -36,7 +36,16 @@ export const layoutRouter: RouteRecordRaw[] = [
 ];
 
 // staticRouter[静态路由] 预留
-export const staticRouter: RouteRecordRaw[] = [];
+export const staticRouter: RouteRecordRaw[] = [
+  {
+    path: '/markdown-test',
+    name: 'MarkdownTest',
+    component: () => import('@/components/MarkdownTest.vue'),
+    meta: {
+      title: 'Markdown测试',
+    }
+  }
+];
 
 // errorRouter (错误页面路由)
 export const errorRouter = [

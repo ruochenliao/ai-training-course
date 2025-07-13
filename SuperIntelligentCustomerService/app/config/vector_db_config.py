@@ -2,10 +2,10 @@
 向量数据库配置和模型管理器
 支持ChromaDB向量数据库和嵌入模型管理
 """
-import os
 import logging
+import os
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 

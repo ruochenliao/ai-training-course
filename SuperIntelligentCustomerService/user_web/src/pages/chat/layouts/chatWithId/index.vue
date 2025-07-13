@@ -1,6 +1,7 @@
 <!-- 每个回话对应的聊天内容 -->
 <script setup lang="ts">
 import type {Sender} from 'vue-element-plus-x';
+import {XMarkdown} from 'vue-element-plus-x';
 import type {BubbleProps} from 'vue-element-plus-x/types/Bubble';
 import type {BubbleListInstance} from 'vue-element-plus-x/types/BubbleList';
 import type {FilesCardProps} from 'vue-element-plus-x/types/FilesCard';
@@ -13,7 +14,6 @@ import {useChatStore} from '@/stores/modules/chat';
 import {useFilesStore} from '@/stores/modules/files';
 import {useUserStore} from '@/stores/modules/user';
 import {useModelStore} from '@/stores/modules/model';
-import {XMarkdown} from 'vue-element-plus-x';
 
 type MessageItem = BubbleProps & {
   key: number;
@@ -153,30 +153,170 @@ async function startSSE(chatContent: string) {
     // 使用新的流式API
     const stream = await sendStream(sendData);
 
-    // 解析流式响应
-    for await (const chunk of parseStreamResponse(stream)) {
+    let currentMessage = '';
+    let isFirstChunk = true;
+    let processingStatus = '';
+    let messageBuffer = ''; // 用于缓冲内容，减少渲染闪烁
+    let chunkCount = 0; // 记录接收到的数据块数量
+
+    console.log('🚀 开始新的流式处理，所有变量已重置');
+
+    // 解析优化的流式响应
+    for await (const event of parseStreamResponse(stream)) {
       // 检查是否被中断
       if (abortController?.signal.aborted) {
         break;
       }
 
-      // 后端直接返回文本内容，不是JSON格式
-      if (typeof chunk === 'string' && chunk.trim()) {
-        // 获取最后一条消息（AI回复）
-        if (bubbleItems.value && bubbleItems.value.length > 0) {
-          const lastMessage = bubbleItems.value[bubbleItems.value.length - 1];
-          if (lastMessage && (lastMessage.role === 'assistant' || lastMessage.role === 'system')) {
-            lastMessage.content = (lastMessage.content || '') + chunk;
-            lastMessage.loading = false;
-            lastMessage.typing = true;
+      // 处理不同类型的流式事件
+      switch (event.type) {
+        case 'start':
+          processingStatus = '开始处理...';
+          console.log('🚀 开始处理用户请求');
+          break;
 
-            // 自动滚动到底部
-            nextTick(() => {
-              bubbleListRef.value?.scrollToBottom();
+        case 'processing':
+          processingStatus = event.data?.message || 'AI正在思考中...';
+          console.log('🤔 AI思考中:', processingStatus);
+          break;
+
+        case 'content':
+          // 累积内容
+          if (event.data) {
+            chunkCount++;
+            messageBuffer += event.data;
+
+            // 调试信息：记录每个数据块
+            console.log(`📦 接收数据块 ${chunkCount}:`, {
+              chunkIndex: event.chunk_index,
+              chunkLength: event.data.length,
+              totalBufferLength: messageBuffer.length,
+              chunkPreview: event.data.substring(0, 50) + (event.data.length > 50 ? '...' : ''),
+              isFirstChunk: chunkCount === 1
             });
+
+            // 特别记录前几个数据块的完整内容
+            if (chunkCount <= 3) {
+              console.log(`🔍 数据块 ${chunkCount} 完整内容:`, JSON.stringify(event.data));
+            }
+
+            // 实时更新UI，使用防抖机制减少渲染频率
+            currentMessage = messageBuffer;
+
+            // 更新最后一条消息（AI回复）
+            if (bubbleItems.value && bubbleItems.value.length > 0) {
+              const lastMessage = bubbleItems.value[bubbleItems.value.length - 1];
+              if (lastMessage && (lastMessage.role === 'assistant' || lastMessage.role === 'system')) {
+                lastMessage.content = currentMessage;
+                lastMessage.isMarkdown = true; // 标记为Markdown内容
+                lastMessage.loading = false;
+                lastMessage.typing = true;
+
+                // 首次收到内容时滚动到底部
+                if (isFirstChunk) {
+                  isFirstChunk = false;
+                  console.log('🎯 首次内容，缓冲区长度:', messageBuffer.length);
+                  console.log('🎯 首次内容预览:', messageBuffer.substring(0, 100));
+                  await nextTick();
+                  bubbleListRef.value?.scrollToBottom();
+                }
+              }
+            }
+
+            // 优化滚动策略：减少滚动频率，提高性能
+            if (event.chunk_index && event.chunk_index % 30 === 0) {
+              await nextTick();
+              bubbleListRef.value?.scrollToBottom();
+            }
           }
-        }
+          break;
+
+        case 'complete':
+          // 确保最终内容完整 - 使用后端提供的完整内容
+          if (event.data?.full_content) {
+            currentMessage = event.data.full_content;
+            messageBuffer = event.data.full_content;
+            console.log('🔍 使用后端完整内容，长度:', event.data.full_content.length);
+            console.log('🔍 完整内容预览:', event.data.full_content.substring(0, 200) + '...');
+          } else {
+            currentMessage = messageBuffer;
+            console.log('🔍 使用缓冲区内容，长度:', messageBuffer.length);
+            console.log('🔍 缓冲区内容预览:', messageBuffer.substring(0, 200) + '...');
+          }
+
+          if (bubbleItems.value && bubbleItems.value.length > 0) {
+            const lastMessage = bubbleItems.value[bubbleItems.value.length - 1];
+            if (lastMessage && (lastMessage.role === 'assistant' || lastMessage.role === 'system')) {
+              lastMessage.content = currentMessage;
+              lastMessage.isMarkdown = true;
+              lastMessage.loading = false;
+              lastMessage.typing = false;
+              console.log('🔍 最终设置的消息内容长度:', lastMessage.content.length);
+            }
+          }
+
+          console.log('✅ 处理完成:', {
+            totalChunks: event.data?.total_chunks,
+            processingTime: event.data?.processing_time,
+            wordCount: event.data?.word_count,
+            finalContentLength: currentMessage.length,
+            bufferLength: messageBuffer.length
+          });
+
+          // 最终滚动到底部
+          await nextTick();
+          bubbleListRef.value?.scrollToBottom();
+          break;
+
+        case 'error':
+          console.error('❌ 处理出错:', event.data);
+          // 显示错误信息
+          if (bubbleItems.value && bubbleItems.value.length > 0) {
+            const lastMessage = bubbleItems.value[bubbleItems.value.length - 1];
+            if (lastMessage && (lastMessage.role === 'assistant' || lastMessage.role === 'system')) {
+              lastMessage.content = event.data?.message || '处理出现错误，请重试';
+              lastMessage.isMarkdown = false;
+              lastMessage.loading = false;
+              lastMessage.typing = false;
+            }
+          }
+          break;
+
+        case 'done':
+          console.log('🏁 流式处理结束');
+          processingStatus = '';
+          // 最终滚动到底部
+          await nextTick();
+          bubbleListRef.value?.scrollToBottom();
+          break;
+
+        default:
+          // 兼容旧版本的字符串格式
+          if (typeof event === 'string' && event.trim()) {
+            messageBuffer += event;
+            currentMessage = messageBuffer;
+
+            if (bubbleItems.value && bubbleItems.value.length > 0) {
+              const lastMessage = bubbleItems.value[bubbleItems.value.length - 1];
+              if (lastMessage && (lastMessage.role === 'assistant' || lastMessage.role === 'system')) {
+                lastMessage.content = currentMessage;
+                lastMessage.isMarkdown = true;
+                lastMessage.loading = false;
+                lastMessage.typing = true;
+
+                // 自动滚动到底部
+                nextTick(() => {
+                  bubbleListRef.value?.scrollToBottom();
+                });
+              }
+            }
+          }
+          console.log('📨 收到其他事件:', event);
       }
+
+      // 优化的延迟机制：根据内容类型调整延迟时间
+      const delay = event.type === 'content' ? 20 : 10; // 内容块稍微慢一点，其他事件快一点
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
   catch (err) {
@@ -288,20 +428,23 @@ watch(
           />
         </template>
         <template #content="{ item }">
-          <!-- 如果是助手消息且标记为 Markdown，使用 XMarkdown 组件渲染 -->
+          <!-- 如果是助手消息且标记为 Markdown，使用优化的 XMarkdown 组件渲染 -->
           <XMarkdown
             v-if="item.isMarkdown && item.role === 'assistant'"
             :markdown="item.content"
             :enable-latex="true"
             :enable-breaks="true"
-            :allow-html="true"
+            :allow-html="false"
             :themes="{
               light: 'vitesse-light',
               dark: 'vitesse-dark'
             }"
             :default-theme-mode="'light'"
-            :need-view-code-btn="false"
-            class="markdown-content"
+            :need-view-code-btn="true"
+            :enable-copy="true"
+            :enable-line-numbers="false"
+            :enable-word-wrap="true"
+            class="enhanced-markdown-content optimized-rendering"
           />
           <!-- 否则使用普通文本显示 -->
           <div v-else class="text-content">
@@ -587,6 +730,83 @@ watch(
     .text-content {
       line-height: 1.6;
       word-wrap: break-word;
+    }
+
+    // 增强的Markdown内容样式优化
+    .enhanced-markdown-content {
+      width: 100%;
+      max-width: 100%;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+
+      // 代码块样式优化
+      :deep(pre) {
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        white-space: pre !important;
+        background-color: #f6f8fa !important;
+        border: 1px solid #d0d7de !important;
+        border-radius: 8px !important;
+        padding: 16px !important;
+        margin: 12px 0 !important;
+        font-size: 13px !important;
+        line-height: 1.45 !important;
+        font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', 'Menlo', monospace !important;
+
+        code {
+          background: transparent !important;
+          padding: 0 !important;
+          border-radius: 0 !important;
+          white-space: pre !important;
+          word-wrap: normal !important;
+        }
+      }
+
+      // 行内代码样式
+      :deep(p code), :deep(li code), :deep(td code), :deep(th code) {
+        background-color: rgba(175, 184, 193, 0.2) !important;
+        padding: 2px 4px !important;
+        border-radius: 4px !important;
+        font-size: 0.9em !important;
+        font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', 'Menlo', monospace !important;
+        white-space: nowrap !important;
+      }
+
+      // 图片样式优化
+      :deep(img) {
+        max-width: 100% !important;
+        height: auto !important;
+        border-radius: 8px !important;
+        margin: 8px 0 !important;
+        display: block !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+      }
+
+      // 表格样式优化
+      :deep(table) {
+        border-collapse: collapse !important;
+        width: 100% !important;
+        margin: 16px 0 !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+
+        th, td {
+          border: 1px solid #d0d7de !important;
+          padding: 8px 12px !important;
+          text-align: left !important;
+          word-wrap: break-word !important;
+        }
+
+        th {
+          background-color: #f6f8fa !important;
+          font-weight: 600 !important;
+        }
+
+        tr:nth-child(even) {
+          background-color: #f6f8fa !important;
+        }
+      }
     }
   }
   .chat-defaul-sender {
