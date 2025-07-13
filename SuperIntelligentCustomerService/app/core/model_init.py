@@ -19,7 +19,7 @@ async def init_models():
         logger.info("🤖 开始初始化AI模型...")
         
         # 导入下载模块
-        from download_models import download_all_models, check_models_exist
+        from .download_models import download_all_models, check_models_exist
         
         # 检查模型状态
         status = check_models_exist()
