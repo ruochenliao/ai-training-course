@@ -33,27 +33,27 @@ class VectorDBConfig:
         str(Path(__file__).parent.parent.parent / "models")
     )
 
-    # 通义千问模型路径配置
-    QWEN_EMBEDDING_MODEL_PATH: str = os.getenv(
-        "QWEN_EMBEDDING_MODEL_PATH",
-        str(Path(__file__).parent.parent.parent / "models" / "embedding" / "Qwen3-8B")
+    # BGE模型路径配置
+    BGE_EMBEDDING_MODEL_PATH: str = os.getenv(
+        "BGE_EMBEDDING_MODEL_PATH",
+        str(Path(__file__).parent.parent.parent / "models" / "embedding" / "bge-small-zh-v1.5")
     )
-    QWEN_RERANKER_MODEL_PATH: str = os.getenv(
-        "QWEN_RERANKER_MODEL_PATH",
-        str(Path(__file__).parent.parent.parent / "models" / "reranker" / "Qwen3-Reranker-8B")
+    BGE_RERANKER_MODEL_PATH: str = os.getenv(
+        "BGE_RERANKER_MODEL_PATH",
+        str(Path(__file__).parent.parent.parent / "models" / "reranker" / "bge-reranker-base")
     )
 
-    # 嵌入模型配置 - 强制使用通义千问模型
-    USE_QWEN_EMBEDDING: bool = True  # 强制启用通义千问嵌入模型
-    EMBEDDING_MODEL_NAME: str = "Qwen3-8B"  # 固定使用通义千问嵌入模型
-    EMBEDDING_DIMENSION: int = 4096  # 通义千问嵌入模型维度
-    USE_LOCAL_EMBEDDING: bool = True  # 强制使用本地模型
+    # 嵌入模型配置 - 使用BGE模型
+    USE_BGE_EMBEDDING: bool = True  # 启用BGE嵌入模型
+    EMBEDDING_MODEL_NAME: str = "BAAI/bge-small-zh-v1.5"  # BGE小型中文嵌入模型
+    EMBEDDING_DIMENSION: int = 512  # BGE-small-zh-v1.5嵌入维度
+    USE_LOCAL_EMBEDDING: bool = True  # 使用本地模型
 
-    # 重排模型配置 - 强制使用通义千问重排模型
-    USE_QWEN_RERANKER: bool = True  # 强制启用通义千问重排模型
-    RERANKER_MODEL_NAME: str = "Qwen3-Reranker-8B"  # 固定使用通义千问重排模型
-    USE_RERANKER: bool = True  # 强制启用重排功能
-    USE_LOCAL_RERANKER: bool = True  # 强制使用本地重排模型
+    # 重排模型配置 - 使用BGE重排模型
+    USE_BGE_RERANKER: bool = True  # 启用BGE重排模型
+    RERANKER_MODEL_NAME: str = "BAAI/bge-reranker-base"  # BGE基础重排模型
+    USE_RERANKER: bool = True  # 启用重排功能
+    USE_LOCAL_RERANKER: bool = True  # 使用本地重排模型
     
     # 检索配置
     DEFAULT_RETRIEVAL_LIMIT: int = int(os.getenv("DEFAULT_RETRIEVAL_LIMIT", "5"))
@@ -79,10 +79,10 @@ class VectorDBConfig:
         return {
             "chroma_persist_directory": cls.CHROMA_PERSIST_DIRECTORY,
             "model_cache_dir": cls.MODEL_CACHE_DIR,
-            "qwen_embedding_model_path": cls.QWEN_EMBEDDING_MODEL_PATH,
-            "qwen_reranker_model_path": cls.QWEN_RERANKER_MODEL_PATH,
-            "use_qwen_embedding": cls.USE_QWEN_EMBEDDING,
-            "use_qwen_reranker": cls.USE_QWEN_RERANKER,
+            "bge_embedding_model_path": cls.BGE_EMBEDDING_MODEL_PATH,
+            "bge_reranker_model_path": cls.BGE_RERANKER_MODEL_PATH,
+            "use_bge_embedding": cls.USE_BGE_EMBEDDING,
+            "use_bge_reranker": cls.USE_BGE_RERANKER,
             "embedding_model_name": cls.EMBEDDING_MODEL_NAME,
             "embedding_dimension": cls.EMBEDDING_DIMENSION,
             "use_local_embedding": cls.USE_LOCAL_EMBEDDING,
@@ -135,73 +135,71 @@ class ModelManager:
         return self._reranker_model
     
     def _load_embedding_model(self):
-        """加载嵌入模型 - 必须使用通义千问模型"""
+        """加载BGE嵌入模型"""
         if not SENTENCE_TRANSFORMERS_AVAILABLE:
             logger.error("sentence-transformers不可用，请安装: pip install sentence-transformers")
             raise RuntimeError("sentence-transformers依赖缺失，无法加载嵌入模型")
 
-        # 强制使用通义千问嵌入模型，不允许回退
-        return self._load_qwen_embedding_model()
+        # 使用BGE嵌入模型
+        return self._load_bge_embedding_model()
 
-    def _load_qwen_embedding_model(self):
-        """加载通义千问嵌入模型 - 必须成功，不允许回退"""
-        model_path = self.config.QWEN_EMBEDDING_MODEL_PATH
-
-        # 检查模型路径是否存在
-        if not Path(model_path).exists():
-            error_msg = f"通义千问嵌入模型路径不存在: {model_path}"
-            logger.error(error_msg)
-            logger.error("请运行 'python models/quick_download.py' 下载模型")
-            raise FileNotFoundError(error_msg)
+    def _load_bge_embedding_model(self):
+        """加载BGE嵌入模型"""
+        model_path = self.config.BGE_EMBEDDING_MODEL_PATH
 
         try:
-            logger.info(f"加载通义千问嵌入模型: {model_path}")
-
-            # 加载本地通义千问模型
-            model = SentenceTransformer(str(model_path), device='cpu')
-            logger.info(f"通义千问嵌入模型加载成功: {model_path}")
-            return model
+            # 首先尝试加载本地模型
+            if Path(model_path).exists():
+                logger.info(f"加载本地BGE嵌入模型: {model_path}")
+                model = SentenceTransformer(str(model_path), device='cpu')
+                logger.info(f"本地BGE嵌入模型加载成功: {model_path}")
+                return model
+            else:
+                # 如果本地模型不存在，从HuggingFace下载
+                logger.info(f"本地模型不存在，从HuggingFace下载: {self.config.EMBEDDING_MODEL_NAME}")
+                model = SentenceTransformer(self.config.EMBEDDING_MODEL_NAME, device='cpu')
+                logger.info(f"BGE嵌入模型下载并加载成功: {self.config.EMBEDDING_MODEL_NAME}")
+                return model
 
         except Exception as e:
-            error_msg = f"加载通义千问嵌入模型失败: {e}"
+            error_msg = f"加载BGE嵌入模型失败: {e}"
             logger.error(error_msg)
-            logger.error("请检查模型文件完整性或重新下载模型")
+            logger.error("请检查网络连接或手动下载模型")
             raise RuntimeError(error_msg)
 
 
     
     def _load_reranker_model(self):
-        """加载重排模型 - 必须使用通义千问模型"""
+        """加载BGE重排模型"""
         if not SENTENCE_TRANSFORMERS_AVAILABLE:
             logger.error("sentence-transformers不可用，请安装: pip install sentence-transformers")
             raise RuntimeError("sentence-transformers依赖缺失，无法加载重排模型")
 
-        # 强制使用通义千问重排模型，不允许回退
-        return self._load_qwen_reranker_model()
+        # 使用BGE重排模型
+        return self._load_bge_reranker_model()
 
-    def _load_qwen_reranker_model(self):
-        """加载通义千问重排模型 - 必须成功，不允许回退"""
-        model_path = self.config.QWEN_RERANKER_MODEL_PATH
-
-        # 检查模型路径是否存在
-        if not Path(model_path).exists():
-            error_msg = f"通义千问重排模型路径不存在: {model_path}"
-            logger.error(error_msg)
-            logger.error("请运行 'python models/quick_download.py' 下载模型")
-            raise FileNotFoundError(error_msg)
+    def _load_bge_reranker_model(self):
+        """加载BGE重排模型"""
+        model_path = self.config.BGE_RERANKER_MODEL_PATH
 
         try:
-            logger.info(f"加载通义千问重排模型: {model_path}")
-
-            # 加载本地通义千问重排模型
-            model = CrossEncoder(str(model_path), device='cpu')
-            logger.info(f"通义千问重排模型加载成功: {model_path}")
-            return model
+            # 首先尝试加载本地模型
+            if Path(model_path).exists():
+                logger.info(f"加载本地BGE重排模型: {model_path}")
+                model = CrossEncoder(str(model_path), device='cpu')
+                logger.info(f"本地BGE重排模型加载成功: {model_path}")
+                return model
+            else:
+                # 如果本地模型不存在，从HuggingFace下载
+                logger.info(f"本地模型不存在，从HuggingFace下载: {self.config.RERANKER_MODEL_NAME}")
+                model = CrossEncoder(self.config.RERANKER_MODEL_NAME, device='cpu')
+                logger.info(f"BGE重排模型下载并加载成功: {self.config.RERANKER_MODEL_NAME}")
+                return model
 
         except Exception as e:
-            error_msg = f"加载通义千问重排模型失败: {e}"
+            error_msg = f"加载BGE重排模型失败: {e}"
             logger.error(error_msg)
-            logger.error("请检查模型文件完整性或重新下载模型")
+            logger.error("请检查网络连接或手动下载模型")
             raise RuntimeError(error_msg)
 
 

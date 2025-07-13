@@ -17,7 +17,7 @@ from .exceptions import (
     ResponseValidationHandle,
 )
 from .middlewares import BackGroundTaskMiddleware, HttpAuditLogMiddleware
-from .model_init import init_models as init_ai_models
+# BGE模型会在首次使用时自动下载，无需单独初始化
 from ..api import api_router
 from ..controllers.api import api_controller
 from ..controllers.user import UserCreate, user_controller
@@ -261,88 +261,14 @@ async def init_models():
     """初始化模型数据"""
     models = await Model.exists()
     if not models:
-        # 创建阿里云通义千问文本模型
-        await Model.create(
-            category="对话模型",
-            model_name="qwen-plus-latest",
-            model_describe="阿里云通义千问Plus模型，专业的对话AI助手，支持中文优化",
-            model_price=0.001,
-            model_type="chat",
-            model_show="通义千问Plus",
-            system_prompt="""你是超级智能客服，专业、友好、乐于助人。请用中文回复用户的问题。
-
-## 重要格式要求：
-**必须使用标准 Markdown 格式**输出所有回复，特别注意：
-
-1. **代码块格式**：
-```语言名称
-代码内容（必须有正确的换行符和缩进）
-```
-
-2. **确保代码块内容格式化良好**：
-   - 每行代码独立成行
-   - 保持正确的缩进
-   - 包含适当的注释
-   - 不要将所有代码挤在一行
-
-3. **使用适当的 Markdown 语法**：
-   - 标题：# ## ###
-   - 列表：- 或 1.
-   - 强调：**粗体** *斜体*
-   - 行内代码：`代码`
-
-确保所有代码示例都格式化良好。""",
-            api_host="https://dashscope.aliyuncs.com/compatible-mode/v1",
-            api_key=encrypt_api_key("sk-aeb8d69039b14320b0fe58cb8285d8b1"),
-            is_active=True,
-            remark="阿里云通义千问文本模型"
-        )
-
-        # 创建阿里云通义千问多模态模型
-        await Model.create(
-            category="多模态模型",
-            model_name="qwen-vl-max",
-            model_describe="阿里云通义千问VL-Max模型，支持图像理解和多模态对话",
-            model_price=0.002,
-            model_type="multimodal",
-            model_show="通义千问VL-Max",
-            system_prompt="""你是超级智能客服，专业、友好、乐于助人。你可以理解图像内容并用中文回复用户的问题。
-
-## 重要格式要求：
-**必须使用标准 Markdown 格式**输出所有回复，特别注意：
-
-1. **代码块格式**：
-```语言名称
-代码内容（必须有正确的换行符和缩进）
-```
-
-2. **确保代码块内容格式化良好**：
-   - 每行代码独立成行
-   - 保持正确的缩进
-   - 包含适当的注释
-   - 不要将所有代码挤在一行
-
-3. **使用适当的 Markdown 语法**：
-   - 标题：# ## ###
-   - 列表：- 或 1.
-   - 强调：**粗体** *斜体*
-   - 行内代码：`代码`
-
-确保所有代码示例都格式化良好。""",
-            api_host="https://dashscope.aliyuncs.com/compatible-mode/v1",
-            api_key=encrypt_api_key("sk-aeb8d69039b14320b0fe58cb8285d8b1"),
-            is_active=True,
-            remark="阿里云通义千问多模态模型"
-        )
-
-        # 创建deepseek模型
+        # 创建DeepSeek文本模型
         await Model.create(
             category="对话模型",
             model_name="deepseek-chat",
-            model_describe="Deepseek Chat 模型，专业的对话AI助手",
+            model_describe="DeepSeek Chat模型，专业的对话AI助手，支持中文优化",
             model_price=0.001,
             model_type="chat",
-            model_show="Deepseek Chat",
+            model_show="DeepSeek Chat",
             system_prompt="""你是超级智能客服，专业、友好、乐于助人。请用中文回复用户的问题。
 
 ## 重要格式要求：
@@ -369,8 +295,47 @@ async def init_models():
             api_host="https://api.deepseek.com/v1",
             api_key=encrypt_api_key("sk-56f5743d59364543a00109a4c1c10a56"),
             is_active=True,
-            remark="默认对话模型"
+            remark="DeepSeek文本模型"
         )
+
+        # 创建DeepSeek多模态模型
+        await Model.create(
+            category="多模态模型",
+            model_name="deepseek-vl-chat",
+            model_describe="DeepSeek VL Chat模型，支持图像理解和多模态对话",
+            model_price=0.002,
+            model_type="multimodal",
+            model_show="DeepSeek VL Chat",
+            system_prompt="""你是超级智能客服，专业、友好、乐于助人。你可以理解图像内容并用中文回复用户的问题。
+
+## 重要格式要求：
+**必须使用标准 Markdown 格式**输出所有回复，特别注意：
+
+1. **代码块格式**：
+```语言名称
+代码内容（必须有正确的换行符和缩进）
+```
+
+2. **确保代码块内容格式化良好**：
+   - 每行代码独立成行
+   - 保持正确的缩进
+   - 包含适当的注释
+   - 不要将所有代码挤在一行
+
+3. **使用适当的 Markdown 语法**：
+   - 标题：# ## ###
+   - 列表：- 或 1.
+   - 强调：**粗体** *斜体*
+   - 行内代码：`代码`
+
+确保所有代码示例都格式化良好。""",
+            api_host="https://api.deepseek.com/v1",
+            api_key=encrypt_api_key("sk-56f5743d59364543a00109a4c1c10a56"),
+            is_active=True,
+            remark="DeepSeek多模态模型"
+        )
+
+        # 注意：DeepSeek Chat模型已在上面创建，避免重复
 
 
 async def init_depts():
@@ -495,5 +460,4 @@ async def init_data():
     await init_roles()
     await init_models()
     await init_depts()
-    # 初始化AI模型（嵌入模型和重排模型）
-    await init_ai_models()
+    # BGE模型会在首次使用时自动下载，无需单独初始化

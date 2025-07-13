@@ -25,6 +25,7 @@ from ....controllers.memory.autogen_memory import AutoGenMemoryAdapter
 from ....controllers.memory.factory import MemoryServiceFactory
 from ....controllers.model import model_controller
 from ....core.dependency import DependAuth
+from ....core.custom_context import create_safe_assistant_with_memory
 from ....models.admin import User
 from ....schemas import Success, Fail, SuccessExtra
 from ....schemas.chat_service import *
@@ -66,10 +67,10 @@ class SmartChatSystem:
         self.current_text_model = None
         self.current_vision_model = None
 
-        # 记忆功能 - 暂时禁用直到通义千问模型下载完成
+        # 记忆功能 - 使用BGE模型
         self.memory_factory = None
         self.memory_adapters = {}  # 用户ID -> AutoGenMemoryAdapter
-        self.memory_enabled = False  # 暂时禁用记忆功能
+        self.memory_enabled = True  # 启用记忆功能
 
     def _update_model_info(self, model_name: str, vision_support: bool):
         """更新模型信息到全局缓存"""
@@ -222,8 +223,7 @@ class SmartChatSystem:
             text_model_client = await self.get_model_client(model_name=text_model_name, vision_support=False)
             vision_model_client = await self.get_model_client(model_name=vision_model_name, vision_support=True)
 
-            # 暂时禁用记忆功能，直到通义千问模型下载完成
-            # 因为记忆功能依赖于嵌入模型，而当前强制使用通义千问模型
+            # 记忆功能已启用，使用BGE嵌入模型
             memory_adapters = []
             if user_id and self.memory_enabled:
                 try:
@@ -235,12 +235,11 @@ class SmartChatSystem:
                     logger.warning(f"记忆适配器初始化失败，将禁用记忆功能: {memory_error}")
                     memory_adapters = []
 
-            # 创建文本智能体（暂时不集成记忆功能）
-            self.text_agent = AssistantAgent(
-                "text_agent",
+            # 创建文本智能体（使用修复后的上下文）
+            self.text_agent = create_safe_assistant_with_memory(
+                name="text_agent",
                 model_client=text_model_client,
-                model_client_stream=True,  # 启用流式token
-                memory=memory_adapters,  # 暂时注释掉记忆功能
+                memory_adapters=memory_adapters,
                 system_message="""你是专门处理文本对话的智能客服助手。你的职责是：
 
 1. 回答用户的文本问题
@@ -248,6 +247,26 @@ class SmartChatSystem:
 3. 理解用户意图并给出有用的建议
 4. 保持对话的连贯性和上下文理解
 5. 利用历史对话记忆和用户偏好提供个性化服务
+
+## 知识库使用指南（重要）：
+
+**你必须优先使用记忆中的知识库内容来回答用户问题**
+
+### 知识库内容识别：
+- 记忆中标记为"公共知识库"的内容是上传的文档知识
+- 记忆中标记为"个人相关信息"的内容是用户的个人知识库
+- 这些内容是最权威和准确的信息来源
+
+### 使用策略：
+1. **优先检查记忆**：首先检查记忆中是否有与用户问题相关的知识库内容
+2. **严格基于知识库**：如果找到相关内容，必须严格基于这些内容回答，不要添加额外信息
+3. **明确标注来源**：在回答中明确说明信息来源于知识库
+4. **保持准确性**：不要修改或解释知识库内容，直接使用原始信息
+5. **结构化呈现**：将知识库内容整理成清晰易懂的格式
+
+### 回答模式：
+- **有知识库内容**：基于知识库内容回答，格式："根据知识库信息：[具体内容]"
+- **无相关知识库**：基于常识回答，但要说明："基于一般知识，[回答内容]，建议查阅相关文档获取准确信息"
 
 ## 重要格式要求：
 **必须严格使用标准 Markdown 格式**输出所有回复，确保内容能够正确渲染：
@@ -281,12 +300,11 @@ class SmartChatSystem:
 请用中文回复，语气要专业且友好。确保所有内容都能在前端正确渲染显示。"""
             )
 
-            # 创建多模态智能体（暂时不集成记忆功能）
-            self.vision_agent = AssistantAgent(
-                "vision_agent",
+            # 创建多模态智能体（使用修复后的上下文）
+            self.vision_agent = create_safe_assistant_with_memory(
+                name="vision_agent",
                 model_client=vision_model_client,
-                model_client_stream=True,  # 启用流式token
-                memory=memory_adapters,  # 暂时注释掉记忆功能
+                memory_adapters=memory_adapters,
                 system_message="""你是专门处理多模态内容的智能客服助手。你的职责是：
 
 1. 分析和理解图片、视频等多媒体内容
@@ -294,6 +312,21 @@ class SmartChatSystem:
 3. 提供基于视觉内容的专业建议
 4. 识别图片中的物品、场景、文字等信息
 5. 利用历史对话记忆和用户偏好提供个性化服务
+
+## 知识库使用指南（重要）：
+
+**你必须优先使用记忆中的知识库内容来回答用户问题**
+
+### 多模态知识库处理：
+- 记忆中的知识库内容可能包含图片、文档等多媒体信息
+- 结合视觉分析和知识库内容提供综合回答
+- 当用户上传的图片与知识库内容相关时，优先引用知识库信息
+
+### 使用策略：
+1. **视觉分析 + 知识库**：先分析图片内容，然后检查记忆中的相关知识库信息
+2. **优先知识库**：如果知识库中有相关信息，必须基于知识库内容回答
+3. **标注信息来源**：明确区分视觉分析结果和知识库信息
+4. **综合回答**：将视觉分析和知识库内容结合，提供完整回答
 
 ## 重要格式要求：
 **必须严格使用标准 Markdown 格式**输出所有回复，确保内容能够正确渲染：

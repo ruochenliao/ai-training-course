@@ -247,6 +247,8 @@ class AutoGenMemoryAdapter(Memory):
                     "source_weight": 0.7,  # 公共记忆权重较低
                     "query_time": public_query_result.query_time
                 })
+                all_results.append(item)  # 修复：添加公共记忆结果到总结果列表
+
             # 重新计算综合相关性分数
             for item in all_results:
                 base_score = item.metadata.get("relevance_score", 0)
@@ -342,9 +344,19 @@ class AutoGenMemoryAdapter(Memory):
             try:
                 from autogen_agentchat.messages import SystemMessage
 
-                # 创建包含记忆信息的系统消息
+                # 创建包含记忆信息的系统消息，强调知识库内容的重要性
                 memory_system_message = SystemMessage(
-                    content=f"\n相关记忆内容（按时间顺序）：\n{memory_context}\n",
+                    content=f"""
+## 重要：以下是与用户问题相关的记忆内容
+
+{memory_context}
+
+**使用指导：**
+1. 如果上述内容包含"相关知识库内容"，这是最权威的信息来源，必须优先使用
+2. 严格基于知识库内容回答，不要添加或修改信息
+3. 如果知识库内容不完整，可以结合其他记忆内容补充
+4. 在回答中明确标注信息来源（知识库/个人信息/对话历史）
+""",
                     type="SystemMessage"
                 )
 
@@ -362,7 +374,17 @@ class AutoGenMemoryAdapter(Memory):
 
                 memory_message = TextMessage(
                     source="system",
-                    content=f"\n相关记忆内容（按时间顺序）：\n{memory_context}\n"
+                    content=f"""
+## 重要：以下是与用户问题相关的记忆内容
+
+{memory_context}
+
+**使用指导：**
+1. 如果上述内容包含"相关知识库内容"，这是最权威的信息来源，必须优先使用
+2. 严格基于知识库内容回答，不要添加或修改信息
+3. 如果知识库内容不完整，可以结合其他记忆内容补充
+4. 在回答中明确标注信息来源（知识库/个人信息/对话历史）
+"""
                 )
 
                 updated_messages = list(messages)
@@ -379,11 +401,18 @@ class AutoGenMemoryAdapter(Memory):
         """构建记忆上下文字符串
 
         根据Microsoft AutoGen官方文档的格式构建记忆上下文
+        增强知识库内容的处理和展示
         """
-        context_parts = []
+        if not memories:
+            return ""
+
+        # 分类记忆内容
+        knowledge_base_memories = []
+        chat_memories = []
+        private_memories = []
 
         try:
-            for i, memory in enumerate(memories, 1):
+            for memory in memories:
                 if not memory:
                     continue
 
@@ -394,11 +423,62 @@ class AutoGenMemoryAdapter(Memory):
                 if not isinstance(metadata, dict):
                     metadata = {}
 
-                # 根据AutoGen官方文档的格式，简化记忆内容的展示
-                context_part = f"{i}. {content}"
-                context_parts.append(context_part)
+                # 根据来源分类记忆
+                source = metadata.get('source', 'unknown')
+                memory_type = metadata.get('content_type', 'unknown')
 
-            return "\n".join(context_parts)
+                memory_info = {
+                    'content': content,
+                    'metadata': metadata,
+                    'source': source,
+                    'type': memory_type,
+                    'relevance_score': metadata.get('relevance_score', 0)
+                }
+
+                # 分类存储
+                if 'knowledge' in memory_type.lower() or 'document' in source.lower():
+                    knowledge_base_memories.append(memory_info)
+                elif 'chat' in source.lower() or 'conversation' in source.lower():
+                    chat_memories.append(memory_info)
+                else:
+                    private_memories.append(memory_info)
+
+            # 构建分类的上下文
+            context_parts = []
+
+            # 1. 知识库内容（最重要，放在前面）
+            if knowledge_base_memories:
+                context_parts.append("## 相关知识库内容（重要参考）：")
+                for i, memory in enumerate(knowledge_base_memories, 1):
+                    title = memory['metadata'].get('title', f'知识条目{i}')
+                    category = memory['metadata'].get('category', '通用')
+                    score = memory['relevance_score']
+
+                    context_part = f"### {i}. {title} (分类: {category}, 相关度: {score:.3f})\n{memory['content']}"
+                    context_parts.append(context_part)
+                context_parts.append("")  # 添加空行分隔
+
+            # 2. 个人相关信息
+            if private_memories:
+                context_parts.append("## 个人相关信息：")
+                for i, memory in enumerate(private_memories, 1):
+                    context_part = f"{i}. {memory['content']}"
+                    context_parts.append(context_part)
+                context_parts.append("")  # 添加空行分隔
+
+            # 3. 对话历史（简化显示）
+            if chat_memories:
+                context_parts.append("## 相关对话历史：")
+                for i, memory in enumerate(chat_memories[:3], 1):  # 只显示最相关的3条
+                    context_part = f"{i}. {memory['content'][:100]}..."  # 截断长内容
+                    context_parts.append(context_part)
+
+            result = "\n".join(context_parts)
+
+            # 记录构建的上下文信息用于调试
+            logger.debug(f"构建记忆上下文完成 - 知识库: {len(knowledge_base_memories)}, 私有: {len(private_memories)}, 聊天: {len(chat_memories)}")
+
+            return result
 
         except Exception as e:
             logger.error(f"构建记忆上下文失败: {e}")

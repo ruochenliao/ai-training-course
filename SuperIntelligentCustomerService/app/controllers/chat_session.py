@@ -32,9 +32,10 @@ except ImportError:
             self.stop_reason = stop_reason
 
 from ..schemas.chat_service import (
-    ChatMessage, MessageRole, MessageType, SessionInfo, 
+    ChatMessage, MessageRole, MessageType, SessionInfo,
     MemoryContext, ChatServiceConfig
 )
+from ..core.custom_context import create_safe_assistant_with_memory
 
 logger = logging.getLogger(__name__)
 
@@ -143,12 +144,12 @@ class ChatSession:
             except ImportError:
                 logger.warning("记忆适配器不可用")
             
-            # 创建助手智能体
-            assistant = AssistantAgent(
+            # 创建助手智能体（使用修复后的上下文）
+            assistant = create_safe_assistant_with_memory(
                 name="intelligent_assistant",
                 model_client=self.model_client,
                 system_message=prompt,
-                memory=memory_adapters if memory_adapters else None
+                memory_adapters=memory_adapters if memory_adapters else None
             )
             
             logger.info(f"会话 {self.session_id} 助手智能体创建成功")

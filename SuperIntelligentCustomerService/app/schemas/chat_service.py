@@ -146,7 +146,7 @@ class ChatServiceConfig(BaseModel):
     memory_context_limit: int = Field(default=10, description="记忆上下文限制")
     enable_streaming: bool = Field(default=True, description="启用流式响应")
     enable_multimodal: bool = Field(default=True, description="启用多模态")
-    default_model: str = Field(default="qwen-plus-latest", description="默认模型")
+    default_model: str = Field(default="deepseek-chat", description="默认模型")
     system_prompt: str = Field(
         default="""你是超级智能客服，专业、友好、乐于助人。请用中文回复用户的问题。
 

@@ -19,8 +19,19 @@ except ImportError:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # 初始化数据库和基础数据
     await init_data()
+
+    # 启动异步文件处理器
+    from .controllers.async_file_processor import async_file_processor
+    await async_file_processor.start()
+
     yield
+
+    # 关闭异步文件处理器
+    await async_file_processor.stop()
+
+    # 关闭数据库连接
     await Tortoise.close_connections()
 
 

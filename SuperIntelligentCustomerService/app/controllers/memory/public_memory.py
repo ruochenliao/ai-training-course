@@ -14,6 +14,7 @@ from typing import List, Dict, Any, Optional
 
 try:
     import chromadb
+    import numpy as np
     from sentence_transformers import SentenceTransformer, CrossEncoder
     CHROMADB_AVAILABLE = True
 except ImportError:
@@ -304,11 +305,12 @@ class PublicMemoryService(BaseMemoryService):
             # 第一阶段：向量检索，获取更多候选结果
             retrieval_limit = min(limit * 3, 20)  # 获取3倍数量用于重排
 
+            # 修复：同时检查布尔值True和字符串"True"，兼容不同的数据格式
             results = self.collection.query(
                 query_embeddings=[query_embedding],
                 n_results=retrieval_limit,
                 include=["documents", "metadatas", "distances"],
-                where={"is_active": True}  # 只检索激活的知识
+                where={"$or": [{"is_active": True}, {"is_active": "True"}]}  # 兼容布尔值和字符串
             )
 
             if not results["ids"] or not results["ids"][0]:
@@ -388,14 +390,34 @@ class PublicMemoryService(BaseMemoryService):
 
             # 更新候选结果的分数
             for i, candidate in enumerate(candidates):
-                candidate["rerank_score"] = float(rerank_scores[i])
+                # 安全地转换重排分数，处理BGE重排模型的返回格式
+                try:
+                    raw_score = rerank_scores[i]
+                    if isinstance(raw_score, (list, tuple, np.ndarray)):
+                        # 如果返回的是数组，取第一个元素
+                        rerank_score = float(raw_score[0]) if len(raw_score) > 0 else 0.5
+                    elif hasattr(raw_score, 'item'):
+                        # 处理numpy标量
+                        rerank_score = float(raw_score.item())
+                    else:
+                        rerank_score = float(raw_score)
+                except (ValueError, TypeError, IndexError, AttributeError) as e:
+                    logger.warning(f"重排分数转换失败: {e}, 原始分数类型: {type(rerank_scores[i])}, 值: {rerank_scores[i]}, 使用默认分数")
+                    rerank_score = 0.5  # 默认中等分数
+
+                candidate["rerank_score"] = rerank_score
 
                 # 结合原始相似度和重排分数
-                combined_score = 0.3 * candidate["similarity_score"] + 0.7 * candidate["rerank_score"]
+                similarity_score = candidate["similarity_score"]
+                combined_score = 0.3 * similarity_score + 0.7 * rerank_score
 
                 # 考虑优先级加权
                 priority = candidate["metadata"].get("priority", 1)
-                priority_bonus = priority * 0.1
+                try:
+                    priority_bonus = float(priority) * 0.1
+                except (ValueError, TypeError):
+                    priority_bonus = 0.1  # 默认优先级加成
+
                 candidate["final_score"] = combined_score + priority_bonus
 
             # 按最终分数排序
