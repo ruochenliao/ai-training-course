@@ -236,7 +236,7 @@ class AutoGenMemoryAdapter(Memory):
             for item in private_query_result.items:
                 item.metadata.update({
                     "memory_source": "private",
-                    "source_weight": 0.9,  # 私有记忆权重最高
+                    "source_weight": 1.5,  # 私有记忆权重大幅提高，确保优先级
                     "query_time": private_query_result.query_time
                 })
                 all_results.append(item)
@@ -244,7 +244,7 @@ class AutoGenMemoryAdapter(Memory):
             for item in public_query_result.items:
                 item.metadata.update({
                     "memory_source": "public",
-                    "source_weight": 0.7,  # 公共记忆权重较低
+                    "source_weight": 0.6,  # 公共记忆权重降低
                     "query_time": public_query_result.query_time
                 })
                 all_results.append(item)  # 修复：添加公共记忆结果到总结果列表
