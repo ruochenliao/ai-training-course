@@ -1,3 +1,7 @@
+import warnings
+# 抑制 passlib 中 pkg_resources 的弃用警告
+warnings.filterwarnings("ignore", message="pkg_resources is deprecated", category=UserWarning)
+
 from passlib import pwd
 from passlib.context import CryptContext
 
