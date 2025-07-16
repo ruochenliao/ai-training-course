@@ -138,6 +138,13 @@ class AgentType(str, Enum):
     MULTIMODAL_AGENT = "multimodal_agent"
 
 
+class MemoryContext(BaseModel):
+    """记忆上下文"""
+    chat_history: List[ChatServiceMessage] = Field(default_factory=list, description="聊天历史")
+    private_memories: List[str] = Field(default_factory=list, description="私有记忆")
+    public_memories: List[str] = Field(default_factory=list, description="公共记忆")
+
+
 class ChatServiceConfig(BaseModel):
     """聊天服务配置"""
     max_sessions_per_user: int = Field(default=10, description="每用户最大会话数")

@@ -2,13 +2,13 @@ from typing import Optional
 
 from fastapi import APIRouter, Query, HTTPException
 
-from ....controllers.chat import chat_controller
+from ....controllers.message_manager import message_manager
 from ....core.dependency import DependAuth
 from ....models.admin import User
 from ....schemas import Success, SuccessExtra
-from ....schemas.chat import (
-    ChatMessageVo,
-    ChatMessageCreate
+from ....schemas.chat_service import (
+    ChatServiceMessage as ChatMessageVo,
+    ChatServiceMessage as ChatMessageCreate
 )
 from ....utils.serializer import safe_serialize
 
@@ -43,7 +43,7 @@ async def get_chat_list(
 
 
 
-        total, messages = await chat_controller.get_session_messages(
+        total, messages = await message_manager.get_session_messages(
             session_id=session_id_int,
             user_id=user_id,
             page=page_num,
@@ -114,7 +114,7 @@ async def add_chat_message(
             remark=message_data.remark
         )
         
-        message = await chat_controller.create_message(message_create)
+        message = await message_manager.create_message(message_create)
         message_dict = await message.to_dict()
         
         return Success(data=message_dict, msg="聊天记录添加成功")
@@ -137,7 +137,7 @@ async def get_latest_messages(
     try:
         user_id = current_user.id
         session_id_int = session_id
-        messages = await chat_controller.get_latest_messages(
+        messages = await message_manager.get_latest_messages(
             session_id=session_id_int,
             user_id=user_id,
             limit=limit
@@ -166,7 +166,7 @@ async def delete_session_messages(
     """删除会话的所有聊天记录"""
     try:
         user_id = current_user.id
-        deleted_count = await chat_controller.delete_session_messages(session_id, user_id)
+        deleted_count = await message_manager.delete_session_messages(session_id, user_id)
         
         return Success(msg=f"成功删除 {deleted_count} 条聊天记录")
         
@@ -185,7 +185,7 @@ async def get_user_chat_stats(
     """获取用户聊天统计信息"""
     try:
         user_id = current_user.id
-        stats = await chat_controller.get_user_message_stats(user_id)
+        stats = await message_manager.get_user_message_stats(user_id)
         return Success(data=stats)
         
     except Exception as e:
