@@ -5,6 +5,7 @@
 """
 import asyncio
 import logging
+import traceback
 from datetime import datetime, timedelta
 from io import BytesIO
 from typing import List, Optional, Any, AsyncGenerator
@@ -355,21 +356,34 @@ class ChatSession:
                     raise Exception(error_msg)
 
             logger.info(f"会话 {self.session_id} 选择了{agent_type}来处理消息")
+            logger.info(f"🤖 智能体类型: {type(selected_agent)}")
 
             # 创建消息对象
             if is_multimodal and files:
                 user_message = await self._create_multimodal_message(content, files)
+                logger.info(f"📷 创建多模态消息: {len(files)} 个文件")
             else:
                 user_message = content
+                logger.info(f"📝 创建文本消息: {content[:50]}...")
 
             # 流式处理响应
             full_response = ""
             content_buffer = ""
             last_yield_time = 0
             min_yield_interval = 0.05
+            chunk_count = 0
+            total_chars = 0
 
-            async for message in selected_agent.run_stream(task=user_message):
-                try:
+            logger.info(f"🚀 开始调用智能体流式处理...")
+            logger.info(f"📝 用户消息: {user_message}")
+            logger.info(f"🤖 智能体类型: {type(selected_agent)}")
+
+            try:
+                logger.info(f"🔄 开始智能体流式调用...")
+                message_count = 0
+                async for message in selected_agent.run_stream(task=user_message):
+                    message_count += 1
+                    logger.info(f"📨 收到消息 #{message_count}: {type(message)}")
                     message_type = getattr(message, 'type', None)
 
                     # 处理流式token块
@@ -379,6 +393,8 @@ class ChatSession:
                             if content_chunk:
                                 content_buffer += content_chunk
                                 full_response += content_chunk
+                                chunk_count += 1
+                                total_chars += len(content_chunk)
 
                                 current_time = asyncio.get_event_loop().time()
                                 if current_time - last_yield_time >= min_yield_interval or len(content_buffer) > 100:
@@ -397,12 +413,16 @@ class ChatSession:
                                 if not full_response:
                                     full_response = content_chunk
                                     yield content_chunk
+                                    chunk_count += 1
+                                    total_chars += len(content_chunk)
                                     await asyncio.sleep(0.01)
                                 elif len(content_chunk) > len(full_response):
                                     remaining = content_chunk[len(full_response):]
                                     if remaining.strip():
                                         full_response = content_chunk
                                         yield remaining
+                                        chunk_count += 1
+                                        total_chars += len(remaining)
                                         await asyncio.sleep(0.01)
 
                     # 处理TaskResult
@@ -415,24 +435,29 @@ class ChatSession:
                                     if content_chunk and content_chunk != str(user_message).strip():
                                         full_response = content_chunk
                                         yield content_chunk
+                                        chunk_count += 1
+                                        total_chars += len(content_chunk)
                                         await asyncio.sleep(0.01)
                                         break
 
-                except Exception as chunk_error:
-                    logger.warning(f"处理消息块时出错: {chunk_error}")
-                    continue
+                # 输出剩余缓冲内容
+                if content_buffer:
+                    yield content_buffer
 
-            # 输出剩余缓冲内容
-            if content_buffer:
-                yield content_buffer
+                # 更新消息计数
+                self.message_count += 1
 
-            # 更新消息计数
-            self.message_count += 1
+                logger.info(f"会话 {self.session_id} 消息处理完成，响应长度: {len(full_response)}")
+                logger.info(f"📊 处理统计: 块数={chunk_count}, 字符数={total_chars}")
 
-            logger.info(f"会话 {self.session_id} 消息处理完成，响应长度: {len(full_response)}")
+            except Exception as inner_e:
+                logger.error(f"❌ 智能体调用失败: {inner_e}")
+                logger.error(f"详细错误: {traceback.format_exc()}")
+                yield f"抱歉，AI处理时出现错误: {str(inner_e)}"
 
         except Exception as e:
-            logger.error(f"发送消息失败: {e}")
+            logger.error(f"❌ 发送消息失败: {e}")
+            logger.error(f"详细错误: {traceback.format_exc()}")
             yield f"抱歉，处理您的消息时出现错误: {str(e)}"
 
     def _detect_multimodal_content(self, message: str, files: Optional[List[Any]] = None) -> bool:

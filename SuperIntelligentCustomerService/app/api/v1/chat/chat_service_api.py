@@ -181,6 +181,34 @@ class SmartChatSystem:
             if not api_host:
                 raise ValueError(f"模型 {model_name} 的 API Host 为空")
 
+            # 确保 model_info 包含必需的字段
+            if not model_info:
+                model_info = {}
+
+            # AutoGen v0.4.7+ 要求 ModelInfo 包含所有必需字段
+            # 根据模型名称判断特性
+            is_vision_model = any(keyword in model_name.lower() for keyword in ['vl', 'vision', 'visual', 'gpt-4o', 'gpt-4-vision'])
+
+            # 设置所有必需字段
+            model_info.setdefault('vision', is_vision_model)
+            model_info.setdefault('function_calling', True)
+            model_info.setdefault('json_output', True)
+
+            # 根据模型名称设置 family
+            if 'family' not in model_info:
+                if 'qwen' in model_name.lower():
+                    model_info['family'] = 'qwen'
+                elif 'deepseek' in model_name.lower():
+                    model_info['family'] = 'deepseek'
+                elif 'gpt' in model_name.lower():
+                    model_info['family'] = 'openai'
+                elif 'claude' in model_name.lower():
+                    model_info['family'] = 'anthropic'
+                else:
+                    model_info['family'] = 'unknown'
+
+            logger.info(f"   - Model Info: {model_info}")
+
             client = OpenAIChatCompletionClient(
                 model=model_name,
                 base_url=api_host,
@@ -188,6 +216,7 @@ class SmartChatSystem:
                 model_info=model_info,
             )
             logger.info(f"✅ 模型客户端创建成功: {model_name}")
+            logger.info(f"   - 客户端类型: {type(client)}")
             return client
         except Exception as e:
             logger.error(f"❌ 创建模型客户端失败: {e}")
