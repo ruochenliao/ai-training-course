@@ -7,35 +7,13 @@ import logging
 from datetime import datetime
 from typing import List, Dict, Any
 
-try:
-    from autogen_core.memory import Memory, MemoryContent, MemoryMimeType
-    from autogen_agentchat.messages import BaseMessage, TextMessage
-    from typing import Sequence
-    AUTOGEN_AVAILABLE = True
-except ImportError:
-    AUTOGEN_AVAILABLE = False
-    # 创建占位符类
-    class Memory:
-        async def add(self, memory_content): pass
-        async def query(self, query, limit=5): return []
-        async def update_context(self, messages): return messages
-        async def clear(self): pass
-        async def close(self): pass
-    class MemoryContent:
-        def __init__(self, content, mime_type=None, metadata=None):
-            self.content = content
-            self.mime_type = mime_type
-            self.metadata = metadata or {}
-    class MemoryMimeType:
-        TEXT = "text"
-    class BaseMessage:
-        def __init__(self, content=""):
-            self.content = content
-    class TextMessage(BaseMessage):
-        def __init__(self, source="", content=""):
-            super().__init__(content)
-            self.source = source
-    from typing import Sequence
+# 直接导入 AutoGen 组件
+from autogen_core.memory import Memory, MemoryContent, MemoryMimeType
+from autogen_agentchat.messages import BaseMessage, TextMessage
+from typing import Sequence
+
+# 从 custom_context 导入 AUTOGEN_AVAILABLE 状态
+from ...core.custom_context import AUTOGEN_AVAILABLE
 
 from .factory import MemoryServiceFactory
 

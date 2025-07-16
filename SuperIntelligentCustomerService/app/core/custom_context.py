@@ -4,22 +4,26 @@
 参考: https://microsoft.github.io/autogen/stable/user-guide/agentchat-user-guide/memory.html
 """
 import logging
+import sys
+import traceback
 from typing import List, Sequence, Any, Optional
 
-try:
-    from autogen_agentchat.messages import BaseMessage
-    from autogen_core.model_context import UnboundedChatCompletionContext
-    from autogen_core.models import LLMMessage
-    from autogen_agentchat.agents import AssistantAgent
-    AUTOGEN_AVAILABLE = True
-except ImportError:
-    AUTOGEN_AVAILABLE = False
-    class BaseMessage: pass
-    class UnboundedChatCompletionContext: pass
-    class LLMMessage: pass
-    class AssistantAgent: pass
-
 logger = logging.getLogger(__name__)
+
+# 直接导入 AutoGen 组件
+logger.info("🔧 开始导入 AutoGen 组件...")
+
+# 直接导入，不使用复杂的错误处理
+from autogen_agentchat.messages import BaseMessage
+from autogen_core.model_context import UnboundedChatCompletionContext
+from autogen_core.models import LLMMessage
+from autogen_agentchat.agents import AssistantAgent
+from autogen_ext.models.openai import OpenAIChatCompletionClient
+
+AUTOGEN_AVAILABLE = True
+logger.info("✅ AutoGen 组件导入成功")
+
+
 
 
 class MemoryResult:
@@ -208,76 +212,34 @@ def patch_memory_adapter(adapter):
     return adapter
 
 
-def create_safe_assistant_with_memory(name: str, model_client, system_message: str = None, 
+def create_safe_assistant_with_memory(name: str, model_client, system_message: str = None,
                                      tools: List = None, memory_adapters: List = None):
     """
-    创建安全的带记忆功能的AssistantAgent
-    自动应用memories属性修复和错误处理
+    创建带记忆功能的AssistantAgent
     """
-    if not AUTOGEN_AVAILABLE:
-        logger.warning("AutoGen不可用，无法创建智能体")
+    if not model_client:
+        logger.error("❌ 模型客户端为空，无法创建智能体")
         return None
     
     try:
-        # 首先尝试使用修复后的context创建
-        assistant = create_fixed_assistant(name, model_client, system_message, tools, memory_adapters)
-        if assistant:
-            return assistant
-            
-    except Exception as e:
-        logger.warning(f"使用修复后的context创建失败: {e}")
-    
-    # 如果修复方式失败，尝试对memory_adapters应用补丁
-    try:
-        patched_adapters = []
-        if memory_adapters:
-            for adapter in memory_adapters:
-                patched_adapter = patch_memory_adapter(adapter)
-                patched_adapters.append(patched_adapter)
-        
-        # 使用标准方式创建，但使用补丁后的适配器
+        # 使用简化的方式创建智能体
         assistant_params = {
             "name": name,
             "model_client": model_client,
-            "reflect_on_tool_use": True,
-            "model_client_stream": True,
         }
-        
+
         if system_message:
             assistant_params["system_message"] = system_message
-        
+
         if tools:
             assistant_params["tools"] = tools
-        
-        if patched_adapters:
-            assistant_params["memory"] = patched_adapters
-        
+
+        # 创建智能体
         assistant = AssistantAgent(**assistant_params)
-        logger.info(f"使用补丁方式创建助手成功: {name}")
+        logger.info(f"✅ 智能体创建成功: {name}")
         return assistant
-        
+
     except Exception as e:
-        logger.error(f"使用补丁方式创建助手失败: {e}")
-        
-        # 最后的回退：不使用记忆功能
-        try:
-            assistant_params = {
-                "name": name,
-                "model_client": model_client,
-                "reflect_on_tool_use": True,
-                "model_client_stream": True,
-            }
-            
-            if system_message:
-                assistant_params["system_message"] = system_message
-            
-            if tools:
-                assistant_params["tools"] = tools
-            
-            assistant = AssistantAgent(**assistant_params)
-            logger.warning(f"使用无记忆回退方式创建助手: {name}")
-            return assistant
-            
-        except Exception as final_error:
-            logger.error(f"所有创建方式都失败: {final_error}")
-            return None
+        logger.error(f"❌ 智能体创建失败: {e}")
+        logger.error(f"详细错误: {traceback.format_exc()}")
+        return None

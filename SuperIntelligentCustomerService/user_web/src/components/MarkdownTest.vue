@@ -41,8 +41,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { XMarkdown } from 'vue-element-plus-x';
+import {ref} from 'vue';
+import {XMarkdown} from 'vue-element-plus-x';
 
 const testMarkdown = ref(`# Python冒泡排序算法测试
 

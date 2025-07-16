@@ -6,6 +6,7 @@
 标准化实现，参考roles.py模式
 """
 import logging
+import traceback
 from io import BytesIO
 from typing import AsyncGenerator
 
@@ -169,12 +170,29 @@ class SmartChatSystem:
 
     def _create_model_client(self, model_name: str, api_host: str, api_key: str, model_info):
         """创建模型客户端"""
-        return OpenAIChatCompletionClient(
-            model=model_name,
-            base_url=api_host,
-            api_key=api_key,
-            model_info=model_info,
-        )
+        try:
+            logger.info(f"🔧 创建模型客户端: {model_name}")
+            logger.info(f"   - API Host: {api_host}")
+            logger.info(f"   - API Key: {api_key[:20]}..." if api_key else "   - API Key: 无")
+
+            if not api_key:
+                raise ValueError(f"模型 {model_name} 的 API 密钥为空")
+
+            if not api_host:
+                raise ValueError(f"模型 {model_name} 的 API Host 为空")
+
+            client = OpenAIChatCompletionClient(
+                model=model_name,
+                base_url=api_host,
+                api_key=api_key,
+                model_info=model_info,
+            )
+            logger.info(f"✅ 模型客户端创建成功: {model_name}")
+            return client
+        except Exception as e:
+            logger.error(f"❌ 创建模型客户端失败: {e}")
+            logger.error(f"详细错误: {traceback.format_exc()}")
+            raise
 
     def _get_default_config(self, vision_support: bool):
         """获取默认模型配置"""
@@ -199,13 +217,22 @@ class SmartChatSystem:
                 return self._get_default_config(vision_support)
 
             # 验证API密钥必须是加密的
-            if not is_api_key_encrypted(default_model.api_key):
-                raise Exception(f"模型 {default_model.model_name} 的API密钥未加密")
+            # 解密 API 密钥
+            if is_api_key_encrypted(default_model.api_key):
+                try:
+                    api_key = decrypt_api_key(default_model.api_key)
+                    logger.info(f"✅ 默认模型 {default_model.model_name} API密钥解密成功")
+                except Exception as e:
+                    logger.error(f"❌ 默认模型 {default_model.model_name} API密钥解密失败: {e}")
+                    raise Exception(f"模型 {default_model.model_name} 的API密钥解密失败")
+            else:
+                api_key = default_model.api_key
+                logger.info(f"✅ 默认模型 {default_model.model_name} 使用未加密API密钥")
 
             return {
                 "model_name": default_model.model_name,
                 "api_host": default_model.api_host,
-                "api_key": decrypt_api_key(default_model.api_key)
+                "api_key": api_key
             }
         else:
             # 根据模型名称获取配置
@@ -215,13 +242,22 @@ class SmartChatSystem:
                     raise Exception(f"模型 {model_name} 不存在或未启用")
 
                 # 验证API密钥必须是加密的
-                if not is_api_key_encrypted(model_config.api_key):
-                    raise Exception(f"模型 {model_name} 的API密钥未加密")
+                # 解密 API 密钥
+                if is_api_key_encrypted(model_config.api_key):
+                    try:
+                        api_key = decrypt_api_key(model_config.api_key)
+                        logger.info(f"✅ 模型 {model_name} API密钥解密成功")
+                    except Exception as e:
+                        logger.error(f"❌ 模型 {model_name} API密钥解密失败: {e}")
+                        raise Exception(f"模型 {model_name} 的API密钥解密失败")
+                else:
+                    api_key = model_config.api_key
+                    logger.info(f"✅ 模型 {model_name} 使用未加密API密钥")
 
                 return {
                     "model_name": model_name,
                     "api_host": model_config.api_host,
-                    "api_key": decrypt_api_key(model_config.api_key)
+                    "api_key": api_key
                 }
             except Exception:
                 logger.warning(f"获取模型 {model_name} 配置失败，使用默认配置")
@@ -345,6 +381,9 @@ async def send_chat_message(
         message_data = await _parse_request_data(request, content_type)
         if not message_data:
             return Fail(msg="请求数据解析失败")
+
+        # 调试日志
+        logger.info(f"解析后的消息数据: {message_data}")
 
         # 验证消息内容
         if not message_data.get("message") or not message_data["message"].strip():
@@ -485,7 +524,7 @@ async def _generate_stream_response(
         # 保存用户消息到数据库
         if session_id:
             try:
-                from ....schemas.chat_service import ChatServiceMessage
+                from ....schemas.chat_service import ChatMessageCreate
 
                 # 安全地转换session_id为整数
                 try:
@@ -498,7 +537,7 @@ async def _generate_stream_response(
                 except (ValueError, AttributeError):
                     session_id_int = 1
 
-                user_message_create = ChatServiceMessage(
+                user_message_create = ChatMessageCreate(
                     session_id=session_id_int,
                     user_id=user_id,
                     role="user",

@@ -8,7 +8,7 @@ from ....models.admin import User
 from ....schemas import Success, SuccessExtra
 from ....schemas.chat_service import (
     ChatServiceMessage as ChatMessageVo,
-    ChatServiceMessage as ChatMessageCreate
+    ChatMessageCreate
 )
 from ....utils.serializer import safe_serialize
 

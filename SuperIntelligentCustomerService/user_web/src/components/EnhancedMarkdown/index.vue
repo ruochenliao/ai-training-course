@@ -1,7 +1,7 @@
 <!-- 增强的Markdown渲染组件 -->
 <script setup lang="ts">
-import { XMarkdown } from 'vue-element-plus-x';
-import { ref, computed, watch, nextTick } from 'vue';
+import {XMarkdown} from 'vue-element-plus-x';
+import {computed, nextTick, ref, watch} from 'vue';
 
 interface Props {
   content: string;

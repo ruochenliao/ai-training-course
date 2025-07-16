@@ -3,14 +3,14 @@
 替代旧的chat_controller，提供基础的消息数据库操作
 与新的集成架构兼容，不包含冲突的聊天逻辑
 """
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from tortoise.expressions import Q
 from tortoise.functions import Sum
 
 from ..core.crud import CRUDBase
 from ..models.admin import ChatMessage
-from ..schemas.chat_service import ChatServiceMessage
+from ..schemas.chat_service import ChatServiceMessage, ChatMessageCreate
 
 
 class MessageManager(CRUDBase[ChatMessage, ChatServiceMessage, ChatServiceMessage]):
@@ -34,7 +34,7 @@ class MessageManager(CRUDBase[ChatMessage, ChatServiceMessage, ChatServiceMessag
         
         return await self.list(page=page, page_size=page_size, search=q, order=["created_at"])
 
-    async def create_message(self, message_data: ChatServiceMessage) -> ChatMessage:
+    async def create_message(self, message_data: Union[ChatServiceMessage, ChatMessageCreate]) -> ChatMessage:
         """创建聊天消息"""
         return await self.create(obj_in=message_data)
 

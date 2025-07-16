@@ -11,34 +11,20 @@ from typing import List, Optional, Any, AsyncGenerator
 
 import PIL.Image
 
-try:
-    from autogen_agentchat.agents import AssistantAgent
-    from autogen_agentchat.messages import TextMessage, MultiModalMessage
-    from autogen_agentchat.task import TaskResult
-    from autogen_core import Image
-    from autogen_ext.models.openai import OpenAIChatCompletionClient
-    AUTOGEN_AVAILABLE = True
-except ImportError:
-    AUTOGEN_AVAILABLE = False
-    # 创建占位符类
-    class AssistantAgent:
-        def __init__(self, *args, **kwargs): pass
-        async def run_stream(self, *args, **kwargs):
-            yield "AutoGen不可用"
-    class TextMessage:
-        def __init__(self, content, source=""):
-            self.content = content
-            self.source = source
-    class MultiModalMessage:
-        def __init__(self, content, source=""):
-            self.content = content
-            self.source = source
-    class TaskResult:
-        def __init__(self, messages=None, stop_reason=None):
-            self.messages = messages or []
-            self.stop_reason = stop_reason
-    class Image:
-        def __init__(self, *args, **kwargs): pass
+# 直接导入 AutoGen 组件，不使用 try-except
+from autogen_agentchat.agents import AssistantAgent
+from autogen_agentchat.messages import TextMessage, MultiModalMessage
+from autogen_core import Image
+from autogen_ext.models.openai import OpenAIChatCompletionClient
+
+# 从 custom_context 导入 AUTOGEN_AVAILABLE 状态
+from ..core.custom_context import AUTOGEN_AVAILABLE
+
+# TaskResult 可能不存在，创建一个简单的替代类
+class TaskResult:
+    def __init__(self, messages=None, stop_reason=None):
+        self.messages = messages or []
+        self.stop_reason = stop_reason
 
 from ..schemas.chat_service import (
     ChatServiceMessage, ChatServiceConfig
@@ -80,6 +66,10 @@ class ChatSession:
         self.vision_model_client = vision_model_client
         self.config = config or ChatServiceConfig()
 
+        # 模型名称（从客户端中提取，如果可用）
+        self.text_model_name = getattr(text_model_client, 'model', None) if text_model_client else None
+        self.vision_model_name = getattr(vision_model_client, 'model', None) if vision_model_client else None
+
         # 会话状态
         self.created_at = datetime.now()
         self.last_activity = datetime.now()
@@ -113,9 +103,9 @@ class ChatSession:
         try:
             # 获取数据库路径
             try:
-                from ...settings.config import settings
+                from app.settings.config import settings
                 db_path = settings.TORTOISE_ORM["connections"]["sqlite"]["credentials"]["file_path"]
-            except (AttributeError, KeyError):
+            except (AttributeError, KeyError, ImportError):
                 db_path = "db.sqlite3"
 
             # 创建记忆适配器
@@ -148,23 +138,31 @@ class ChatSession:
 
             # 创建文本智能体
             if self.text_model_client:
+                logger.info(f"会话 {self.session_id} 开始创建文本智能体")
                 self.text_agent = create_safe_assistant_with_memory(
                     name="text_agent",
                     model_client=self.text_model_client,
                     memory_adapters=memory_adapters,
                     system_message=self._get_text_system_prompt()
                 )
-                logger.info(f"会话 {self.session_id} 文本智能体创建成功")
+                if self.text_agent:
+                    logger.info(f"会话 {self.session_id} 文本智能体创建成功")
+                else:
+                    logger.error(f"会话 {self.session_id} 文本智能体创建失败")
 
             # 创建视觉智能体
             if self.vision_model_client:
+                logger.info(f"会话 {self.session_id} 开始创建视觉智能体")
                 self.vision_agent = create_safe_assistant_with_memory(
                     name="vision_agent",
                     model_client=self.vision_model_client,
                     memory_adapters=memory_adapters,
                     system_message=self._get_vision_system_prompt()
                 )
-                logger.info(f"会话 {self.session_id} 视觉智能体创建成功")
+                if self.vision_agent:
+                    logger.info(f"会话 {self.session_id} 视觉智能体创建成功")
+                else:
+                    logger.error(f"会话 {self.session_id} 视觉智能体创建失败")
 
         except Exception as e:
             logger.error(f"初始化智能体失败: {e}")
@@ -336,8 +334,25 @@ class ChatSession:
                 selected_agent = self.text_agent
                 agent_type = "文本智能体"
             else:
-                yield "抱歉，智能助手暂时不可用，请稍后再试。"
-                return
+                # 强制重新初始化智能体
+                logger.error("❌ 智能体不可用，尝试强制重新初始化")
+
+                # 强制重新初始化
+                self._agents_initialized = False
+                await self._ensure_agents_initialized()
+
+                # 重新选择智能体
+                if is_multimodal and self.vision_agent:
+                    selected_agent = self.vision_agent
+                    agent_type = "视觉智能体"
+                elif self.text_agent:
+                    selected_agent = self.text_agent
+                    agent_type = "文本智能体"
+                else:
+                    # 如果仍然失败，抛出异常而不是返回回退响应
+                    error_msg = f"智能体初始化失败: AutoGen={AUTOGEN_AVAILABLE}, 文本客户端={self.text_model_client is not None}, 视觉客户端={self.vision_model_client is not None}"
+                    logger.error(error_msg)
+                    raise Exception(error_msg)
 
             logger.info(f"会话 {self.session_id} 选择了{agent_type}来处理消息")
 

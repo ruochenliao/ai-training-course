@@ -31,6 +31,25 @@ class ChatServiceMessage(BaseModel):
     message_type: MessageType = Field(default=MessageType.TEXT, description="消息类型")
     images: Optional[List[str]] = Field(default=None, description="图片URL列表")
     metadata: Optional[Dict[str, Any]] = Field(default=None, description="元数据")
+    # 添加数据库操作所需的字段
+    session_id: Optional[int] = Field(None, description="会话ID")
+    user_id: Optional[int] = Field(None, description="用户ID")
+    model_name: Optional[str] = Field(None, description="模型名称")
+    total_tokens: Optional[int] = Field(default=0, description="累计Tokens")
+    deduct_cost: Optional[float] = Field(default=0, description="扣除金额")
+    remark: Optional[str] = Field(None, description="备注")
+
+
+class ChatMessageCreate(BaseModel):
+    """创建聊天消息的数据模型"""
+    session_id: int = Field(..., description="会话ID")
+    user_id: int = Field(..., description="用户ID")
+    role: str = Field(..., description="对话角色")
+    content: str = Field(..., description="消息内容")
+    model_name: Optional[str] = Field(None, description="模型名称")
+    total_tokens: int = Field(default=0, description="累计Tokens")
+    deduct_cost: float = Field(default=0, description="扣除金额")
+    remark: Optional[str] = Field(None, description="备注")
 
 
 class ChatServiceRequest(BaseModel):
