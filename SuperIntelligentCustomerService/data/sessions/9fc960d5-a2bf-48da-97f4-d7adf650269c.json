@@ -1,0 +1,16 @@
+{
+  "session_id": "9fc960d5-a2bf-48da-97f4-d7adf650269c",
+  "user_id": "demo_user",
+  "created_at": "2025-07-17T22:34:49.824564",
+  "last_active": "2025-07-17T22:34:54.422563",
+  "messages": [
+    {
+      "role": "user",
+      "content": "你好，请简单介绍一下你的功能"
+    },
+    {
+      "role": "assistant",
+      "content": "您好！我是您的智能客服助手，很高兴为您服务。我的主要功能包括：\n\n1. **"
+    }
+  ]
+}

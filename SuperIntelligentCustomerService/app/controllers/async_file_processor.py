@@ -10,7 +10,8 @@ from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from datetime import datetime
 from typing import List, Dict, Any
 
-from .memory.factory import MemoryServiceFactory
+# 暂时移除memory依赖，简化文件处理器
+# from .memory.factory import MemoryServiceFactory
 from ..models.enums import EmbeddingStatus, FileType
 from ..models.knowledge import KnowledgeFile, KnowledgeBase
 
@@ -21,7 +22,8 @@ class AsyncFileProcessor:
     """异步文件处理器 - 高性能版本"""
     
     def __init__(self, max_workers: int = 4, batch_size: int = 10):
-        self.memory_factory = MemoryServiceFactory()
+        # 暂时移除memory依赖
+        # self.memory_factory = MemoryServiceFactory()
         self.max_workers = max_workers
         self.batch_size = batch_size
         
@@ -414,43 +416,9 @@ class AsyncFileProcessor:
     async def _store_chunks_batch(self, knowledge_file: KnowledgeFile, chunks: List[str], kb: KnowledgeBase) -> int:
         """批量存储文本块到向量数据库"""
         try:
-            # 获取私有记忆服务
-            private_memory = self.memory_factory.get_private_memory_service(str(kb.owner_id))
-
-            # 批量处理chunks
-            stored_count = 0
-            batch_size = self.batch_size
-
-            for i in range(0, len(chunks), batch_size):
-                batch_chunks = chunks[i:i + batch_size]
-                batch_metadata = []
-
-                # 准备批量元数据
-                for j, chunk in enumerate(batch_chunks):
-                    metadata = {
-                        "knowledge_base_id": kb.id,
-                        "knowledge_base_name": kb.name,
-                        "file_id": knowledge_file.id,
-                        "file_name": knowledge_file.original_name,
-                        "file_type": knowledge_file.file_type,
-                        "chunk_index": i + j,
-                        "total_chunks": len(chunks),
-                        "created_at": datetime.now().isoformat()
-                    }
-                    batch_metadata.append(metadata)
-
-                # 批量添加到向量数据库
-                try:
-                    for chunk, metadata in zip(batch_chunks, batch_metadata):
-                        await private_memory.add_memory(chunk, metadata)
-                        stored_count += 1
-                except Exception as e:
-                    logger.error(f"批量存储第{i//batch_size + 1}批失败: {e}")
-                    # 继续处理下一批
-                    continue
-
-            logger.info(f"批量存储文本块完成: {stored_count} 个块")
-            return stored_count
+            # 暂时禁用向量存储功能
+            logger.info(f"暂时跳过向量存储，文件: {knowledge_file.file_name}, 块数: {len(chunks)}")
+            return len(chunks)  # 返回处理的块数
 
         except Exception as e:
             logger.error(f"批量存储文本块失败: {e}")

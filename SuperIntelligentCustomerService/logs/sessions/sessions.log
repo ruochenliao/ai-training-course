@@ -1,0 +1,14 @@
+2025-07-17 22:16:23,410 - session_service - INFO - Created new session 60ac3706-9731-42e7-8c75-496eb92fa58e for user test_user_1
+2025-07-17 22:16:23,410 - session_service - INFO - Created new session 60ac3706-9731-42e7-8c75-496eb92fa58e for user test_user_1
+2025-07-17 22:31:01,319 - session_service - INFO - Created new session deddbf47-8c01-4d36-a1bd-067acc91d411 for user test_user_integration
+2025-07-17 22:31:01,319 - session_service - INFO - Created new session deddbf47-8c01-4d36-a1bd-067acc91d411 for user test_user_integration
+2025-07-17 22:31:35,405 - session_service - INFO - Created new session a98b4770-b26f-455c-aad0-648a16cc1012 for user test_user_integration
+2025-07-17 22:31:35,405 - session_service - INFO - Created new session a98b4770-b26f-455c-aad0-648a16cc1012 for user test_user_integration
+2025-07-17 22:32:35,911 - session_service - INFO - Created new session 76a57397-a381-4516-ab0d-b031e00ab55a for user test_user_integration
+2025-07-17 22:32:35,911 - session_service - INFO - Created new session 76a57397-a381-4516-ab0d-b031e00ab55a for user test_user_integration
+2025-07-17 22:34:49,824 - session_service - INFO - Created new session 9fc960d5-a2bf-48da-97f4-d7adf650269c for user demo_user
+2025-07-17 22:34:49,824 - session_service - INFO - Created new session 9fc960d5-a2bf-48da-97f4-d7adf650269c for user demo_user
+2025-07-17 22:35:22,601 - session_service - INFO - Created new session d8170626-58ff-45f3-8d3a-81f894fddc4a for user demo_user
+2025-07-17 22:35:22,601 - session_service - INFO - Created new session d8170626-58ff-45f3-8d3a-81f894fddc4a for user demo_user
+2025-07-17 22:50:24,967 - session_service - INFO - Created new session 7bac2c4d-697f-43ba-881c-b1e653986f1d for user test_user
+2025-07-17 22:50:24,967 - session_service - INFO - Created new session 7bac2c4d-697f-43ba-881c-b1e653986f1d for user test_user

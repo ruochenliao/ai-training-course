@@ -1,0 +1,12 @@
+{
+  "session_id": "a98b4770-b26f-455c-aad0-648a16cc1012",
+  "user_id": "test_user_integration",
+  "created_at": "2025-07-17T22:31:35.405746",
+  "last_active": "2025-07-17T22:31:35.405746",
+  "messages": [
+    {
+      "role": "user",
+      "content": "集成测试消息"
+    }
+  ]
+}

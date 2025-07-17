@@ -1,0 +1,15 @@
+2025-07-17 22:16:23,412 - chat_service - INFO - 处理用户 test_user_1 的聊天请求
+2025-07-17 22:16:23,412 - chat_service - INFO - Created new session test_session_1 for user test_user_1
+2025-07-17 22:16:38,631 - chat_service - INFO - 保存对话到记忆 - 会话: test_session_1
+2025-07-17 22:31:01,321 - chat_service - INFO - 处理用户 integration_test_user 的聊天请求
+2025-07-17 22:31:01,322 - chat_service - INFO - Created new session integration_test_session for user integration_test_user
+2025-07-17 22:31:35,407 - chat_service - INFO - 处理用户 integration_test_user 的聊天请求
+2025-07-17 22:31:35,407 - chat_service - INFO - Created new session integration_test_session for user integration_test_user
+2025-07-17 22:32:35,912 - chat_service - INFO - 处理用户 integration_test_user 的聊天请求
+2025-07-17 22:32:35,912 - chat_service - INFO - Created new session integration_test_session for user integration_test_user
+2025-07-17 22:34:49,825 - chat_service - INFO - 处理用户 demo_user 的聊天请求
+2025-07-17 22:34:49,825 - chat_service - INFO - Created new session 9fc960d5-a2bf-48da-97f4-d7adf650269c for user demo_user
+2025-07-17 22:35:22,601 - chat_service - INFO - 处理用户 demo_user 的聊天请求
+2025-07-17 22:35:22,601 - chat_service - INFO - Created new session d8170626-58ff-45f3-8d3a-81f894fddc4a for user demo_user
+2025-07-17 22:50:24,968 - chat_service - INFO - 处理用户 test_user 的聊天请求
+2025-07-17 22:50:24,968 - chat_service - INFO - Created new session 7bac2c4d-697f-43ba-881c-b1e653986f1d for user test_user

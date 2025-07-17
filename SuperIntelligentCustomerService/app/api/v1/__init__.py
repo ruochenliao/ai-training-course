@@ -4,7 +4,7 @@ from .apis import apis_router
 from .auditlog import auditlog_router
 from .auth import auth_router
 from .base import base_router
-from .chat import chat_router
+from .customer.customer import router as customer_router
 from .depts import depts_router
 from .knowledge import knowledge_router
 from .menus import menus_router
@@ -18,7 +18,7 @@ v1_router = APIRouter()
 
 v1_router.include_router(base_router, prefix="/base")
 v1_router.include_router(auth_router, prefix="/auth")
-v1_router.include_router(chat_router, prefix="/chat")
+v1_router.include_router(customer_router, prefix="/customer")
 
 v1_router.include_router(resource_router, prefix="/resource")
 v1_router.include_router(users_router, prefix="/user", dependencies=[DependPermission])
