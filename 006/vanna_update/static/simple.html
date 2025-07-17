@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanna Text2SQL - 简化版</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #4285f4;
+        }
+        .chat-container {
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            height: 400px;
+            overflow-y: auto;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .user-message {
+            background-color: #e6f4ff;
+            margin-left: 50px;
+        }
+        .assistant-message {
+            background-color: #f8f9fa;
+            margin-right: 50px;
+        }
+        .input-container {
+            display: flex;
+            margin-top: 20px;
+        }
+        .input-field {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .send-btn {
+            padding: 10px 20px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        .send-btn:hover {
+            background-color: #3367d6;
+        }
+    </style>
+</head>
+<body>
+    <h1>Vanna Text2SQL</h1>
+    <p>这是用于测试目的的Text2SQL界面简化版。</p>
+
+    <div class="chat-container" id="chat-container">
+        <div class="message assistant-message">
+            <strong>Vanna:</strong> 您好！我是您的Text2SQL助手。请询问关于您数据的问题，我将把它转换成SQL。
+        </div>
+    </div>
+
+    <div class="input-container">
+        <input type="text" class="input-field" id="input-field" placeholder="请输入关于您数据的问题...">
+        <button class="send-btn" id="send-btn">发送</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputField = document.getElementById('input-field');
+            const sendBtn = document.getElementById('send-btn');
+            const chatContainer = document.getElementById('chat-container');
+
+            sendBtn.addEventListener('click', () => {
+                const question = inputField.value.trim();
+                if (question) {
+                    // Add user message
+                    const userMessage = document.createElement('div');
+                    userMessage.className = 'message user-message';
+                    userMessage.innerHTML = `<strong>您:</strong> ${question}`;
+                    chatContainer.appendChild(userMessage);
+
+                    // Clear input field
+                    inputField.value = '';
+
+                    // Scroll to bottom
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+                    // Simulate assistant response
+                    setTimeout(() => {
+                        const assistantMessage = document.createElement('div');
+                        assistantMessage.className = 'message assistant-message';
+                        assistantMessage.innerHTML = `
+                            <strong>Vanna:</strong> 我已将您的问题转换为 SQL:
+                            <pre>SELECT * FROM data WHERE question = '${question}';</pre>
+                            <p>这是一个用于测试目的的模拟响应。</p>
+                        `;
+                        chatContainer.appendChild(assistantMessage);
+
+                        // Scroll to bottom
+                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                    }, 1000);
+                }
+            });
+
+            // Allow pressing Enter to send message
+            inputField.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    sendBtn.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

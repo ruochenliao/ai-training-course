@@ -1,0 +1,5 @@
+pymilvus>=2.5.8
+pymilvus[model]
+flask
+db-dtypes
+python-dotenv

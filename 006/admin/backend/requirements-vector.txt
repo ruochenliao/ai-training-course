@@ -1,0 +1,4 @@
+marker-pdf[full]
+chromadb
+sentence-transformers
+langchain-text-splitters

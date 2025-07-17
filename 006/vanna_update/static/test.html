@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #4285f4;
+        }
+        .test-box {
+            background-color: #f1f3f4;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .success {
+            color: #34a853;
+            font-weight: bold;
+        }
+        .error {
+            color: #ea4335;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Vanna Text2SQL 测试页面</h1>
+    <p>此页面用于测试开发服务器是否正常工作。</p>
+
+    <div class="test-box">
+        <h2>服务器状态</h2>
+        <p>如果您能看到此页面，则服务器运行正常！</p>
+        <p class="success">✓ 服务器运行中</p>
+    </div>
+
+    <div class="test-box">
+        <h2>下一步</h2>
+        <p>尝试访问主应用程序：</p>
+        <ul>
+            <li><a href="/">访问主应用程序</a></li>
+            <li><a href="/index.html">访问 index.html</a></li>
+        </ul>
+    </div>
+
+    <script>
+        // Simple test to check if JavaScript is working
+        document.addEventListener('DOMContentLoaded', () => {
+            const testBox = document.createElement('div');
+            testBox.className = 'test-box';
+            testBox.innerHTML = `
+                <h2>JavaScript 测试</h2>
+                <p class="success">✓ JavaScript 运行正常</p>
+            `;
+            document.body.appendChild(testBox);
+        });
+    </script>
+</body>
+</html>

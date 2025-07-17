@@ -1,0 +1,6 @@
+dotenv~=0.9.9
+python-dotenv~=1.1.0
+pydantic~=2.11.5
+SQLAlchemy~=2.0.41
+openai~=1.84.0
+qdrant-client~=1.14.2

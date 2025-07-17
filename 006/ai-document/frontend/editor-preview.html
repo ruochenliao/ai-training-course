@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑器界面预览</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        /* 顶部导航栏 */
+        .header {
+            background: #fff;
+            padding: 0 16px;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 48px;
+        }
+        
+        .header-left, .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .btn:hover {
+            background: #f5f5f5;
+        }
+        
+        .btn-primary {
+            background: #1890ff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #40a9ff;
+        }
+        
+        .user-btn {
+            color: #1890ff;
+        }
+        
+        /* 工具栏 */
+        .toolbar {
+            background: #fff;
+            border-bottom: 1px solid #e8e8e8;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .toolbar .btn {
+            min-width: 24px;
+            height: 24px;
+            font-size: 12px;
+        }
+        
+        .divider {
+            width: 1px;
+            height: 16px;
+            background: #d9d9d9;
+            margin: 0 4px;
+        }
+        
+        /* AI工具栏 */
+        .ai-toolbar {
+            background: #fff;
+            border-bottom: 1px solid #e8e8e8;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .ai-tool-btn {
+            height: 32px;
+            padding: 0 12px;
+            font-size: 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .ai-tool-btn:hover {
+            border-color: #1890ff;
+            color: #1890ff;
+        }
+        
+        /* 主要布局 */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 120px);
+        }
+        
+        .sidebar-left {
+            width: 300px;
+            background: #e8e8e8;
+            border-right: 1px solid #d9d9d9;
+        }
+        
+        .content-area {
+            flex: 1;
+            background: #fff;
+            margin: 20px;
+            padding: 40px;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .content-placeholder {
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+            margin-top: 100px;
+        }
+        
+        .tool-triggers {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .tool-trigger {
+            padding: 4px 12px;
+            font-size: 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+        }
+        
+        .tool-trigger.active {
+            background: #1890ff;
+            color: white;
+            border-color: #1890ff;
+        }
+        
+        .sidebar-right {
+            width: 60px;
+            background: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        /* 底部状态栏 */
+        .status-bar {
+            background: #fff;
+            border-top: 1px solid #e8e8e8;
+            padding: 4px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 32px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="header">
+        <div class="header-left">
+            <button class="btn">←</button>
+            <button class="btn">💾</button>
+            <button class="btn">🔗</button>
+        </div>
+        
+        <div class="header-center">
+            <button class="btn">开始</button>
+            <button class="btn">加入</button>
+            <button class="btn btn-primary">AI 妙笔AI</button>
+        </div>
+        
+        <div class="header-right">
+            <button class="btn user-btn">👤</button>
+        </div>
+    </div>
+
+    <!-- 工具栏 -->
+    <div class="toolbar">
+        <button class="btn">↶</button>
+        <button class="btn">↷</button>
+        <button class="btn">💾</button>
+        <div class="divider"></div>
+        <button class="btn">宋体 ▼</button>
+        <div class="divider"></div>
+        <button class="btn"><strong>B</strong></button>
+        <button class="btn"><em>I</em></button>
+        <button class="btn"><u>U</u></button>
+        <button class="btn"><s>S</s></button>
+        <button class="btn">A</button>
+        <div class="divider"></div>
+        <button class="btn">|||</button>
+        <button class="btn">≡</button>
+        <div class="divider"></div>
+        <button class="btn">🔗</button>
+    </div>
+
+    <!-- AI工具栏 (默认隐藏) -->
+    <div class="ai-toolbar hidden" id="documentTools">
+        <button class="ai-tool-btn">📋 目录</button>
+        <button class="ai-tool-btn">📄 公文格式</button>
+        <button class="ai-tool-btn">📝 内容中间</button>
+        <button class="ai-tool-btn">🎓 学习训练</button>
+        <button class="ai-tool-btn">⚖️ 公文法文</button>
+        <button class="ai-tool-btn">📚 参考资料</button>
+        <button class="ai-tool-btn">👁️ 观点</button>
+    </div>
+
+    <div class="ai-toolbar hidden" id="aiTools">
+        <button class="ai-tool-btn" onclick="goToAIWriting()">🤖 AI写作</button>
+        <button class="ai-tool-btn">📄 AI对效</button>
+        <button class="ai-tool-btn">✨ AI润色</button>
+        <button class="ai-tool-btn">🔍 deepseek</button>
+        <button class="ai-tool-btn">⚖️ AI对比</button>
+        <button class="ai-tool-btn">📚 排版</button>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="main-layout">
+        <!-- 左侧边栏 -->
+        <div class="sidebar-left"></div>
+
+        <!-- 中间编辑区域 -->
+        <div class="content-area">
+            <div class="content-placeholder">
+                请在此输入内容
+            </div>
+            
+            <!-- 工具触发按钮 -->
+            <div class="tool-triggers">
+                <button class="tool-trigger" onclick="toggleDocumentTools()">文档工具</button>
+                <button class="tool-trigger" onclick="toggleAITools()">AI工具</button>
+            </div>
+        </div>
+
+        <!-- 右侧边栏 -->
+        <div class="sidebar-right">
+            <div class="avatar">K</div>
+        </div>
+    </div>
+
+    <!-- 底部状态栏 -->
+    <div class="status-bar">
+        <div>字数：0</div>
+        <div>公开</div>
+    </div>
+
+    <script>
+        let currentToolbar = null;
+
+        function toggleDocumentTools() {
+            const documentTools = document.getElementById('documentTools');
+            const aiTools = document.getElementById('aiTools');
+            const triggers = document.querySelectorAll('.tool-trigger');
+            
+            if (currentToolbar === 'document') {
+                documentTools.classList.add('hidden');
+                triggers[0].classList.remove('active');
+                currentToolbar = null;
+            } else {
+                documentTools.classList.remove('hidden');
+                aiTools.classList.add('hidden');
+                triggers[0].classList.add('active');
+                triggers[1].classList.remove('active');
+                currentToolbar = 'document';
+            }
+        }
+
+        function toggleAITools() {
+            const documentTools = document.getElementById('documentTools');
+            const aiTools = document.getElementById('aiTools');
+            const triggers = document.querySelectorAll('.tool-trigger');
+            
+            if (currentToolbar === 'ai') {
+                aiTools.classList.add('hidden');
+                triggers[1].classList.remove('active');
+                currentToolbar = null;
+            } else {
+                aiTools.classList.remove('hidden');
+                documentTools.classList.add('hidden');
+                triggers[1].classList.add('active');
+                triggers[0].classList.remove('active');
+                currentToolbar = 'ai';
+            }
+        }
+
+        function goToAIWriting() {
+            alert('跳转到AI写作向导');
+        }
+
+        // 为AI工具按钮添加点击事件
+        document.querySelectorAll('.ai-tool-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (!this.onclick) {
+                    alert(`点击了 ${this.textContent.trim()}`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

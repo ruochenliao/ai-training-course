@@ -1,0 +1,268 @@
+/* 全局样式 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f5f5;
+}
+
+#root {
+  height: 100vh;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Quill编辑器样式 */
+.ql-editor {
+  min-height: 400px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.ql-toolbar {
+  border-top: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+}
+
+.ql-container {
+  border-bottom: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+}
+
+/* 自定义样式 */
+.app-layout {
+  height: 100vh;
+}
+
+.sidebar {
+  background: #fff;
+  border-right: 1px solid #f0f0f0;
+}
+
+.main-content {
+  background: #fff;
+}
+
+.document-list-item {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.document-list-item:hover {
+  background-color: #f5f5f5;
+}
+
+.ai-panel {
+  border-left: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.ai-tool-button {
+  margin: 4px;
+  border-radius: 16px;
+}
+
+.editor-toolbar {
+  padding: 8px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fff;
+}
+
+.word-count {
+  color: #666;
+  font-size: 12px;
+}
+
+/* AI响应动画 */
+.cursor {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* AI工具选择页面样式 */
+.ai-tool-button {
+  transition: all 0.3s ease !important;
+}
+
+.ai-tool-button:hover {
+  border-color: #1890ff !important;
+  color: #1890ff !important;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2) !important;
+}
+
+.ai-tool-button:focus {
+  border-color: #1890ff !important;
+  color: #1890ff !important;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* 简洁版AI工具按钮样式 */
+.ai-tool-simple-btn:hover {
+  background: #f0f0f0 !important;
+  color: #1890ff !important;
+}
+
+.ai-tool-simple-btn:focus {
+  background: #f0f0f0 !important;
+  color: #1890ff !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .ai-panel {
+    display: none;
+  }
+
+  .sidebar {
+    width: 250px !important;
+  }
+}
+
+/* 加载状态 */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* 文档列表优化 */
+.document-list-item .ant-list-item-meta-title {
+  margin-bottom: 4px;
+}
+
+.document-list-item .ant-list-item-meta-description {
+  margin-bottom: 0;
+}
+
+/* AI工具按钮样式 */
+.ai-tool-button.ant-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+}
+
+.ai-tool-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* AI写作向导样式 */
+.ai-writing-wizard {
+  .ant-steps-item-title {
+    font-weight: 500;
+  }
+
+  .template-button {
+    transition: all 0.3s ease;
+    border-radius: 6px;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+    }
+  }
+
+  .form-section {
+    .ant-input,
+    .ant-input-affix-wrapper {
+      border-radius: 6px;
+    }
+
+    .ai-generate-btn {
+      color: #ff4d4f;
+      font-size: 12px;
+      padding: 0;
+      height: auto;
+
+      &:hover {
+        color: #ff7875;
+      }
+    }
+  }
+
+  .generation-modal {
+    .ant-modal-content {
+      border-radius: 8px;
+    }
+
+    .content-preview {
+      background: #f9f9f9;
+      border: 1px solid #e8e8e8;
+      border-radius: 6px;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  }
+}
+
+/* 打字机效果 */
+.typing-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background-color: #1890ff;
+  animation: blink 1s infinite;
+}
+
+/* 终极简化版 - Quill工具栏全局保护 */
+.ql-toolbar {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  min-height: 42px !important;
+  background: linear-gradient(to bottom, #fafafa, #f0f0f0) !important;
+  border: none !important;
+  border-bottom: 1px solid #e8e8e8 !important;
+  padding: 12px 16px !important;
+  position: relative !important;
+  z-index: 1000 !important;
+  flex-shrink: 0 !important;
+}
+
+.ql-toolbar button,
+.ql-toolbar .ql-picker {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}

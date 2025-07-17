@@ -1,0 +1,254 @@
+"""
+AutoGen智能体自定义配置示例
+复制此文件为 autogen_custom.py 并根据需要修改
+"""
+
+# 自定义智能体配置
+CUSTOM_AGENT_CONFIGS = {
+    "translator": {
+        "name": "TranslatorAgent",
+        "system_message": """你是一位专业的翻译专家。你擅长：
+1. 准确翻译各种语言之间的内容
+2. 保持原文的语调和风格
+3. 处理专业术语和文化差异
+4. 提供地道的表达方式
+
+请提供高质量、准确的翻译服务。""",
+        "max_consecutive_auto_reply": 2,
+        "temperature": 0.3
+    },
+    
+    "summarizer": {
+        "name": "SummarizerAgent",
+        "system_message": """你是一位专业的内容总结专家。你的能力包括：
+1. 提取文本的核心要点
+2. 生成简洁明了的摘要
+3. 保持重要信息的完整性
+4. 适应不同长度的总结需求
+
+请为用户提供准确、简洁的内容总结。""",
+        "max_consecutive_auto_reply": 2,
+        "temperature": 0.4
+    },
+    
+    "coder": {
+        "name": "CoderAgent",
+        "system_message": """你是一位专业的编程助手。你擅长：
+1. 编写高质量的代码
+2. 代码审查和优化
+3. 解释编程概念和算法
+4. 调试和问题解决
+
+请提供专业的编程支持和建议。""",
+        "max_consecutive_auto_reply": 3,
+        "temperature": 0.2
+    },
+    
+    "marketer": {
+        "name": "MarketerAgent",
+        "system_message": """你是一位专业的营销文案专家。你的专长是：
+1. 创作吸引人的营销文案
+2. 分析目标受众和市场趋势
+3. 制定营销策略和方案
+4. 优化转化率和用户体验
+
+请为用户提供专业的营销支持。""",
+        "max_consecutive_auto_reply": 3,
+        "temperature": 0.7
+    }
+}
+
+# 自定义协作模式
+CUSTOM_COLLABORATION_MODES = {
+    "translation_review": {
+        "agents": ["translator", "reviewer"],
+        "description": "翻译与评审协作",
+        "max_rounds": 2
+    },
+    
+    "content_summary": {
+        "agents": ["summarizer", "reviewer"],
+        "description": "内容总结与评审",
+        "max_rounds": 2
+    },
+    
+    "code_development": {
+        "agents": ["coder", "reviewer"],
+        "description": "代码开发与评审",
+        "max_rounds": 3
+    },
+    
+    "marketing_campaign": {
+        "agents": ["marketer", "writer", "reviewer"],
+        "description": "营销活动策划",
+        "max_rounds": 4
+    },
+    
+    "technical_writing": {
+        "agents": ["coder", "writer", "reviewer"],
+        "description": "技术文档写作",
+        "max_rounds": 3
+    }
+}
+
+# 自定义任务映射
+CUSTOM_TASK_MAPPING = {
+    "ai_translate": "translator",
+    "ai_summarize": "summarizer", 
+    "ai_code": "coder",
+    "ai_marketing": "marketer"
+}
+
+# 自定义协作任务映射
+CUSTOM_COLLABORATIVE_MAPPING = {
+    "translate_collaboration": "translation_review",
+    "summary_collaboration": "content_summary",
+    "code_collaboration": "code_development",
+    "marketing_collaboration": "marketing_campaign",
+    "tech_writing_collaboration": "technical_writing"
+}
+
+# 行业特定配置
+INDUSTRY_CONFIGS = {
+    "education": {
+        "agents": {
+            "teacher": {
+                "name": "TeacherAgent",
+                "system_message": """你是一位专业的教育工作者。你擅长：
+1. 设计教学内容和课程
+2. 解释复杂概念
+3. 创建学习材料
+4. 评估学习效果
+
+请提供专业的教育支持。""",
+                "temperature": 0.6
+            }
+        },
+        "modes": {
+            "lesson_planning": {
+                "agents": ["teacher", "writer", "reviewer"],
+                "description": "课程规划协作"
+            }
+        }
+    },
+    
+    "healthcare": {
+        "agents": {
+            "medical_writer": {
+                "name": "MedicalWriterAgent", 
+                "system_message": """你是一位专业的医学写作专家。你擅长：
+1. 撰写医学文档和报告
+2. 解释医学概念和术语
+3. 遵循医学写作规范
+4. 确保内容的准确性
+
+请提供专业的医学写作支持。""",
+                "temperature": 0.3
+            }
+        },
+        "modes": {
+            "medical_documentation": {
+                "agents": ["medical_writer", "reviewer"],
+                "description": "医学文档写作"
+            }
+        }
+    }
+}
+
+# 模型特定配置
+MODEL_SPECIFIC_CONFIGS = {
+    "gpt-4": {
+        "max_tokens": 4000,
+        "temperature": 0.7,
+        "top_p": 0.9
+    },
+    
+    "gpt-3.5-turbo": {
+        "max_tokens": 2000,
+        "temperature": 0.7,
+        "top_p": 1.0
+    },
+    
+    "claude-3": {
+        "max_tokens": 3000,
+        "temperature": 0.6,
+        "top_p": 0.95
+    }
+}
+
+# 高级协作策略
+ADVANCED_STRATEGIES = {
+    "iterative_improvement": {
+        "description": "迭代改进策略",
+        "steps": [
+            {"agent": "writer", "action": "initial_draft"},
+            {"agent": "reviewer", "action": "review_and_suggest"},
+            {"agent": "polisher", "action": "refine_content"},
+            {"agent": "reviewer", "action": "final_review"}
+        ],
+        "max_iterations": 3
+    },
+    
+    "parallel_processing": {
+        "description": "并行处理策略",
+        "parallel_groups": [
+            ["researcher", "outliner"],
+            ["writer", "creative"]
+        ],
+        "final_agent": "reviewer"
+    },
+    
+    "expert_panel": {
+        "description": "专家小组策略",
+        "panel_size": 3,
+        "voting_mechanism": "majority",
+        "conflict_resolution": "reviewer"
+    }
+}
+
+# 质量控制配置
+QUALITY_CONTROL = {
+    "min_response_length": 50,
+    "max_response_length": 5000,
+    "required_elements": [
+        "coherence",
+        "relevance", 
+        "completeness"
+    ],
+    "auto_review_threshold": 0.8,
+    "human_review_required": False
+}
+
+# 性能优化配置
+PERFORMANCE_CONFIG = {
+    "cache_responses": True,
+    "cache_duration": 3600,  # 1小时
+    "parallel_execution": True,
+    "max_concurrent_agents": 3,
+    "timeout_seconds": 300,
+    "retry_attempts": 2
+}
+
+# 使用示例
+USAGE_EXAMPLES = {
+    "custom_agent_usage": {
+        "description": "如何使用自定义智能体",
+        "code": """
+# 在 autogen_service.py 中添加自定义智能体
+from app.config.autogen_custom import CUSTOM_AGENT_CONFIGS
+
+# 合并配置
+all_configs = {**AGENT_CONFIGS, **CUSTOM_AGENT_CONFIGS}
+        """
+    },
+    
+    "industry_specific": {
+        "description": "如何配置行业特定智能体",
+        "code": """
+# 为教育行业配置智能体
+education_config = INDUSTRY_CONFIGS["education"]
+agents = education_config["agents"]
+modes = education_config["modes"]
+        """
+    }
+}

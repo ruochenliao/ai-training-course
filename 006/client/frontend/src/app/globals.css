@@ -1,0 +1,1026 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.markdown-body {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #374151;
+}
+
+.dark .markdown-body {
+  color: #d1d5db;
+}
+
+.markdown-body p {
+  margin-bottom: 1rem;
+  white-space: pre-wrap;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.markdown-body ol {
+  list-style-type: decimal;
+  counter-reset: item;
+}
+
+.markdown-body ol > li {
+  display: block;
+  position: relative;
+}
+
+.markdown-body ol > li::before {
+  content: counters(item, ".") ". ";
+  counter-increment: item;
+  position: absolute;
+  left: -1.5em;
+}
+
+.markdown-body li {
+  margin-bottom: 0.5rem;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4 {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.prose :where(code):not(:where([class~="not-prose"] *)) {
+  font-weight: 400;
+  font-size: 0.875em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+:root {
+  --primary: #1a73e8;
+  --primary-hover: #1765cc;
+  --secondary: #8e24aa;
+  --background: #f8f9fa;
+  --foreground: #202124;
+  --muted: #5f6368;
+  --border: #dadce0;
+  --card: #ffffff;
+  --card-foreground: #202124;
+  --ring: #1a73e8;
+
+  /* Code block styling */
+  --code-bg: #f8fafc;
+  --font-mono: 'Fira Code', 'JetBrains Mono', 'SF Mono', 'Roboto Mono', monospace;
+}
+
+.dark {
+  --primary: #8ab4f8;
+  --primary-hover: #aecbfa;
+  --secondary: #ce93d8;
+  --background: #202124;
+  --foreground: #e8eaed;
+  --muted: #9aa0a6;
+  --border: #3c4043;
+  --card: #2d2e31;
+  --card-foreground: #e8eaed;
+  --ring: #8ab4f8;
+
+  /* Code block styling for dark mode */
+  --code-bg: #1d1f21;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Google Sans', 'Roboto', sans-serif;
+}
+
+/* Gemini风格的渐变背景 */
+.gemini-gradient {
+  background: linear-gradient(120deg, #4285f4, #8e24aa, #ea4335);
+  background-size: 300% 300%;
+  animation: gradient-animation 8s ease infinite;
+}
+
+.gemini-gradient-text {
+  background: linear-gradient(90deg, #4285f4, #8e24aa, #ea4335);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 300% 100%;
+  animation: gradient-animation 8s ease infinite;
+}
+
+/* 轻柔的波浪背景 */
+.wave-background {
+  position: relative;
+  overflow: hidden;
+}
+
+.wave-background::before {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  z-index: 0;
+  background: radial-gradient(circle, rgba(66, 133, 244, 0.1) 0%, rgba(66, 133, 244, 0) 70%);
+  animation: rotate 30s linear infinite;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Gemini风格的按钮 */
+.gemini-button {
+  @apply rounded-full px-6 py-2.5 font-medium transition-all duration-300 focus:outline-none;
+}
+
+.gemini-button-primary {
+  @apply gemini-button bg-[var(--primary)] text-white hover:bg-[var(--primary-hover)] hover:shadow-md;
+}
+
+.gemini-button-secondary {
+  @apply gemini-button border border-[var(--border)] bg-white text-[var(--foreground)] hover:bg-gray-50 hover:shadow-sm;
+}
+
+.gemini-button-text {
+  @apply gemini-button bg-transparent text-[var(--primary)] hover:bg-blue-50 dark:hover:bg-blue-900/20;
+}
+
+/* Gemini风格的卡片 */
+.gemini-card {
+  @apply rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm transition-all duration-300 hover:shadow-md;
+}
+
+/* Gemini风格的输入框 */
+.gemini-input {
+  @apply rounded-full border border-[var(--border)] bg-white px-4 py-2.5 focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:ring-opacity-30 dark:bg-[var(--card)];
+}
+
+/* 导航栏 */
+.gemini-navbar {
+  @apply fixed top-0 z-50 w-full border-b border-[var(--border)] bg-white/80 backdrop-blur-md dark:bg-[var(--background)/90];
+}
+
+/* 圆角平滑过渡 */
+.smooth-corners {
+  border-radius: clamp(0px, 2.5vmin, 24px);
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* 代码高亮和Markdown样式 */
+.prose pre {
+  @apply rounded-lg overflow-hidden;
+}
+
+.prose code {
+  @apply font-mono text-sm;
+}
+
+/* 毛玻璃效果 */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glassmorphism {
+  background: rgba(17, 24, 39, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* 渐变背景 */
+.gradient-bg {
+  background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
+}
+
+/* 聊天气泡样式 */
+.chat-bubble {
+  @apply relative rounded-lg px-4 py-2 max-w-[80%];
+}
+
+.chat-bubble-user {
+  @apply bg-blue-600 text-white ml-auto;
+}
+
+.chat-bubble-assistant {
+  @apply bg-gray-100 dark:bg-gray-800 mr-auto;
+}
+
+/* 添加动画效果 */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* 代码块样式 */
+.prose pre code {
+  @apply text-sm !leading-relaxed;
+}
+
+/* Gemini 风格代码块 - 增强对比度 */
+.code-block-container {
+  position: relative;
+  margin: 1.5rem 0;
+}
+
+.code-block-wrapper {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background-color: var(--code-bg);
+}
+
+.dark .code-block-wrapper {
+  border-color: #373b41;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  background-color: var(--code-bg);
+}
+
+.code-block-wrapper:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+  border-color: #cbd5e1;
+}
+
+.dark .code-block-wrapper:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  border-color: #4d4d4c;
+}
+
+/* 代码块语言标记 */
+.language-indicator {
+  position: absolute;
+  top: 0;
+  left: 12px;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+}
+
+.dark .language-indicator {
+  background-color: #282a2e;
+  color: #c5c8c6;
+  border-color: #373b41;
+}
+
+/* 复制按钮样式 */
+.copy-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  opacity: 0;
+  transform: translateY(0);
+  transition: opacity 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 10;
+}
+
+.dark .copy-button {
+  background-color: rgba(40, 42, 46, 0.8);
+  color: #c5c8c6;
+  border-color: #373b41;
+}
+
+.code-block-container:hover .copy-button {
+  opacity: 1;
+}
+
+.copy-button:hover {
+  background-color: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.dark .copy-button:hover {
+  background-color: #373b41;
+  color: #ffffff;
+  border-color: #4d4d4c;
+}
+
+.copy-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* 代码行号样式 - SyntaxHighlighter */
+.dark .react-syntax-highlighter-line-number {
+  color: rgba(255, 255, 255, 0.4) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 智能客服特殊效果 */
+.chatbox-shadow {
+  box-shadow: 0 0 30px rgba(66, 133, 244, 0.1);
+}
+
+.floating-effect {
+  animation: floating 6s ease-in-out infinite;
+}
+
+@keyframes floating {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.neon-glow {
+  box-shadow: 0 0 5px rgba(66, 133, 244, 0.5),
+              0 0 15px rgba(66, 133, 244, 0.3),
+              0 0 30px rgba(66, 133, 244, 0.15);
+}
+
+.text-glow {
+  text-shadow: 0 0 8px rgba(66, 133, 244, 0.4);
+}
+
+.gemini-bg-dots {
+  background-image: radial-gradient(circle, #4285f4 1px, transparent 1px);
+  background-size: 30px 30px;
+  opacity: 0.15;
+}
+
+/* 科技感炫酷按钮 */
+.tech-button {
+  @apply relative overflow-hidden rounded-full;
+  z-index: 1;
+}
+
+.tech-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, rgba(66, 133, 244, 0.8), rgba(142, 36, 170, 0.8));
+  z-index: -1;
+  transition: opacity 0.3s ease;
+}
+
+.tech-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, rgba(142, 36, 170, 0.8), rgba(66, 133, 244, 0.8));
+  z-index: -2;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tech-button:hover::before {
+  opacity: 0;
+}
+
+.tech-button:hover::after {
+  opacity: 1;
+}
+
+/* 修复Text2SQL输入框按钮定位问题 */
+.relative.flex-1 {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.relative.flex-1 .absolute {
+  position: absolute;
+  display: flex;
+  z-index: 10;
+}
+
+/* 添加文案创作页面所需的科技感样式 */
+.tech-grid {
+  background-image: linear-gradient(to right, rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+                  linear-gradient(to bottom, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+.tech-dots {
+  background-image: radial-gradient(rgba(59, 130, 246, 0.2) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.bg-grid-pattern {
+  background-size: 50px 50px;
+  background-image:
+    linear-gradient(to right, rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+}
+
+.glassmorphism-dark {
+  background: rgba(15, 23, 42, 0.6);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glassmorphism-card {
+  background: rgba(15, 23, 42, 0.6);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.shadow-glow-blue {
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+}
+
+.neo-brutalism-button {
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.neo-brutalism-button:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neo-brutalism-button:active {
+  transform: translate(-1px, -1px);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.particle {
+  animation: float 10s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-30px) translateX(30px);
+  }
+  50% {
+    transform: translateY(-15px) translateX(-15px);
+  }
+  75% {
+    transform: translateY(30px) translateX(15px);
+  }
+}
+
+.md-content {
+  line-height: 1.6;
+}
+
+.md-content h1, .md-content h2, .md-content h3 {
+  color: rgba(191, 219, 254, 1);
+  margin-bottom: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.md-content h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.md-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.md-content h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.md-content ul, .md-content ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.md-content ul {
+  list-style-type: disc;
+}
+
+.md-content ol {
+  list-style-type: decimal;
+  counter-reset: item;
+}
+
+.md-content ol > li {
+  display: block;
+  position: relative;
+}
+
+.md-content ol > li::before {
+  content: counters(item, ".") ". ";
+  counter-increment: item;
+  position: absolute;
+  left: -1.5em;
+}
+
+.md-content p {
+  margin-bottom: 0.75rem;
+}
+
+.md-content strong {
+  color: rgba(147, 197, 253, 1);
+  font-weight: 600;
+}
+
+/* 优化滚动条样式 */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 消息动画 */
+@keyframes message-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-animation {
+  animation: message-fade-in-up 0.3s ease-out forwards;
+}
+
+/* 输入框样式 */
+.chat-input {
+  border-radius: 24px;
+  transition: all 0.2s ease-in-out;
+}
+
+.chat-input:focus {
+  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+}
+
+/* Gemini聊天相关样式 */
+.chat-container {
+  background: linear-gradient(180deg, rgba(248,249,253,0) 0%, rgba(248,249,253,1) 100%);
+}
+
+.dark .chat-container {
+  background: linear-gradient(180deg, rgba(23,23,23,0) 0%, rgba(23,23,23,1) 100%);
+}
+
+/* 优化代码块样式 - Gemini 风格 */
+.prose pre {
+  background-color: #f3f4f6 !important; /* 从 #f8f9fa 改深一点 */
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  margin: 1.25rem 0;
+  padding: 1rem;
+  position: relative;
+}
+
+.dark .prose pre {
+  background-color: #1a1b1e !important; /* 从 #202124 改深一点 */
+  border-color: #3c4043;
+}
+
+/* Gemini 风格代码块 */
+.code-block-container {
+  position: relative;
+  margin: 1.5rem 0;
+}
+
+.code-block-wrapper {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.dark .code-block-wrapper {
+  border-color: #3c4043;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.code-block-wrapper:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.dark .code-block-wrapper:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* 代码块语言标记 */
+.code-block-container .language-indicator {
+  position: absolute;
+  top: 0;
+  left: 12px;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+}
+
+.dark .code-block-container .language-indicator {
+  background-color: #0c4a6e;
+  color: #bae6fd;
+  border-color: #075985;
+}
+
+/* 复制按钮样式 */
+.code-block-container .copy-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.375rem 0.625rem;
+  border-radius: 0.375rem;
+  background-color: white;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  opacity: 0;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+  z-index: 10;
+}
+
+.dark .code-block-container .copy-button {
+  background-color: #374151;
+  color: #d1d5db;
+  border-color: #4b5563;
+}
+
+.code-block-container:hover .copy-button {
+  opacity: 1;
+}
+
+.code-block-container .copy-button:hover {
+  background-color: #f9fafb;
+}
+
+.dark .code-block-container .copy-button:hover {
+  background-color: #4b5563;
+}
+
+/* 内联代码样式 */
+.prose :where(code):not(:where([class~="not-prose"] *)):not(pre code) {
+  font-weight: 500;
+  font-size: 0.925em;
+  font-family: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: #202124;
+  background-color: #e9eaec; /* 从 #f1f3f4 改深一点 */
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+}
+
+.dark .prose :where(code):not(:where([class~="not-prose"] *)):not(pre code) {
+  color: #e8eaed;
+  background-color: #2d2e31; /* 从 #3c4043 改深一点 */
+}
+
+/* 代码块内容样式 */
+.prose pre code {
+  font-family: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.925rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #202124;
+  background-color: transparent;
+  padding: 0;
+  border: none;
+}
+
+.dark .prose pre code {
+  color: #e8eaed;
+}
+
+/* 输出内容样式 */
+.output-block {
+  background-color: #f3f4f6; /* 从 #f8f9fa 改深一点 */
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin: 1.25rem 0;
+  font-family: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.925rem;
+  line-height: 1.5;
+  color: #202124;
+  overflow-x: auto;
+}
+
+.dark .output-block {
+  background-color: #1a1b1e; /* 从 #202124 改深一点 */
+  border-color: #3c4043;
+  color: #e8eaed;
+}
+
+/* 优化内联代码样式 */
+.prose code:not(pre code) {
+  background-color: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 0.375rem;
+  font-size: 0.875em;
+}
+
+.dark .prose code:not(pre code) {
+  background-color: #2d2e31;
+}
+
+/* 优化链接样式 */
+.prose a {
+  color: #1a73e8;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.prose a:hover {
+  color: #1557b0;
+  text-decoration: underline;
+}
+
+.dark .prose a {
+  color: #8ab4f8;
+}
+
+.dark .prose a:hover {
+  color: #aecbfa;
+}
+
+/* 打字机光标动画 */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.typing-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background-color: currentColor;
+  margin-left: 2px;
+  animation: blink 1s step-end infinite;
+}
+
+/* Gemini 风格的打字机效果 */
+.gemini-typing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+  padding: 0 2px;
+}
+
+.gemini-typing-indicator span {
+  width: 3px;
+  height: 3px;
+  background-color: var(--primary);
+  border-radius: 50%;
+  animation: geminiTyping 1.4s infinite ease-in-out;
+}
+
+.dark .gemini-typing-indicator span {
+  background-color: #8ab4f8;
+}
+
+@keyframes geminiTyping {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.3;
+  }
+  30% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+/* Gemini 风格的 Markdown 内容 */
+.prose {
+  max-width: none !important;
+  font-size: 1rem; /* 从 0.9375rem 调整为 1rem */
+  line-height: 1.6;
+}
+
+.prose p {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+}
+
+/* 内联代码字体大小调整 */
+.prose code {
+  font-size: 0.925em; /* 从 0.875em 调整为 0.925em */
+  font-weight: 400;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  background-color: rgba(96, 125, 139, 0.1);
+}
+
+/* 代码块字体大小调整 */
+.prose pre code {
+  font-size: 0.925em; /* 从 0.875em 调整为 0.925em */
+  line-height: 1.7142857;
+}
+
+/* 标题字体大小调整 */
+.prose h1 {
+  font-size: 1.75rem; /* 2em -> 1.75rem */
+}
+
+.prose h2 {
+  font-size: 1.5rem; /* 1.5em -> 1.5rem */
+}
+
+.prose h3 {
+  font-size: 1.25rem; /* 1.25em -> 1.25rem */
+}
+
+.prose h4 {
+  font-size: 1.125rem; /* 1.125em -> 1.125rem */
+}
+
+/* 列表字体大小调整 */
+.prose ul,
+.prose ol {
+  font-size: 1rem;
+}
+
+/* Gemini 风格的链接 */
+.prose a {
+  color: #1a73e8;
+  text-decoration: none;
+  font-weight: 400;
+}
+
+.dark .prose a {
+  color: #8ab4f8;
+}
+
+.prose a:hover {
+  text-decoration: underline;
+}
+
+/* Gemini 风格的列表 */
+.prose ul, .prose ol {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+  padding-left: 1.5em;
+}
+
+.prose ol {
+  list-style-type: decimal;
+  counter-reset: item;
+}
+
+.prose ol > li {
+  display: block;
+  position: relative;
+}
+
+.prose ol > li::before {
+  content: counters(item, ".") ". ";
+  counter-increment: item;
+  position: absolute;
+  left: -1.5em;
+}
+
+.prose li {
+  margin-top: 0.375em;
+  margin-bottom: 0.375em;
+}
+
+/* Gemini 风格的标题 */
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  font-weight: 500;
+  line-height: 1.3;
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+/* 消息气泡阴影效果 */
+.message-bubble {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.dark .message-bubble {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}

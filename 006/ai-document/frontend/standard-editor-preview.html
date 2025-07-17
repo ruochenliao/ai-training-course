@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>标准编辑器界面预览</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #fff;
+            min-height: 100vh;
+        }
+        
+        /* 工具栏 */
+        .toolbar {
+            background: #fff;
+            border-bottom: 1px solid #e8e8e8;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        
+        .toolbar-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #666;
+            transition: all 0.2s ease;
+        }
+        
+        .toolbar-btn:hover {
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .toolbar-select {
+            border: none;
+            background: none;
+            font-size: 12px;
+            color: #666;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .toolbar-select:hover {
+            background: #f5f5f5;
+        }
+        
+        .divider {
+            width: 1px;
+            height: 20px;
+            background: #d9d9d9;
+            margin: 0 4px;
+        }
+        
+        /* 编辑区域 */
+        .editor-content {
+            padding: 40px 60px;
+            background: #fff;
+            min-height: calc(100vh - 60px);
+        }
+        
+        .editor-container {
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: 500px;
+            padding: 20px;
+            border: 1px solid #f0f0f0;
+            border-radius: 4px;
+            background: #fff;
+            position: relative;
+        }
+        
+        .editor-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #999;
+            font-size: 16px;
+            pointer-events: none;
+        }
+        
+        .editor-area {
+            min-height: 400px;
+            outline: none;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .editor-area:focus {
+            outline: none;
+        }
+        
+        /* 工具栏图标样式 */
+        .icon {
+            font-size: 14px;
+        }
+        
+        .bold { font-weight: bold; }
+        .italic { font-style: italic; }
+        .underline { text-decoration: underline; }
+        .strikethrough { text-decoration: line-through; }
+    </style>
+</head>
+<body>
+    <!-- 工具栏 -->
+    <div class="toolbar">
+        <!-- 撤销重做组 -->
+        <button class="toolbar-btn" title="撤销">↶</button>
+        <button class="toolbar-btn" title="重做">↷</button>
+        <button class="toolbar-btn" title="打印">🖨</button>
+        <button class="toolbar-btn" title="链接">🔗</button>
+        
+        <div class="divider"></div>
+        
+        <!-- 字体选择 -->
+        <select class="toolbar-select">
+            <option>宋体</option>
+            <option>微软雅黑</option>
+            <option>黑体</option>
+        </select>
+        
+        <div class="divider"></div>
+        
+        <!-- 格式化按钮 -->
+        <button class="toolbar-btn bold" title="加粗">B</button>
+        <button class="toolbar-btn italic" title="斜体">I</button>
+        <button class="toolbar-btn underline" title="下划线">U</button>
+        <button class="toolbar-btn strikethrough" title="删除线">S</button>
+        <button class="toolbar-btn" title="字体颜色">A</button>
+        
+        <div class="divider"></div>
+        
+        <!-- 标题样式 -->
+        <button class="toolbar-btn" title="标题1">H1</button>
+        <button class="toolbar-btn" title="标题2">H2</button>
+        <button class="toolbar-btn" title="标题3">H3</button>
+        
+        <div class="divider"></div>
+        
+        <!-- 对齐方式 -->
+        <button class="toolbar-btn" title="左对齐">≡</button>
+        <button class="toolbar-btn" title="居中对齐">≣</button>
+        <button class="toolbar-btn" title="右对齐">≡</button>
+        <button class="toolbar-btn" title="两端对齐">≣</button>
+        
+        <div class="divider"></div>
+        
+        <!-- 列表和缩进 -->
+        <button class="toolbar-btn" title="无序列表">•</button>
+        <button class="toolbar-btn" title="有序列表">1.</button>
+        <button class="toolbar-btn" title="减少缩进">⇤</button>
+        <button class="toolbar-btn" title="增加缩进">⇥</button>
+        
+        <div class="divider"></div>
+        
+        <!-- 表格和全屏 -->
+        <button class="toolbar-btn" title="插入表格">⊞</button>
+        <button class="toolbar-btn" title="全屏">⛶</button>
+
+        <div class="divider"></div>
+
+        <!-- AI工具 -->
+        <button class="toolbar-btn ai-writing-btn" onclick="handleAIWriting()" style="background: #1890ff; color: white; margin-left: 8px;">
+            🤖 AI写作
+        </button>
+    </div>
+
+    <!-- 编辑区域 -->
+    <div class="editor-content">
+        <div class="editor-container">
+            <div class="editor-placeholder" id="placeholder">
+                请在此输入内容
+            </div>
+            <div 
+                class="editor-area" 
+                contenteditable="true"
+                id="editor"
+                oninput="handleInput()"
+            ></div>
+        </div>
+    </div>
+
+    <script>
+        function handleInput() {
+            const editor = document.getElementById('editor');
+            const placeholder = document.getElementById('placeholder');
+            
+            if (editor.innerText.trim().length > 0) {
+                placeholder.style.display = 'none';
+            } else {
+                placeholder.style.display = 'block';
+            }
+        }
+
+        // 工具栏按钮功能
+        document.querySelectorAll('.toolbar-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const title = this.getAttribute('title');
+                if (title) {
+                    console.log('点击了:', title);
+                    // 这里可以实现具体的编辑功能
+                }
+            });
+        });
+
+        // 格式化按钮功能示例
+        document.querySelector('.bold').addEventListener('click', function() {
+            document.execCommand('bold');
+        });
+
+        document.querySelector('.italic').addEventListener('click', function() {
+            document.execCommand('italic');
+        });
+
+        document.querySelector('.underline').addEventListener('click', function() {
+            document.execCommand('underline');
+        });
+
+        // 编辑器焦点处理
+        document.getElementById('editor').addEventListener('focus', function() {
+            document.getElementById('placeholder').style.display = 'none';
+        });
+
+        document.getElementById('editor').addEventListener('blur', function() {
+            if (this.innerText.trim().length === 0) {
+                document.getElementById('placeholder').style.display = 'block';
+            }
+        });
+
+        // AI写作按钮功能
+        function handleAIWriting() {
+            alert('点击了AI写作按钮！\n\n在实际应用中，这里会跳转到AI写作向导页面。');
+        }
+    </script>
+</body>
+</html>

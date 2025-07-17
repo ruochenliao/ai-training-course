@@ -1,0 +1,11 @@
+{
+  "name": "vanna-text2sql",
+  "version": "1.0.0",
+  "description": "Vanna Text2SQL Application Frontend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "MIT"
+}
