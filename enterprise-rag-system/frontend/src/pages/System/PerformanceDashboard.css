@@ -1,0 +1,285 @@
+/* 性能监控仪表板样式 */
+
+.performance-dashboard {
+  padding: 24px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.performance-dashboard .ant-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.performance-dashboard .ant-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.control-panel {
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.control-panel .ant-card-body {
+  padding: 16px 24px;
+}
+
+.control-panel .ant-select-selector {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.control-panel .ant-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.control-panel .ant-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.control-panel .ant-btn-primary {
+  background: rgba(24, 144, 255, 0.8);
+  border-color: rgba(24, 144, 255, 0.8);
+}
+
+.control-panel .ant-btn-primary:hover {
+  background: rgba(24, 144, 255, 1);
+  border-color: rgba(24, 144, 255, 1);
+}
+
+/* 统计卡片样式 */
+.performance-dashboard .ant-statistic {
+  text-align: center;
+}
+
+.performance-dashboard .ant-statistic-title {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.performance-dashboard .ant-statistic-content {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.performance-dashboard .ant-statistic-content-prefix {
+  margin-right: 8px;
+  font-size: 20px;
+}
+
+/* 进度条样式 */
+.performance-dashboard .ant-progress-line {
+  margin: 0;
+}
+
+.performance-dashboard .ant-progress-bg {
+  border-radius: 4px;
+}
+
+/* 表格样式 */
+.performance-dashboard .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.performance-dashboard .ant-table-tbody > tr:hover > td {
+  background: #f0f9ff !important;
+}
+
+/* 标签样式 */
+.performance-dashboard .ant-tag {
+  border-radius: 12px;
+  font-size: 11px;
+  padding: 2px 8px;
+  border: none;
+  font-weight: 500;
+}
+
+/* 警告框样式 */
+.performance-dashboard .ant-alert {
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.performance-dashboard .ant-alert-message {
+  font-weight: 600;
+}
+
+/* 图表容器样式 */
+.performance-dashboard .ant-card-head-title {
+  font-weight: 600;
+  color: #333;
+}
+
+.performance-dashboard .ant-card-body {
+  padding: 20px;
+}
+
+.performance-dashboard .ant-card-small .ant-card-body {
+  padding: 16px;
+}
+
+/* 仪表盘特殊样式 */
+.performance-dashboard .gauge-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+/* 加载状态 */
+.performance-dashboard .ant-spin-container {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 状态指示器 */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-indicator.normal {
+  color: #52c41a;
+}
+
+.status-indicator.warning {
+  color: #faad14;
+}
+
+.status-indicator.critical {
+  color: #ff4d4f;
+}
+
+/* 实时数据动画 */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.real-time-data {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .performance-dashboard {
+    padding: 16px;
+  }
+  
+  .performance-dashboard .ant-statistic-content {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .performance-dashboard {
+    padding: 12px;
+  }
+  
+  .control-panel .ant-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .performance-dashboard .ant-statistic-content {
+    font-size: 18px;
+  }
+  
+  .performance-dashboard .ant-card-head-title {
+    font-size: 14px;
+  }
+  
+  .performance-dashboard .ant-table {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .performance-dashboard {
+    padding: 8px;
+  }
+  
+  .performance-dashboard .ant-card-body {
+    padding: 12px;
+  }
+  
+  .performance-dashboard .ant-card-small .ant-card-body {
+    padding: 8px;
+  }
+  
+  .performance-dashboard .ant-statistic-content {
+    font-size: 16px;
+  }
+  
+  .performance-dashboard .ant-space {
+    flex-wrap: wrap;
+  }
+}
+
+/* 深色主题支持 */
+@media (prefers-color-scheme: dark) {
+  .performance-dashboard {
+    background: #141414;
+  }
+  
+  .performance-dashboard .ant-card {
+    background: #1f1f1f;
+    border-color: #303030;
+  }
+  
+  .performance-dashboard .ant-statistic-title {
+    color: #a0a0a0;
+  }
+  
+  .performance-dashboard .ant-table-thead > tr > th {
+    background: #262626;
+    color: #fff;
+  }
+  
+  .performance-dashboard .ant-table-tbody > tr > td {
+    background: #1f1f1f;
+    border-color: #303030;
+    color: #fff;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .performance-dashboard {
+    background: white;
+    padding: 0;
+  }
+  
+  .control-panel {
+    display: none;
+  }
+  
+  .performance-dashboard .ant-card {
+    box-shadow: none;
+    border: 1px solid #d9d9d9;
+    page-break-inside: avoid;
+    margin-bottom: 20px;
+  }
+  
+  .performance-dashboard .ant-btn {
+    display: none;
+  }
+}

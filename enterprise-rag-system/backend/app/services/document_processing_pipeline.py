@@ -1,34 +1,81 @@
 """
-文档处理流水线服务 - 企业级RAG系统
-严格按照技术栈要求：文档解析 → 智能分块 → Qwen2.5向量化 → Milvus存储 → Neo4j图谱构建
+文档处理流水线服务 - 企业级RAG系统 (第一阶段完善版)
+严格按照技术栈要求：Marker文档解析 → 智能分块 → Qwen3-8B向量化 → Milvus存储 → Neo4j图谱构建
 """
 import asyncio
+import hashlib
+import time
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from loguru import logger
 
-from app import entity_extraction_service
-from app import intelligent_chunker, ChunkStrategy
-from app import marker_service
-from app import milvus_service
-from app import neo4j_service
-from app import qwen_embedding_service
+from app.services.marker_service import marker_service
+from app.services.enhanced_chunker import EnhancedChunker, EnhancedChunkConfig
+from app.services.qwen_embedding_service import QwenEmbeddingService
+from app.services.milvus_service import milvus_service
+from app.services.neo4j_graph_service import Neo4jGraphService
+from app.services.entity_extraction_service import EntityExtractionService
 from app.core import get_db_session
 from app.models import Document, DocumentChunk, ParseStatus, ChunkType
+from app.core.exceptions import DocumentProcessingException
 
 
 class DocumentProcessingPipeline:
-    """文档处理流水线"""
-    
+    """文档处理流水线 - 第一阶段完善版"""
+
     def __init__(self):
-        self.default_chunk_strategy = ChunkStrategy.RECURSIVE
-        self.default_chunk_size = 1000
-        self.default_overlap = 200
-        self.batch_size = 50  # 批处理大小
-    
+        # 核心服务组件
+        self.marker_service = marker_service
+        self.chunker = EnhancedChunker()
+        self.embedding_service = QwenEmbeddingService()
+        self.vector_service = milvus_service
+        self.graph_service = Neo4jGraphService()
+        self.entity_service = EntityExtractionService()
+
+        # 配置参数
+        self.default_chunk_config = EnhancedChunkConfig(
+            chunk_size=800,
+            chunk_overlap=200,
+            strategy="adaptive",
+            preserve_structure=True
+        )
+        self.batch_size = 32  # 批处理大小
+        self._initialized = False
+
+    async def initialize(self):
+        """初始化所有服务组件"""
+        if self._initialized:
+            return
+
+        try:
+            logger.info("初始化文档处理管道...")
+
+            # 并行初始化所有服务
+            init_tasks = [
+                self.embedding_service.initialize(),
+                self.vector_service.connect(),
+                self.graph_service.connect(),
+                self.entity_service.initialize()
+            ]
+
+            results = await asyncio.gather(*init_tasks, return_exceptions=True)
+
+            # 检查初始化结果
+            for i, result in enumerate(results):
+                if isinstance(result, Exception):
+                    service_names = ["embedding", "vector", "graph", "entity"]
+                    logger.warning(f"{service_names[i]}服务初始化失败: {result}")
+
+            self._initialized = True
+            logger.info("文档处理管道初始化完成")
+
+        except Exception as e:
+            logger.error(f"文档处理管道初始化失败: {e}")
+            raise
+
     async def process_document(
         self,
         document_id: int,

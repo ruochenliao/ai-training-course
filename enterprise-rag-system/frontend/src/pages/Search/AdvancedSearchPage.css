@@ -1,0 +1,378 @@
+/* 高级搜索页面样式 */
+
+.advanced-search-page {
+  padding: 24px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.search-header {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.search-header .ant-card-head {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px 8px 0 0;
+}
+
+.search-header .ant-card-head-title {
+  color: white;
+  font-weight: 600;
+}
+
+.search-header .ant-tabs-tab {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.search-header .ant-tabs-tab-active {
+  color: white;
+}
+
+.search-header .ant-tabs-ink-bar {
+  background: white;
+}
+
+/* 搜索表单样式 */
+.advanced-search-page .ant-form-item-label > label {
+  font-weight: 600;
+  color: #333;
+}
+
+.advanced-search-page .ant-input,
+.advanced-search-page .ant-select-selector {
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  transition: all 0.3s ease;
+}
+
+.advanced-search-page .ant-input:focus,
+.advanced-search-page .ant-select-focused .ant-select-selector {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.advanced-search-page .ant-input::placeholder {
+  color: #bfbfbf;
+}
+
+/* 折叠面板样式 */
+.advanced-search-page .ant-collapse-ghost > .ant-collapse-item {
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.advanced-search-page .ant-collapse-header {
+  background: #fafafa;
+  border-radius: 6px;
+  font-weight: 600;
+  color: #333;
+}
+
+.advanced-search-page .ant-collapse-content {
+  background: white;
+  border-radius: 0 0 6px 6px;
+}
+
+/* 滑块样式 */
+.advanced-search-page .ant-slider-track {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.advanced-search-page .ant-slider-handle {
+  border-color: #667eea;
+}
+
+.advanced-search-page .ant-slider-handle:hover,
+.advanced-search-page .ant-slider-handle:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.2);
+}
+
+/* 开关样式 */
+.advanced-search-page .ant-switch-checked {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* 按钮样式 */
+.advanced-search-page .ant-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+.advanced-search-page .ant-btn-primary:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px);
+}
+
+.advanced-search-page .ant-btn {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.advanced-search-page .ant-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* 搜索结果样式 */
+.search-results {
+  margin-top: 24px;
+}
+
+.results-header {
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.results-header strong {
+  color: #1890ff;
+}
+
+/* 表格样式 */
+.advanced-search-page .ant-table {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.advanced-search-page .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.advanced-search-page .ant-table-tbody > tr:hover > td {
+  background: #f0f9ff !important;
+}
+
+.advanced-search-page .ant-table-tbody > tr > td {
+  padding: 16px;
+  vertical-align: top;
+}
+
+/* 标签样式 */
+.advanced-search-page .ant-tag {
+  border-radius: 12px;
+  font-size: 11px;
+  padding: 2px 8px;
+  border: none;
+  font-weight: 500;
+  margin: 2px;
+}
+
+.advanced-search-page .ant-tag-blue {
+  background: linear-gradient(135deg, #1890ff, #36cfc9);
+  color: white;
+}
+
+.advanced-search-page .ant-tag-green {
+  background: linear-gradient(135deg, #52c41a, #73d13d);
+  color: white;
+}
+
+.advanced-search-page .ant-tag-orange {
+  background: linear-gradient(135deg, #fa8c16, #ffa940);
+  color: white;
+}
+
+/* 工具提示样式 */
+.advanced-search-page .ant-tooltip-inner {
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+/* 分页样式 */
+.advanced-search-page .ant-pagination {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.advanced-search-page .ant-pagination-item-active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+}
+
+.advanced-search-page .ant-pagination-item-active a {
+  color: white;
+}
+
+/* 空状态样式 */
+.advanced-search-page .ant-empty {
+  padding: 60px 0;
+}
+
+.advanced-search-page .ant-empty-description {
+  color: #999;
+  font-size: 14px;
+}
+
+/* 加载状态样式 */
+.advanced-search-page .ant-spin-dot-item {
+  background-color: #667eea;
+}
+
+/* 选择器下拉样式 */
+.advanced-search-page .ant-select-dropdown {
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.advanced-search-page .ant-select-item-option-selected {
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+}
+
+.advanced-search-page .ant-select-item-option:hover {
+  background: rgba(102, 126, 234, 0.05);
+}
+
+/* 日期选择器样式 */
+.advanced-search-page .ant-picker {
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+}
+
+.advanced-search-page .ant-picker:hover,
+.advanced-search-page .ant-picker-focused {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .advanced-search-page {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .advanced-search-page {
+    padding: 12px;
+  }
+  
+  .results-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .advanced-search-page .ant-table {
+    font-size: 12px;
+  }
+  
+  .advanced-search-page .ant-form-item {
+    margin-bottom: 16px;
+  }
+  
+  .advanced-search-page .ant-btn-large {
+    height: 40px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .advanced-search-page {
+    padding: 8px;
+  }
+  
+  .advanced-search-page .ant-card-body {
+    padding: 16px;
+  }
+  
+  .advanced-search-page .ant-space {
+    flex-wrap: wrap;
+  }
+  
+  .advanced-search-page .ant-table-tbody > tr > td {
+    padding: 12px 8px;
+  }
+  
+  .advanced-search-page .ant-btn {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-results {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.advanced-search-page .ant-table-tbody > tr {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* 高亮搜索结果 */
+.search-highlight {
+  background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+/* 评分显示 */
+.score-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.score-high {
+  color: #52c41a;
+}
+
+.score-medium {
+  color: #faad14;
+}
+
+.score-low {
+  color: #ff4d4f;
+}
+
+/* 打印样式 */
+@media print {
+  .advanced-search-page {
+    background: white;
+    padding: 0;
+  }
+  
+  .search-header .ant-card-head {
+    background: white;
+    color: black;
+  }
+  
+  .advanced-search-page .ant-btn,
+  .advanced-search-page .ant-pagination {
+    display: none;
+  }
+  
+  .advanced-search-page .ant-table {
+    box-shadow: none;
+    border: 1px solid #d9d9d9;
+  }
+}

@@ -7,7 +7,12 @@ import { useSimpleAuthStore } from '@/store/simple-auth'
 import HomePage from '../../pages/Home/HomePage'
 import SimpleHomePage from '../../pages/Home/SimpleHomePage'
 import ChatPage from '../../pages/Chat/ChatPage'
+import GeminiChatPage from '../../pages/Chat/GeminiChatPage'
 import KnowledgeBasesPage from '../../pages/Knowledge/KnowledgeBasesPage'
+import KnowledgeGraphPage from '../../pages/Knowledge/KnowledgeGraphPage'
+import AdvancedSearchPage from '../../pages/Search/AdvancedSearchPage'
+import PerformanceDashboard from '../../pages/System/PerformanceDashboard'
+import SystemManagementPage from '../../pages/System/SystemManagementPage'
 import DocumentsPage from '../../pages/Knowledge/DocumentsPage'
 import DocumentCenterPage from '../../pages/Documents/DocumentCenterPage'
 import UsersPage from '../../pages/Users/UsersPage'
@@ -88,6 +93,51 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <ChatPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path='/gemini-chat'
+        element={
+          <ProtectedRoute>
+            <GeminiChatPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path='/knowledge-graph'
+        element={
+          <ProtectedRoute>
+            <KnowledgeGraphPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path='/advanced-search'
+        element={
+          <ProtectedRoute>
+            <AdvancedSearchPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path='/performance'
+        element={
+          <ProtectedRoute>
+            <PerformanceDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path='/system-management'
+        element={
+          <ProtectedRoute>
+            <SystemManagementPage />
           </ProtectedRoute>
         }
       />

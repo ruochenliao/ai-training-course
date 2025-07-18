@@ -12,10 +12,12 @@ from autogen_agentchat.base import TaskResult
 from autogen_agentchat.messages import ModelClientStreamingChunkEvent, MultiModalMessage as AGMultiModalMessage
 from autogen_core import Image as AGImage
 from autogen_core.model_context import BufferedChatCompletionContext
+from autogen_core.memory import MemoryContent, MemoryMimeType
 
 from app.core.llms import model_client, vllm_model_client
 from app.schemas.customer import ChatMessage, MessageContent
 from app.settings.config import settings
+from app.services.memory_service import MemoryServiceFactory
 
 # 获取项目根目录
 BASE_DIR = settings.BASE_DIR
@@ -30,6 +32,12 @@ class ChatSession:
             session_id: 会话唯一标识符
             user_id: 用户唯一标识符
         """
+        # 初始化记忆服务工厂
+        service = MemoryServiceFactory()
+        self.chat_memory_service = service.get_chat_memory_service(user_id)
+        self.public_memory_service = service.get_public_memory_service()
+        self.private_memory_service = service.get_private_memory_service(user_id)
+
         self.session_id = session_id
         self.user_id = user_id
 
@@ -272,7 +280,11 @@ class ChatService:
             model_client_stream=True,  # 启用流式输出
             tools=[],  # 暂时不添加工具
             reflect_on_tool_use=True,
-            memory=[],  # 暂时不添加记忆
+            memory=[
+                session.chat_memory_service.memory,
+                session.public_memory_service.memory,
+                session.private_memory_service.memory
+            ],
             model_context=BufferedChatCompletionContext(buffer_size=10),
         )
 
@@ -284,9 +296,23 @@ class ChatService:
             task_result: 任务结果，包含用户消息和AI回复
         """
         try:
-            # 这里可以实现记忆保存逻辑
-            # 暂时只记录日志
-            self.logger.info(f"保存对话到记忆 - 会话: {session.session_id}")
+            # 保存用户提问
+            if task_result.messages and len(task_result.messages) > 0:
+                await session.chat_memory_service.memory.add(
+                    MemoryContent(
+                        content=task_result.messages[0].model_dump_json(),
+                        mime_type=MemoryMimeType.JSON
+                    )
+                )
+
+            # 保存AI回答
+            if task_result.messages and len(task_result.messages) > 1:
+                await session.chat_memory_service.memory.add(
+                    MemoryContent(
+                        content=task_result.messages[-1].model_dump_json(),
+                        mime_type=MemoryMimeType.JSON
+                    )
+                )
         except Exception as e:
             self.logger.error(f"保存对话到记忆失败: {str(e)}", exc_info=True)
 

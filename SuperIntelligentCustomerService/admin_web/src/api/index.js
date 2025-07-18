@@ -54,11 +54,66 @@ export default {
   deleteKnowledgeBase: (id) => request.delete(`/knowledge/${id}`),
   getKnowledgeTypes: () => request.get('/knowledge/types'),
 
+  // knowledge bases
+  getKnowledgeBases: (params = {}) => request.get('/knowledge/bases/', { params }),
+  getKnowledgeBase: (id) => request.get(`/knowledge/bases/${id}`),
+  createKnowledgeBase: (data = {}) => {
+    // 转换文件大小单位（MB -> 字节）
+    const submitData = { ...data }
+    if (submitData.max_file_size_mb) {
+      submitData.max_file_size = submitData.max_file_size_mb * 1024 * 1024
+      delete submitData.max_file_size_mb
+    }
+    return request.post('/knowledge/bases/', submitData)
+  },
+  updateKnowledgeBase: (id, data = {}) => {
+    // 转换文件大小单位（MB -> 字节）
+    const submitData = { ...data }
+    if (submitData.max_file_size_mb) {
+      submitData.max_file_size = submitData.max_file_size_mb * 1024 * 1024
+      delete submitData.max_file_size_mb
+    }
+    return request.put(`/knowledge/bases/${id}`, submitData)
+  },
+  deleteKnowledgeBase: (id) => request.delete(`/knowledge/bases/${id}`),
+  getKnowledgeTypes: () => request.get('/knowledge/bases/types'),
+  getKnowledgeBaseStats: (id) => request.get(`/knowledge/bases/${id}/stats`),
+
   // knowledge files
-  getKnowledgeFileList: (kbId, params = {}) => request.get(`/knowledge/${kbId}/files`, { params }),
-  uploadKnowledgeFile: (kbId, data = {}) => request.post(`/knowledge/${kbId}/files`, data),
+  getKnowledgeFiles: (kbId, params = {}) => request.get(`/knowledge/files/${kbId}/list`, { params }),
+  getKnowledgeFile: (fileId) => request.get(`/knowledge/files/${fileId}/info`),
+  uploadFile: (kbId, file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return request.post(`/knowledge/files/${kbId}/upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 300000 // 5分钟超时
+    })
+  },
+  batchUploadFiles: (kbId, files) => {
+    const formData = new FormData()
+    files.forEach(file => formData.append('files', file))
+    return request.post(`/knowledge/files/batch-upload/${kbId}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 600000 // 10分钟超时
+    })
+  },
+  downloadFile: (fileId) => request.get(`/knowledge/files/${fileId}/download`, { responseType: 'blob' }),
+  deleteFile: (fileId) => request.delete(`/knowledge/files/${fileId}`),
+  reprocessFile: (fileId) => request.post(`/knowledge/files/${fileId}/reprocess`),
+  getFileProcessingStatus: (fileId) => request.get(`/knowledge/files/${fileId}/processing-status`),
+
+  // knowledge search
+  searchKnowledge: (params = {}) => request.post('/knowledge/search', params),
+  getSearchableKnowledgeBases: () => request.get('/knowledge/knowledge-bases'),
+  searchSimilarContent: (params = {}) => request.post('/knowledge/similar', params),
+  getSearchStats: () => request.get('/knowledge/stats'),
+
+  // 兼容旧API
+  getKnowledgeFileList: (kbId, params = {}) => request.get(`/knowledge/files/${kbId}/list`, { params }),
+  uploadKnowledgeFile: (kbId, data = {}) => request.post(`/knowledge/files/${kbId}/upload`, data),
   deleteKnowledgeFile: (fileId) => request.delete(`/knowledge/files/${fileId}`),
-  getKnowledgeFileStatistics: (kbId) => request.get(`/knowledge/${kbId}/files/statistics`),
-  retryKnowledgeFile: (kbId, fileId) => request.post(`/knowledge/${kbId}/files/${fileId}/retry`),
+  getKnowledgeFileStatistics: (kbId) => request.get(`/knowledge/bases/${kbId}/stats`),
+  retryKnowledgeFile: (kbId, fileId) => request.post(`/knowledge/files/${fileId}/reprocess`),
 
 }

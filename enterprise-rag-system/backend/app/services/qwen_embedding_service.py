@@ -1,6 +1,6 @@
 """
-基于Qwen2.5-7B-Instruct的嵌入服务 - 企业级RAG系统
-严格按照技术栈要求：Qwen2.5-7B-Instruct (ModelScope部署)
+基于Qwen3-8B的嵌入服务 - 企业级RAG系统
+严格按照技术栈要求：Qwen3-8B (ModelScope部署)
 """
 import asyncio
 from datetime import datetime
@@ -16,35 +16,35 @@ from app.core import settings
 
 
 class QwenEmbeddingService:
-    """Qwen2.5-7B-Instruct 嵌入服务"""
-    
+    """Qwen3-8B 嵌入服务"""
+
     def __init__(self):
         self.model = None
         self.tokenizer = None
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model_name = "qwen/Qwen2.5-7B-Instruct"
-        self.max_length = 8192  # Qwen2.5支持的最大长度
-        self.embedding_dim = 1024  # 嵌入维度
-        self.batch_size = 32  # 批处理大小
+        self.model_name = "Qwen/Qwen3-8B"  # 用户指定的模型
+        self.max_length = 8192  # Qwen3支持的最大长度
+        self.embedding_dim = 4096  # Qwen3-8B的嵌入维度
+        self.batch_size = 16  # 批处理大小（8B模型较大，减少批次）
         self._initialized = False
     
     async def initialize(self):
-        """初始化Qwen2.5模型"""
+        """初始化Qwen3-8B模型"""
         if self._initialized:
             return
-        
+
         try:
-            logger.info("正在初始化Qwen2.5-7B-Instruct嵌入模型...")
-            
+            logger.info("正在初始化Qwen3-8B嵌入模型...")
+
             # 在线程池中加载模型，避免阻塞
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(None, self._load_model)
-            
+
             self._initialized = True
-            logger.info(f"Qwen2.5嵌入模型初始化完成 (设备: {self.device})")
-            
+            logger.info(f"Qwen3-8B嵌入模型初始化完成 (设备: {self.device})")
+
         except Exception as e:
-            logger.error(f"Qwen2.5模型初始化失败: {e}")
+            logger.error(f"Qwen3-8B模型初始化失败: {e}")
             raise
     
     def _load_model(self):

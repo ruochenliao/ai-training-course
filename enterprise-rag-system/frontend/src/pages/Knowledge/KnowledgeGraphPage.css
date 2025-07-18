@@ -1,0 +1,128 @@
+/* 知识图谱页面样式 */
+
+.knowledge-graph-page {
+  padding: 24px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.knowledge-graph-page .ant-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.knowledge-graph-page .ant-statistic {
+  text-align: center;
+}
+
+.knowledge-graph-page .ant-statistic-title {
+  color: #666;
+  font-size: 14px;
+}
+
+.knowledge-graph-page .ant-statistic-content {
+  color: #1890ff;
+}
+
+.knowledge-graph-page .ant-tabs-tab {
+  font-weight: 500;
+}
+
+.knowledge-graph-page .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+.knowledge-graph-page .ant-descriptions-item-label {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+/* 统计卡片动画 */
+.knowledge-graph-page .ant-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+/* 表格行悬停效果 */
+.knowledge-graph-page .ant-table-tbody > tr:hover > td {
+  background: #f0f9ff !important;
+}
+
+/* 标签样式 */
+.knowledge-graph-page .ant-tag {
+  border-radius: 12px;
+  font-size: 11px;
+  padding: 2px 8px;
+  border: none;
+}
+
+/* 操作按钮样式 */
+.knowledge-graph-page .ant-btn-text {
+  border-radius: 6px;
+}
+
+.knowledge-graph-page .ant-btn-text:hover {
+  background: #f0f0f0;
+}
+
+/* 搜索框样式 */
+.knowledge-graph-page .ant-input-search {
+  border-radius: 6px;
+}
+
+/* 模态框样式 */
+.knowledge-graph-page .ant-modal-content {
+  border-radius: 8px;
+}
+
+.knowledge-graph-page .ant-modal-header {
+  border-radius: 8px 8px 0 0;
+}
+
+/* 描述列表样式 */
+.knowledge-graph-page .ant-descriptions-item-content pre {
+  background: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .knowledge-graph-page {
+    padding: 16px;
+  }
+  
+  .knowledge-graph-page .ant-card-head-title {
+    font-size: 16px;
+  }
+  
+  .knowledge-graph-page .ant-table {
+    font-size: 12px;
+  }
+  
+  .knowledge-graph-page .ant-btn {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .knowledge-graph-page {
+    padding: 12px;
+  }
+  
+  .knowledge-graph-page .ant-card-extra {
+    margin-top: 8px;
+  }
+  
+  .knowledge-graph-page .ant-space {
+    flex-wrap: wrap;
+  }
+}

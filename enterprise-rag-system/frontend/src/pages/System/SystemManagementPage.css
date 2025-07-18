@@ -1,0 +1,436 @@
+/* 系统管理页面样式 */
+
+.system-management-page {
+  padding: 24px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.page-header {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: none;
+  margin-bottom: 24px;
+}
+
+.page-header .ant-card-head {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px 8px 0 0;
+}
+
+.page-header .ant-card-head-title {
+  color: white;
+  font-weight: 600;
+}
+
+.page-header .ant-tabs-tab {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.page-header .ant-tabs-tab-active {
+  color: white;
+}
+
+.page-header .ant-tabs-ink-bar {
+  background: white;
+}
+
+/* 配置管理样式 */
+.config-management {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.config-toolbar {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.config-toolbar .ant-btn {
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.config-toolbar .ant-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+.config-toolbar .ant-btn-primary:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px);
+}
+
+.config-toolbar .ant-input-search {
+  border-radius: 6px;
+}
+
+.config-toolbar .ant-select-selector {
+  border-radius: 6px;
+}
+
+/* 表格样式 */
+.system-management-page .ant-table {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.system-management-page .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.system-management-page .ant-table-tbody > tr:hover > td {
+  background: #f0f9ff !important;
+}
+
+.system-management-page .ant-table-tbody > tr > td {
+  padding: 16px;
+  vertical-align: top;
+}
+
+/* 标签样式 */
+.system-management-page .ant-tag {
+  border-radius: 12px;
+  font-size: 11px;
+  padding: 2px 8px;
+  border: none;
+  font-weight: 500;
+  margin: 2px;
+}
+
+.system-management-page .ant-tag-green {
+  background: linear-gradient(135deg, #52c41a, #73d13d);
+  color: white;
+}
+
+.system-management-page .ant-tag-red {
+  background: linear-gradient(135deg, #ff4d4f, #ff7875);
+  color: white;
+}
+
+.system-management-page .ant-tag-orange {
+  background: linear-gradient(135deg, #fa8c16, #ffa940);
+  color: white;
+}
+
+.system-management-page .ant-tag-blue {
+  background: linear-gradient(135deg, #1890ff, #40a9ff);
+  color: white;
+}
+
+/* 系统健康状态样式 */
+.system-health {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.system-health .ant-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.system-health .ant-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.system-health .ant-statistic {
+  text-align: center;
+}
+
+.system-health .ant-statistic-title {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.system-health .ant-statistic-content {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.system-health .ant-statistic-content-prefix {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+/* 状态徽章样式 */
+.system-health .ant-badge-status-success {
+  background-color: #52c41a;
+}
+
+.system-health .ant-badge-status-warning {
+  background-color: #faad14;
+}
+
+.system-health .ant-badge-status-error {
+  background-color: #ff4d4f;
+}
+
+/* 模态框样式 */
+.system-management-page .ant-modal-content {
+  border-radius: 8px;
+}
+
+.system-management-page .ant-modal-header {
+  border-radius: 8px 8px 0 0;
+}
+
+.system-management-page .ant-form-item-label > label {
+  font-weight: 600;
+  color: #333;
+}
+
+.system-management-page .ant-input,
+.system-management-page .ant-input-number,
+.system-management-page .ant-select-selector {
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  transition: all 0.3s ease;
+}
+
+.system-management-page .ant-input:focus,
+.system-management-page .ant-input-number:focus,
+.system-management-page .ant-select-focused .ant-select-selector {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* 开关样式 */
+.system-management-page .ant-switch-checked {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* 上传组件样式 */
+.system-management-page .ant-upload-drag {
+  border-radius: 8px;
+  border: 2px dashed #d9d9d9;
+  background: #fafafa;
+  transition: all 0.3s ease;
+}
+
+.system-management-page .ant-upload-drag:hover {
+  border-color: #1890ff;
+  background: #f0f9ff;
+}
+
+.system-management-page .ant-upload-drag-icon {
+  font-size: 48px;
+  color: #1890ff;
+}
+
+.system-management-page .ant-upload-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.system-management-page .ant-upload-hint {
+  color: #666;
+}
+
+/* 警告框样式 */
+.system-management-page .ant-alert {
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.system-management-page .ant-alert-message {
+  font-weight: 600;
+}
+
+/* 按钮样式 */
+.system-management-page .ant-btn {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.system-management-page .ant-btn:hover {
+  transform: translateY(-1px);
+}
+
+.system-management-page .ant-btn-text {
+  border-radius: 6px;
+}
+
+.system-management-page .ant-btn-text:hover {
+  background: #f0f0f0;
+}
+
+/* 分页样式 */
+.system-management-page .ant-pagination {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.system-management-page .ant-pagination-item-active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+}
+
+.system-management-page .ant-pagination-item-active a {
+  color: white;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .system-management-page {
+    padding: 16px;
+  }
+  
+  .config-management,
+  .system-health {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .system-management-page {
+    padding: 12px;
+  }
+  
+  .config-toolbar {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .config-toolbar .ant-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .system-management-page .ant-table {
+    font-size: 12px;
+  }
+  
+  .system-management-page .ant-table-tbody > tr > td {
+    padding: 12px 8px;
+  }
+  
+  .system-health .ant-statistic-content {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .system-management-page {
+    padding: 8px;
+  }
+  
+  .config-management,
+  .system-health {
+    padding: 12px;
+  }
+  
+  .system-management-page .ant-card-body {
+    padding: 16px;
+  }
+  
+  .system-management-page .ant-space {
+    flex-wrap: wrap;
+  }
+  
+  .system-management-page .ant-btn {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.config-management,
+.system-health {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.system-management-page .ant-table-tbody > tr {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* 状态指示器 */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-indicator.healthy {
+  color: #52c41a;
+}
+
+.status-indicator.degraded {
+  color: #faad14;
+}
+
+.status-indicator.unhealthy {
+  color: #ff4d4f;
+}
+
+/* 配置项特殊样式 */
+.config-item-sensitive {
+  background: rgba(255, 77, 79, 0.05);
+  border-left: 3px solid #ff4d4f;
+  padding-left: 12px;
+}
+
+.config-item-restart-required {
+  background: rgba(250, 173, 20, 0.05);
+  border-left: 3px solid #faad14;
+  padding-left: 12px;
+}
+
+.config-item-error {
+  background: rgba(255, 77, 79, 0.1);
+  border: 1px solid #ff4d4f;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+/* 打印样式 */
+@media print {
+  .system-management-page {
+    background: white;
+    padding: 0;
+  }
+  
+  .config-toolbar,
+  .ant-btn,
+  .ant-pagination {
+    display: none;
+  }
+  
+  .system-management-page .ant-card {
+    box-shadow: none;
+    border: 1px solid #d9d9d9;
+    page-break-inside: avoid;
+    margin-bottom: 20px;
+  }
+  
+  .system-management-page .ant-table {
+    box-shadow: none;
+    border: 1px solid #d9d9d9;
+  }
+}

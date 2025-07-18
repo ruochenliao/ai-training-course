@@ -10,9 +10,14 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   MessageOutlined,
+  RobotOutlined,
   SearchOutlined,
   SettingOutlined,
   UserOutlined,
+  NodeIndexOutlined,
+  DashboardOutlined,
+  FilterOutlined,
+  ControlOutlined,
 } from '@ant-design/icons'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useSimpleAuthStore } from '@/store/simple-auth'
@@ -31,6 +36,31 @@ const menuItems: MenuProps['items'] = [
     key: '/chat',
     icon: <MessageOutlined />,
     label: '智能对话',
+  },
+  {
+    key: '/gemini-chat',
+    icon: <RobotOutlined />,
+    label: 'Gemini智能助手',
+  },
+  {
+    key: '/knowledge-graph',
+    icon: <NodeIndexOutlined />,
+    label: '知识图谱',
+  },
+  {
+    key: '/advanced-search',
+    icon: <FilterOutlined />,
+    label: '高级搜索',
+  },
+  {
+    key: '/performance',
+    icon: <DashboardOutlined />,
+    label: '性能监控',
+  },
+  {
+    key: '/system-management',
+    icon: <ControlOutlined />,
+    label: '系统管理',
   },
   {
     key: '/knowledge',

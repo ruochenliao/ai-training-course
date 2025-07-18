@@ -17,6 +17,8 @@ from .endpoints import (
     advanced_search,
     graph,
     autogen_chat,
+    stage1_test,  # 第一阶段测试
+    multi_agent_chat,  # 第二阶段多智能体
 
     monitoring,
     permission_management,
@@ -89,6 +91,12 @@ api_router.include_router(validation_management.router, prefix="/validation", ta
 
 # 文件上传接口
 api_router.include_router(file_upload.router, prefix="/upload", tags=["文件上传"])
+
+# 第一阶段测试接口
+api_router.include_router(stage1_test.router, tags=["第一阶段测试"])
+
+# 第二阶段多智能体协作接口
+api_router.include_router(multi_agent_chat.router, tags=["多智能体协作"])
 
 
 @api_router.get("/")

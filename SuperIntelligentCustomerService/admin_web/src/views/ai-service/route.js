@@ -41,5 +41,14 @@ export default {
         hideInMenu: true, // 不在菜单中显示
       },
     },
+    {
+      path: 'knowledge/search',
+      name: 'AiServiceKnowledgeSearch',
+      component: () => import('./knowledge/search.vue'),
+      meta: {
+        title: '知识库搜索',
+        icon: 'material-symbols:search',
+      },
+    },
   ],
 }

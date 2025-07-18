@@ -30,12 +30,25 @@ numpy>=1.24.0
 # 向量数据库
 chromadb==0.4.18
 faiss-cpu==1.7.4
+pymilvus==2.3.4
+milvus==2.3.4
+
+# 图数据库
+neo4j==5.15.0
+py2neo==2021.2.4
 
 # 文档处理
 pypdf2==3.0.1
 python-docx==0.8.11
 openpyxl==3.1.2
 markdown==3.5.1
+marker-pdf==0.2.12
+pymupdf==1.23.14
+pillow>=9.0.0
+
+# ModelScope和通义千问
+modelscope==1.11.0
+dashscope==1.17.0
 
 # 多智能体框架
 autogen==0.2.0

@@ -12,12 +12,12 @@ from typing import Any, Dict, List, Optional, Tuple
 from autogen import ConversableAgent
 from loguru import logger
 
-from app import LLMService
-from app import enhanced_graph_service
-# 导入增强版服务
-from app import enhanced_vector_db_service
-from app import qwen_model_manager
-from app.core import AgentException
+from app.services.qwen_embedding_service import QwenEmbeddingService
+from app.services.milvus_service import milvus_service
+from app.services.neo4j_graph_service import Neo4jGraphService
+from app.services.deepseek_llm_service import DeepSeekLLMService
+from app.services.qwen_multimodal_service import QwenMultimodalService
+from app.core.exceptions import AgentException
 from app.core import settings
 
 
@@ -77,91 +77,92 @@ class AgentResponse:
 
 class EnhancedSemanticSearchAgent(ConversableAgent):
     """增强版语义检索智能体"""
-    
+
     def __init__(self):
         super().__init__(
             name="enhanced_semantic_search_agent",
             system_message="""你是一个专业的语义检索智能体，使用最先进的向量检索技术。
-            
+
             你的核心能力：
             1. 理解用户查询的语义意图
-            2. 使用通义千问3-8B嵌入模型生成高质量查询向量
+            2. 使用通义千问Qwen3-8B嵌入模型生成高质量查询向量
             3. 在Milvus向量数据库中执行高效的相似度搜索
             4. 支持混合检索（向量+关键词）
             5. 使用重排模型优化结果排序
-            
+
             请始终关注检索结果的相关性和准确性。""",
             llm_config={
-                "config_list": settings.AUTOGEN_CONFIG_LIST,
-                "temperature": settings.AUTOGEN_TEMPERATURE,
-                "timeout": settings.AUTOGEN_TIMEOUT,
+                "config_list": [{"model": "deepseek-chat", "api_key": "your-api-key"}],
+                "temperature": 0.1,
+                "timeout": 60,
             },
             human_input_mode="NEVER",
         )
-        self.vector_service = enhanced_vector_db_service
-        self.embedding_service = None
+        self.vector_service = milvus_service
+        self.embedding_service = QwenEmbeddingService()
         self.stats = {"total_searches": 0, "avg_response_time": 0.0}
     
     async def initialize(self):
         """初始化智能体"""
-        await self.vector_service.initialize()
-        self.embedding_service = await qwen_model_manager.get_embedding_service()
+        await self.vector_service.connect()
+        await self.embedding_service.initialize()
         logger.info("语义检索智能体初始化完成")
-    
+
     async def semantic_search(
-        self, 
-        query: str, 
+        self,
+        query: str,
         top_k: int = 10,
         knowledge_base_ids: Optional[List[int]] = None,
-        use_rerank: bool = True
+        use_hybrid: bool = True
     ) -> List[SearchResult]:
         """执行语义检索"""
         start_time = time.time()
-        
+
         try:
             # 生成查询向量
-            query_vector = await self.embedding_service.embed_query(query)
-            
-            if use_rerank:
-                # 使用重排的语义检索
-                results = await self.vector_service.semantic_search_with_rerank(
-                    collection_name=settings.MILVUS_COLLECTION_NAME,
-                    query_vector=query_vector,
-                    query_text=query,
+            query_embedding = await self.embedding_service.encode_single(query)
+
+            if use_hybrid:
+                # 使用混合检索
+                results = await self.vector_service.hybrid_search(
+                    dense_vector=query_embedding.tolist(),
+                    keywords=query,
                     top_k=top_k,
                     knowledge_base_ids=knowledge_base_ids
                 )
             else:
                 # 普通向量检索
-                results = await self.vector_service._vector_search(
-                    collection_name=settings.MILVUS_COLLECTION_NAME,
-                    query_vectors=[query_vector],
+                results = await self.vector_service.search_vectors(
+                    vector=query_embedding.tolist(),
                     top_k=top_k,
-                    knowledge_base_ids=knowledge_base_ids,
-                    search_config=None
+                    knowledge_base_ids=knowledge_base_ids
                 )
-                results = results[0] if results else []
-            
+
             # 转换为SearchResult格式
             search_results = []
             for result in results:
                 search_results.append(SearchResult(
                     content=result.get("content", ""),
-                    source=result.get("source", "语义检索"),
+                    source=f"文档ID: {result.get('document_id', 'unknown')}",
                     score=result.get("score", 0.0),
-                    metadata=result.get("metadata", {}),
+                    metadata={
+                        "chunk_id": result.get("chunk_id"),
+                        "document_id": result.get("document_id"),
+                        "knowledge_base_id": result.get("knowledge_base_id"),
+                        "chunk_index": result.get("chunk_index")
+                    },
                     search_type="semantic",
                     confidence=result.get("score", 0.0),
                     relevance_explanation=f"语义相似度: {result.get('score', 0.0):.3f}"
                 ))
-            
+
             # 更新统计
             processing_time = time.time() - start_time
             self._update_stats(processing_time)
-            
+
             logger.info(f"语义检索完成: {len(search_results)} 个结果, 耗时: {processing_time:.2f}s")
             return search_results
-            
+
         except Exception as e:
             logger.error(f"语义检索失败: {e}")
             return []
@@ -175,28 +176,28 @@ class EnhancedSemanticSearchAgent(ConversableAgent):
 
 class EnhancedGraphSearchAgent(ConversableAgent):
     """增强版图谱检索智能体"""
-    
+
     def __init__(self):
         super().__init__(
             name="enhanced_graph_search_agent",
             system_message="""你是一个专业的知识图谱检索智能体，擅长实体关系分析。
-            
+
             你的核心能力：
             1. 从用户查询中识别关键实体
             2. 在Neo4j知识图谱中查找实体关系
             3. 执行多跳路径搜索
             4. 分析实体间的复杂关系网络
             5. 提供基于图谱结构的推理结果
-            
+
             请关注实体关系的逻辑性和完整性。""",
             llm_config={
-                "config_list": settings.AUTOGEN_CONFIG_LIST,
-                "temperature": settings.AUTOGEN_TEMPERATURE,
-                "timeout": settings.AUTOGEN_TIMEOUT,
+                "config_list": [{"model": "deepseek-chat", "api_key": "your-api-key"}],
+                "temperature": 0.1,
+                "timeout": 60,
             },
             human_input_mode="NEVER",
         )
-        self.graph_service = enhanced_graph_service
+        self.graph_service = Neo4jGraphService()
         self.stats = {"total_searches": 0, "entities_found": 0}
     
     async def initialize(self):

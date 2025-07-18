@@ -1,8 +1,10 @@
 """
-Milvus向量数据库服务
+Milvus向量数据库服务 - 支持混合检索
 """
 
-from typing import Dict, List, Any, Optional
+import asyncio
+from typing import Dict, List, Any, Optional, Tuple
+import numpy as np
 
 from loguru import logger
 from pymilvus import (
@@ -11,7 +13,9 @@ from pymilvus import (
     CollectionSchema,
     FieldSchema,
     DataType,
-    utility
+    utility,
+    AnnSearchRequest,
+    RRFRanker
 )
 
 from app.core import settings
@@ -109,6 +113,17 @@ class MilvusService:
                     dtype=DataType.FLOAT_VECTOR,
                     dim=self.dimension,
                     description="向量嵌入"
+                ),
+                FieldSchema(
+                    name="sparse_vector",
+                    dtype=DataType.SPARSE_FLOAT_VECTOR,
+                    description="稀疏向量（用于关键词检索）"
+                ),
+                FieldSchema(
+                    name="keywords",
+                    dtype=DataType.VARCHAR,
+                    max_length=1000,
+                    description="关键词（用于BM25检索）"
                 )
             ]
             
@@ -247,9 +262,143 @@ class MilvusService:
             
             logger.info(f"向量搜索返回 {len(results)} 条结果")
             return results
-            
+
         except Exception as e:
             logger.error(f"向量搜索失败: {str(e)}")
+            return []
+
+    async def hybrid_search(
+        self,
+        dense_vector: List[float],
+        sparse_vector: Optional[Dict[int, float]] = None,
+        keywords: Optional[str] = None,
+        top_k: int = 10,
+        score_threshold: float = 0.7,
+        knowledge_base_ids: Optional[List[int]] = None,
+        document_ids: Optional[List[int]] = None,
+        dense_weight: float = 0.7,
+        sparse_weight: float = 0.3
+    ) -> List[Dict[str, Any]]:
+        """
+        混合检索：结合密集向量和稀疏向量检索
+
+        Args:
+            dense_vector: 密集向量
+            sparse_vector: 稀疏向量
+            keywords: 关键词
+            top_k: 返回结果数量
+            score_threshold: 分数阈值
+            knowledge_base_ids: 知识库ID列表
+            document_ids: 文档ID列表
+            dense_weight: 密集向量权重
+            sparse_weight: 稀疏向量权重
+        """
+        try:
+            if not self._connected:
+                await self.connect()
+
+            # 构建过滤表达式
+            filter_expr = []
+            if knowledge_base_ids:
+                kb_filter = f"knowledge_base_id in {knowledge_base_ids}"
+                filter_expr.append(kb_filter)
+
+            if document_ids:
+                doc_filter = f"document_id in {document_ids}"
+                filter_expr.append(doc_filter)
+
+            expr = " and ".join(filter_expr) if filter_expr else None
+
+            # 准备搜索请求
+            search_requests = []
+
+            # 密集向量搜索
+            if dense_vector:
+                dense_search_params = {
+                    "metric_type": "COSINE",
+                    "params": {"nprobe": 10}
+                }
+
+                dense_request = AnnSearchRequest(
+                    data=[dense_vector],
+                    anns_field="vector",
+                    param=dense_search_params,
+                    limit=top_k * 2,  # 获取更多结果用于重排序
+                    expr=expr
+                )
+                search_requests.append(dense_request)
+
+            # 稀疏向量搜索
+            if sparse_vector:
+                sparse_search_params = {
+                    "metric_type": "IP",  # 内积
+                    "params": {}
+                }
+
+                sparse_request = AnnSearchRequest(
+                    data=[sparse_vector],
+                    anns_field="sparse_vector",
+                    param=sparse_search_params,
+                    limit=top_k * 2,
+                    expr=expr
+                )
+                search_requests.append(sparse_request)
+
+            # 执行混合搜索
+            if len(search_requests) > 1:
+                # 使用RRF（Reciprocal Rank Fusion）进行结果融合
+                ranker = RRFRanker()
+
+                hybrid_results = self.collection.hybrid_search(
+                    reqs=search_requests,
+                    rerank=ranker,
+                    limit=top_k,
+                    output_fields=["id", "document_id", "knowledge_base_id", "chunk_index", "content", "keywords"]
+                )
+            else:
+                # 单一搜索
+                if search_requests:
+                    hybrid_results = self.collection.search(
+                        data=search_requests[0].data,
+                        anns_field=search_requests[0].anns_field,
+                        param=search_requests[0].param,
+                        limit=top_k,
+                        expr=expr,
+                        output_fields=["id", "document_id", "knowledge_base_id", "chunk_index", "content", "keywords"]
+                    )
+                else:
+                    return []
+
+            # 处理结果
+            results = []
+            for hits in hybrid_results:
+                for hit in hits:
+                    if hit.score >= score_threshold:
+                        result = {
+                            "chunk_id": hit.entity.get("id"),
+                            "document_id": hit.entity.get("document_id"),
+                            "knowledge_base_id": hit.entity.get("knowledge_base_id"),
+                            "chunk_index": hit.entity.get("chunk_index"),
+                            "content": hit.entity.get("content"),
+                            "keywords": hit.entity.get("keywords", ""),
+                            "score": float(hit.score),
+                            "distance": float(hit.distance),
+                            "search_type": "hybrid"
+                        }
+                        results.append(result)
+
+            logger.info(f"混合搜索返回 {len(results)} 条结果")
+            return results
+
+        except Exception as e:
+            logger.error(f"混合搜索失败: {str(e)}")
+            # 降级到普通向量搜索
+            if dense_vector:
+                logger.info("降级到普通向量搜索")
+                return await self.search_vectors(
+                    dense_vector, top_k, score_threshold,
+                    knowledge_base_ids, document_ids
+                )
             return []
     
     async def delete_document_vectors(self, document_id: int):

@@ -21,11 +21,15 @@ class MethodType(StrEnum):
 
 class KnowledgeType(StrEnum):
     """知识库类型枚举"""
-    GENERAL = "general"
-    TECHNICAL = "technical"
-    FAQ = "faq"
-    POLICY = "policy"
-    PRODUCT = "product"
+    CUSTOMER_SERVICE = "customer_service"  # 智能客服知识库
+    TEXT_SQL = "text_sql"  # TextSQL知识库
+    RAG = "rag"  # RAG知识库
+    CONTENT_CREATION = "content_creation"  # 文案创作知识库
+    GENERAL = "general"  # 通用知识库
+    TECHNICAL = "technical"  # 技术文档
+    FAQ = "faq"  # 常见问题
+    POLICY = "policy"  # 政策文档
+    PRODUCT = "product"  # 产品文档
 
 
 class EmbeddingStatus(StrEnum):

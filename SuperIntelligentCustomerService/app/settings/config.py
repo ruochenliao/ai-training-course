@@ -47,5 +47,9 @@ class Settings(BaseSettings):
     }
     DATETIME_FORMAT: str = "%Y-%m-%d %H:%M:%S"
 
+    # ChromaDB配置
+    CHROMA_DB_HOST: str = "localhost"
+    CHROMA_DB_PORT: int = 8000
+
 
 settings = Settings()

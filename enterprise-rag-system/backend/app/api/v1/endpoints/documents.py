@@ -9,7 +9,7 @@ from typing import Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form, status
 from fastapi.responses import StreamingResponse
 
-from app.services import document_processor
+from app.services.document_processing_pipeline import DocumentProcessingPipeline
 from app.services import file_storage
 from app.core import get_current_user
 from app.models import Document, DocumentChunk, KnowledgeBase

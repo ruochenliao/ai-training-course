@@ -8,6 +8,8 @@ from .customer.customer import router as customer_router
 from .customer.sessions import router as customer_sessions_router
 from .depts import depts_router
 from .knowledge import knowledge_router
+
+from .memory import router as memory_router
 from .menus import menus_router
 from .resource import resource_router
 from .roles import roles_router
@@ -31,3 +33,4 @@ v1_router.include_router(depts_router, prefix="/dept", dependencies=[DependPermi
 v1_router.include_router(auditlog_router, prefix="/auditlog", dependencies=[DependPermission])
 v1_router.include_router(system_router, prefix="/system")
 v1_router.include_router(knowledge_router, prefix="/knowledge", dependencies=[DependPermission])
+v1_router.include_router(memory_router, prefix="/memory")

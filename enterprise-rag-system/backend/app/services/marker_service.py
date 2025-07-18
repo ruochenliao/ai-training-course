@@ -19,6 +19,8 @@ from pptx import Presentation
 
 # Marker imports - 基于官方源码
 try:
+    # 尝试导入marker-pdf包
+    import marker
     from marker.convert import convert_single_pdf
     from marker.models import load_all_models
     from marker.settings import settings as marker_settings
@@ -29,7 +31,26 @@ try:
     logger.info("Marker库加载成功")
 except ImportError as e:
     logger.warning(f"Marker库不可用，将使用基础PDF解析: {e}")
-    MARKER_AVAILABLE = False
+    # 尝试安装marker-pdf
+    try:
+        import subprocess
+        import sys
+        logger.info("尝试安装marker-pdf...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "marker-pdf"])
+
+        # 重新导入
+        import marker
+        from marker.convert import convert_single_pdf
+        from marker.models import load_all_models
+        from marker.settings import settings as marker_settings
+        from marker.output import markdown_exists, save_markdown
+        from marker.pdf.utils import find_filetype
+        from marker.pdf.extract_text import get_length_of_text
+        MARKER_AVAILABLE = True
+        logger.info("Marker库安装并加载成功")
+    except Exception as install_error:
+        logger.warning(f"Marker库安装失败: {install_error}")
+        MARKER_AVAILABLE = False
 
 from app.core import settings
 from app.core import DocumentProcessingException
