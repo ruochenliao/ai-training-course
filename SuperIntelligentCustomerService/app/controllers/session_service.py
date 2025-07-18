@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 
-from ..schemas.customer import ChatMessage
+from app.schemas.customer import ChatMessage
 
 
 class SessionService:
@@ -153,6 +153,62 @@ class SessionService:
 
         return sessions
 
+    def delete_session(self, session_id: str) -> bool:
+        """删除会话
+
+        Args:
+            session_id: 会话ID
+
+        Returns:
+            是否删除成功
+        """
+        session_file = os.path.join(self.sessions_dir, f"{session_id}.json")
+
+        try:
+            if os.path.exists(session_file):
+                os.remove(session_file)
+                self.logger.info(f"Deleted session file: {session_id}")
+                return True
+            else:
+                self.logger.warning(f"Session file not found: {session_id}")
+                return False
+        except Exception as e:
+            self.logger.error(f"Failed to delete session {session_id}: {e}")
+            return False
+
+    def update_session(self, session_id: str, updates: Dict[str, Any]) -> bool:
+        """更新会话信息
+
+        Args:
+            session_id: 会话ID
+            updates: 要更新的字段
+
+        Returns:
+            是否更新成功
+        """
+        try:
+            session_data = self.get_session(session_id)
+            if not session_data:
+                return False
+
+            # 更新字段
+            for key, value in updates.items():
+                if key in session_data:
+                    session_data[key] = value
+
+            # 更新最后活动时间
+            session_data["last_active"] = datetime.now().isoformat()
+
+            # 保存会话
+            self._save_session(session_data)
+
+            self.logger.info(f"Updated session {session_id}")
+            return True
+
+        except Exception as e:
+            self.logger.error(f"Failed to update session {session_id}: {e}")
+            return False
+
     def _save_session(self, session_data: Dict[str, Any]) -> None:
         """保存会话到文件
 
@@ -167,3 +223,7 @@ class SessionService:
                 json.dump(session_data, f, ensure_ascii=False, indent=2)
         except Exception as e:
             self.logger.error(f"Failed to save session {session_id}: {e}")
+
+
+# 创建全局会话服务实例
+session_service = SessionService()

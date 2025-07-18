@@ -13,3 +13,36 @@
 2025-07-17 22:35:22,601 - chat_service - INFO - Created new session d8170626-58ff-45f3-8d3a-81f894fddc4a for user demo_user
 2025-07-17 22:50:24,968 - chat_service - INFO - 处理用户 test_user 的聊天请求
 2025-07-17 22:50:24,968 - chat_service - INFO - Created new session 7bac2c4d-697f-43ba-881c-b1e653986f1d for user test_user
+2025-07-18 20:43:41,047 - chat_service - INFO - 处理用户 1 的聊天请求
+2025-07-18 20:43:41,047 - chat_service - INFO - Created new session 975495f5-4498-4a4d-af02-1eacd4836d15 for user 1
+2025-07-18 20:43:53,463 - chat_service - INFO - 保存对话到记忆 - 会话: 975495f5-4498-4a4d-af02-1eacd4836d15
+2025-07-18 20:58:43,273 - chat_service - INFO - 处理用户 1 的聊天请求
+2025-07-18 20:58:43,273 - chat_service - INFO - Created new session 975495f5-4498-4a4d-af02-1eacd4836d15 for user 1
+2025-07-18 20:58:55,340 - chat_service - INFO - 保存对话到记忆 - 会话: 975495f5-4498-4a4d-af02-1eacd4836d15
+2025-07-18 20:59:53,298 - chat_service - INFO - 处理用户 1 的聊天请求
+2025-07-18 20:59:53,298 - chat_service - INFO - 处理用户 1 的聊天请求
+2025-07-18 20:59:53,298 - chat_service - INFO - Created new session 5c44fd8b-3d20-4525-9e91-b1142db092dc for user 1
+2025-07-18 20:59:53,298 - chat_service - INFO - Created new session 5c44fd8b-3d20-4525-9e91-b1142db092dc for user 1
+2025-07-18 21:00:05,019 - chat_service - INFO - 保存对话到记忆 - 会话: 5c44fd8b-3d20-4525-9e91-b1142db092dc
+2025-07-18 21:00:05,019 - chat_service - INFO - 保存对话到记忆 - 会话: 5c44fd8b-3d20-4525-9e91-b1142db092dc
+2025-07-18 21:03:24,534 - chat_service - INFO - 处理用户 1 的聊天请求
+2025-07-18 21:03:24,534 - chat_service - INFO - Created new session 5c44fd8b-3d20-4525-9e91-b1142db092dc for user 1
+2025-07-18 21:03:41,292 - chat_service - INFO - 保存对话到记忆 - 会话: 5c44fd8b-3d20-4525-9e91-b1142db092dc
+2025-07-18 21:10:08,826 - chat_service - INFO - 处理用户 1 的聊天请求
+2025-07-18 21:10:08,826 - chat_service - INFO - Created new session 5c44fd8b-3d20-4525-9e91-b1142db092dc for user 1
+2025-07-18 21:10:19,313 - chat_service - INFO - 保存对话到记忆 - 会话: 5c44fd8b-3d20-4525-9e91-b1142db092dc
+2025-07-18 21:15:29,045 - chat_service - INFO - 处理用户 1 的聊天请求
+2025-07-18 21:15:29,045 - chat_service - INFO - Created new session 5c44fd8b-3d20-4525-9e91-b1142db092dc for user 1
+2025-07-18 21:15:36,988 - chat_service - INFO - 保存对话到记忆 - 会话: 5c44fd8b-3d20-4525-9e91-b1142db092dc
+2025-07-18 21:18:59,637 - chat_service - INFO - 处理用户 1 的聊天请求
+2025-07-18 21:18:59,638 - chat_service - INFO - Created new session 975495f5-4498-4a4d-af02-1eacd4836d15 for user 1
+2025-07-18 21:19:09,533 - chat_service - INFO - 保存对话到记忆 - 会话: 975495f5-4498-4a4d-af02-1eacd4836d15
+2025-07-18 21:35:41,124 - chat_service - INFO - 处理用户 1 的聊天请求
+2025-07-18 21:35:41,125 - chat_service - INFO - Created new session 5c44fd8b-3d20-4525-9e91-b1142db092dc for user 1
+2025-07-18 21:35:48,512 - chat_service - INFO - 保存对话到记忆 - 会话: 5c44fd8b-3d20-4525-9e91-b1142db092dc
+2025-07-18 21:44:07,880 - chat_service - INFO - 处理用户 1 的聊天请求
+2025-07-18 21:44:07,880 - chat_service - INFO - Created new session 5c44fd8b-3d20-4525-9e91-b1142db092dc for user 1
+2025-07-18 21:44:20,166 - chat_service - INFO - 保存对话到记忆 - 会话: 5c44fd8b-3d20-4525-9e91-b1142db092dc
+2025-07-18 21:52:18,780 - chat_service - INFO - 处理用户 1 的聊天请求
+2025-07-18 21:52:18,780 - chat_service - INFO - Created new session 14cca4c1-5ef1-48a4-8858-7e149599bfb2 for user 1
+2025-07-18 21:52:31,735 - chat_service - INFO - 保存对话到记忆 - 会话: 14cca4c1-5ef1-48a4-8858-7e149599bfb2

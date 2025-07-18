@@ -21,7 +21,14 @@ export const sendStream = async (data: ChatSendRequest): Promise<ReadableStream>
   if (hasFiles) {
     // 有文件时使用 FormData 格式
     const formData = new FormData();
-    formData.append('message', data.message);
+
+    // 构建消息对象
+    const messages = [{
+      role: 'user',
+      content: data.message
+    }];
+
+    formData.append('messages', JSON.stringify(messages));
 
     if (data.sessionId) {
       formData.append('session_id', data.sessionId);
@@ -42,14 +49,16 @@ export const sendStream = async (data: ChatSendRequest): Promise<ReadableStream>
     // 无文件时使用 JSON 格式
     headers['Content-Type'] = 'application/json';
     body = JSON.stringify({
-      message: data.message,
-      session_id: data.sessionId ? parseInt(data.sessionId) : undefined,
-      model_name: data.model_name,
-      files: []
+      messages: [{
+        role: 'user',
+        content: data.message
+      }],
+      session_id: data.sessionId || null,
+      model_name: data.model_name
     });
   }
 
-  const response = await fetch('/api/v1/chat/send', {
+  const response = await fetch('/api/v1/customer/chat/stream', {
     method: 'POST',
     headers,
     body,
@@ -134,6 +143,15 @@ export const parseStreamResponse = async function* (
                 // 验证事件格式
                 if (event.type && event.timestamp) {
                   yield event;
+                } else if (event.content) {
+                  // 兼容旧格式：直接包含 content 字段
+                  yield {
+                    id: `compat_${Date.now()}_${eventCount}`,
+                    type: 'content',
+                    timestamp: new Date().toISOString(),
+                    data: { content: event.content },
+                    is_markdown: true
+                  };
                 } else {
                   console.warn('收到格式不完整的事件:', event);
                 }
@@ -181,14 +199,33 @@ export function addChat(data: ChatMessageVo) {
   return post('/api/v1/system/message', data);
 }
 
-// 获取当前会话的聊天记录
+// 获取当前会话的聊天记录 - 改为使用会话详情接口
 export function getChatList(params: GetChatListParams) {
-  return get<ChatMessageVo[]>('/api/v1/system/message/list', {
-    session_id: params.sessionId ? parseInt(params.sessionId) : undefined,
-    page: params.pageNum || 1,
-    page_size: params.pageSize || 20,
-    content: params.content,
-    role: params.role
+  if (!params.sessionId) {
+    return Promise.resolve({ data: [] });
+  }
+
+  // 使用会话详情接口获取消息历史
+  return get<any>(`/api/v1/customer/sessions/${params.sessionId}`).then(response => {
+    // 从会话数据中提取消息列表
+    const messages = response.data?.messages || [];
+
+    // 转换消息格式以匹配前端期望的格式
+    const formattedMessages = messages.map((msg: any, index: number) => ({
+      id: index + 1, // 临时ID，因为文件系统存储的消息没有独立ID
+      content: msg.content,
+      role: msg.role,
+      sessionId: params.sessionId,
+      userId: response.data?.user_id,
+      modelName: msg.model_name || 'DeepSeek VL Chat',
+      totalTokens: msg.total_tokens || 0,
+      deductCost: msg.deduct_cost || 0,
+      remark: msg.remark || '',
+      created_at: msg.created_at || response.data?.created_at,
+      updated_at: msg.updated_at || response.data?.last_active
+    }));
+
+    return { data: formattedMessages };
   });
 }
 
@@ -205,4 +242,33 @@ export function getServiceStats() {
 // 获取可用模型列表
 export function getAvailableModels(params?: { page?: number; page_size?: number; model_type?: string }) {
   return get('/api/v1/chat/models/list', params);
+}
+
+// 上传图片到聊天会话
+export async function uploadImage(file: File, sessionId?: string): Promise<any> {
+  const userStore = useUserStore();
+  const formData = new FormData();
+  formData.append('file', file);
+
+  if (sessionId) {
+    formData.append('session_id', sessionId);
+  }
+
+  const headers: Record<string, string> = {};
+  if (userStore.token) {
+    headers['token'] = userStore.token;
+  }
+
+  const response = await fetch('/api/v1/customer/chat/upload-image', {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`上传图片失败: ${response.status} ${errorText}`);
+  }
+
+  return await response.json();
 }

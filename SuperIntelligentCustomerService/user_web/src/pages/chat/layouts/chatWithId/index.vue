@@ -184,20 +184,22 @@ async function startSSE(chatContent: string) {
           // 累积内容
           if (event.data) {
             chunkCount++;
-            messageBuffer += event.data;
+            // 从 event.data.content 中提取内容
+            const content = event.data.content || event.data;
+            messageBuffer += content;
 
             // 调试信息：记录每个数据块
             console.log(`📦 接收数据块 ${chunkCount}:`, {
               chunkIndex: event.chunk_index,
-              chunkLength: event.data.length,
+              chunkLength: content.length,
               totalBufferLength: messageBuffer.length,
-              chunkPreview: event.data.substring(0, 50) + (event.data.length > 50 ? '...' : ''),
+              chunkPreview: content.substring(0, 50) + (content.length > 50 ? '...' : ''),
               isFirstChunk: chunkCount === 1
             });
 
             // 特别记录前几个数据块的完整内容
             if (chunkCount <= 3) {
-              console.log(`🔍 数据块 ${chunkCount} 完整内容:`, JSON.stringify(event.data));
+              console.log(`🔍 数据块 ${chunkCount} 完整内容:`, JSON.stringify(content));
             }
 
             // 实时更新UI，使用防抖机制减少渲染频率

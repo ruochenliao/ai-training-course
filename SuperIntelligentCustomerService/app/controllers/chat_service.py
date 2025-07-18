@@ -13,9 +13,9 @@ from autogen_agentchat.messages import ModelClientStreamingChunkEvent, MultiModa
 from autogen_core import Image as AGImage
 from autogen_core.model_context import BufferedChatCompletionContext
 
-from ..core.llms import model_client, vllm_model_client
-from ..schemas.customer import ChatMessage, MessageContent
-from ..settings.config import settings
+from app.core.llms import model_client, vllm_model_client
+from app.schemas.customer import ChatMessage, MessageContent
+from app.settings.config import settings
 
 # 获取项目根目录
 BASE_DIR = settings.BASE_DIR

@@ -60,6 +60,7 @@ export const useSessionStore = defineStore('session', () => {
       const params = {
         page: page,
         page_size: pageSize.value,
+        user_id: userStore.userInfo?.id?.toString() || 'current'
       };
 
       console.log('发送会话列表请求:', params);
@@ -71,12 +72,12 @@ export const useSessionStore = defineStore('session', () => {
       if (resArr.data && Array.isArray(resArr.data)) {
         // 转换后端数据格式为前端期望格式
         sessionData = resArr.data.map((item: any) => ({
-          id: item.id || item.session_id,
-          sessionTitle: item.title || item.sessionTitle || "新对话",
-          sessionContent: item.sessionContent || "",
-          userId: item.userId,
-          created_at: item.updated_at || item.created_at,
-          updated_at: item.updated_at,
+          id: item.session_id || item.id,
+          sessionTitle: item.session_title || item.sessionTitle || "新对话",
+          sessionContent: item.session_content || item.sessionContent || "",
+          userId: item.user_id || item.userId,
+          created_at: item.created_at,
+          updated_at: item.last_active || item.updated_at,
           remark: item.remark || ""
         }));
       }
@@ -141,10 +142,10 @@ export const useSessionStore = defineStore('session', () => {
         const newSession = {
           id: sessionData.session_id || sessionData.id,
           sessionTitle: sessionData.session_title || data.session_title,
-          sessionContent: data.session_content || "",
+          sessionContent: sessionData.session_content || data.session_content || "",
           userId: sessionData.user_id,
           created_at: sessionData.created_at,
-          updated_at: sessionData.created_at,
+          updated_at: sessionData.last_active || sessionData.created_at,
           remark: ""
         };
 
@@ -175,7 +176,12 @@ export const useSessionStore = defineStore('session', () => {
   // 更新会话（供组件调用）
   const updateSession = async (item: ChatSessionVo) => {
     try {
-      await update_session(item);
+      // 修复：正确传递 session_id 和更新数据
+      await update_session(item.id, {
+        session_title: item.sessionTitle,
+        session_content: item.sessionContent,
+        remark: item.remark || ""
+      });
       // 1. 先找到被修改会话在 sessionList 中的索引（假设 sessionList 是按服务端排序的完整列表）
       const targetIndex = sessionList.value.findIndex(session => session.id === item.id);
       // 2. 计算该会话所在的页码（页大小固定为 pageSize.value）

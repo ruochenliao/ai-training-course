@@ -2,17 +2,18 @@ import json
 import os
 import shutil
 import uuid
-from typing import List
+from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from fastapi.responses import StreamingResponse
 
 from ....core.dependency import DependAuth
-from ....models.admin import User
-from ....schemas.customer import ChatRequest, ChatMessage, SessionRequest, SessionResponse, MessageContent, \
+from ....models.admin import User, ChatMessage as ChatMessageModel
+from ....schemas.base import Success
+from ....schemas.customer import ChatRequest, ChatMessage, MessageContent, \
     ImageContent, MultiModalContent
-from ....services.chat_service import ChatService
-from ....services.session_service import SessionService
+from app.controllers.chat_service import ChatService
+from app.controllers.session_service import SessionService
 from ....settings.config import settings
 
 router = APIRouter()
@@ -34,14 +35,31 @@ async def customer_chat_stream(
     try:
         chat_service = ChatService()
 
-        # 保存用户消息到会话
+        # 保存用户消息到会话和数据库
         if request.session_id:
             # 添加用户消息到会话
             user_message = request.messages[-1]
             session_service.add_message(request.session_id, user_message)
 
+            # 同时保存到数据库
+            try:
+                await ChatMessageModel.create(
+                    session_id=request.session_id,
+                    user_id=current_user.id,
+                    role="user",
+                    content=user_message.content if isinstance(user_message.content, str) else str(user_message.content),
+                    model_name=None,
+                    total_tokens=0,
+                    deduct_cost=0,
+                    remark="用户消息"
+                )
+            except Exception as e:
+                print(f"保存用户消息到数据库失败: {e}")
+
         async def response_generator():
             assistant_response = ""
+            chunk_index = 0
+
             async for chunk in chat_service.chat_stream(
                 messages=request.messages,
                 user_id=str(current_user.id),
@@ -50,12 +68,60 @@ async def customer_chat_stream(
                 # 确保每个chunk立即发送
                 if chunk:  # 确保chunk不为空
                     assistant_response += chunk
-                    encoded_chunk = json.dumps({"content": chunk})
+                    chunk_index += 1
+
+                    # 构建完整的流式事件格式
+                    stream_event = {
+                        "id": f"chunk_{chunk_index}_{int(datetime.now().timestamp() * 1000)}",
+                        "type": "content",
+                        "timestamp": datetime.now().isoformat(),
+                        "session_id": request.session_id,
+                        "user_id": current_user.id,
+                        "model_name": "DeepSeek VL Chat",
+                        "data": {"content": chunk},
+                        "chunk_index": chunk_index,
+                        "is_markdown": True
+                    }
+
+                    # 确保中文字符正确编码，不使用 ASCII 转义
+                    encoded_chunk = json.dumps(stream_event, ensure_ascii=False)
                     yield f"data: {encoded_chunk}\n\n"
-            # 保存AI回复到会话
+            # 发送完成事件
+            complete_event = {
+                "id": f"complete_{int(datetime.now().timestamp() * 1000)}",
+                "type": "complete",
+                "timestamp": datetime.now().isoformat(),
+                "session_id": request.session_id,
+                "user_id": current_user.id,
+                "model_name": "DeepSeek VL Chat",
+                "data": {"total_chunks": chunk_index, "total_content": assistant_response},
+                "is_markdown": True
+            }
+            encoded_complete = json.dumps(complete_event, ensure_ascii=False)
+            yield f"data: {encoded_complete}\n\n"
+
+            # 发送结束标记
+            yield "data: [DONE]\n\n"
+
+            # 保存AI回复到会话和数据库
             if request.session_id and assistant_response:
                 assistant_message = ChatMessage(role="assistant", content=assistant_response)
                 session_service.add_message(request.session_id, assistant_message)
+
+                # 同时保存到数据库
+                try:
+                    await ChatMessageModel.create(
+                        session_id=request.session_id,
+                        user_id=current_user.id,
+                        role="assistant",
+                        content=assistant_response,
+                        model_name="DeepSeek VL Chat",  # 可以从配置中获取
+                        total_tokens=0,  # 这里可以计算实际的token数
+                        deduct_cost=0,   # 这里可以计算实际的费用
+                        remark="AI回复"
+                    )
+                except Exception as e:
+                    print(f"保存AI回复到数据库失败: {e}")
 
         return StreamingResponse(
             response_generator(),
@@ -69,69 +135,6 @@ async def customer_chat_stream(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-@router.post("/session/create", response_model=SessionResponse)
-async def create_session(
-    request: SessionRequest,
-    current_user: User = DependAuth
-):
-    """创建新的聊天会话"""
-    try:
-        session_data = session_service.create_session(request.user_id or str(current_user.id))
-        return SessionResponse(
-            session_id=session_data["session_id"],
-            user_id=session_data["user_id"],
-            created_at=session_data["created_at"],
-            last_active=session_data["last_active"],
-            messages=session_data["messages"]
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/session/{session_id}", response_model=SessionResponse)
-async def get_session(
-    session_id: str,
-    current_user: User = DependAuth
-):
-    """获取会话信息和历史消息"""
-    try:
-        session_data = session_service.get_session(session_id)
-        if not session_data:
-            raise HTTPException(status_code=404, detail="会话不存在")
-
-        return SessionResponse(
-            session_id=session_data["session_id"],
-            user_id=session_data["user_id"],
-            created_at=session_data["created_at"],
-            last_active=session_data["last_active"],
-            messages=session_data["messages"]
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/sessions/{user_id}", response_model=List[SessionResponse])
-async def get_user_sessions(
-    user_id: str,
-    current_user: User = DependAuth
-):
-    """获取用户的所有会话"""
-    try:
-        sessions_data = session_service.get_user_sessions(user_id)
-        return [
-            SessionResponse(
-                session_id=session["session_id"],
-                user_id=session["user_id"],
-                created_at=session["created_at"],
-                last_active=session["last_active"],
-                messages=session["messages"]
-            ) for session in sessions_data
-        ]
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/chat/upload-image")
@@ -183,12 +186,13 @@ async def customer_upload_image(
             message = ChatMessage(role="user", content=image_content)
             session_service.add_message(session_id, message)
 
-        return {
+        data = {
             "url": image_url,
             "file_name": file.filename,
             "content_type": file.content_type,
             "size": os.path.getsize(file_path)
         }
+        return Success(data=data, msg="图片上传成功")
     except HTTPException:
         raise
     except Exception as e:
@@ -222,3 +226,5 @@ async def customer_get_image(user_id: str, image_name: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+

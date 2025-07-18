@@ -104,7 +104,7 @@ class ChatSession(BaseModel, TimestampMixin):
 
 class ChatMessage(BaseModel, TimestampMixin):
     """聊天消息模型"""
-    session_id = fields.IntField(description="会话ID", index=True)
+    session_id = fields.CharField(max_length=100, description="会话ID", index=True)  # 支持UUID格式
     user_id = fields.IntField(description="用户ID", index=True)
     role = fields.CharField(max_length=20, description="对话角色", index=True)  # user, assistant, system
     content = fields.TextField(description="消息内容")
