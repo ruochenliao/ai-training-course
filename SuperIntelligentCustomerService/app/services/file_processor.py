@@ -12,7 +12,7 @@ from pathlib import Path
 from app.models.knowledge import KnowledgeFile, KnowledgeBase
 from app.models.enums import EmbeddingStatus
 from app.services.file_storage import file_storage
-from app.services.knowledge_vector_service import knowledge_vector_manager
+from .vector_db import vector_db
 from app.services.file_processing_monitor import add_file_to_monitor, update_file_progress, mark_file_completed, mark_file_failed
 from app.log import logger
 
@@ -242,30 +242,25 @@ class FileProcessor:
             # 获取知识库信息
             knowledge_base = await knowledge_file.knowledge_base
 
-            # 获取向量服务
-            vector_service = knowledge_vector_manager.get_service(knowledge_base.id)
+            # 将所有块合并为一个文档内容
+            full_content = "\n\n".join(chunks)
 
-            vector_ids = []
+            # 获取文件扩展名
+            file_extension = os.path.splitext(knowledge_file.name)[1].lower()
 
-            for i, chunk in enumerate(chunks):
-                # 准备元数据
-                metadata = {
-                    "file_name": knowledge_file.name,
-                    "file_type": knowledge_file.file_type,
-                    "chunk_count": len(chunks),
-                    "original_name": knowledge_file.original_name,
-                    "file_size": knowledge_file.file_size
-                }
+            # 添加到向量数据库
+            vector_ids = await vector_db.add_document(
+                knowledge_base_id=knowledge_base.id,
+                file_id=knowledge_file.id,
+                content=full_content,
+                knowledge_type=knowledge_base.knowledge_type,
+                is_public=knowledge_base.is_public,
+                owner_id=knowledge_base.owner_id,
+                chunk_size=knowledge_base.chunk_size,
+                file_extension=file_extension
+            )
 
-                # 添加到向量数据库
-                vector_id = await vector_service.add_chunk(
-                    content=chunk,
-                    file_id=knowledge_file.id,
-                    chunk_index=i,
-                    metadata=metadata
-                )
-                vector_ids.append(vector_id)
-
+            logger.info(f"成功向量化文件 {knowledge_file.id}，生成 {len(vector_ids)} 个向量块")
             return vector_ids
 
         except Exception as e:
@@ -345,8 +340,29 @@ async def process_file_background(file_id: int):
 def start_file_processing(file_id: int):
     """
     启动文件处理任务
-    
+
     Args:
         file_id: 文件ID
     """
-    asyncio.create_task(process_file_background(file_id))
+    try:
+        # 获取当前事件循环
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            # 如果事件循环正在运行，创建任务
+            asyncio.create_task(process_file_background(file_id))
+        else:
+            # 如果没有运行的事件循环，在新线程中运行
+            import threading
+            def run_in_thread():
+                asyncio.run(process_file_background(file_id))
+            thread = threading.Thread(target=run_in_thread)
+            thread.daemon = True
+            thread.start()
+    except RuntimeError:
+        # 如果没有事件循环，在新线程中运行
+        import threading
+        def run_in_thread():
+            asyncio.run(process_file_background(file_id))
+        thread = threading.Thread(target=run_in_thread)
+        thread.daemon = True
+        thread.start()

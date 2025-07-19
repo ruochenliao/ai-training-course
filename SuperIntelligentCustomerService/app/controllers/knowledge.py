@@ -17,6 +17,7 @@ from app.services.file_storage import file_storage
 from app.services.file_processor import start_file_processing
 from app.services.knowledge_permission_service import knowledge_permission_service, check_knowledge_base_access, check_file_access
 from app.services.file_validator import validate_uploaded_file
+from ..services.vector_db import vector_db
 from app.core.knowledge_exceptions import *
 from app.core.knowledge_logger import get_logger, LogCategory
 from app.log import logger
@@ -255,9 +256,21 @@ class KnowledgeBaseController:
             if not await knowledge_base.can_edit(user_id):
                 return Fail(msg="无权限删除此知识库")
             
+            # 从向量数据库中删除
+            try:
+                await vector_db.delete_knowledge_base(
+                    knowledge_base_id=kb_id,
+                    knowledge_type=knowledge_base.knowledge_type,
+                    is_public=knowledge_base.is_public,
+                    owner_id=knowledge_base.owner_id
+                )
+                logger.info(f"成功从向量数据库删除知识库: {kb_id}")
+            except Exception as e:
+                logger.warning(f"从向量数据库删除知识库失败: {e}")
+
             # 软删除
             await knowledge_base.soft_delete()
-            
+
             logger.info(f"知识库删除成功: {kb_id}")
             return Success(msg="知识库删除成功")
             
@@ -341,6 +354,9 @@ class KnowledgeFileController:
             existing_file = await KnowledgeFile.check_duplicate(knowledge_base_id, file_hash)
             if existing_file:
                 return Fail(msg="文件已存在")
+
+            # 重置文件指针到开头
+            await file.seek(0)
 
             # 保存文件到存储服务
             file_path = await file_storage.save_file(file, knowledge_base_id)
@@ -453,6 +469,19 @@ class KnowledgeFileController:
             # 检查编辑权限
             if not await knowledge_base.can_edit(user_id):
                 return Fail(msg="无权限删除此文件")
+
+            # 从向量数据库中删除
+            try:
+                await vector_db.delete_file(
+                    knowledge_base_id=knowledge_base.id,
+                    file_id=file_id,
+                    knowledge_type=knowledge_base.knowledge_type,
+                    is_public=knowledge_base.is_public,
+                    owner_id=knowledge_base.owner_id
+                )
+                logger.info(f"成功从向量数据库删除文件: {file_id}")
+            except Exception as e:
+                logger.warning(f"从向量数据库删除文件失败: {e}")
 
             # 软删除文件
             await knowledge_file.soft_delete()

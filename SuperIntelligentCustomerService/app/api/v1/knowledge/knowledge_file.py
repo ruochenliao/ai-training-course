@@ -32,9 +32,9 @@ async def upload_file(
         user_id=current_user.id
     )
     
-    if not result.get("success", False):
-        raise HTTPException(status_code=400, detail=result.get("msg", "上传失败"))
-    
+    if hasattr(result, 'success') and not result.success:
+        raise HTTPException(status_code=400, detail=getattr(result, 'msg', "上传失败"))
+
     return result
 
 
@@ -55,9 +55,9 @@ async def list_files(
         status=status
     )
     
-    if not result.get("success", False):
-        raise HTTPException(status_code=400, detail=result.get("msg", "获取失败"))
-    
+    if hasattr(result, 'success') and not result.success:
+        raise HTTPException(status_code=400, detail=getattr(result, 'msg', "获取失败"))
+
     return result
 
 
@@ -69,10 +69,10 @@ async def get_file_info(
     """获取文件详细信息"""
     result = await knowledge_file_controller.get_file_info(file_id, current_user.id)
     
-    if not result.get("success", False):
-        raise HTTPException(status_code=404 if "不存在" in result.get("msg", "") else 403,
-                          detail=result.get("msg", "获取失败"))
-    
+    if hasattr(result, 'success') and not result.success:
+        msg = getattr(result, 'msg', "获取失败")
+        raise HTTPException(status_code=404 if "不存在" in msg else 403, detail=msg)
+
     return result
 
 
@@ -85,13 +85,13 @@ async def download_file(
     # 先获取文件信息
     result = await knowledge_file_controller.get_file_info(file_id, current_user.id)
     
-    if not result.get("success", False):
-        raise HTTPException(status_code=404 if "不存在" in result.get("msg", "") else 403,
-                          detail=result.get("msg", "文件不存在或无权限"))
+    if hasattr(result, 'success') and not result.success:
+        msg = getattr(result, 'msg', "文件不存在或无权限")
+        raise HTTPException(status_code=404 if "不存在" in msg else 403, detail=msg)
     
-    file_data = result.get("data", {})
-    file_path = file_data.get("file_path")
-    original_name = file_data.get("original_name")
+    file_data = getattr(result, "data", {})
+    file_path = file_data.get("file_path") if isinstance(file_data, dict) else None
+    original_name = file_data.get("original_name") if isinstance(file_data, dict) else None
     
     if not file_path:
         raise HTTPException(status_code=404, detail="文件路径不存在")
@@ -110,10 +110,10 @@ async def delete_file(
     """删除文件"""
     result = await knowledge_file_controller.delete_file(file_id, current_user.id)
     
-    if not result.get("success", False):
-        raise HTTPException(status_code=404 if "不存在" in result.get("msg", "") else 403,
-                          detail=result.get("msg", "删除失败"))
-    
+    if hasattr(result, 'success') and not result.success:
+        msg = getattr(result, 'msg', "删除失败")
+        raise HTTPException(status_code=404 if "不存在" in msg else 403, detail=msg)
+
     return result
 
 
@@ -128,9 +128,9 @@ async def reprocess_file(
     # 先检查文件权限
     result = await knowledge_file_controller.get_file_info(file_id, current_user.id)
     
-    if not result.get("success", False):
-        raise HTTPException(status_code=404 if "不存在" in result.get("msg", "") else 403,
-                          detail=result.get("msg", "文件不存在或无权限"))
+    if hasattr(result, 'success') and not result.success:
+        msg = getattr(result, 'msg', "文件不存在或无权限")
+        raise HTTPException(status_code=404 if "不存在" in msg else 403, detail=msg)
     
     # 重新处理文件
     try:
@@ -157,16 +157,16 @@ async def get_processing_status(
     """获取文件处理状态"""
     result = await knowledge_file_controller.get_file_info(file_id, current_user.id)
     
-    if not result.get("success", False):
-        raise HTTPException(status_code=404 if "不存在" in result.get("msg", "") else 403,
-                          detail=result.get("msg", "文件不存在或无权限"))
-    
-    file_data = result.get("data", {})
+    if hasattr(result, 'success') and not result.success:
+        msg = getattr(result, 'msg', "文件不存在或无权限")
+        raise HTTPException(status_code=404 if "不存在" in msg else 403, detail=msg)
+
+    file_data = getattr(result, "data", {})
     
     status_info = {
         "file_id": file_id,
-        "filename": file_data.get("name"),
-        "status": file_data.get("embedding_status"),
+        "filename": file_data.get("name") if isinstance(file_data, dict) else None,
+        "status": file_data.get("embedding_status") if isinstance(file_data, dict) else None,
         "error_message": file_data.get("embedding_error"),
         "chunk_count": file_data.get("chunk_count", 0),
         "processed_at": file_data.get("processed_at"),
@@ -203,18 +203,20 @@ async def batch_upload_files(
                 user_id=current_user.id
             )
             
-            if result.get("success", False):
+            if hasattr(result, 'success') and result.success:
                 results["success_count"] += 1
+                data = getattr(result, "data", {})
+                file_id = data.get("id") if isinstance(data, dict) else None
                 results["success_files"].append({
                     "filename": file.filename,
-                    "file_id": result.get("data", {}).get("id"),
+                    "file_id": file_id,
                     "status": "success"
                 })
             else:
                 results["failed_count"] += 1
                 results["failed_files"].append({
                     "filename": file.filename,
-                    "error": result.get("msg", "上传失败")
+                    "error": getattr(result, "msg", "上传失败")
                 })
                 
         except Exception as e:

@@ -147,6 +147,61 @@
         </NFormItem>
       </NForm>
     </CrudModal>
+
+    <!-- 文件管理模态框 -->
+    <NModal
+      v-model:show="fileModalVisible"
+      preset="card"
+      title="文件管理"
+      class="w-1200px"
+      :mask-closable="false"
+    >
+      <div class="file-management">
+        <!-- 文件上传区域 -->
+        <div class="upload-section mb-4">
+          <NUpload
+            ref="uploadRef"
+            multiple
+            directory-dnd
+            :action="`/api/v1/knowledge/files/${currentKnowledgeBase?.id}/upload`"
+            :headers="{ token: getToken() }"
+            :file-list="fileList"
+            @update:file-list="handleFileListChange"
+            @finish="handleUploadFinish"
+            @error="handleUploadError"
+          >
+            <NUploadDragger>
+              <div style="margin-bottom: 12px">
+                <TheIcon icon="material-symbols:cloud-upload" :size="48" />
+              </div>
+              <NText style="font-size: 16px">
+                点击或者拖动文件到该区域来上传
+              </NText>
+              <NP depth="3" style="margin: 8px 0 0 0">
+                支持单个或批量上传。支持的文件类型：{{ currentKnowledgeBase?.allowed_file_types?.join(', ') }}
+              </NP>
+            </NUploadDragger>
+          </NUpload>
+        </div>
+
+        <!-- 文件列表 -->
+        <div class="file-list">
+          <NDataTable
+            :columns="fileColumns"
+            :data="knowledgeFiles"
+            :loading="fileLoading"
+            :pagination="filePagination"
+            :row-key="(row) => row.id"
+          />
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="flex justify-end">
+          <NButton @click="fileModalVisible = false">关闭</NButton>
+        </div>
+      </template>
+    </NModal>
   </CommonPage>
 </template>
 
@@ -155,16 +210,22 @@ import { h, onMounted, ref, resolveDirective, withDirectives } from 'vue'
 import type { Ref } from 'vue'
 import {
   NButton,
+  NDataTable,
   NForm,
   NFormItem,
   NGi,
   NGrid,
   NInput,
   NInputNumber,
+  NModal,
+  NP,
   NPopconfirm,
   NSelect,
   NSpace,
   NTag,
+  NText,
+  NUpload,
+  NUploadDragger,
 } from 'naive-ui'
 
 import CommonPage from '@/components/page/CommonPage.vue'
@@ -182,6 +243,32 @@ defineOptions({ name: '知识库管理' })
 const $table = ref(null)
 const queryItems = ref({})
 const vPermission = resolveDirective('permission')
+
+// 文件管理相关
+const fileModalVisible = ref(false)
+const currentKnowledgeBase = ref(null)
+const knowledgeFiles = ref([])
+const fileLoading = ref(false)
+const fileList = ref([])
+const uploadRef = ref(null)
+
+// 文件分页
+const filePagination = reactive({
+  page: 1,
+  pageSize: 10,
+  itemCount: 0,
+  showSizePicker: true,
+  pageSizes: [10, 20, 50],
+  onChange: (page: number) => {
+    filePagination.page = page
+    loadKnowledgeFiles()
+  },
+  onUpdatePageSize: (pageSize: number) => {
+    filePagination.pageSize = pageSize
+    filePagination.page = 1
+    loadKnowledgeFiles()
+  }
+})
 
 const {
   modalVisible,
@@ -253,6 +340,172 @@ const loadKnowledgeTypes = async () => {
   }
 }
 
+// 文件管理相关方法
+const handleManageFiles = (row) => {
+  currentKnowledgeBase.value = row
+  fileModalVisible.value = true
+  loadKnowledgeFiles()
+}
+
+const loadKnowledgeFiles = async () => {
+  if (!currentKnowledgeBase.value) return
+
+  fileLoading.value = true
+  try {
+    const response = await api.getKnowledgeFileList(currentKnowledgeBase.value.id, {
+      page: filePagination.page,
+      page_size: filePagination.pageSize
+    })
+
+    if (response.code === 200) {
+      knowledgeFiles.value = response.data
+      filePagination.itemCount = response.total
+    }
+  } catch (error) {
+    console.error('获取文件列表失败:', error)
+    window.$message?.error('获取文件列表失败')
+  } finally {
+    fileLoading.value = false
+  }
+}
+
+const handleFileListChange = (files) => {
+  fileList.value = files
+}
+
+const handleUploadFinish = ({ file, event }) => {
+  try {
+    const response = JSON.parse(event.target.response)
+    if (response.code === 200) {
+      window.$message?.success(`文件 ${file.name} 上传成功`)
+      loadKnowledgeFiles() // 重新加载文件列表
+    } else {
+      window.$message?.error(`文件 ${file.name} 上传失败: ${response.msg}`)
+    }
+  } catch (error) {
+    console.error('Upload finish error:', error)
+    window.$message?.error(`文件 ${file.name} 上传失败`)
+  }
+}
+
+const handleUploadError = ({ file, event }) => {
+  try {
+    if (event?.target?.response) {
+      const response = JSON.parse(event.target.response)
+      window.$message?.error(`文件 ${file.name} 上传失败: ${response.msg || '未知错误'}`)
+    } else {
+      window.$message?.error(`文件 ${file.name} 上传失败`)
+    }
+  } catch (error) {
+    console.error('Upload error:', error)
+    window.$message?.error(`文件 ${file.name} 上传失败`)
+  }
+}
+
+const handleDeleteFile = async (file) => {
+  try {
+    const response = await api.deleteKnowledgeFile(file.id)
+    if (response.code === 200) {
+      window.$message?.success('文件删除成功')
+      loadKnowledgeFiles() // 重新加载文件列表
+    } else {
+      window.$message?.error(response.msg || '文件删除失败')
+    }
+  } catch (error) {
+    console.error('删除文件失败:', error)
+    window.$message?.error('文件删除失败')
+  }
+}
+
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+const getToken = () => {
+  const tokenData = localStorage.getItem('ACCESS_TOKEN')
+  if (tokenData) {
+    try {
+      const parsed = JSON.parse(tokenData)
+      return parsed.value || ''
+    } catch (e) {
+      return ''
+    }
+  }
+  return ''
+}
+
+// 文件列表列定义
+const fileColumns = [
+  {
+    title: 'ID',
+    key: 'id',
+    width: 80,
+    align: 'center',
+  },
+  {
+    title: '文件名',
+    key: 'name',
+    width: 200,
+    ellipsis: { tooltip: true },
+  },
+  {
+    title: '文件类型',
+    key: 'file_type',
+    width: 120,
+  },
+  {
+    title: '文件大小',
+    key: 'file_size',
+    width: 100,
+    render: (row) => formatFileSize(row.file_size),
+  },
+  {
+    title: '处理状态',
+    key: 'embedding_status',
+    width: 120,
+    render: (row) => {
+      const statusMap = {
+        pending: { type: 'warning', text: '待处理' },
+        processing: { type: 'info', text: '处理中' },
+        completed: { type: 'success', text: '已完成' },
+        failed: { type: 'error', text: '处理失败' }
+      }
+      const status = statusMap[row.embedding_status] || { type: 'default', text: '未知' }
+      return h(NTag, { type: status.type }, { default: () => status.text })
+    }
+  },
+  {
+    title: '上传时间',
+    key: 'created_at',
+    width: 180,
+    render: (row) => formatDate(row.created_at),
+  },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 150,
+    align: 'center',
+    render: (row) => [
+      h(
+        NButton,
+        {
+          size: 'small',
+          type: 'error',
+          onClick: () => handleDeleteFile(row),
+        },
+        {
+          default: () => '删除',
+          icon: renderIcon('material-symbols:delete-outline', { size: 16 }),
+        }
+      ),
+    ],
+  },
+]
+
 onMounted(() => {
   loadKnowledgeTypes()
   $table.value?.handleSearch()
@@ -314,6 +567,22 @@ const columns = [
     width: 200,
     align: 'center',
     render: (row) => [
+      withDirectives(
+        h(
+          NButton,
+          {
+            size: 'small',
+            type: 'info',
+            style: 'margin-right: 8px;',
+            onClick: () => handleManageFiles(row),
+          },
+          {
+            default: () => '管理文件',
+            icon: renderIcon('material-symbols:folder-open', { size: 16 }),
+          }
+        ),
+        [[vPermission, 'get/api/v1/knowledge/files']]
+      ),
       withDirectives(
         h(
           NButton,
