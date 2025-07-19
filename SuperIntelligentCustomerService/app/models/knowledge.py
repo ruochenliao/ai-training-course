@@ -4,6 +4,7 @@
 参考006项目的设计架构
 """
 import hashlib
+import json
 import os
 from datetime import datetime
 from typing import Dict, Any, List, Optional
@@ -33,21 +34,21 @@ class KnowledgeBase(BaseModel, TimestampMixin):
     knowledge_type = fields.CharField(
         max_length=50,
         description="知识库类型",
-        default=KnowledgeType.CUSTOMER_SERVICE,
+        default="customer_service",
         index=True
     )
     
     # 配置信息
-    config = fields.JSONField(default=dict, description="知识库配置")
+    config = fields.TextField(default="{}", description="知识库配置JSON")
     embedding_model = fields.CharField(max_length=100, null=True, description="嵌入模型")
     chunk_size = fields.IntField(default=1000, description="分块大小")
     chunk_overlap = fields.IntField(default=200, description="分块重叠")
-    
+
     # 文件限制
     max_file_size = fields.BigIntField(default=52428800, description="最大文件大小(字节)")  # 50MB
-    allowed_file_types = fields.JSONField(
-        default=lambda: ["pdf", "docx", "txt", "md"],
-        description="允许的文件类型"
+    allowed_file_types = fields.TextField(
+        default='["pdf", "docx", "txt", "md"]',
+        description="允许的文件类型JSON"
     )
     
     # 统计信息
@@ -71,6 +72,28 @@ class KnowledgeBase(BaseModel, TimestampMixin):
             ["created_at"],
         ]
 
+    def get_config(self) -> Dict[str, Any]:
+        """获取配置信息"""
+        try:
+            return json.loads(self.config) if self.config else {}
+        except (json.JSONDecodeError, TypeError):
+            return {}
+
+    def set_config(self, config: Dict[str, Any]):
+        """设置配置信息"""
+        self.config = json.dumps(config, ensure_ascii=False)
+
+    def get_allowed_file_types(self) -> List[str]:
+        """获取允许的文件类型"""
+        try:
+            return json.loads(self.allowed_file_types) if self.allowed_file_types else ["pdf", "docx", "txt", "md"]
+        except (json.JSONDecodeError, TypeError):
+            return ["pdf", "docx", "txt", "md"]
+
+    def set_allowed_file_types(self, file_types: List[str]):
+        """设置允许的文件类型"""
+        self.allowed_file_types = json.dumps(file_types, ensure_ascii=False)
+
     async def to_dict(self) -> Dict[str, Any]:
         """转换为字典格式"""
         return {
@@ -80,12 +103,12 @@ class KnowledgeBase(BaseModel, TimestampMixin):
             "is_public": self.is_public,
             "owner_id": self.owner_id,
             "knowledge_type": self.knowledge_type,
-            "config": self.config,
+            "config": self.get_config(),
             "embedding_model": self.embedding_model,
             "chunk_size": self.chunk_size,
             "chunk_overlap": self.chunk_overlap,
             "max_file_size": self.max_file_size,
-            "allowed_file_types": self.allowed_file_types,
+            "allowed_file_types": self.get_allowed_file_types(),
             "file_count": self.file_count,
             "total_size": self.total_size,
             "status": self.status,
@@ -156,7 +179,7 @@ class KnowledgeFile(BaseModel, TimestampMixin):
     # 处理状态
     embedding_status = fields.CharField(
         max_length=20,
-        default=EmbeddingStatus.PENDING,
+        default="pending",
         description="嵌入处理状态"
     )
     embedding_error = fields.TextField(null=True, description="嵌入错误信息")
@@ -164,7 +187,7 @@ class KnowledgeFile(BaseModel, TimestampMixin):
 
     # 分块信息
     chunk_count = fields.IntField(default=0, description="分块数量")
-    vector_ids = fields.JSONField(default=list, description="向量ID列表")
+    vector_ids = fields.TextField(default="[]", description="向量ID列表JSON")
 
     # 软删除
     is_deleted = fields.BooleanField(default=False, description="是否已删除")
@@ -177,6 +200,17 @@ class KnowledgeFile(BaseModel, TimestampMixin):
             ["file_hash"],
             ["created_at"],
         ]
+
+    def get_vector_ids(self) -> List[str]:
+        """获取向量ID列表"""
+        try:
+            return json.loads(self.vector_ids) if self.vector_ids else []
+        except (json.JSONDecodeError, TypeError):
+            return []
+
+    def set_vector_ids(self, vector_ids: List[str]):
+        """设置向量ID列表"""
+        self.vector_ids = json.dumps(vector_ids, ensure_ascii=False)
 
     async def to_dict(self) -> Dict[str, Any]:
         """转换为字典格式"""
@@ -193,7 +227,7 @@ class KnowledgeFile(BaseModel, TimestampMixin):
             "embedding_error": self.embedding_error,
             "processed_at": self.processed_at.isoformat() if self.processed_at else None,
             "chunk_count": self.chunk_count,
-            "vector_ids": self.vector_ids,
+            "vector_ids": self.get_vector_ids(),
             "is_deleted": self.is_deleted,
             "deleted_at": self.deleted_at.isoformat() if self.deleted_at else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,

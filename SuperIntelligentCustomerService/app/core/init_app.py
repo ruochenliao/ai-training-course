@@ -229,7 +229,7 @@ async def init_apis():
 async def init_db():
     # 初始化Tortoise ORM连接
     await Tortoise.init(config=settings.TORTOISE_ORM)
-    await Tortoise.generate_schemas()
+    await Tortoise.generate_schemas(safe=True)
 
 
 async def init_roles():

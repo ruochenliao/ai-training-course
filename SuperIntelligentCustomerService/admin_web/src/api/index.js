@@ -47,16 +47,8 @@ export default {
   deleteModel: (params = {}) => request.delete('/system/model/delete', { params }),
 
   // knowledge base
-  getKnowledgeBaseList: (params = {}) => request.get('/knowledge/', { params }),
-  getKnowledgeBaseById: (id) => request.get(`/knowledge/${id}`),
-  createKnowledgeBase: (data = {}) => request.post('/knowledge/', data),
-  updateKnowledgeBase: (id, data = {}) => request.put(`/knowledge/${id}`, data),
-  deleteKnowledgeBase: (id) => request.delete(`/knowledge/${id}`),
-  getKnowledgeTypes: () => request.get('/knowledge/types'),
-
-  // knowledge bases
-  getKnowledgeBases: (params = {}) => request.get('/knowledge/bases/', { params }),
-  getKnowledgeBase: (id) => request.get(`/knowledge/bases/${id}`),
+  getKnowledgeBaseList: (params = {}) => request.get('/knowledge/bases/', { params }),
+  getKnowledgeBaseById: (id) => request.get(`/knowledge/bases/${id}`),
   createKnowledgeBase: (data = {}) => {
     // 转换文件大小单位（MB -> 字节）
     const submitData = { ...data }
@@ -77,7 +69,8 @@ export default {
   },
   deleteKnowledgeBase: (id) => request.delete(`/knowledge/bases/${id}`),
   getKnowledgeTypes: () => request.get('/knowledge/bases/types'),
-  getKnowledgeBaseStats: (id) => request.get(`/knowledge/bases/${id}/stats`),
+
+
 
   // knowledge files
   getKnowledgeFiles: (kbId, params = {}) => request.get(`/knowledge/files/${kbId}/list`, { params }),

@@ -38,10 +38,7 @@ async def create_knowledge_base(
         max_file_size=request.max_file_size,
         allowed_file_types=request.allowed_file_types
     )
-    
-    if not result.get("success", False):
-        raise HTTPException(status_code=400, detail=result.get("msg", "创建失败"))
-    
+
     return result
 
 
@@ -63,10 +60,7 @@ async def list_knowledge_bases(
         is_public=is_public,
         search=search
     )
-    
-    if not result.get("success", False):
-        raise HTTPException(status_code=400, detail=result.get("msg", "获取失败"))
-    
+
     return result
 
 
@@ -74,10 +68,8 @@ async def list_knowledge_bases(
 async def get_knowledge_types():
     """获取所有可用的知识库类型"""
     result = await knowledge_base_controller.get_knowledge_types()
-    
-    if not result.get("success", False):
-        raise HTTPException(status_code=400, detail=result.get("msg", "获取失败"))
-    
+
+    # Success 对象直接返回，不需要检查 success 字段
     return result
 
 
@@ -88,11 +80,7 @@ async def get_knowledge_base(
 ):
     """获取知识库详情"""
     result = await knowledge_base_controller.get_knowledge_base(kb_id, current_user.id)
-    
-    if not result.get("success", False):
-        raise HTTPException(status_code=404 if "不存在" in result.get("msg", "") else 403, 
-                          detail=result.get("msg", "获取失败"))
-    
+
     return result
 
 
@@ -111,11 +99,7 @@ async def update_knowledge_base(
         user_id=current_user.id,
         **update_data
     )
-    
-    if not result.get("success", False):
-        raise HTTPException(status_code=404 if "不存在" in result.get("msg", "") else 403,
-                          detail=result.get("msg", "更新失败"))
-    
+
     return result
 
 
@@ -126,11 +110,7 @@ async def delete_knowledge_base(
 ):
     """删除知识库（软删除）"""
     result = await knowledge_base_controller.delete_knowledge_base(kb_id, current_user.id)
-    
-    if not result.get("success", False):
-        raise HTTPException(status_code=404 if "不存在" in result.get("msg", "") else 403,
-                          detail=result.get("msg", "删除失败"))
-    
+
     return result
 
 
@@ -142,22 +122,5 @@ async def get_knowledge_base_stats(
     """获取知识库统计信息"""
     # 获取知识库详情（包含统计信息）
     result = await knowledge_base_controller.get_knowledge_base(kb_id, current_user.id)
-    
-    if not result.get("success", False):
-        raise HTTPException(status_code=404 if "不存在" in result.get("msg", "") else 403,
-                          detail=result.get("msg", "获取失败"))
-    
-    # 提取统计信息
-    kb_data = result.get("data", {})
-    stats = {
-        "file_count": kb_data.get("file_count", 0),
-        "total_size": kb_data.get("total_size", 0),
-        "status_stats": kb_data.get("status_stats", {}),
-        "last_updated_at": kb_data.get("last_updated_at"),
-    }
-    
-    return {
-        "success": True,
-        "data": stats,
-        "msg": "获取统计信息成功"
-    }
+
+    return result
