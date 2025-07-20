@@ -4,17 +4,16 @@
 参考006项目的设计架构
 """
 import os
-import shutil
 import uuid
-from pathlib import Path
-from typing import Optional, BinaryIO, Union
 from datetime import datetime
+from pathlib import Path
+from typing import Optional
 
 from fastapi import UploadFile, HTTPException
 from fastapi.responses import FileResponse
 
-from app.settings.config import settings
 from app.log import logger
+from app.settings.config import settings
 
 
 class FileStorageService:

@@ -8,7 +8,6 @@ from .customer.customer import router as customer_router
 from .customer.sessions import router as customer_sessions_router
 from .depts import depts_router
 from .knowledge import knowledge_router
-
 from .memory import router as memory_router
 from .menus import menus_router
 from .resource import resource_router

@@ -1,22 +1,20 @@
 """
 文件处理监控API路由
 """
-from typing import List, Optional
+import json
+from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 
+from app.core.dependency import DependAuth
+from app.models.admin import User
+from app.models.knowledge import KnowledgeFile
 from app.services.file_processing_monitor import (
     file_processing_monitor,
     get_file_status,
     get_all_file_status,
     ProcessingEvent
 )
-from app.core.dependency import DependAuth
-from app.models.admin import User
-from app.models.knowledge import KnowledgeFile
-import json
-import asyncio
 
 router = APIRouter()
 

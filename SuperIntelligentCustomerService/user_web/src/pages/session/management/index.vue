@@ -93,16 +93,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Delete } from '@element-plus/icons-vue'
-import { useRouter } from 'vue-router'
-import { 
-  get_session_list, 
-  create_session, 
-  update_session, 
-  delete_session, 
-  batch_delete_sessions 
+import {onMounted, reactive, ref} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {Delete, Plus} from '@element-plus/icons-vue'
+import {useRouter} from 'vue-router'
+import {
+  batch_delete_sessions,
+  create_session,
+  delete_session,
+  get_session_list,
+  update_session
 } from '@/api/session'
 
 const router = useRouter()

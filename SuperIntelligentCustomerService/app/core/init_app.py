@@ -21,10 +21,9 @@ from .middlewares import BackGroundTaskMiddleware, HttpAuditLogMiddleware
 from ..api import api_router
 from ..controllers.api import api_controller
 from ..controllers.user import UserCreate, user_controller
-from ..models.admin import Api, Menu, Role, Model, Dept
+from ..models.admin import Api, Menu, Role, Dept
 from ..schemas.menus import MenuType
 from ..settings.config import settings
-from ..utils.encryption import encrypt_api_key
 
 
 def make_middlewares():
@@ -257,83 +256,11 @@ async def init_roles():
         await user_role.apis.add(*basic_apis)
 
 
-async def init_models():
-    """初始化模型数据"""
-    models = await Model.exists()
-    if not models:
-        # 创建DeepSeek文本模型
-        await Model.create(
-            category="对话模型",
-            model_name="deepseek-chat",
-            model_describe="DeepSeek Chat模型，专业的对话AI助手，支持中文优化",
-            model_price=0.001,
-            model_type="chat",
-            model_show="DeepSeek Chat",
-            system_prompt="""你是超级智能客服，专业、友好、乐于助人。请用中文回复用户的问题。
-
-## 重要格式要求：
-**必须使用标准 Markdown 格式**输出所有回复，特别注意：
-
-1. **代码块格式**：
-```语言名称
-代码内容（必须有正确的换行符和缩进）
-```
-
-2. **确保代码块内容格式化良好**：
-   - 每行代码独立成行
-   - 保持正确的缩进
-   - 包含适当的注释
-   - 不要将所有代码挤在一行
-
-3. **使用适当的 Markdown 语法**：
-   - 标题：# ## ###
-   - 列表：- 或 1.
-   - 强调：**粗体** *斜体*
-   - 行内代码：`代码`
-
-确保所有代码示例都格式化良好。""",
-            api_host="https://api.deepseek.com/v1",
-            api_key=encrypt_api_key("sk-56f5743d59364543a00109a4c1c10a56"),
-            is_active=True,
-            remark="DeepSeek文本模型"
-        )
-
-        # 创建DeepSeek多模态模型
-        await Model.create(
-            category="多模态模型",
-            model_name="deepseek-vl-chat",
-            model_describe="DeepSeek VL Chat模型，支持图像理解和多模态对话",
-            model_price=0.002,
-            model_type="multimodal",
-            model_show="DeepSeek VL Chat",
-            system_prompt="""你是超级智能客服，专业、友好、乐于助人。你可以理解图像内容并用中文回复用户的问题。
-
-## 重要格式要求：
-**必须使用标准 Markdown 格式**输出所有回复，特别注意：
-
-1. **代码块格式**：
-```语言名称
-代码内容（必须有正确的换行符和缩进）
-```
-
-2. **确保代码块内容格式化良好**：
-   - 每行代码独立成行
-   - 保持正确的缩进
-   - 包含适当的注释
-   - 不要将所有代码挤在一行
-
-3. **使用适当的 Markdown 语法**：
-   - 标题：# ## ###
-   - 列表：- 或 1.
-   - 强调：**粗体** *斜体*
-   - 行内代码：`代码`
-
-确保所有代码示例都格式化良好。""",
-            api_host="https://api.deepseek.com/v1",
-            api_key=encrypt_api_key("sk-56f5743d59364543a00109a4c1c10a56"),
-            is_active=True,
-            remark="DeepSeek多模态模型"
-        )
+async def init_llm_models():
+    """初始化LLM模型数据"""
+    # 简化：不在启动时初始化LLM数据，避免数据库连接问题
+    # LLM数据可以通过管理界面或独立脚本初始化
+    print("⏭️  跳过LLM模型数据初始化（使用默认配置）")
 
         # 注意：DeepSeek Chat模型已在上面创建，避免重复
 
@@ -458,6 +385,7 @@ async def init_data():
     await init_menus()
     await init_apis()
     await init_roles()
-    await init_models()
+    await init_llm_models()  # 使用新的LLM模型初始化
     await init_depts()
+    # LLM客户端将在应用启动后单独初始化
     # BGE模型会在首次使用时自动下载，无需单独初始化

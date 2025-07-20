@@ -11,13 +11,13 @@ from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.base import TaskResult
 from autogen_agentchat.messages import ModelClientStreamingChunkEvent, MultiModalMessage as AGMultiModalMessage
 from autogen_core import Image as AGImage
-from autogen_core.model_context import BufferedChatCompletionContext
 from autogen_core.memory import MemoryContent, MemoryMimeType
+from autogen_core.model_context import BufferedChatCompletionContext
 
-from app.core.llms import model_client, vllm_model_client
+from app.core.llms import get_model_client, get_default_model_client
 from app.schemas.customer import ChatMessage, MessageContent
-from app.settings.config import settings
 from app.services.memory_service import MemoryServiceFactory
+from app.settings.config import settings
 
 # 获取项目根目录
 BASE_DIR = settings.BASE_DIR
@@ -58,7 +58,8 @@ class ChatService:
         Args:
             model: 使用的模型名称，如果为None则使用配置中的默认模型
         """
-        self.model_client = model_client
+        self.model_name = model or "deepseek-chat"  # 默认使用deepseek-chat
+        self.model_client = None  # 将在异步方法中初始化
 
         # 初始化日志记录器
         self.logger = logging.getLogger("chat_service")
@@ -99,6 +100,16 @@ class ChatService:
         - 对于图片相关的问题，请仔细观察图片内容并提供详细的分析。
         """
 
+    async def _ensure_model_client(self):
+        """确保模型客户端已初始化"""
+        if self.model_client is None:
+            self.model_client = await get_model_client(self.model_name)
+            if self.model_client is None:
+                # 如果指定模型不可用，使用默认模型
+                self.model_client = await get_default_model_client()
+                if self.model_client is None:
+                    raise RuntimeError("无法获取任何可用的模型客户端")
+
     async def chat_stream(self, messages: List[ChatMessage],
                          system_prompt: Optional[str] = None,
                          user_id: str = "1",
@@ -136,12 +147,15 @@ class ChatService:
         last_user_message = await self._process_user_message(last_message, user_id)
 
         try:
-            # 4. 会话管理 - 获取或创建用户会话
+            # 4. 确保模型客户端已初始化
+            await self._ensure_model_client()
+
+            # 5. 会话管理 - 获取或创建用户会话
             # 注意：这里使用user_id作为session_id是为了保持会话一致性
             session = self._get_or_create_session(user_id, session_id or user_id)
 
-            # 5. 创建AI助手代理
-            agent = self._create_assistant_agent(user_id, system_prompt, session)
+            # 6. 创建AI助手代理
+            agent = await self._create_assistant_agent(user_id, system_prompt, session)
 
             # 6. 流式生成响应并处理结果
             async for event in agent.run_stream(task=last_user_message):
@@ -173,7 +187,8 @@ class ChatService:
             message.content.content):
 
             # 对于多模态消息，使用支持多模态的模型
-            self.model_client = vllm_model_client
+            self.model_name = "qwen-vl-plus"
+            self.model_client = await get_model_client("qwen-vl-plus")
             self.logger.info(f"处理用户 {user_id} 的多模态消息")
 
             # 获取文本内容，如果没有则使用默认提示
@@ -262,7 +277,7 @@ class ChatService:
         pil_image = PILImage.open(BytesIO(response.content))
         return AGImage(pil_image)
 
-    def _create_assistant_agent(self, user_id: str, system_prompt: Optional[str], session: ChatSession) -> AssistantAgent:
+    async def _create_assistant_agent(self, user_id: str, system_prompt: Optional[str], session: ChatSession) -> AssistantAgent:
         """创建AI助手代理
 
         Args:
@@ -273,6 +288,9 @@ class ChatService:
         Returns:
             AssistantAgent实例
         """
+        # 确保模型客户端已初始化
+        await self._ensure_model_client()
+
         return AssistantAgent(
             name=f"agent_{user_id}",
             model_client=self.model_client,

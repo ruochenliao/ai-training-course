@@ -16,7 +16,7 @@ from app.models.knowledge import KnowledgeBase, KnowledgeFile
 from app.schemas.base import Success, Fail, SuccessExtra
 from app.services.file_processor import start_file_processing
 from app.services.file_storage import file_storage
-from app.services.unified_vector_service import delete_knowledge_base_file
+from ..services.vector_db import vector_db
 
 # 获取专用日志记录器
 kb_logger = get_logger("base")
@@ -252,20 +252,14 @@ class KnowledgeBaseController:
             if not await knowledge_base.can_edit(user_id):
                 return Fail(msg="无权限删除此知识库")
             
-            # 从向量数据库中删除 - 使用新的统一向量服务
+            # 从向量数据库中删除
             try:
-                # 使用统一向量服务删除知识库
-                from app.services.unified_vector_service import get_unified_vector_service, VectorCollectionType
-                unified_service = get_unified_vector_service()
-                await unified_service.delete_collection(
-                    collection_type=VectorCollectionType.KNOWLEDGE_BASE,
-                    identifier=str(kb_id),
+                await vector_db.delete_knowledge_base(
+                    knowledge_base_id=kb_id,
+                    knowledge_type=knowledge_base.knowledge_type,
                     is_public=knowledge_base.is_public,
                     owner_id=knowledge_base.owner_id
                 )
-            except Exception as e:
-                kb_logger.error(f"使用统一向量服务删除失败: {e}")
-                # 删除失败，但继续删除数据库记录
                 logger.info(f"成功从向量数据库删除知识库: {kb_id}")
             except Exception as e:
                 logger.warning(f"从向量数据库删除知识库失败: {e}")
@@ -474,9 +468,12 @@ class KnowledgeFileController:
 
             # 从向量数据库中删除
             try:
-                await delete_knowledge_base_file(
+                await vector_db.delete_file(
                     knowledge_base_id=knowledge_base.id,
-                    file_id=file_id
+                    file_id=file_id,
+                    knowledge_type=knowledge_base.knowledge_type,
+                    is_public=knowledge_base.is_public,
+                    owner_id=knowledge_base.owner_id
                 )
                 logger.info(f"成功从向量数据库删除文件: {file_id}")
             except Exception as e:

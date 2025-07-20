@@ -6,15 +6,15 @@
 import asyncio
 import os
 import tempfile
-from typing import List, Dict, Any, Optional
-from pathlib import Path
+from typing import List, Dict
 
-from app.models.knowledge import KnowledgeFile, KnowledgeBase
-from app.models.enums import EmbeddingStatus
-from app.services.file_storage import file_storage
-from .vector_db import vector_db
-from app.services.file_processing_monitor import add_file_to_monitor, update_file_progress, mark_file_completed, mark_file_failed
 from app.log import logger
+from app.models.enums import EmbeddingStatus
+from app.models.knowledge import KnowledgeFile
+from app.services.file_processing_monitor import add_file_to_monitor, update_file_progress, mark_file_completed, \
+    mark_file_failed
+from app.services.file_storage import file_storage
+from .unified_vector_service import add_knowledge_base_document
 
 
 class FileProcessor:
@@ -248,17 +248,25 @@ class FileProcessor:
             # 获取文件扩展名
             file_extension = os.path.splitext(knowledge_file.name)[1].lower()
 
-            # 添加到向量数据库
-            vector_ids = await vector_db.add_document(
-                knowledge_base_id=knowledge_base.id,
-                file_id=knowledge_file.id,
-                content=full_content,
-                knowledge_type=knowledge_base.knowledge_type,
-                is_public=knowledge_base.is_public,
-                owner_id=knowledge_base.owner_id,
-                chunk_size=knowledge_base.chunk_size,
-                file_extension=file_extension
-            )
+            # 添加到向量数据库 - 使用新的统一向量服务
+            try:
+                vector_ids = await add_knowledge_base_document(
+                    knowledge_base_id=knowledge_base.id,
+                    file_id=knowledge_file.id,
+                    content=full_content,
+                    chunk_size=knowledge_base.chunk_size,
+                    file_extension=file_extension,
+                    metadata={
+                        "knowledge_type": knowledge_base.knowledge_type,
+                        "is_public": knowledge_base.is_public,
+                        "owner_id": knowledge_base.owner_id,
+                        "file_name": knowledge_file.name
+                    }
+                )
+            except Exception as e:
+                logger.error(f"使用统一向量服务失败: {e}")
+                # 向量化失败，返回空列表
+                vector_ids = []
 
             logger.info(f"成功向量化文件 {knowledge_file.id}，生成 {len(vector_ids)} 个向量块")
             return vector_ids

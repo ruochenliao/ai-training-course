@@ -2,12 +2,12 @@
 知识库权限控制服务
 实现知识库的访问权限控制、用户权限验证等功能
 """
-from typing import List, Optional, Dict, Any
 from enum import Enum
+from typing import List, Dict, Any
 
-from app.models.knowledge import KnowledgeBase, KnowledgeFile
-from app.models.admin import User
 from app.log import logger
+from app.models.admin import User
+from app.models.knowledge import KnowledgeBase, KnowledgeFile
 
 
 class PermissionLevel(Enum):

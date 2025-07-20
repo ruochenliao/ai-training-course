@@ -2,15 +2,15 @@
 知识库统计服务
 提供知识库的各种统计功能，包括文件数量、大小、处理状态等
 """
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Dict, Any, Optional
 
-from app.models.knowledge import KnowledgeBase, KnowledgeFile
-from app.models.enums import KnowledgeType, EmbeddingStatus
-from app.core.knowledge_logger import get_logger
 from tortoise.functions import Count, Sum, Avg, Max, Min
-from tortoise.expressions import Q
+
+from app.core.knowledge_logger import get_logger
+from app.models.enums import EmbeddingStatus
+from app.models.knowledge import KnowledgeBase, KnowledgeFile
 
 logger = get_logger("system")
 

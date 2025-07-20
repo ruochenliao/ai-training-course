@@ -3,8 +3,8 @@
 简化版本，用于向量数据库集成
 """
 import re
-from typing import List, Optional
 from dataclasses import dataclass
+from typing import List
 
 
 @dataclass

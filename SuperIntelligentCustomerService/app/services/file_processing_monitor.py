@@ -3,15 +3,14 @@
 实现文件处理状态的实时监控、进度跟踪、错误处理等功能
 """
 import asyncio
-import time
-from typing import Dict, List, Optional, Any, Callable
-from datetime import datetime, timedelta
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import Enum
+from typing import Dict, List, Optional, Any, Callable
 
-from app.models.knowledge import KnowledgeFile
-from app.models.enums import EmbeddingStatus
 from app.log import logger
+from app.models.enums import EmbeddingStatus
+from app.models.knowledge import KnowledgeFile
 
 
 class ProcessingEvent(Enum):

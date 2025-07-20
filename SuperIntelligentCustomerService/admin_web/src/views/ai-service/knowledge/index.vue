@@ -206,8 +206,7 @@
 </template>
 
 <script setup lang="ts">
-import { h, onMounted, ref, resolveDirective, withDirectives } from 'vue'
-import type { Ref } from 'vue'
+import {h, onMounted, ref, resolveDirective, withDirectives} from 'vue'
 import {
   NButton,
   NDataTable,
@@ -221,7 +220,6 @@ import {
   NP,
   NPopconfirm,
   NSelect,
-  NSpace,
   NTag,
   NText,
   NUpload,
@@ -233,9 +231,8 @@ import QueryBarItem from '@/components/query-bar/QueryBarItem.vue'
 import CrudModal from '@/components/table/CrudModal.vue'
 import CrudTable from '@/components/table/CrudTable.vue'
 import TheIcon from '@/components/icon/TheIcon.vue'
-import type { DataTableColumns } from 'naive-ui'
-import { formatDate, renderIcon } from '@/utils'
-import { useCRUD } from '@/composables'
+import {formatDate, renderIcon} from '@/utils'
+import {useCRUD} from '@/composables'
 import api from '@/api'
 
 defineOptions({ name: '知识库管理' })

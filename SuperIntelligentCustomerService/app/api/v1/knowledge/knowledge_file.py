@@ -3,18 +3,12 @@
 """
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query, UploadFile, File, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, Query, UploadFile, File, HTTPException
 
 from app.controllers.knowledge import knowledge_file_controller
-from app.schemas.knowledge import (
-    KnowledgeFileResponse,
-    KnowledgeFileListQuery,
-    KnowledgeFileUploadResponse
-)
-from app.services.file_storage import file_storage
 from app.core.dependency import DependAuth
 from app.models.admin import User
+from app.services.file_storage import file_storage
 
 router = APIRouter()
 

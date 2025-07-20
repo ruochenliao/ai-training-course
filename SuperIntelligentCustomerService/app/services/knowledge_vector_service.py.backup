@@ -4,16 +4,15 @@
 基于ChromaDB实现
 """
 import os
-from typing import List, Dict, Any, Optional, Union
 from datetime import datetime
+from typing import List, Dict, Any, Optional
 
 from autogen_core.memory import MemoryContent, MemoryMimeType
 from autogen_ext.memory.chromadb import ChromaDBVectorMemory, PersistentChromaDBVectorMemoryConfig, \
     HttpChromaDBVectorMemoryConfig
 
-from app.settings.config import settings
 from app.log import logger
-from app.models.knowledge import KnowledgeBase, KnowledgeFile
+from app.settings.config import settings
 
 
 class KnowledgeVectorService:

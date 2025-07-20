@@ -4,13 +4,13 @@
 """
 from typing import Dict, Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from app.services.knowledge_statistics import knowledge_statistics_service
-from app.services.knowledge_permission_service import check_knowledge_base_access
 from app.core.dependency import DependAuth
 from app.models.admin import User
+from app.services.knowledge_permission_service import check_knowledge_base_access
+from app.services.knowledge_statistics import knowledge_statistics_service
 
 router = APIRouter()
 

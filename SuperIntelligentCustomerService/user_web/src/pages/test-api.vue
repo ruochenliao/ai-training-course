@@ -63,9 +63,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { get_session_list, create_session, get_session } from '@/api/session'
-import { uploadImage } from '@/api/chat'
+import {ref} from 'vue'
+import {create_session, get_session, get_session_list} from '@/api/session'
+import {uploadImage} from '@/api/chat'
 
 // 响应式数据
 const loading = ref(false)

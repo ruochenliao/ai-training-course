@@ -2,13 +2,13 @@
 知识库专用日志记录器
 提供结构化的日志记录功能，支持不同级别的日志和事件跟踪
 """
-import logging
 import json
+import logging
 import traceback
 from datetime import datetime
-from typing import Dict, Any, Optional, Union
-from pathlib import Path
 from enum import Enum
+from pathlib import Path
+from typing import Dict, Any, Optional
 
 from app.settings.config import settings
 

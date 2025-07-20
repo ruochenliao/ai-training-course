@@ -37,6 +37,7 @@ class Settings(BaseSettings):
                 "models": [
                     "app.models.admin",
                     "app.models.knowledge",
+                    "app.models.llm_models",
                     "aerich.models"
                 ],
                 "default_connection": "sqlite",
@@ -48,8 +49,9 @@ class Settings(BaseSettings):
     DATETIME_FORMAT: str = "%Y-%m-%d %H:%M:%S"
 
     # ChromaDB配置
-    CHROMA_DB_HOST: str = "localhost"
-    CHROMA_DB_PORT: int = 8000
+    # DEPRECATED: 以下配置已废弃，请使用统一向量服务
+    # CHROMA_DB_HOST: str = "localhost"
+    # CHROMA_DB_PORT: int = 8000
 
 
 settings = Settings()

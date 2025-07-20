@@ -117,19 +117,4 @@ class ChatMessage(BaseModel, TimestampMixin):
         table = "chat_message"
 
 
-class Model(BaseModel, TimestampMixin):
-    """AI模型配置"""
-    category = fields.CharField(max_length=50, description="模型分类", index=True)
-    model_name = fields.CharField(max_length=100, unique=True, description="模型名称", index=True)
-    model_describe = fields.CharField(max_length=500, null=True, description="模型描述")
-    model_price = fields.DecimalField(max_digits=10, decimal_places=4, default=0, description="模型价格")
-    model_type = fields.CharField(max_length=50, description="模型类型", index=True)  # chat, embedding, etc.
-    model_show = fields.CharField(max_length=100, description="显示名称")
-    system_prompt = fields.TextField(null=True, description="系统提示词")
-    api_host = fields.CharField(max_length=255, null=True, description="API主机地址")
-    api_key = fields.CharField(max_length=255, null=True, description="API密钥")
-    is_active = fields.BooleanField(default=True, description="是否启用", index=True)
-    remark = fields.CharField(max_length=500, null=True, description="备注")
 
-    class Meta:
-        table = "model"

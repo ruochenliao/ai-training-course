@@ -2,19 +2,13 @@
 文件验证服务
 实现文件上传的类型检查、大小限制、安全验证等功能
 """
-import os
-import magic
 import hashlib
-from typing import List, Dict, Any, Optional, Tuple
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
+from typing import List, Dict, Any, Optional
 
-from app.core.knowledge_exceptions import (
-    UnsupportedFileTypeError,
-    FileSizeExceededError,
-    ValidationError,
-    FileUploadError
-)
+import magic
+
 from app.core.knowledge_logger import get_logger
 
 logger = get_logger("file_processing")

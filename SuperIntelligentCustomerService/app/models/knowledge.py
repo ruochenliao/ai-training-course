@@ -13,7 +13,7 @@ from tortoise import fields
 from tortoise.expressions import Q
 
 from .base import BaseModel, TimestampMixin
-from .enums import KnowledgeType, EmbeddingStatus, FileType
+from .enums import EmbeddingStatus
 
 
 class KnowledgeBase(BaseModel, TimestampMixin):

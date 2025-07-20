@@ -3,18 +3,15 @@
 """
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Query
 
 from app.controllers.knowledge import knowledge_base_controller
-from app.schemas.knowledge import (
-    KnowledgeBaseCreate,
-    KnowledgeBaseUpdate,
-    KnowledgeBaseResponse,
-    KnowledgeBaseListQuery,
-    KnowledgeTypeOption
-)
 from app.core.dependency import DependAuth
 from app.models.admin import User
+from app.schemas.knowledge import (
+    KnowledgeBaseCreate,
+    KnowledgeBaseUpdate
+)
 
 router = APIRouter()
 

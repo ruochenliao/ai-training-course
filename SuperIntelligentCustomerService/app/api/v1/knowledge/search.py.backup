@@ -12,7 +12,8 @@ from app.schemas.knowledge import (
     KnowledgeSearchResponse,
     KnowledgeSearchResult
 )
-from app.services.unified_vector_service import search_multiple_knowledge_bases, search_knowledge_base
+from app.services.unified_vector_service import search_multiple_knowledge_bases
+from app.services.vector_service_adapter import get_vector_db_adapter
 
 router = APIRouter()
 
@@ -102,9 +103,36 @@ async def search_knowledge_content(
                 })
 
         except Exception as e:
-            logger.error(f"向量搜索失败: {e}")
-            # 搜索失败，返回空结果
+            logger.error(f"向量搜索失败，回退到适配器: {e}")
+            # 回退到适配器模式
+            vector_db_adapter = get_vector_db_adapter()
             search_results = []
+
+            for kb_id in kb_ids:
+                kb = await KnowledgeBase.get_or_none(id=kb_id)
+                if not kb:
+                    continue
+
+                # 使用适配器搜索
+                kb_results = await vector_db_adapter.search(
+                    knowledge_base_id=kb_id,
+                    query=request.query,
+                    limit=request.limit,
+                    knowledge_type=kb.knowledge_type,
+                    is_public=kb.is_public,
+                    owner_id=kb.owner_id
+                )
+
+                # 转换结果格式
+                for result in kb_results:
+                    search_results.append({
+                        "content": result.get("document", ""),
+                        "score": 1.0 - result.get("distance", 0.0),
+                        "file_id": int(result.get("metadata", {}).get("file_id", 0)),
+                        "knowledge_base_id": kb_id,
+                        "chunk_index": result.get("metadata", {}).get("chunk_index", 0),
+                        "metadata": result.get("metadata", {})
+                    })
 
         # 按分数排序并限制结果数量
         search_results.sort(key=lambda x: x["score"], reverse=True)
@@ -258,21 +286,24 @@ async def search_similar_content(
             raise HTTPException(status_code=403, detail="无权限访问该知识库")
         
         # 执行相似内容搜索
-        search_results = await search_knowledge_base(
+        search_results = await vector_db.search(
             knowledge_base_id=knowledge_base_id,
             query=content,
-            limit=limit
+            limit=limit,
+            knowledge_type=kb.knowledge_type,
+            is_public=kb.is_public,
+            owner_id=kb.owner_id
         )
         
         # 格式化结果
         similar_contents = []
         for result in search_results:
             similar_contents.append({
-                "content": result.content,
-                "score": result.score,
-                "file_id": int(result.metadata.get("file_id", 0)),
-                "chunk_index": result.metadata.get("chunk_index", 0),
-                "metadata": result.metadata
+                "content": result.get("document", ""),
+                "score": 1.0 - result.get("distance", 0.0),  # 转换距离为相似度分数
+                "file_id": int(result.get("metadata", {}).get("file_id", 0)),
+                "chunk_index": result.get("metadata", {}).get("chunk_index", 0),
+                "metadata": result.get("metadata", {})
             })
         
         return {

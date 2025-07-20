@@ -2,14 +2,14 @@
 文件验证相关API路由
 提供文件类型和大小限制的查询接口
 """
-from typing import List, Dict, Any
+from typing import List, Dict
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException, UploadFile, File
 from pydantic import BaseModel
 
-from app.services.file_validator import file_validator, validate_uploaded_file
 from app.core.dependency import DependAuth
 from app.models.admin import User
+from app.services.file_validator import file_validator, validate_uploaded_file
 
 router = APIRouter()
 

@@ -39,12 +39,27 @@ export default {
   deleteDept: (params = {}) => request.delete('/dept/delete', { params }),
   // auditlog
   getAuditLogList: (params = {}) => request.get('/auditlog/list', { params }),
-  // models
-  getModelList: (params = {}) => request.get('/system/model/list', { params }),
-  getModelById: (params = {}) => request.get('/system/model/get', { params }),
-  createModel: (data = {}) => request.post('/system/model/create', data),
-  updateModel: (data = {}) => request.post('/system/model/update', data),
-  deleteModel: (params = {}) => request.delete('/system/model/delete', { params }),
+  // LLM models (新的模型管理API)
+  getModelList: (params = {}) => request.get('/system/llm/models', { params }),
+  getModelById: (id) => request.get(`/system/llm/models/${id}`),
+  createModel: (data = {}) => request.post('/system/llm/models', data),
+  updateModel: (data = {}) => request.put(`/system/llm/models/${data.id}`, data),
+  deleteModel: (id) => request.delete(`/system/llm/models/${id}`),
+  toggleModelStatus: (id) => request.post(`/system/llm/models/${id}/toggle`),
+  setDefaultModel: (id, category) => request.post(`/system/llm/models/${id}/set-default`, { category }),
+
+  // LLM providers
+  getProviderList: (params = {}) => request.get('/system/llm/providers', { params }),
+  getProviderById: (id) => request.get(`/system/llm/providers/${id}`),
+  createProvider: (data = {}) => request.post('/system/llm/providers', data),
+  updateProvider: (data = {}) => request.put(`/system/llm/providers/${data.id}`, data),
+  deleteProvider: (id) => request.delete(`/system/llm/providers/${id}`),
+
+  // Model categories and stats
+  getModelCategories: () => request.get('/system/llm/categories'),
+  getModelUsageStats: (id, days = 30) => request.get(`/system/llm/models/${id}/usage`, { params: { days } }),
+  getAvailableModels: () => request.get('/system/llm/available-models'),
+  reloadModels: () => request.post('/system/llm/reload-models'),
 
   // knowledge base
   getKnowledgeBaseList: (params = {}) => request.get('/knowledge/bases/', { params }),

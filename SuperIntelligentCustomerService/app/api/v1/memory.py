@@ -1,5 +1,6 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, UploadFile, File, Form, Query
+
+from fastapi import APIRouter, UploadFile, File, Form, Query
 
 from app.controllers.memory_controller import MemoryController, MemoryQueryRequest, MemoryAddRequest
 from app.services.memory_service import KnowledgeType

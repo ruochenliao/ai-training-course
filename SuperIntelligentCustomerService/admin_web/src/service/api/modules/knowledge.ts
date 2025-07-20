@@ -1,7 +1,7 @@
 /**
  * 知识库管理相关API
  */
-import { request } from '../request'
+import {request} from '../request'
 
 export interface KnowledgeBase {
   id?: number

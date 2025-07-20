@@ -24,6 +24,14 @@ async def lifespan(app: FastAPI):
     # 初始化数据库和基础数据
     await init_data()
 
+    # 在数据库初始化完成后，延迟初始化LLM客户端
+    try:
+        from .core.llms import initialize_llm_clients
+        await initialize_llm_clients()
+        print("✅ LLM客户端延迟初始化完成")
+    except Exception as e:
+        print(f"⚠️  LLM客户端延迟初始化失败: {e}")
+
     # 启动异步文件处理器
     from .controllers.async_file_processor import async_file_processor
     await async_file_processor.start()

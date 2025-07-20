@@ -3,12 +3,12 @@
 """
 from typing import List
 
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
+from fastapi import APIRouter, File, UploadFile, HTTPException
 from pydantic import BaseModel
 
-from app.services.batch_operations import batch_operation_service
 from app.core.dependency import DependAuth
 from app.models.admin import User
+from app.services.batch_operations import batch_operation_service
 
 router = APIRouter()
 

@@ -7,11 +7,11 @@ from typing import Optional, List
 from fastapi import APIRouter, Query, HTTPException, Body
 from pydantic import BaseModel, Field
 
+from app.controllers.session_service import session_service
 from ....core.dependency import DependAuth
 from ....models.admin import User, ChatMessage as ChatMessageModel
 from ....schemas import Success, SuccessExtra
 from ....schemas.session import CreateSessionDTO
-from app.controllers.session_service import session_service
 
 router = APIRouter(tags=['会话管理'])
 

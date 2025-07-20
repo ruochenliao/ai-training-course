@@ -342,6 +342,7 @@ class MemoryServiceFactory:
             私有记忆服务实例
         """
         # 延迟导入避免循环导入
+        from .vector_memory_service import PrivateMemoryService
 
         # 初始化用户的私有服务字典
         if user_id not in self._private_services:
@@ -367,6 +368,7 @@ class MemoryServiceFactory:
             公共记忆服务实例
         """
         # 延迟导入避免循环导入
+        from .vector_memory_service import PublicMemoryService
 
         if knowledge_type not in self._public_services:
             self._public_services[knowledge_type] = PublicMemoryService(

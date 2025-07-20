@@ -3,18 +3,18 @@
 实现知识库和文件的批量操作功能，包括批量上传、删除、处理等
 """
 import asyncio
-from typing import List, Dict, Any, Optional, Union
 from dataclasses import dataclass
 from datetime import datetime
+from typing import List, Dict, Any
 
 from fastapi import UploadFile
 
-from app.models.knowledge import KnowledgeBase, KnowledgeFile
-from app.models.enums import EmbeddingStatus
-from app.services.file_storage import file_storage
-from app.services.file_processor import start_file_processing
-from app.services.knowledge_permission_service import check_knowledge_base_access, check_file_access
 from app.log import logger
+from app.models.enums import EmbeddingStatus
+from app.models.knowledge import KnowledgeBase, KnowledgeFile
+from app.services.file_processor import start_file_processing
+from app.services.file_storage import file_storage
+from app.services.knowledge_permission_service import check_knowledge_base_access, check_file_access
 
 
 @dataclass
