@@ -48,13 +48,6 @@ export default {
   toggleModelStatus: (id) => request.post(`/system/llm/models/${id}/toggle`),
   setDefaultModel: (id, category) => request.post(`/system/llm/models/${id}/set-default`, { category }),
 
-  // LLM providers
-  getProviderList: (params = {}) => request.get('/system/llm/providers', { params }),
-  getProviderById: (id) => request.get(`/system/llm/providers/${id}`),
-  createProvider: (data = {}) => request.post('/system/llm/providers', data),
-  updateProvider: (data = {}) => request.put(`/system/llm/providers/${data.id}`, data),
-  deleteProvider: (id) => request.delete(`/system/llm/providers/${id}`),
-
   // Model categories and stats
   getModelCategories: () => request.get('/system/llm/categories'),
   getModelUsageStats: (id, days = 30) => request.get(`/system/llm/models/${id}/usage`, { params: { days } }),

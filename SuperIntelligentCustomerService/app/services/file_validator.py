@@ -9,9 +9,7 @@ from typing import List, Dict, Any, Optional
 
 import magic
 
-from app.core.knowledge_logger import get_logger
-
-logger = get_logger("file_processing")
+from app.log import logger
 
 
 @dataclass

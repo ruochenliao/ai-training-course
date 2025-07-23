@@ -11,12 +11,45 @@ from ....controllers.llm_models import llm_model_controller
 from ....core.dependency import DependAuth
 from ....core.llms import model_client_manager
 from ....models.admin import User
-from ....schemas.base import Success
+from ....models.llm_models import LLMModel
+from ....schemas.base import Success, SuccessExtra
 from ....schemas.llm_models import (
     LLMModelCreate, LLMModelUpdate, LLMModelResponse, LLMModelListResponse
 )
 
 router = APIRouter()
+
+
+def model_to_dict(model: LLMModel) -> dict:
+    """将模型对象转换为字典"""
+    return {
+        "id": model.id,
+        "provider_name": model.provider_name,
+        "provider_display_name": model.provider_display_name,
+        "base_url": model.base_url,
+        "model_name": model.model_name,
+        "display_name": model.display_name,
+        "description": model.description,
+        "category": model.category,
+        "vision": model.vision,
+        "function_calling": model.function_calling,
+        "json_output": model.json_output,
+        "structured_output": model.structured_output,
+        "multiple_system_messages": model.multiple_system_messages,
+        "model_family": model.model_family,
+        "max_tokens": model.max_tokens,
+        "temperature": model.temperature,
+        "top_p": model.top_p,
+        "input_price_per_1k": float(model.input_price_per_1k),
+        "output_price_per_1k": float(model.output_price_per_1k),
+        "system_prompt": model.system_prompt,
+        "is_active": model.is_active,
+        "is_default": model.is_default,
+        "sort_order": model.sort_order,
+        "created_at": model.created_at.isoformat() if model.created_at else None,
+        "updated_at": model.updated_at.isoformat() if model.updated_at else None,
+    }
+
 
 # ==================== LLM模型管理 ====================
 
@@ -51,12 +84,13 @@ async def get_model_list(
             search=search,
             order=["sort_order", "display_name"]
         )
-        
-        # 预加载提供商信息
-        for model in models:
-            await model.fetch_related("provider")
-        
-        return Success(data=LLMModelListResponse(total=total, items=models))
+
+        return SuccessExtra(
+            data=[model_to_dict(model) for model in models],
+            total=total,
+            page=page,
+            page_size=page_size
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"获取模型列表失败: {str(e)}")
 
@@ -81,7 +115,7 @@ async def create_model(
         # 重新加载模型客户端
         await model_client_manager.reload_models()
         
-        return Success(data=model, msg="创建模型成功")
+        return Success(data=model_to_dict(model), msg="创建模型成功")
     except HTTPException:
         raise
     except Exception as e:
@@ -103,7 +137,7 @@ async def update_model(
         # 重新加载模型客户端
         await model_client_manager.reload_models()
         
-        return Success(data=model, msg="更新模型成功")
+        return Success(data=model_to_dict(model), msg="更新模型成功")
     except HTTPException:
         raise
     except Exception as e:
@@ -141,7 +175,7 @@ async def toggle_model_status(
         # 重新加载模型客户端
         await model_client_manager.reload_models()
         
-        return Success(data=model, msg="切换模型状态成功")
+        return Success(data=model_to_dict(model), msg="切换模型状态成功")
     except HTTPException:
         raise
     except Exception as e:

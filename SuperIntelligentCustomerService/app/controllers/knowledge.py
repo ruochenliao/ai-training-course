@@ -9,7 +9,6 @@ from fastapi import UploadFile
 from tortoise.expressions import Q
 
 from app.core.knowledge_exceptions import *
-from app.core.knowledge_logger import get_logger
 from app.log import logger
 from app.models.enums import KnowledgeType, EmbeddingStatus
 from app.models.knowledge import KnowledgeBase, KnowledgeFile
@@ -17,10 +16,6 @@ from app.schemas.base import Success, Fail, SuccessExtra
 from app.services.file_processor import start_file_processing
 from app.services.file_storage import file_storage
 from app.services.unified_vector_service import delete_knowledge_base_file
-
-# 获取专用日志记录器
-kb_logger = get_logger("base")
-file_logger = get_logger("file_processing")
 
 
 class KnowledgeBaseController:
@@ -264,7 +259,7 @@ class KnowledgeBaseController:
                     owner_id=knowledge_base.owner_id
                 )
             except Exception as e:
-                kb_logger.error(f"使用统一向量服务删除失败: {e}")
+                logger.error(f"使用统一向量服务删除失败: {e}")
                 # 删除失败，但继续删除数据库记录
                 logger.info(f"成功从向量数据库删除知识库: {kb_id}")
             except Exception as e:

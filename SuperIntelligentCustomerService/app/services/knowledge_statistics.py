@@ -8,11 +8,9 @@ from typing import Dict, Any, Optional
 
 from tortoise.functions import Count, Sum, Avg, Max, Min
 
-from app.core.knowledge_logger import get_logger
+from app.log import logger
 from app.models.enums import EmbeddingStatus
 from app.models.knowledge import KnowledgeBase, KnowledgeFile
-
-logger = get_logger("system")
 
 
 @dataclass
@@ -200,7 +198,7 @@ class KnowledgeStatisticsService:
             )
             
         except Exception as e:
-            self.logger.error(f"获取知识库统计失败: {e}", exception=e)
+            self.logger.error(f"获取知识库统计失败: {e}")
             return None
     
     async def get_user_stats(self, user_id: int) -> Dict[str, Any]:
@@ -280,7 +278,7 @@ class KnowledgeStatisticsService:
             }
             
         except Exception as e:
-            self.logger.error(f"获取用户统计失败: {e}", exception=e)
+            self.logger.error(f"获取用户统计失败: {e}")
             return {}
     
     async def get_system_stats(self) -> SystemStats:
@@ -360,7 +358,7 @@ class KnowledgeStatisticsService:
             )
             
         except Exception as e:
-            self.logger.error(f"获取系统统计失败: {e}", exception=e)
+            self.logger.error(f"获取系统统计失败: {e}")
             return SystemStats(0, 0, 0, 0, 0, 0, 0, 0, 0.0)
     
     async def get_trending_stats(self, days: int = 7) -> Dict[str, Any]:
@@ -420,7 +418,7 @@ class KnowledgeStatisticsService:
             }
             
         except Exception as e:
-            self.logger.error(f"获取趋势统计失败: {e}", exception=e)
+            self.logger.error(f"获取趋势统计失败: {e}")
             return {}
     
     def _format_size(self, size_bytes: int) -> str:
