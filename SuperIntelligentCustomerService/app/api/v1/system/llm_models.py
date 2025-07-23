@@ -1,118 +1,22 @@
 # -*- coding: utf-8 -*-
 """
 LLM模型管理API路由
+简化版本：只保留LLM模型管理功能
 """
 from typing import Optional
 
 from fastapi import APIRouter, Query, HTTPException
 
-from ....controllers.llm_models import (
-    llm_provider_controller,
-    llm_model_controller,
-    llm_model_usage_controller
-)
+from ....controllers.llm_models import llm_model_controller
 from ....core.dependency import DependAuth
 from ....core.llms import model_client_manager
 from ....models.admin import User
 from ....schemas.base import Success
 from ....schemas.llm_models import (
-    LLMProviderCreate, LLMProviderUpdate, LLMProviderResponse, LLMProviderListResponse,
     LLMModelCreate, LLMModelUpdate, LLMModelResponse, LLMModelListResponse
 )
 
 router = APIRouter()
-
-# ==================== LLM提供商管理 ====================
-
-@router.get("/providers", summary="获取LLM提供商列表", response_model=LLMProviderListResponse)
-async def get_provider_list(
-    page: int = Query(1, description="页码"),
-    page_size: int = Query(20, description="每页数量"),
-    name: Optional[str] = Query(None, description="提供商名称"),
-    is_active: Optional[bool] = Query(None, description="是否启用"),
-    current_user: User = DependAuth
-):
-    """获取LLM提供商列表"""
-    try:
-        from tortoise.queryset import Q
-        
-        # 构建查询条件
-        search = Q()
-        if name:
-            search &= Q(name__icontains=name) | Q(display_name__icontains=name)
-        if is_active is not None:
-            search &= Q(is_active=is_active)
-        
-        total, providers = await llm_provider_controller.list(
-            page=page,
-            page_size=page_size,
-            search=search,
-            order=["sort_order", "name"]
-        )
-        
-        return Success(data=LLMProviderListResponse(total=total, items=providers))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"获取提供商列表失败: {str(e)}")
-
-
-@router.post("/providers", summary="创建LLM提供商", response_model=LLMProviderResponse)
-async def create_provider(
-    provider_data: LLMProviderCreate,
-    current_user: User = DependAuth
-):
-    """创建LLM提供商"""
-    try:
-        # 检查名称是否已存在
-        existing = await llm_provider_controller.get_by_name(provider_data.name)
-        if existing:
-            raise HTTPException(status_code=400, detail="提供商名称已存在")
-        
-        provider = await llm_provider_controller.create(provider_data)
-        return Success(data=provider, msg="创建提供商成功")
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"创建提供商失败: {str(e)}")
-
-
-@router.put("/providers/{provider_id}", summary="更新LLM提供商", response_model=LLMProviderResponse)
-async def update_provider(
-    provider_id: int,
-    provider_data: LLMProviderUpdate,
-    current_user: User = DependAuth
-):
-    """更新LLM提供商"""
-    try:
-        provider = await llm_provider_controller.update(provider_id, provider_data)
-        if not provider:
-            raise HTTPException(status_code=404, detail="提供商不存在")
-        
-        # 重新加载模型客户端
-        await model_client_manager.reload_models()
-        
-        return Success(data=provider, msg="更新提供商成功")
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"更新提供商失败: {str(e)}")
-
-
-@router.delete("/providers/{provider_id}", summary="删除LLM提供商")
-async def delete_provider(
-    provider_id: int,
-    current_user: User = DependAuth
-):
-    """删除LLM提供商"""
-    try:
-        await llm_provider_controller.remove(provider_id)
-        
-        # 重新加载模型客户端
-        await model_client_manager.reload_models()
-        
-        return Success(msg="删除提供商成功")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"删除提供商失败: {str(e)}")
-
 
 # ==================== LLM模型管理 ====================
 
@@ -121,7 +25,7 @@ async def get_model_list(
     page: int = Query(1, description="页码"),
     page_size: int = Query(20, description="每页数量"),
     category: Optional[str] = Query(None, description="模型分类"),
-    provider_id: Optional[int] = Query(None, description="提供商ID"),
+    provider_name: Optional[str] = Query(None, description="提供商名称"),
     model_name: Optional[str] = Query(None, description="模型名称"),
     is_active: Optional[bool] = Query(None, description="是否启用"),
     current_user: User = DependAuth
@@ -129,13 +33,13 @@ async def get_model_list(
     """获取LLM模型列表"""
     try:
         from tortoise.queryset import Q
-        
+
         # 构建查询条件
         search = Q()
         if category:
             search &= Q(category=category)
-        if provider_id:
-            search &= Q(provider_id=provider_id)
+        if provider_name:
+            search &= Q(provider_name=provider_name)
         if model_name:
             search &= Q(model_name__icontains=model_name) | Q(display_name__icontains=model_name)
         if is_active is not None:
@@ -164,13 +68,13 @@ async def create_model(
 ):
     """创建LLM模型"""
     try:
-        # 检查模型名称在同一提供商下是否已存在
+        # 检查模型名称是否已存在
         existing = await llm_model_controller.get_by_name(
-            model_data.model_name, 
-            model_data.provider_id
+            model_data.model_name,
+            model_data.provider_name if hasattr(model_data, 'provider_name') else None
         )
         if existing:
-            raise HTTPException(status_code=400, detail="该提供商下模型名称已存在")
+            raise HTTPException(status_code=400, detail="模型名称已存在")
         
         model = await llm_model_controller.create(model_data)
         
@@ -275,18 +179,7 @@ async def get_model_categories(current_user: User = DependAuth):
         raise HTTPException(status_code=500, detail=f"获取模型分类失败: {str(e)}")
 
 
-@router.get("/models/{model_id}/usage", summary="获取模型使用统计")
-async def get_model_usage_stats(
-    model_id: int,
-    days: int = Query(30, description="统计天数"),
-    current_user: User = DependAuth
-):
-    """获取模型使用统计"""
-    try:
-        stats = await llm_model_usage_controller.get_model_usage_stats(model_id, days)
-        return Success(data=stats)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"获取使用统计失败: {str(e)}")
+# 注意：使用统计功能已移除，可通过日志系统或其他方式实现
 
 
 # ==================== 模型客户端管理 ====================

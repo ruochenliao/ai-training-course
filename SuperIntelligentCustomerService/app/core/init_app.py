@@ -258,9 +258,24 @@ async def init_roles():
 
 async def init_llm_models():
     """初始化LLM模型数据"""
-    # 简化：不在启动时初始化LLM数据，避免数据库连接问题
-    # LLM数据可以通过管理界面或独立脚本初始化
-    print("⏭️  跳过LLM模型数据初始化（使用默认配置）")
+    try:
+        from ..models.llm_models import LLMModel
+
+        # 检查是否已有模型数据
+        existing_models = await LLMModel.all().count()
+        if existing_models > 0:
+            print(f"⏭️  LLM模型数据已存在 ({existing_models} 个模型)")
+            return
+
+        # 如果没有数据，则初始化
+        print("🚀 开始初始化LLM模型数据...")
+        from ..core.init_llm_data import init_llm_models as init_models
+        await init_models()
+        print("✅ LLM模型数据初始化完成")
+
+    except Exception as e:
+        print(f"⚠️  LLM模型数据初始化失败: {e}")
+        print("   将使用默认配置运行")
 
         # 注意：DeepSeek Chat模型已在上面创建，避免重复
 

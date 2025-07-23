@@ -53,11 +53,18 @@ class LLMProviderResponse(LLMProviderBase):
 
 class LLMModelBase(BaseModel):
     """LLM模型基础模型"""
+    # 提供商信息（直接存储）
+    provider_name: str = Field(..., description="提供商名称")
+    provider_display_name: str = Field(..., description="提供商显示名称")
+    base_url: str = Field(..., description="API基础URL")
+    api_key: Optional[str] = Field(None, description="API密钥")
+
+    # 基本信息
     model_name: str = Field(..., description="模型名称")
     display_name: str = Field(..., description="显示名称")
     description: Optional[str] = Field(None, description="模型描述")
     category: str = Field(..., description="模型分类")
-    
+
     # 模型能力
     vision: bool = Field(False, description="支持视觉功能")
     function_calling: bool = Field(False, description="支持函数调用")
@@ -65,20 +72,20 @@ class LLMModelBase(BaseModel):
     structured_output: bool = Field(False, description="支持结构化输出")
     multiple_system_messages: bool = Field(False, description="支持多个系统消息")
     model_family: str = Field("unknown", description="模型系列")
-    
+
     # 技术配置
     max_tokens: int = Field(4096, description="最大令牌数")
     temperature: float = Field(0.7, description="默认温度")
     top_p: float = Field(0.9, description="默认top_p")
-    
+
     # 定价信息
     input_price_per_1k: Decimal = Field(0, description="输入价格/1K tokens")
     output_price_per_1k: Decimal = Field(0, description="输出价格/1K tokens")
-    
+
     # 系统配置
     system_prompt: Optional[str] = Field(None, description="默认系统提示词")
     custom_config: Dict[str, Any] = Field(default_factory=dict, description="自定义配置参数")
-    
+
     # 状态管理
     is_active: bool = Field(True, description="是否启用")
     is_default: bool = Field(False, description="是否为默认模型")
@@ -87,17 +94,23 @@ class LLMModelBase(BaseModel):
 
 class LLMModelCreate(LLMModelBase):
     """创建LLM模型"""
-    provider_id: int = Field(..., description="提供商ID")
+    pass
 
 
 class LLMModelUpdate(BaseModel):
     """更新LLM模型"""
-    provider_id: Optional[int] = Field(None, description="提供商ID")
+    # 提供商信息
+    provider_name: Optional[str] = Field(None, description="提供商名称")
+    provider_display_name: Optional[str] = Field(None, description="提供商显示名称")
+    base_url: Optional[str] = Field(None, description="API基础URL")
+    api_key: Optional[str] = Field(None, description="API密钥")
+
+    # 基本信息
     model_name: Optional[str] = Field(None, description="模型名称")
     display_name: Optional[str] = Field(None, description="显示名称")
     description: Optional[str] = Field(None, description="模型描述")
     category: Optional[str] = Field(None, description="模型分类")
-    
+
     # 模型能力
     vision: Optional[bool] = Field(None, description="支持视觉功能")
     function_calling: Optional[bool] = Field(None, description="支持函数调用")
@@ -105,20 +118,20 @@ class LLMModelUpdate(BaseModel):
     structured_output: Optional[bool] = Field(None, description="支持结构化输出")
     multiple_system_messages: Optional[bool] = Field(None, description="支持多个系统消息")
     model_family: Optional[str] = Field(None, description="模型系列")
-    
+
     # 技术配置
     max_tokens: Optional[int] = Field(None, description="最大令牌数")
     temperature: Optional[float] = Field(None, description="默认温度")
     top_p: Optional[float] = Field(None, description="默认top_p")
-    
+
     # 定价信息
     input_price_per_1k: Optional[Decimal] = Field(None, description="输入价格/1K tokens")
     output_price_per_1k: Optional[Decimal] = Field(None, description="输出价格/1K tokens")
-    
+
     # 系统配置
     system_prompt: Optional[str] = Field(None, description="默认系统提示词")
     custom_config: Optional[Dict[str, Any]] = Field(None, description="自定义配置参数")
-    
+
     # 状态管理
     is_active: Optional[bool] = Field(None, description="是否启用")
     is_default: Optional[bool] = Field(None, description="是否为默认模型")
@@ -128,16 +141,10 @@ class LLMModelUpdate(BaseModel):
 class LLMModelResponse(LLMModelBase):
     """LLM模型响应模型"""
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: int = Field(..., description="模型ID")
-    provider_id: int = Field(..., description="提供商ID")
     created_at: DateTimeType = Field(..., description="创建时间")
     updated_at: DateTimeType = Field(..., description="更新时间")
-
-
-class LLMModelWithProvider(LLMModelResponse):
-    """包含提供商信息的LLM模型"""
-    provider: LLMProviderResponse = Field(..., description="提供商信息")
 
 
 # ==================== 模型使用统计相关 ====================
@@ -211,7 +218,7 @@ class LLMModelPresetResponse(LLMModelPresetBase):
 class LLMModelListResponse(BaseModel):
     """LLM模型列表响应"""
     total: int = Field(..., description="总数量")
-    items: List[LLMModelWithProvider] = Field(..., description="模型列表")
+    items: List[LLMModelResponse] = Field(..., description="模型列表")
 
 
 class LLMProviderListResponse(BaseModel):

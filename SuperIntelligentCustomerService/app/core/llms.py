@@ -36,7 +36,7 @@ class LLMModelClientManager:
                 return False
 
             from ..models.llm_models import LLMModel
-            models = await LLMModel.filter(is_active=True).prefetch_related("provider").order_by("sort_order", "display_name")
+            models = await LLMModel.filter(is_active=True).order_by("sort_order", "display_name")
 
             if not models:
                 print("数据库中没有找到模型配置")
@@ -48,8 +48,6 @@ class LLMModelClientManager:
 
             for model in models:
                 try:
-                    provider = await model.provider
-
                     # 创建模型信息
                     model_info = ModelInfo(
                         vision=model.vision,
@@ -62,12 +60,12 @@ class LLMModelClientManager:
 
                     # 解密API密钥
                     from ..utils.security import decrypt_api_key
-                    api_key = decrypt_api_key(provider.api_key) if provider.api_key else ""
+                    api_key = decrypt_api_key(model.api_key) if model.api_key else ""
 
                     # 创建客户端
                     client = OpenAIChatCompletionClient(
                         model=model.model_name,
-                        base_url=provider.base_url,
+                        base_url=model.base_url,
                         api_key=api_key,
                         model_info=model_info,
                         temperature=model.temperature,
@@ -76,7 +74,7 @@ class LLMModelClientManager:
                     )
 
                     # 注册客户端
-                    client_key = f"{provider.name}:{model.model_name}"
+                    client_key = f"{model.provider_name}:{model.model_name}"
                     self._clients[client_key] = client
                     self._clients[model.model_name] = client
 
@@ -101,72 +99,51 @@ class LLMModelClientManager:
             return False
 
     async def _create_default_clients(self):
-        """创建默认的模型客户端（兼容原有配置）"""
-        # 定义Deepseek模型信息（基于实际验证结果）
-        deepseek_model_info = ModelInfo(
-            vision=False,  # 不支持视觉功能
-            function_calling=True,  # ✅ 验证支持函数调用
-            json_output=False,  # ❌ API不支持结构化输出
-            structured_output=False,  # ❌ API不支持结构化输出
-            family=ModelFamily.UNKNOWN,  # 模型系列为未知
-        )
+        """创建默认的模型客户端（使用统一配置）"""
+        from .llm_config import get_llm_models_config
 
-        # 创建Deepseek客户端
-        deepseek_chat_client = OpenAIChatCompletionClient(
-            model="deepseek-chat",
-            base_url="https://api.deepseek.com/v1",
-            api_key="sk-56f5743d59364543a00109a4c1c10a56",
-            model_info=deepseek_model_info,
-        )
+        models_config = get_llm_models_config()
 
-        deepseek_reasoner_client = OpenAIChatCompletionClient(
-            model="deepseek-reasoner",
-            base_url="https://api.deepseek.com/v1",
-            api_key="sk-56f5743d59364543a00109a4c1c10a56",
-            model_info=deepseek_model_info,
-        )
+        for config in models_config:
+            try:
+                # 创建模型信息
+                model_info = ModelInfo(
+                    vision=config["vision"],
+                    function_calling=config["function_calling"],
+                    json_output=config["json_output"],
+                    structured_output=config["structured_output"],
+                    multiple_system_messages=config["multiple_system_messages"],
+                    family=ModelFamily.UNKNOWN
+                )
 
-        # 创建Qwen VL Plus客户端
-        qwen_vl_plus_model_info = ModelInfo(
-            vision=True,  # ✅ 理论支持视觉功能
-            function_calling=False,  # ❌ 验证中模型没有返回函数调用
-            json_output=False,  # ❌ 返回文本而非JSON格式
-            structured_output=False,  # ❌ 不支持结构化输出
-            family=ModelFamily.UNKNOWN,  # 模型系列为未知
-        )
+                # 创建客户端
+                client = OpenAIChatCompletionClient(
+                    model=config["model_name"],
+                    base_url=config["base_url"],
+                    api_key=config["api_key"],
+                    model_info=model_info,
+                    temperature=config["temperature"],
+                    top_p=config["top_p"],
+                    max_tokens=config["max_tokens"]
+                )
 
-        qwen_vl_plus_client = OpenAIChatCompletionClient(
-            model="qwen-vl-plus",
-            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-            api_key="sk-aeb8d69039b14320b0fe58cb8285d8b1",
-            model_info=qwen_vl_plus_model_info,
-        )
+                # 注册客户端
+                client_key = f"{config['provider_name']}:{config['model_name']}"
+                self._clients[client_key] = client
+                self._clients[config["model_name"]] = client
 
-        # 注册客户端
-        self._clients["deepseek:deepseek-chat"] = deepseek_chat_client
-        self._clients["deepseek-chat"] = deepseek_chat_client
-        self._clients["deepseek:deepseek-reasoner"] = deepseek_reasoner_client
-        self._clients["deepseek-reasoner"] = deepseek_reasoner_client
-        self._clients["qwen:qwen-vl-plus"] = qwen_vl_plus_client
-        self._clients["qwen-vl-plus"] = qwen_vl_plus_client
+                # 缓存模型信息
+                self._model_info_cache[config["model_name"]] = model_info
 
-        # 缓存模型信息
-        self._model_info_cache["deepseek-chat"] = deepseek_model_info
-        self._model_info_cache["deepseek-reasoner"] = deepseek_model_info
-        self._model_info_cache["qwen-vl-plus"] = qwen_vl_plus_model_info
+                # 更新全局模型信息
+                _MODEL_INFO[config["model_name"]] = model_info
+                _MODEL_TOKEN_LIMITS[config["model_name"]] = config["max_tokens"]
 
-        # 更新全局模型信息
-        _MODEL_INFO.update({
-            "deepseek-chat": deepseek_model_info,
-            "deepseek-reasoner": deepseek_model_info,
-            "qwen-vl-plus": qwen_vl_plus_model_info,
-        })
+                print(f"✅ 加载默认模型: {config['display_name']}")
 
-        _MODEL_TOKEN_LIMITS.update({
-            "deepseek-chat": 128000,
-            "deepseek-reasoner": 128000,
-            "qwen-vl-plus": 128000,
-        })
+            except Exception as e:
+                print(f"❌ 加载默认模型失败 {config['model_name']}: {e}")
+                continue
 
     async def get_client(self, model_name: str) -> Optional[ChatCompletionClient]:
         """获取模型客户端"""
