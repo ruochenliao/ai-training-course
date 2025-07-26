@@ -22,34 +22,12 @@ LLM_MODELS_CONFIG: List[Dict[str, Any]] = [
         "structured_output": False,
         "multiple_system_messages": True,
         "model_family": "unknown",
-        "max_tokens": 128000,
+        "max_tokens": 8192,
         "temperature": 0.7,
         "top_p": 0.9,
         "input_price_per_1k": 0.0014,
         "output_price_per_1k": 0.0028,
-        "system_prompt": """你是超级智能客服，专业、友好、乐于助人。你可以用中文回复用户的问题。
-
-## 重要格式要求：
-**必须使用标准 Markdown 格式**输出所有回复，特别注意：
-
-1. **代码块格式**：
-```语言名称
-代码内容（必须有正确的换行符和缩进）
-```
-
-2. **确保代码块内容格式化良好**：
-   - 每行代码独立成行
-   - 保持正确的缩进
-   - 包含适当的注释
-   - 不要将所有代码挤在一行
-
-3. **使用适当的 Markdown 语法**：
-   - 标题：# ## ###
-   - 列表：- 或 1.
-   - 强调：**粗体** *斜体*
-   - 行内代码：`代码`
-
-确保所有代码示例都格式化良好。""",
+        "system_prompt": """你是专业的智能客服助手，友好、耐心、乐于助人。请用中文回复用户问题，使用清晰的Markdown格式。""",
         "custom_config": {},
         "is_active": True,
         "is_default": True,
@@ -70,33 +48,12 @@ LLM_MODELS_CONFIG: List[Dict[str, Any]] = [
         "structured_output": False,
         "multiple_system_messages": True,
         "model_family": "unknown",
-        "max_tokens": 128000,
+        "max_tokens": 8192,
         "temperature": 0.7,
         "top_p": 0.9,
         "input_price_per_1k": 0.0055,
         "output_price_per_1k": 0.022,
-        "system_prompt": """你是超级智能客服，专业、友好、乐于助人。你具备强大的推理能力，可以进行复杂的逻辑分析和问题解决。
-
-## 重要格式要求：
-**必须使用标准 Markdown 格式**输出所有回复，特别注意：
-
-1. **推理过程展示**：
-   - 使用清晰的步骤说明
-   - 展示思考过程
-   - 提供逻辑链条
-
-2. **代码块格式**：
-```语言名称
-代码内容（必须有正确的换行符和缩进）
-```
-
-3. **使用适当的 Markdown 语法**：
-   - 标题：# ## ###
-   - 列表：- 或 1.
-   - 强调：**粗体** *斜体*
-   - 行内代码：`代码`
-
-确保所有回复都经过深入思考和推理。""",
+        "system_prompt": """你是专业的智能推理客服助手，具备强大的逻辑分析能力。请用中文回复用户问题，展示清晰的推理过程，使用Markdown格式。""",
         "custom_config": {},
         "is_active": True,
         "is_default": False,
@@ -117,33 +74,12 @@ LLM_MODELS_CONFIG: List[Dict[str, Any]] = [
         "structured_output": False,
         "multiple_system_messages": True,
         "model_family": "unknown",
-        "max_tokens": 128000,
+        "max_tokens": 8192,
         "temperature": 0.7,
         "top_p": 0.9,
         "input_price_per_1k": 0.008,
         "output_price_per_1k": 0.008,
-        "system_prompt": """你是超级智能客服，专业、友好、乐于助人。你可以理解图像内容并用中文回复用户的问题。
-
-## 重要格式要求：
-**必须使用标准 Markdown 格式**输出所有回复，特别注意：
-
-1. **图像分析**：
-   - 详细描述图像内容
-   - 识别关键信息
-   - 回答相关问题
-
-2. **代码块格式**：
-```语言名称
-代码内容（必须有正确的换行符和缩进）
-```
-
-3. **使用适当的 Markdown 语法**：
-   - 标题：# ## ###
-   - 列表：- 或 1.
-   - 强调：**粗体** *斜体*
-   - 行内代码：`代码`
-
-确保所有回复都准确理解图像内容。""",
+        "system_prompt": """你是专业的多模态智能客服助手，可以理解图像内容。请用中文回复用户问题，准确分析图像信息，使用Markdown格式。""",
         "custom_config": {},
         "is_active": True,
         "is_default": False,

@@ -367,8 +367,8 @@ class ChatService:
         Returns:
             AssistantAgent实例
         """
-        print(f"🔧 [DEBUG] _create_assistant_agent 开始执行，用户: {user_id}, 当前模型: {self.model_name}")
-        self.logger.info(f"🔧 [DEBUG] _create_assistant_agent 开始执行，用户: {user_id}, 当前模型: {self.model_name}")
+        print(f"[DEBUG] _create_assistant_agent 开始执行，用户: {user_id}, 当前模型: {self.model_name}")
+        self.logger.info(f"[DEBUG] _create_assistant_agent 开始执行，用户: {user_id}, 当前模型: {self.model_name}")
 
         # 确保模型客户端已初始化
         await self._ensure_model_client()
@@ -376,8 +376,8 @@ class ChatService:
         # 检查当前模型是否支持函数调用
         supports_function_calling = await self._check_model_function_calling_support()
 
-        print(f"🔧 [DEBUG] 模型 {self.model_name} 函数调用支持: {supports_function_calling}")
-        self.logger.info(f"🔧 [DEBUG] 模型 {self.model_name} 函数调用支持: {supports_function_calling}")
+        print(f"[DEBUG] 模型 {self.model_name} 函数调用支持: {supports_function_calling}")
+        self.logger.info(f"[DEBUG] 模型 {self.model_name} 函数调用支持: {supports_function_calling}")
 
         # 根据模型能力动态设置 AssistantAgent 参数
         agent_params = {
@@ -390,11 +390,16 @@ class ChatService:
                 session.public_memory_service.memory,
                 session.private_memory_service.memory
             ],
-            "model_context": BufferedChatCompletionContext(buffer_size=2),  # 进一步减少缓冲区大小
+            "model_context": BufferedChatCompletionContext(buffer_size=1),  # 最小缓冲区大小以减少输入长度
         }
 
-        print(f"🔧 [DEBUG] 创建AssistantAgent，缓冲区大小: 2")
-        self.logger.info(f"🔧 [DEBUG] 创建AssistantAgent，缓冲区大小: 2")
+        print(f"[DEBUG] 创建AssistantAgent，缓冲区大小: 1")
+        self.logger.info(f"[DEBUG] 创建AssistantAgent，缓冲区大小: 1")
+
+        # 估算输入长度（简单估算）
+        system_prompt_length = len(system_prompt or self.default_system_message)
+        print(f"[DEBUG] 系统提示词长度: {system_prompt_length}")
+        self.logger.info(f"[DEBUG] 系统提示词长度: {system_prompt_length}")
 
         # 只有当模型支持函数调用时才添加相关参数
         if supports_function_calling:
@@ -402,8 +407,8 @@ class ChatService:
             agent_params["reflect_on_tool_use"] = True
         else:
             # 对于不支持函数调用的模型，不设置任何工具相关参数
-            print(f"🔧 [DEBUG] 模型不支持函数调用，创建简单的对话代理")
-            self.logger.info(f"🔧 [DEBUG] 模型不支持函数调用，创建简单的对话代理")
+            print(f"[DEBUG] 模型不支持函数调用，创建简单的对话代理")
+            self.logger.info(f"[DEBUG] 模型不支持函数调用，创建简单的对话代理")
 
         return AssistantAgent(**agent_params)
 
