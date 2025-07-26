@@ -303,6 +303,207 @@ class ChatMemoryService(MemoryService):
         self.logger.info(f"已关闭用户 {self.user_id} 的聊天历史记忆服务")
 
 
+class PublicMemoryService(MemoryService):
+    """公共记忆服务，存储所有用户共享的公共数据"""
+
+    def __init__(self, base_dir: Optional[str] = None, knowledge_type: Optional[str] = None):
+        """初始化公共记忆服务
+
+        Args:
+            base_dir: 基础存储目录，如果为None则使用默认目录
+            knowledge_type: 知识库类型，如果为None则使用默认类型
+        """
+        super().__init__(base_dir)
+        self.knowledge_type = knowledge_type or KnowledgeType.CUSTOMER_SERVICE
+        self.storage_dir = os.path.join(self.base_dir, f"{self.knowledge_type}_public_memory")
+
+        # 确保存储目录存在
+        os.makedirs(self.storage_dir, exist_ok=True)
+
+        # 初始化持久化列表记忆
+        self.memory = PersistentListMemory(
+            name=f"public_memory_{self.knowledge_type}",
+            storage_dir=self.storage_dir,
+            auto_save=True
+        )
+
+        self.logger.info(f"初始化公共记忆服务，知识库类型: {self.knowledge_type}")
+
+    async def add(self, content: Union[str, ChatMessage], metadata: Optional[Dict[str, Any]] = None) -> None:
+        """添加内容到公共记忆
+
+        Args:
+            content: 文本内容或ChatMessage对象
+            metadata: 额外的元数据
+        """
+        # 确保元数据中标记为公共
+        if metadata is None:
+            metadata = {}
+        metadata["public"] = True
+        metadata["knowledge_type"] = self.knowledge_type
+        metadata["timestamp"] = datetime.now().isoformat()
+
+        # 处理不同类型的内容
+        if isinstance(content, ChatMessage):
+            text_content = content.get_content_text()
+            metadata.update({
+                "role": content.role,
+                "message_type": "chat"
+            })
+        else:
+            text_content = str(content)
+            metadata["message_type"] = "text"
+
+        # 添加到记忆
+        memory_content = MemoryContent(
+            content=text_content,
+            mime_type=MemoryMimeType.TEXT,
+            metadata=metadata
+        )
+
+        await self.memory.add(memory_content)
+        self.logger.info(f"已添加内容到公共记忆: {text_content[:50]}...")
+
+    async def query(self, query: str, **kwargs) -> List[Dict]:
+        """查询公共记忆
+
+        Args:
+            query: 查询字符串
+            **kwargs: 额外的查询参数
+
+        Returns:
+            匹配的记忆列表
+        """
+        # 简单的关键词匹配查询
+        results = []
+        for item in self.memory.content:
+            if query.lower() in item.content.lower():
+                results.append({
+                    "content": item.content,
+                    "metadata": item.metadata,
+                    "source": "public_memory"
+                })
+
+        # 应用限制
+        limit = kwargs.get("limit", None)
+        if limit is not None:
+            results = results[:limit]
+
+        return results
+
+    async def clear(self) -> None:
+        """清空公共记忆"""
+        await self.memory.clear()
+        self.logger.info(f"已清空公共记忆服务，知识库类型: {self.knowledge_type}")
+
+    async def close(self) -> None:
+        """关闭公共记忆服务"""
+        await self.memory.close()
+        self.logger.info(f"已关闭公共记忆服务，知识库类型: {self.knowledge_type}")
+
+
+class PrivateMemoryService(MemoryService):
+    """私有记忆服务，存储用户的私有数据"""
+
+    def __init__(self, user_id: str, base_dir: Optional[str] = None, knowledge_type: Optional[str] = None):
+        """初始化私有记忆服务
+
+        Args:
+            user_id: 用户ID
+            base_dir: 基础存储目录，如果为None则使用默认目录
+            knowledge_type: 知识库类型，如果为None则使用默认类型
+        """
+        super().__init__(base_dir)
+        self.user_id = user_id
+        self.knowledge_type = knowledge_type or KnowledgeType.CUSTOMER_SERVICE
+        self.storage_dir = os.path.join(self.base_dir, f"{self.knowledge_type}_private_memory_{user_id}")
+
+        # 确保存储目录存在
+        os.makedirs(self.storage_dir, exist_ok=True)
+
+        # 初始化持久化列表记忆
+        self.memory = PersistentListMemory(
+            name=f"private_memory_{user_id}_{self.knowledge_type}",
+            storage_dir=self.storage_dir,
+            auto_save=True
+        )
+
+        self.logger.info(f"初始化私有记忆服务，用户ID: {user_id}, 知识库类型: {self.knowledge_type}")
+
+    async def add(self, content: Union[str, ChatMessage], metadata: Optional[Dict[str, Any]] = None) -> None:
+        """添加内容到私有记忆
+
+        Args:
+            content: 文本内容或ChatMessage对象
+            metadata: 额外的元数据
+        """
+        # 确保元数据中标记为私有
+        if metadata is None:
+            metadata = {}
+        metadata["private"] = True
+        metadata["user_id"] = self.user_id
+        metadata["knowledge_type"] = self.knowledge_type
+        metadata["timestamp"] = datetime.now().isoformat()
+
+        # 处理不同类型的内容
+        if isinstance(content, ChatMessage):
+            text_content = content.get_content_text()
+            metadata.update({
+                "role": content.role,
+                "message_type": "chat"
+            })
+        else:
+            text_content = str(content)
+            metadata["message_type"] = "text"
+
+        # 添加到记忆
+        memory_content = MemoryContent(
+            content=text_content,
+            mime_type=MemoryMimeType.TEXT,
+            metadata=metadata
+        )
+
+        await self.memory.add(memory_content)
+        self.logger.info(f"已添加内容到私有记忆: {text_content[:50]}...")
+
+    async def query(self, query: str, **kwargs) -> List[Dict]:
+        """查询私有记忆
+
+        Args:
+            query: 查询字符串
+            **kwargs: 额外的查询参数
+
+        Returns:
+            匹配的记忆列表
+        """
+        # 简单的关键词匹配查询
+        results = []
+        for item in self.memory.content:
+            if query.lower() in item.content.lower():
+                results.append({
+                    "content": item.content,
+                    "metadata": item.metadata,
+                    "source": "private_memory"
+                })
+
+        # 应用限制
+        limit = kwargs.get("limit", None)
+        if limit is not None:
+            results = results[:limit]
+
+        return results
+
+    async def clear(self) -> None:
+        """清空私有记忆"""
+        await self.memory.clear()
+        self.logger.info(f"已清空私有记忆服务，用户ID: {self.user_id}, 知识库类型: {self.knowledge_type}")
+
+    async def close(self) -> None:
+        """关闭私有记忆服务"""
+        await self.memory.close()
+        self.logger.info(f"已关闭私有记忆服务，用户ID: {self.user_id}, 知识库类型: {self.knowledge_type}")
+
+
 class MemoryServiceFactory:
     """记忆服务工厂类，用于创建和管理不同类型的记忆服务"""
 

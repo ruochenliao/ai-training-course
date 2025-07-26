@@ -1,3 +1,4 @@
+import base64
 import logging
 import os
 import uuid
@@ -169,6 +170,9 @@ class ChatService:
         except Exception as e:
             error_msg = f"聊天处理失败 {user_id}: {e}"
             self.logger.error(error_msg)
+            print(f"❌ ChatService.chat_stream 错误: {e}")
+            import traceback
+            traceback.print_exc()
             yield f"很抱歉，处理您的请求时出现了错误。请稍后再试。"
 
     async def _process_user_message(self, message: ChatMessage, user_id: str) -> Union[str, AGMultiModalMessage]:
@@ -186,13 +190,17 @@ class ChatService:
             message.content.type == "multi-modal" and
             message.content.content):
 
-            # 对于多模态消息，使用支持多模态的模型
-            self.model_name = "qwen-vl-plus"
-            self.model_client = await get_model_client("qwen-vl-plus")
             self.logger.info(f"处理用户 {user_id} 的多模态消息")
 
+            # 选择合适的多模态模型
+            selected_model = await self._select_appropriate_model(is_multimodal=True)
+            if selected_model != self.model_name:
+                self.model_name = selected_model
+                self.model_client = await get_model_client(selected_model)
+                self.logger.info(f"切换到多模态模型: {selected_model}")
+
             # 获取文本内容，如果没有则使用默认提示
-            text_content = message.content.text or "请深刻理解图片中表达的含义并调用合适的工具"
+            text_content = message.content.text or "请分析这张图片的内容"
             content_list = [text_content]  # 初始化内容列表，先添加文本
 
             # 处理所有图片内容
@@ -258,10 +266,10 @@ class ChatService:
             raise ValueError(f"无效的本地图片URL格式: {image_url}")
 
     async def _load_external_image(self, image_url: str) -> AGImage:
-        """从外部URL加载图片
+        """从外部URL或base64数据加载图片
 
         Args:
-            image_url: 外部图片URL
+            image_url: 外部图片URL或base64数据URL
 
         Returns:
             AGImage对象
@@ -269,13 +277,84 @@ class ChatService:
         Raises:
             Exception: 如果请求失败或图片处理出错
         """
-        self.logger.info(f"从外部URL加载图片: {image_url}")
-        response = requests.get(image_url, timeout=10)  # 添加超时设置
-        response.raise_for_status()
+        self.logger.info(f"加载图片: {image_url[:50]}...")
 
-        # 创建PIL图片对象并转换为AutoGen图片对象
-        pil_image = PILImage.open(BytesIO(response.content))
-        return AGImage(pil_image)
+        # 检查是否是base64数据URL
+        if image_url.startswith('data:'):
+            # 处理base64格式的图片
+            try:
+                # 解析data URL格式: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
+                header, data = image_url.split(',', 1)
+                image_data = base64.b64decode(data)
+
+                # 创建PIL图片对象并转换为AutoGen图片对象
+                pil_image = PILImage.open(BytesIO(image_data))
+                return AGImage(pil_image)
+
+            except Exception as e:
+                self.logger.error(f"解析base64图片失败: {e}")
+                raise ValueError(f"无效的base64图片数据: {e}")
+        else:
+            # 处理外部URL
+            response = requests.get(image_url, timeout=10)  # 添加超时设置
+            response.raise_for_status()
+
+            # 创建PIL图片对象并转换为AutoGen图片对象
+            pil_image = PILImage.open(BytesIO(response.content))
+            return AGImage(pil_image)
+
+    async def _select_appropriate_model(self, is_multimodal: bool = False) -> str:
+        """根据消息类型选择合适的模型
+
+        Args:
+            is_multimodal: 是否为多模态消息
+
+        Returns:
+            str: 选择的模型名称
+        """
+        try:
+            from ..models.llm_models import LLMModel
+
+            if is_multimodal:
+                # 对于多模态消息，必须选择支持视觉的模型
+                vision_models = await LLMModel.filter(
+                    is_active=True,
+                    vision=True
+                ).order_by("-function_calling", "sort_order")  # 优先选择同时支持视觉和函数调用的模型
+
+                if vision_models:
+                    selected_model = vision_models[0].model_name
+                    self.logger.info(f"为多模态消息选择视觉模型: {selected_model}")
+                    return selected_model
+                else:
+                    self.logger.warning("没有找到支持视觉的模型，使用默认模型（可能无法处理图片）")
+                    return self.model_name
+            else:
+                # 对于纯文本消息，使用当前模型或默认模型
+                return self.model_name
+
+        except Exception as e:
+            self.logger.error(f"选择模型时出错: {e}")
+            return self.model_name
+
+    async def _check_model_function_calling_support(self) -> bool:
+        """检查当前模型是否支持函数调用
+
+        Returns:
+            bool: 如果模型支持函数调用返回True，否则返回False
+        """
+        try:
+            from ..models.llm_models import LLMModel
+            model = await LLMModel.filter(model_name=self.model_name, is_active=True).first()
+            if model:
+                return model.function_calling
+            else:
+                # 如果数据库中找不到模型配置，默认不支持函数调用
+                self.logger.warning(f"数据库中未找到模型 {self.model_name} 的配置，默认不支持函数调用")
+                return False
+        except Exception as e:
+            self.logger.error(f"检查模型函数调用支持时出错: {e}")
+            return False
 
     async def _create_assistant_agent(self, user_id: str, system_prompt: Optional[str], session: ChatSession) -> AssistantAgent:
         """创建AI助手代理
@@ -288,23 +367,45 @@ class ChatService:
         Returns:
             AssistantAgent实例
         """
+        print(f"🔧 [DEBUG] _create_assistant_agent 开始执行，用户: {user_id}, 当前模型: {self.model_name}")
+        self.logger.info(f"🔧 [DEBUG] _create_assistant_agent 开始执行，用户: {user_id}, 当前模型: {self.model_name}")
+
         # 确保模型客户端已初始化
         await self._ensure_model_client()
 
-        return AssistantAgent(
-            name=f"agent_{user_id}",
-            model_client=self.model_client,
-            system_message=system_prompt or self.default_system_message,
-            model_client_stream=True,  # 启用流式输出
-            tools=[],  # 暂时不添加工具
-            reflect_on_tool_use=True,
-            memory=[
+        # 检查当前模型是否支持函数调用
+        supports_function_calling = await self._check_model_function_calling_support()
+
+        print(f"🔧 [DEBUG] 模型 {self.model_name} 函数调用支持: {supports_function_calling}")
+        self.logger.info(f"🔧 [DEBUG] 模型 {self.model_name} 函数调用支持: {supports_function_calling}")
+
+        # 根据模型能力动态设置 AssistantAgent 参数
+        agent_params = {
+            "name": f"agent_{user_id}",
+            "model_client": self.model_client,
+            "system_message": system_prompt or self.default_system_message,
+            "model_client_stream": True,  # 启用流式输出
+            "memory": [
                 session.chat_memory_service.memory,
                 session.public_memory_service.memory,
                 session.private_memory_service.memory
             ],
-            model_context=BufferedChatCompletionContext(buffer_size=10),
-        )
+            "model_context": BufferedChatCompletionContext(buffer_size=2),  # 进一步减少缓冲区大小
+        }
+
+        print(f"🔧 [DEBUG] 创建AssistantAgent，缓冲区大小: 2")
+        self.logger.info(f"🔧 [DEBUG] 创建AssistantAgent，缓冲区大小: 2")
+
+        # 只有当模型支持函数调用时才添加相关参数
+        if supports_function_calling:
+            agent_params["tools"] = []  # 可以添加工具
+            agent_params["reflect_on_tool_use"] = True
+        else:
+            # 对于不支持函数调用的模型，不设置任何工具相关参数
+            print(f"🔧 [DEBUG] 模型不支持函数调用，创建简单的对话代理")
+            self.logger.info(f"🔧 [DEBUG] 模型不支持函数调用，创建简单的对话代理")
+
+        return AssistantAgent(**agent_params)
 
     async def _save_conversation_to_memory(self, session: ChatSession, task_result: TaskResult) -> None:
         """保存对话到用户记忆

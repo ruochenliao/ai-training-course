@@ -1,6 +1,0 @@
-2025-07-26 18:23:03,846 - chat_service - INFO - 处理用户 1 的聊天请求
-2025-07-26 18:23:03,848 - chat_service - ERROR - 聊天处理失败 1: name 'PublicMemoryService' is not defined
-2025-07-26 18:23:49,846 - chat_service - INFO - 处理用户 1 的聊天请求
-2025-07-26 18:23:49,846 - chat_service - INFO - 处理用户 1 的聊天请求
-2025-07-26 18:23:49,847 - chat_service - ERROR - 聊天处理失败 1: name 'PublicMemoryService' is not defined
-2025-07-26 18:23:49,847 - chat_service - ERROR - 聊天处理失败 1: name 'PublicMemoryService' is not defined

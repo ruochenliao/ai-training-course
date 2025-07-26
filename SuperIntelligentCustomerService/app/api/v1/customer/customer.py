@@ -4,8 +4,9 @@ import shutil
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Request
 from fastapi.responses import StreamingResponse
+import base64
 
 from app.controllers.chat_service import ChatService
 from app.controllers.session_service import SessionService
@@ -13,7 +14,7 @@ from ....core.dependency import DependAuth
 from ....models.admin import User, ChatMessage as ChatMessageModel
 from ....schemas.base import Success
 from ....schemas.customer import ChatRequest, ChatMessage, MessageContent, \
-    ImageContent, MultiModalContent
+    ImageContent, MultiModalContent, AGImage
 from ....settings.config import settings
 
 router = APIRouter()
@@ -28,23 +29,110 @@ os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 @router.post("/chat/stream", response_model=None)
 async def customer_chat_stream(
-    request: ChatRequest,
+    request: Request,
     current_user: User = DependAuth
 ):
     """客户服务流式聊天API"""
     try:
+        # 解析请求数据，支持JSON和FormData两种格式
+        content_type = request.headers.get("content-type", "")
+
+        if content_type.startswith("application/json"):
+            # JSON格式
+            request_data = await request.json()
+            chat_request = ChatRequest(**request_data)
+        elif content_type.startswith("multipart/form-data"):
+            # FormData格式（有文件上传）
+            form = await request.form()
+
+            # 解析消息
+            messages_str = form.get("messages")
+            if not messages_str:
+                raise HTTPException(status_code=422, detail="Missing messages field")
+
+            messages_data = json.loads(messages_str)
+            messages = [ChatMessage(**msg) for msg in messages_data]
+
+            # 构建ChatRequest对象
+            chat_request = ChatRequest(
+                messages=messages,
+                session_id=form.get("session_id"),
+                model=form.get("model"),
+                system_prompt=form.get("system_prompt"),
+                user_id=form.get("user_id", str(current_user.id))
+            )
+
+            # 处理文件（如果有的话）
+            files = form.getlist("files")
+            if files:
+                print(f"收到 {len(files)} 个文件")
+
+                # 处理图片文件，将其添加到最后一条用户消息中
+                if messages and len(messages) > 0:
+                    last_message = messages[-1]
+                    if last_message.role == "user":
+                        # 创建多模态内容列表
+                        multimodal_contents = []
+
+                        # 添加文本内容
+                        if isinstance(last_message.content, str):
+                            multimodal_contents.append(MultiModalContent(text=last_message.content))
+                        elif isinstance(last_message.content, MessageContent) and last_message.content.text:
+                            multimodal_contents.append(MultiModalContent(text=last_message.content.text))
+
+                        # 处理每个文件
+                        for file in files:
+                            if file.filename and file.content_type and file.content_type.startswith('image/'):
+                                try:
+                                    # 读取文件内容
+                                    file_content = await file.read()
+
+                                    # 创建图片内容
+                                    image_content = ImageContent(
+                                        url=f"data:{file.content_type};base64,{base64.b64encode(file_content).decode()}",
+                                        file_name=file.filename
+                                    )
+
+                                    # 添加到多模态内容
+                                    multimodal_contents.append(MultiModalContent(image=image_content))
+
+                                    print(f"处理图片文件: {file.filename}, 大小: {len(file_content)} bytes")
+
+                                except Exception as e:
+                                    print(f"处理文件 {file.filename} 时出错: {e}")
+
+                        # 更新消息内容为多模态格式
+                        if len(multimodal_contents) > 0:  # 有内容（文本和/或图片）
+                            new_content = MessageContent(
+                                type="multi-modal",
+                                content=multimodal_contents,
+                                task="图片分析"
+                            )
+                            messages[-1] = ChatMessage(role="user", content=new_content)
+
+                            # 更新ChatRequest中的消息
+                            chat_request = ChatRequest(
+                                messages=messages,
+                                session_id=form.get("session_id"),
+                                model=form.get("model"),
+                                system_prompt=form.get("system_prompt"),
+                                user_id=form.get("user_id", str(current_user.id))
+                            )
+        else:
+            raise HTTPException(status_code=422, detail="Unsupported content type")
+
         chat_service = ChatService()
 
         # 保存用户消息到会话和数据库
-        if request.session_id:
+        if chat_request.session_id:
             # 添加用户消息到会话
-            user_message = request.messages[-1]
-            session_service.add_message(request.session_id, user_message)
+            user_message = chat_request.messages[-1]
+            session_service.add_message(chat_request.session_id, user_message)
 
             # 同时保存到数据库
             try:
                 await ChatMessageModel.create(
-                    session_id=request.session_id,
+                    session_id=chat_request.session_id,
                     user_id=current_user.id,
                     role="user",
                     content=user_message.content if isinstance(user_message.content, str) else str(user_message.content),
@@ -61,9 +149,9 @@ async def customer_chat_stream(
             chunk_index = 0
 
             async for chunk in chat_service.chat_stream(
-                messages=request.messages,
+                messages=chat_request.messages,
                 user_id=str(current_user.id),
-                session_id=request.session_id
+                session_id=chat_request.session_id
             ):
                 # 确保每个chunk立即发送
                 if chunk:  # 确保chunk不为空
@@ -75,7 +163,7 @@ async def customer_chat_stream(
                         "id": f"chunk_{chunk_index}_{int(datetime.now().timestamp() * 1000)}",
                         "type": "content",
                         "timestamp": datetime.now().isoformat(),
-                        "session_id": request.session_id,
+                        "session_id": chat_request.session_id,
                         "user_id": current_user.id,
                         "model_name": "DeepSeek VL Chat",
                         "data": {"content": chunk},
@@ -91,7 +179,7 @@ async def customer_chat_stream(
                 "id": f"complete_{int(datetime.now().timestamp() * 1000)}",
                 "type": "complete",
                 "timestamp": datetime.now().isoformat(),
-                "session_id": request.session_id,
+                "session_id": chat_request.session_id,
                 "user_id": current_user.id,
                 "model_name": "DeepSeek VL Chat",
                 "data": {"total_chunks": chunk_index, "total_content": assistant_response},
@@ -104,14 +192,14 @@ async def customer_chat_stream(
             yield "data: [DONE]\n\n"
 
             # 保存AI回复到会话和数据库
-            if request.session_id and assistant_response:
+            if chat_request.session_id and assistant_response:
                 assistant_message = ChatMessage(role="assistant", content=assistant_response)
-                session_service.add_message(request.session_id, assistant_message)
+                session_service.add_message(chat_request.session_id, assistant_message)
 
                 # 同时保存到数据库
                 try:
                     await ChatMessageModel.create(
-                        session_id=request.session_id,
+                        session_id=chat_request.session_id,
                         user_id=current_user.id,
                         role="assistant",
                         content=assistant_response,
@@ -133,6 +221,9 @@ async def customer_chat_stream(
             }
         )
     except Exception as e:
+        print(f"❌ 聊天流式接口错误: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
