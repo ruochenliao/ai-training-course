@@ -23,8 +23,12 @@ class LLMModelClientManager:
         if self._initialized:
             return
 
-        # 直接使用默认配置，简化启动流程
-        await self._create_default_clients()
+        # 只从数据库加载模型，不使用硬编码配置
+        success = await self.load_models_from_database()
+        if not success:
+            print("❌ 数据库中没有可用的模型配置，请先初始化模型数据")
+            print("💡 提示：可以通过管理界面添加模型配置，或运行数据初始化脚本")
+
         self._initialized = True
 
     async def load_models_from_database(self):
@@ -98,53 +102,6 @@ class LLMModelClientManager:
             print(f"❌ 从数据库加载模型失败: {e}")
             return False
 
-    async def _create_default_clients(self):
-        """创建默认的模型客户端（使用统一配置）"""
-        from .llm_config import get_llm_models_config
-
-        models_config = get_llm_models_config()
-
-        for config in models_config:
-            try:
-                # 创建模型信息
-                model_info = ModelInfo(
-                    vision=config["vision"],
-                    function_calling=config["function_calling"],
-                    json_output=config["json_output"],
-                    structured_output=config["structured_output"],
-                    multiple_system_messages=config["multiple_system_messages"],
-                    family=ModelFamily.UNKNOWN
-                )
-
-                # 创建客户端
-                client = OpenAIChatCompletionClient(
-                    model=config["model_name"],
-                    base_url=config["base_url"],
-                    api_key=config["api_key"],
-                    model_info=model_info,
-                    temperature=config["temperature"],
-                    top_p=config["top_p"],
-                    max_tokens=config["max_tokens"]
-                )
-
-                # 注册客户端
-                client_key = f"{config['provider_name']}:{config['model_name']}"
-                self._clients[client_key] = client
-                self._clients[config["model_name"]] = client
-
-                # 缓存模型信息
-                self._model_info_cache[config["model_name"]] = model_info
-
-                # 更新全局模型信息
-                _MODEL_INFO[config["model_name"]] = model_info
-                _MODEL_TOKEN_LIMITS[config["model_name"]] = config["max_tokens"]
-
-                print(f"✅ 加载默认模型: {config['display_name']}")
-
-            except Exception as e:
-                print(f"❌ 加载默认模型失败 {config['model_name']}: {e}")
-                continue
-
     async def get_client(self, model_name: str) -> Optional[ChatCompletionClient]:
         """获取模型客户端"""
         if not self._initialized:
@@ -157,27 +114,37 @@ class LLMModelClientManager:
         if not self._initialized:
             await self.initialize()
 
-        # 优先返回deepseek-chat作为默认客户端
-        return self._clients.get("deepseek-chat") or next(iter(self._clients.values()), None)
+        # 从数据库查询默认模型
+        from tortoise import Tortoise
+        if Tortoise._inited:
+            from ..models.llm_models import LLMModel
+            default_model = await LLMModel.filter(is_active=True, is_default=True).first()
+            if default_model:
+                return self._clients.get(default_model.model_name)
+
+        # 如果没有设置默认模型，返回第一个可用的客户端
+        return next(iter(self._clients.values()), None)
 
     async def list_available_models(self) -> List[str]:
         """列出所有可用的模型"""
         if not self._initialized:
             await self.initialize()
 
-        return list(self._clients.keys())
+        # 直接从数据库查询活跃的模型
+        from tortoise import Tortoise
+        if Tortoise._inited:
+            from ..models.llm_models import LLMModel
+            models = await LLMModel.filter(is_active=True).order_by("sort_order", "display_name")
+            return [model.model_name for model in models]
+
+        return []
 
     async def reload_models(self):
         """重新加载模型配置（从数据库）"""
         success = await self.load_models_from_database()
         if not success:
-            # 如果数据库加载失败，回退到默认配置
-            await self._create_default_clients()
+            print("❌ 重新加载模型失败：数据库中没有可用的模型配置")
         return success
-
-    def get_model_info(self, model_name: str) -> Optional[ModelInfo]:
-        """获取模型信息"""
-        return self._model_info_cache.get(model_name)
 
 
 # 创建全局模型客户端管理器实例
@@ -204,8 +171,3 @@ async def initialize_llm_clients():
     """初始化LLM客户端"""
     await model_client_manager.initialize()
     print("✅ LLM客户端管理器初始化完成")
-
-
-async def reload_llm_models():
-    """重新加载LLM模型配置"""
-    return await model_client_manager.reload_models()

@@ -275,7 +275,7 @@ async def init_llm_models():
 
     except Exception as e:
         print(f"⚠️  LLM模型数据初始化失败: {e}")
-        print("   将使用默认配置运行")
+        print("   请手动通过管理界面添加模型配置")
 
         # 注意：DeepSeek Chat模型已在上面创建，避免重复
 

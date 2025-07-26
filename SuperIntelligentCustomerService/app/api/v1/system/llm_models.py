@@ -229,9 +229,7 @@ async def get_available_models(current_user: User = DependAuth):
         models = await model_client_manager.list_available_models()
         return Success(data=models)
     except Exception as e:
-        # 如果数据库访问失败，返回默认模型列表
-        default_models = ["deepseek-chat", "deepseek-reasoner", "qwen-vl-plus"]
-        return Success(data=default_models, msg=f"使用默认模型列表: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取可用模型列表失败: {str(e)}")
 
 
 @router.post("/reload-models", summary="重新加载模型配置")

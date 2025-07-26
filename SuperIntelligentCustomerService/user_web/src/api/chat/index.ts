@@ -35,7 +35,7 @@ export const sendStream = async (data: ChatSendRequest): Promise<ReadableStream>
     }
 
     if (data.model_name) {
-      formData.append('model_name', data.model_name);
+      formData.append('model', data.model_name);
     }
 
     // 添加文件
@@ -54,7 +54,7 @@ export const sendStream = async (data: ChatSendRequest): Promise<ReadableStream>
         content: data.message
       }],
       session_id: data.sessionId || null,
-      model_name: data.model_name
+      model: data.model_name
     });
   }
 

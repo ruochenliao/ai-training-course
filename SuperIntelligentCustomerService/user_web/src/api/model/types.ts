@@ -1,4 +1,14 @@
-// 查询用户模型列表返回的数据结构
+// API响应的基础结构
+export interface ApiResponse<T> {
+  code: number;
+  msg: string;
+  data: T;
+}
+
+// 可用模型列表响应类型
+export type AvailableModelsResponse = ApiResponse<string[]>;
+
+// 查询用户模型列表返回的数据结构（保留用于其他API）
 export interface GetSessionListVO {
   id?: number;
   category?: string;
