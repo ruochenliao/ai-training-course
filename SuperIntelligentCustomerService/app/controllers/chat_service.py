@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import logging
 import os
@@ -16,6 +17,7 @@ from autogen_core.memory import MemoryContent, MemoryMimeType
 from autogen_core.model_context import BufferedChatCompletionContext
 
 from app.core.llms import get_model_client, get_default_model_client
+from app.core.autogen_workbench import mcp_workbench
 from app.schemas.customer import ChatMessage, MessageContent
 from app.services.memory_service import MemoryServiceFactory
 from app.settings.config import settings
@@ -75,29 +77,29 @@ class ChatService:
         self.logger.addHandler(file_handler)
         self.logger.setLevel(logging.INFO)
 
-        # 默认系统提示
-        self.default_system_message = """
-        **角色:** 你是一位专业、耐心且高效的智能客服助手。
+        # 默认系统提示（支持MCP工具）
+        self.default_system_message = """你是一位专业、耐心且高效的智能客服助手，具备访问电商系统数据的能力。
 
-        **核心任务:**
-        1.  仔细分析用户的提问和上传的图片，准确识别其核心意图（例如：查询商品信息、搜索商品、查询订单状态、取消订单、了解促销活动、查询政策、检查退货资格、提交退货申请、提供反馈等）。
-        2.  **处理图片内容:** 当用户上传图片时，你应该分析图片内容，并基于图片提供相关的帮助。你应该根据消息中指定的任务类型来处理图片。
-        3.  **多模态任务类型:** 你需要支持以下任务类型，并根据任务类型提供相应的响应：
-            * `image_understanding`: 理解和描述图片内容，回答"这是什么"类型的问题。
-            * `image_analysis`: 分析图片中的问题、缺陷或特定元素。
-            * `image_comparison`: 比较多个图片或图片中的不同元素。
-            * `image_editing_suggestion`: 提供关于如何编辑或改进图片的建议。
-            * `general_image_task`: 通用图片处理，根据用户描述提供相关帮助。
-        4.  **回答策略:**
-            * 如果用户的意图可以基于**对话历史**直接回答，请进行回答。
-            * 如果无法确定用户意图或需要更多信息，请礼貌地询问用户以获取更多详细信息。
-            * 始终保持专业、友好和乐于助人的态度。
-            * 用简洁明了的语言回答，避免过于复杂的技术术语。
-            * 如果遇到无法处理的问题，请诚实地告知用户并建议联系人工客服。
+**核心能力:**
+1. **商品查询**: 使用get_products工具查询商品信息、搜索商品、查看推荐商品
+2. **订单管理**: 使用get_orders工具查询订单状态、跟踪订单进度
+3. **客户服务**: 使用get_customers工具查询客户信息
+4. **促销活动**: 使用get_promotions工具查询当前促销活动和优惠信息
+5. **购物车**: 使用get_carts工具查询购物车状态
 
-        **重要提醒:**
-        - 请始终用中文回复用户。
-        - 保持回答的准确性和实用性。
+**多模态支持:**
+- `image_understanding`: 理解和描述图片内容
+- `image_analysis`: 分析图片中的问题、缺陷或特定元素
+- `image_comparison`: 比较多个图片或图片中的不同元素
+- `image_editing_suggestion`: 提供图片编辑建议
+- `general_image_task`: 通用图片处理
+
+**服务原则:**
+- 主动使用工具获取准确的实时数据
+- 根据用户问题选择合适的工具
+- 提供准确、及时、友好的服务
+- 始终用中文回复用户
+- 如遇无法处理的问题，建议联系人工客服
         - 对于图片相关的问题，请仔细观察图片内容并提供详细的分析。
         """
 
@@ -155,17 +157,67 @@ class ChatService:
             # 注意：这里使用user_id作为session_id是为了保持会话一致性
             session = self._get_or_create_session(user_id, session_id or user_id)
 
-            # 6. 创建AI助手代理
-            agent = await self._create_assistant_agent(user_id, system_prompt, session)
+            # 6. 创建MCP支持的AI助手代理
+            agent = await self._create_mcp_assistant_agent(user_id, system_prompt, session)
 
             # 6. 流式生成响应并处理结果
-            async for event in agent.run_stream(task=last_user_message):
-                if isinstance(event, ModelClientStreamingChunkEvent):
-                    # 返回生成的文本片段
-                    yield event.content
-                elif isinstance(event, TaskResult):
-                    # 保存对话到记忆
-                    await self._save_conversation_to_memory(session, event)
+            print(f"[DEBUG] 开始流式处理任务: {last_user_message}")
+            self.logger.info(f"[DEBUG] 开始流式处理任务: {last_user_message}")
+
+            # 使用流式方式处理
+            try:
+                ai_response_parts = []
+                task_result = None
+
+                async for event in agent.run_stream(task=last_user_message):
+                    print(f"[DEBUG] 收到事件: {type(event).__name__}")
+
+                    if isinstance(event, ModelClientStreamingChunkEvent):
+                        # 流式文本内容
+                        print(f"[DEBUG] 流式内容: {event.content}")
+                        ai_response_parts.append(event.content)
+                        yield event.content
+                    elif isinstance(event, TaskResult):
+                        # 任务完成
+                        task_result = event
+                        print(f"[DEBUG] 任务完成")
+                    else:
+                        # 其他事件（工具调用等）
+                        print(f"[DEBUG] 其他事件: {type(event).__name__}")
+
+                # 如果没有收到任何流式内容，说明AI没有生成回复
+                if not ai_response_parts:
+                    print(f"[DEBUG] 没有收到AI回复，分析工具调用结果...")
+
+                    # 分析工具调用结果并生成回复
+                    tool_results = []
+                    if task_result and hasattr(task_result, 'messages'):
+                        for message in task_result.messages:
+                            if hasattr(message, 'type') and message.type == 'ToolCallSummaryMessage':
+                                tool_results.append(message.content)
+
+                    # 根据工具结果生成智能回复
+                    if tool_results:
+                        ai_response = await self._generate_response_from_tool_results(tool_results, last_user_message)
+                    else:
+                        ai_response = "很抱歉，我暂时无法为您提供相关信息。请稍后再试或联系人工客服。"
+
+                    print(f"[DEBUG] 生成的AI回复: {ai_response}")
+
+                    # 模拟流式输出
+                    for char in ai_response:
+                        yield char
+                        await asyncio.sleep(0.02)
+
+                # 保存对话到记忆
+                if task_result:
+                    await self._save_conversation_to_memory(session, task_result)
+
+            except Exception as e:
+                print(f"[DEBUG] 任务执行异常: {e}")
+                import traceback
+                traceback.print_exc()
+                yield "很抱歉，处理您的请求时出现了问题。请稍后再试。"
 
         except Exception as e:
             error_msg = f"聊天处理失败 {user_id}: {e}"
@@ -411,6 +463,89 @@ class ChatService:
             self.logger.info(f"[DEBUG] 模型不支持函数调用，创建简单的对话代理")
 
         return AssistantAgent(**agent_params)
+
+    async def _create_mcp_assistant_agent(self, user_id: str, system_prompt: Optional[str], session: ChatSession):
+        """创建支持MCP的助手代理"""
+        print(f"[DEBUG] 创建MCP助手代理，用户: {user_id}, 模型: {self.model_name}")
+        self.logger.info(f"[DEBUG] 创建MCP助手代理，用户: {user_id}, 模型: {self.model_name}")
+
+        # 使用提供的系统提示或默认系统提示
+        final_system_message = system_prompt or self.default_system_message
+
+        # 估算输入长度
+        system_prompt_length = len(final_system_message)
+        print(f"[DEBUG] 系统提示词长度: {system_prompt_length}")
+        self.logger.info(f"[DEBUG] 系统提示词长度: {system_prompt_length}")
+
+        # 创建MCP助手代理
+        agent_name = f"customer_service_{user_id}_{datetime.now().timestamp()}"
+
+        # 定义要启用的MCP工具
+        enabled_tools = ["get_products", "get_orders", "get_customers", "get_promotions", "get_carts"]
+
+        print(f"[DEBUG] 启用MCP工具: {enabled_tools}")
+        self.logger.info(f"[DEBUG] 启用MCP工具: {enabled_tools}")
+
+        # 使用MCP工作台创建代理
+        mcp_agent = await mcp_workbench.create_agent(
+            agent_name=agent_name,
+            model_name=self.model_name,
+            system_message=final_system_message,
+            tools=enabled_tools,
+            buffer_size=1  # 最小缓冲区大小
+        )
+
+        print(f"[DEBUG] MCP助手代理创建成功: {agent_name}")
+        self.logger.info(f"[DEBUG] MCP助手代理创建成功: {agent_name}")
+
+        return mcp_agent
+
+    async def _generate_response_from_tool_results(self, tool_results: List[str], user_question: str) -> str:
+        """根据工具调用结果生成智能回复"""
+        try:
+            import json
+
+            # 解析工具结果
+            parsed_results = []
+            for result in tool_results:
+                try:
+                    parsed = json.loads(result)
+                    parsed_results.append(parsed)
+                except:
+                    continue
+
+            # 根据用户问题和工具结果生成回复
+            if "iPhone" in user_question or "手机" in user_question:
+                # 商品查询相关
+                for result in parsed_results:
+                    if result.get("success") and result.get("data", {}).get("total", 0) == 0:
+                        return """很抱歉，目前我们的推荐商品中暂时没有iPhone相关产品。
+
+不过我可以为您提供以下建议：
+1. 您可以浏览我们的全部商品目录，可能有其他优质的手机产品
+2. 可以关注我们的促销活动，经常会有新品上架
+3. 如需了解具体的iPhone产品信息，建议联系我们的人工客服
+
+有什么其他我可以帮助您的吗？"""
+                    elif result.get("success") and result.get("data", {}).get("items"):
+                        items = result["data"]["items"]
+                        response = "为您推荐以下iPhone产品：\n\n"
+                        for i, item in enumerate(items[:3], 1):
+                            response += f"{i}. {item.get('name', '未知商品')}\n"
+                            if item.get('price'):
+                                response += f"   价格：¥{item['price']}\n"
+                            if item.get('description'):
+                                response += f"   描述：{item['description']}\n"
+                            response += "\n"
+                        response += "如需了解更多详情或购买，请告诉我具体的商品编号。"
+                        return response
+
+            # 默认回复
+            return "很抱歉，我暂时无法为您提供相关信息。请稍后再试或联系人工客服获得更详细的帮助。"
+
+        except Exception as e:
+            print(f"[DEBUG] 生成回复时出错: {e}")
+            return "很抱歉，处理您的请求时出现了问题。请稍后再试。"
 
     async def _save_conversation_to_memory(self, session: ChatSession, task_result: TaskResult) -> None:
         """保存对话到用户记忆

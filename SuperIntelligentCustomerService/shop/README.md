@@ -16,6 +16,12 @@
 - **多场景支持**: 产品咨询、订单查询、售后服务等
 - **标准化回复**: 预设的回复模板和FAQ
 
+### 🔗 MCP 集成 (NEW!)
+- **Model Context Protocol**: 将 API 端点暴露为 MCP 工具
+- **AI 模型直接集成**: 支持 Claude、GPT 等 AI 模型直接调用
+- **安全认证**: HTTP Bearer Token 认证保护
+- **自动文档生成**: 自动生成 MCP 工具文档
+
 ### 📊 数据初始化
 - 自动创建测试数据
 - 每个类型精确10条初始化数据
@@ -39,7 +45,19 @@ python run.py
 ### 3. 访问服务
 
 - **API 文档**: http://localhost:8001/shop/docs
+- **MCP 服务器**: http://localhost:8001/mcp
+- **MCP 工具列表**: http://localhost:8001/mcp/tools
 - **服务状态**: 查看控制台输出
+
+### 4. 测试 MCP 集成
+
+```bash
+# 安装测试依赖
+pip install httpx
+
+# 运行 MCP 测试
+python test_mcp.py
+```
 
 ## 📊 数据结构 (每种10条)
 
@@ -97,6 +115,28 @@ python run.py
 - `GET /shop/api/v1/cart/` - 获取购物车列表
 - `GET /shop/api/v1/cart/{id}` - 获取购物车详情
 - `GET /shop/api/v1/cart/customer/{customer_id}` - 获取客户购物车
+
+## 🔗 MCP 集成
+
+### MCP 服务器端点
+- **MCP 根路径**: `/mcp`
+- **工具列表**: `/mcp/tools`
+- **工具调用**: `/mcp/tools/call`
+
+### 认证方式
+所有 MCP 请求需要在 Header 中包含 API 密钥：
+```
+Authorization: Bearer mcp-shop-api-key-2025
+```
+
+### 可用的 MCP 工具
+- `get_products` - 查询商品列表
+- `get_orders` - 查询订单列表
+- `get_customers` - 查询客户列表
+- `get_promotions` - 查询促销活动
+- `get_carts` - 查询购物车列表
+
+详细使用说明请参考 [MCP_INTEGRATION.md](./MCP_INTEGRATION.md)
 
 ## 🎯 客服提示词系统
 

@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     
     # 服务器配置
     HOST: str = "0.0.0.0"
-    PORT: int = 8001
+    PORT: int = 8002
     
     # CORS配置
     CORS_ORIGINS: list = ["*"]
@@ -31,6 +31,12 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     OPENAI_BASE_URL: str = "https://api.deepseek.com"
     DEFAULT_MODEL: str = "deepseek-chat"
+
+    # MCP配置
+    MCP_ENABLED: bool = True
+    MCP_API_KEYS: list = ["mcp-shop-api-key-2025", "demo-api-key"]
+    MCP_MOUNT_PATH: str = "/mcp"
+    MCP_TITLE: str = "智能电商系统 MCP 服务器"
     
     class Config:
         env_file = ".env"

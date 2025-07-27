@@ -6,6 +6,8 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from tortoise import Tortoise
 
 from app.core.init_app import init_data, register_exceptions, register_routers
+from app.core.mcp_config import setup_mcp_server
+from app.settings.config import settings
 
 
 @asynccontextmanager
@@ -48,6 +50,11 @@ def create_shop_app() -> FastAPI:
     
     # 注册路由
     register_routers(app, prefix="/shop/api")
+
+    # 设置MCP服务器（如果启用）
+    if getattr(settings, 'MCP_ENABLED', True):
+        mcp = setup_mcp_server(app)
+        print(f"✅ MCP服务器已启用，访问地址: http://{settings.HOST}:{settings.PORT}{settings.MCP_MOUNT_PATH}")
 
     return app
 

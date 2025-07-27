@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app.models import Promotion, Coupon, CouponUsage
 
-router = APIRouter()
+router = APIRouter(tags=["promotions"])
 
 
 @router.get("/")

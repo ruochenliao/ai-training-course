@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app.models import Order, OrderItem, Customer, OrderStatus
 
-router = APIRouter()
+router = APIRouter(tags=["orders"])
 
 
 @router.get("/")

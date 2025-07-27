@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app.models import Customer, CustomerAddress
 
-router = APIRouter()
+router = APIRouter(tags=["customers"])
 
 
 @router.get("/")

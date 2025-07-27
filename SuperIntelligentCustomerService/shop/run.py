@@ -18,6 +18,6 @@ if __name__ == "__main__":
         "app:app",
         host=settings.HOST,
         port=settings.PORT,
-        reload=True,
+        reload=False,  # 禁用自动重载以便测试
         log_level="info"
     )

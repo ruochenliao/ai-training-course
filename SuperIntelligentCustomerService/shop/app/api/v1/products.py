@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app.models import Product, Category, ProductImage
 
-router = APIRouter()
+router = APIRouter(tags=["products"])
 
 
 @router.get("/")

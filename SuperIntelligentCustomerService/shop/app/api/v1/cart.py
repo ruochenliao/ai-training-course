@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app.models import Cart, CartItem, Customer, Product
 
-router = APIRouter()
+router = APIRouter(tags=["cart"])
 
 
 @router.get("/")
