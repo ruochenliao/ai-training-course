@@ -226,8 +226,18 @@ async def get_available_models(current_user: User = DependAuth):
         if not model_client_manager._initialized:
             await model_client_manager.initialize()
 
-        models = await model_client_manager.list_available_models()
-        return Success(data=models)
+        # 直接从数据库查询活跃的模型，返回完整信息
+        from tortoise.queryset import Q
+
+        total, models = await llm_model_controller.list(
+            page=1,
+            page_size=1000,  # 获取所有可用模型
+            search=Q(is_active=True),
+            order=["sort_order", "display_name"]
+        )
+
+        # 返回完整的模型信息
+        return Success(data=[model_to_dict(model) for model in models])
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"获取可用模型列表失败: {str(e)}")
 

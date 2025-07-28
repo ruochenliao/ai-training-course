@@ -6,35 +6,22 @@ export interface ApiResponse<T> {
 }
 
 // 可用模型列表响应类型
-export type AvailableModelsResponse = ApiResponse<string[]>;
+export type AvailableModelsResponse = ApiResponse<GetSessionListVO[]>;
 
 // 查询用户模型列表返回的数据结构（保留用于其他API）
 export interface GetSessionListVO {
   id?: number;
-  category?: string;
-  model_name?: string;
-  model_describe?: string;
-  model_price?: number;
-  model_type?: string;
-  model_show?: string;
-  system_prompt?: string;
-  api_host?: string;
-  api_key?: string;
-  remark?: string;
-  is_active?: boolean;
-  created_at?: string;
-  updated_at?: string;
 
-  // 新增字段，兼容新的LLM模型结构
+  // 提供商信息
+  provider_name?: string;
+  provider_display_name?: string;
+  base_url?: string;
+
+  // 基本信息
+  model_name?: string;
   display_name?: string;
   description?: string;
-  provider_id?: number;
-  provider?: {
-    id: number;
-    name: string;
-    display_name: string;
-    base_url: string;
-  };
+  category?: string;
 
   // 模型能力
   vision?: boolean;
@@ -53,7 +40,31 @@ export interface GetSessionListVO {
   input_price_per_1k?: number;
   output_price_per_1k?: number;
 
+  // 系统配置
+  system_prompt?: string;
+
   // 状态管理
+  is_active?: boolean;
   is_default?: boolean;
   sort_order?: number;
+
+  // 时间戳
+  created_at?: string;
+  updated_at?: string;
+
+  // 兼容旧字段（保留用于向后兼容）
+  model_describe?: string;
+  model_price?: number;
+  model_type?: string;
+  model_show?: string;
+  api_host?: string;
+  api_key?: string;
+  remark?: string;
+  provider_id?: number;
+  provider?: {
+    id: number;
+    name: string;
+    display_name: string;
+    base_url: string;
+  };
 }

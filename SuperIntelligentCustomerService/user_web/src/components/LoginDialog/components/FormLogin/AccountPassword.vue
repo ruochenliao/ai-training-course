@@ -2,7 +2,7 @@
 <script lang="ts" setup>
 import type {FormInstance, FormRules} from 'element-plus';
 import type {LoginDTO} from '@/api/auth/types';
-import {reactive, ref} from 'vue';
+import {reactive, ref, watch} from 'vue';
 import {useRouter} from 'vue-router';
 import {login} from '@/api';
 import {useUserStore} from '@/stores';
@@ -24,6 +24,19 @@ const rules = reactive<FormRules<LoginDTO>>({
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
 });
+
+// 监听预填用户名的变化
+watch(
+  () => loginFromStore.prefilledUsername,
+  (newUsername) => {
+    if (newUsername) {
+      formModel.username = newUsername;
+      // 使用后清除预填的用户名
+      loginFromStore.clearPrefilledUsername();
+    }
+  },
+  { immediate: true }
+);
 
 const router = useRouter();
 async function handleSubmit() {

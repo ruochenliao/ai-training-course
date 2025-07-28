@@ -11,8 +11,18 @@ export const login = (data: LoginDTO) => {
   return post<LoginVO>('/api/v1/base/access_token', credentials);
 };
 
-// 邮箱验证码 - API端点已删除，需要使用替代方案
-// export const emailCode = (data: EmailCodeDTO) => post('/api/v1/resource/email/code', data);
+// 邮箱验证码
+export const emailCode = (data: EmailCodeDTO) => post('/api/v1/base/email/code', data);
 
-// 注册账号 - API端点已删除，需要使用替代方案
-// export const register = (data: RegisterDTO) => post('/api/v1/auth/register', data);
+// 验证邮箱验证码
+export const verifyEmailCode = (email: string, code: string) =>
+  post(`/api/v1/base/email/verify?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`);
+
+// 注册账号
+export const register = (data: RegisterDTO) => post('/api/v1/base/register', data);
+
+// 获取邮件服务状态
+export const getEmailStatus = () => post('/api/v1/base/email/status');
+
+// 获取缓存统计（调试用）
+export const getCacheStats = () => post('/api/v1/base/cache/stats');

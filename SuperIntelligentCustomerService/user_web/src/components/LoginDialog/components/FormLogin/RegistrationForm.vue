@@ -1,10 +1,12 @@
 <!-- 注册表单 -->
 <script lang="ts" setup>
 import type {FormInstance, FormRules} from 'element-plus';
+import {ElMessage} from 'element-plus';
+import {Bell, Message, Unlock} from '@element-plus/icons-vue';
 import type {RegisterDTO} from '@/api/auth/types';
 import {useCountdown} from '@vueuse/core';
-import {reactive, ref} from 'vue';
-// import {emailCode, register} from '@/api'; // 这些API已被删除
+import {reactive, ref, shallowRef} from 'vue';
+import {emailCode, register} from '@/api/auth';
 import {useLoginFormStore} from '@/stores/modules/loginForm';
 
 const loginFromStore = useLoginFormStore();
@@ -62,20 +64,30 @@ function isEmail(email: string) {
 async function handleSubmit() {
   try {
     await formRef.value?.validate();
-    // 注册功能暂时不可用，因为相关API已被删除
-    ElMessage.warning('注册功能暂时不可用，请联系管理员');
-    // const params: RegisterDTO = {
-    //   username: formModel.value.username,
-    //   password: formModel.value.password,
-    //   code: formModel.value.code,
-    // };
-    // await register(params);
-    // ElMessage.success('注册成功');
-    // formRef.value?.resetFields();
-    // resume();
+    const params: RegisterDTO = {
+      username: formModel.value.username,
+      password: formModel.value.password,
+      code: formModel.value.code,
+      confirmPassword: formModel.value.confirmPassword,
+    };
+    await register(params);
+    ElMessage.success('注册成功！请使用新账号登录');
+
+    // 保存注册的邮箱地址，用于登录表单预填
+    const registeredEmail = formModel.value.username;
+
+    formRef.value?.resetFields();
+    resume();
+
+    // 注册成功后切换到登录表单并预填邮箱
+    setTimeout(() => {
+      loginFromStore.setPrefilledUsername(registeredEmail);
+      loginFromStore.setLoginFormType('AccountPassword');
+    }, 1500); // 1.5秒后切换，让用户看到成功提示
   }
-  catch (error) {
+  catch (error: any) {
     console.error('请求错误:', error);
+    ElMessage.error(error?.response?.data?.detail || '注册失败，请重试');
   }
 }
 
@@ -86,21 +98,21 @@ async function getEmailCode() {
     return;
   }
   if (!isEmail(formModel.value.username)) {
+    ElMessage.error('请输入正确的邮箱格式');
     return;
   }
   if (countdown.value > 0 && countdown.value < 60) {
     return;
   }
   try {
-    // 邮箱验证码功能暂时不可用，因为相关API已被删除
-    ElMessage.warning('邮箱验证码功能暂时不可用');
-    // start();
-    // await emailCode({ username: formModel.value.username });
-    // ElMessage.success('验证码发送成功');
+    start();
+    await emailCode({ username: formModel.value.username });
+    ElMessage.success('验证码发送成功');
   }
-  catch (error) {
+  catch (error: any) {
     console.error('请求错误:', error);
     stop();
+    ElMessage.error(error?.response?.data?.detail || '验证码发送失败，请重试');
   }
 }
 </script>
