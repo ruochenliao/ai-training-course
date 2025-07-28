@@ -8,12 +8,12 @@ from fastapi import APIRouter, Query, HTTPException, Body
 from pydantic import BaseModel, Field
 
 from app.controllers.session_service import session_service
-from ....core.dependency import DependAuth
-from ....models.admin import User, ChatMessage as ChatMessageModel
-from ....schemas import Success, SuccessExtra
-from ....schemas.session import CreateSessionDTO
+from app.core.dependency import DependAuth
+from app.models.admin import User, ChatMessage as ChatMessageModel
+from app.schemas import Success, SuccessExtra
+from app.schemas.session import CreateSessionDTO
 
-router = APIRouter(tags=['会话管理'])
+router = APIRouter()
 
 
 @router.post("/create", summary="创建新会话")

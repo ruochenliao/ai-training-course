@@ -3,9 +3,9 @@
 LLM模型数据初始化
 使用统一配置源初始化数据库数据
 """
+from .llm_config import get_llm_models_config
 from ..models.llm_models import LLMModel
 from ..utils.security import encrypt_api_key
-from .llm_config import get_llm_models_config
 
 
 async def init_llm_models():

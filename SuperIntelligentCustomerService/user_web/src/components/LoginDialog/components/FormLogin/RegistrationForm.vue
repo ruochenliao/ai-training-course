@@ -4,7 +4,7 @@ import type {FormInstance, FormRules} from 'element-plus';
 import type {RegisterDTO} from '@/api/auth/types';
 import {useCountdown} from '@vueuse/core';
 import {reactive, ref} from 'vue';
-import {emailCode, register} from '@/api';
+// import {emailCode, register} from '@/api'; // 这些API已被删除
 import {useLoginFormStore} from '@/stores/modules/loginForm';
 
 const loginFromStore = useLoginFormStore();
@@ -62,15 +62,17 @@ function isEmail(email: string) {
 async function handleSubmit() {
   try {
     await formRef.value?.validate();
-    const params: RegisterDTO = {
-      username: formModel.value.username,
-      password: formModel.value.password,
-      code: formModel.value.code,
-    };
-    await register(params);
-    ElMessage.success('注册成功');
-    formRef.value?.resetFields();
-    resume();
+    // 注册功能暂时不可用，因为相关API已被删除
+    ElMessage.warning('注册功能暂时不可用，请联系管理员');
+    // const params: RegisterDTO = {
+    //   username: formModel.value.username,
+    //   password: formModel.value.password,
+    //   code: formModel.value.code,
+    // };
+    // await register(params);
+    // ElMessage.success('注册成功');
+    // formRef.value?.resetFields();
+    // resume();
   }
   catch (error) {
     console.error('请求错误:', error);
@@ -90,9 +92,11 @@ async function getEmailCode() {
     return;
   }
   try {
-    start();
-    await emailCode({ username: formModel.value.username });
-    ElMessage.success('验证码发送成功');
+    // 邮箱验证码功能暂时不可用，因为相关API已被删除
+    ElMessage.warning('邮箱验证码功能暂时不可用');
+    // start();
+    // await emailCode({ username: formModel.value.username });
+    // ElMessage.success('验证码发送成功');
   }
   catch (error) {
     console.error('请求错误:', error);

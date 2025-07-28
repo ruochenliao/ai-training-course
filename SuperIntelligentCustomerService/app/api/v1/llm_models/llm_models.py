@@ -7,13 +7,13 @@ from typing import Optional
 
 from fastapi import APIRouter, Query, HTTPException
 
-from ....controllers.llm_models import llm_model_controller
-from ....core.dependency import DependAuth
-from ....core.llms import model_client_manager
-from ....models.admin import User
-from ....models.llm_models import LLMModel
-from ....schemas.base import Success, SuccessExtra
-from ....schemas.llm_models import (
+from app.controllers.llm_models import llm_model_controller
+from app.core.dependency import DependAuth
+from app.core.llms import model_client_manager
+from app.models.admin import User
+from app.models.llm_models import LLMModel
+from app.schemas.base import Success, SuccessExtra
+from app.schemas.llm_models import (
     LLMModelCreate, LLMModelUpdate, LLMModelResponse, LLMModelListResponse
 )
 

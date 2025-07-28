@@ -29,11 +29,11 @@ class MemoryController:
         self.logger = logging.getLogger(self.__class__.__name__)
 
     async def upload_file_to_knowledge_base(
-        self,
-        user_id: str,
-        file: UploadFile = File(...),
-        knowledge_type: str = Form(KnowledgeType.CUSTOMER_SERVICE),
-        is_public: bool = Form(False)
+            self,
+            user_id: str,
+            file: UploadFile = File(...),
+            knowledge_type: str = Form(KnowledgeType.CUSTOMER_SERVICE),
+            is_public: bool = Form(False)
     ) -> Dict[str, Any]:
         """上传文件到知识库
 
@@ -64,10 +64,10 @@ class MemoryController:
             raise HTTPException(status_code=500, detail=f"文件上传失败: {str(e)}")
 
     async def query_memory(
-        self,
-        user_id: str,
-        request: MemoryQueryRequest,
-        include_public: bool = True
+            self,
+            user_id: str,
+            request: MemoryQueryRequest,
+            include_public: bool = True
     ) -> Dict[str, Any]:
         """查询记忆内容
 
@@ -111,10 +111,10 @@ class MemoryController:
             raise HTTPException(status_code=500, detail=f"记忆查询失败: {str(e)}")
 
     async def add_text_to_memory(
-        self,
-        user_id: str,
-        request: MemoryAddRequest,
-        is_public: bool = False
+            self,
+            user_id: str,
+            request: MemoryAddRequest,
+            is_public: bool = False
     ) -> Dict[str, Any]:
         """添加文本到记忆
 
@@ -148,10 +148,10 @@ class MemoryController:
             raise HTTPException(status_code=500, detail=f"文本添加失败: {str(e)}")
 
     async def clear_user_memory(
-        self,
-        user_id: str,
-        knowledge_type: str = KnowledgeType.CUSTOMER_SERVICE,
-        memory_type: str = "all"  # "chat", "private", "all"
+            self,
+            user_id: str,
+            knowledge_type: str = KnowledgeType.CUSTOMER_SERVICE,
+            memory_type: str = "all"  # "chat", "private", "all"
     ) -> Dict[str, Any]:
         """清除用户记忆
 
@@ -251,3 +251,6 @@ class MemoryController:
         except Exception as e:
             self.logger.error(f"获取记忆统计失败: {str(e)}")
             raise HTTPException(status_code=500, detail=f"获取记忆统计失败: {str(e)}")
+
+
+memory_controller = MemoryController()

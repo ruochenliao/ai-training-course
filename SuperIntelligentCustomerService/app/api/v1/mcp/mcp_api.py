@@ -3,19 +3,18 @@
 MCP API端点
 提供MCP工具的HTTP API接口
 """
-import json
 from typing import Dict, Any, List, Optional
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from app.core.mcp_tools import list_mcp_tools, execute_mcp_tool
 from app.core.autogen_workbench import mcp_workbench
 from app.core.dependency import DependAuth
+from app.core.mcp_tools import list_mcp_tools, execute_mcp_tool
 from app.models.admin import User
 from app.schemas.base import Success
 
-router = APIRouter(tags=["mcp"])
+router = APIRouter()
 
 
 class MCPToolRequest(BaseModel):
@@ -40,7 +39,7 @@ class MCPChatRequest(BaseModel):
 
 
 @router.get("/tools", summary="获取可用的MCP工具列表")
-async def get_mcp_tools(current_user: User = DependAuth) -> Success:
+async def get_mcp_tools() -> Success:
     """获取所有可用的MCP工具"""
     try:
         tools = list_mcp_tools()
@@ -57,13 +56,12 @@ async def get_mcp_tools(current_user: User = DependAuth) -> Success:
 
 @router.post("/tools/execute", summary="执行MCP工具")
 async def execute_mcp_tool_api(
-    request: MCPToolRequest,
-    current_user: User = DependAuth
+        request: MCPToolRequest
 ) -> MCPToolResponse:
     """执行指定的MCP工具"""
     try:
         result = await execute_mcp_tool(request.tool_name, **request.parameters)
-        
+
         return MCPToolResponse(
             success=result.get("success", False),
             data=result.get("data"),
@@ -79,7 +77,7 @@ async def execute_mcp_tool_api(
 
 
 @router.get("/workbench/agents", summary="获取MCP工作台代理列表")
-async def get_workbench_agents(current_user: User = DependAuth) -> Success:
+async def get_workbench_agents() -> Success:
     """获取MCP工作台中的所有代理"""
     try:
         agents = mcp_workbench.list_agents()
@@ -96,14 +94,14 @@ async def get_workbench_agents(current_user: User = DependAuth) -> Success:
 
 @router.post("/workbench/chat", summary="使用MCP工作台进行对话")
 async def chat_with_workbench(
-    request: MCPChatRequest,
-    current_user: User = DependAuth
+        request: MCPChatRequest,
+        current_user: User = DependAuth
 ) -> Success:
     """使用MCP工作台创建临时代理进行对话"""
     try:
         # 创建临时代理
         agent_name = f"temp_agent_{current_user.id}"
-        
+
         agent = mcp_workbench.create_agent(
             agent_name=agent_name,
             model_name="deepseek-chat",
@@ -111,17 +109,17 @@ async def chat_with_workbench(
             tools=request.tools,
             buffer_size=1
         )
-        
+
         # 执行对话
         result = await agent.run(task=request.message)
-        
+
         # 提取响应内容
         response_content = ""
         if hasattr(result, 'messages') and result.messages:
             for message in result.messages:
                 if hasattr(message, 'content'):
                     response_content += str(message.content)
-        
+
         return Success(
             data={
                 "response": response_content,
@@ -141,7 +139,7 @@ async def get_mcp_status(current_user: User = DependAuth) -> Success:
     try:
         tools = list_mcp_tools()
         agents = mcp_workbench.list_agents()
-        
+
         return Success(
             data={
                 "mcp_enabled": True,
@@ -160,8 +158,7 @@ async def get_mcp_status(current_user: User = DependAuth) -> Success:
 
 @router.get("/tools/{tool_name}/schema", summary="获取工具的参数模式")
 async def get_tool_schema(
-    tool_name: str,
-    current_user: User = DependAuth
+        tool_name: str
 ) -> Success:
     """获取指定工具的参数模式"""
     try:
@@ -216,10 +213,10 @@ async def get_tool_schema(
                 "required": []
             }
         }
-        
+
         if tool_name not in schemas:
             raise HTTPException(status_code=404, detail=f"工具 {tool_name} 不存在")
-        
+
         return Success(
             data={
                 "tool_name": tool_name,

@@ -1,3 +1,4 @@
+import base64
 import json
 import os
 import shutil
@@ -6,7 +7,6 @@ from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Request
 from fastapi.responses import StreamingResponse
-import base64
 
 from app.controllers.chat_service import ChatService
 from app.controllers.session_service import SessionService
@@ -14,7 +14,7 @@ from ....core.dependency import DependAuth
 from ....models.admin import User, ChatMessage as ChatMessageModel
 from ....schemas.base import Success
 from ....schemas.customer import ChatRequest, ChatMessage, MessageContent, \
-    ImageContent, MultiModalContent, AGImage
+    ImageContent, MultiModalContent
 from ....settings.config import settings
 
 router = APIRouter()

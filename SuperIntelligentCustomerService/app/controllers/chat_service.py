@@ -16,8 +16,8 @@ from autogen_core import Image as AGImage
 from autogen_core.memory import MemoryContent, MemoryMimeType
 from autogen_core.model_context import BufferedChatCompletionContext
 
-from app.core.llms import get_model_client, get_default_model_client
 from app.core.autogen_workbench import mcp_workbench
+from app.core.llms import get_model_client, get_default_model_client
 from app.schemas.customer import ChatMessage, MessageContent
 from app.services.memory_service import MemoryServiceFactory
 from app.settings.config import settings

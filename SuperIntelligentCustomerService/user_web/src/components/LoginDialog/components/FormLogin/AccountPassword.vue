@@ -31,16 +31,31 @@ async function handleSubmit() {
     await formRef.value?.validate();
     const res = await login(formModel);
     console.log(res, 'res');
-    res.data.token && userStore.setToken(res.data.token);
-    res.data.userInfo && userStore.setUserInfo(res.data.userInfo);
-    ElMessage.success('登录成功');
-    userStore.closeLoginDialog();
-    // 立刻获取回话列表
-    await sessionStore.requestSessionList(1, true);
-    router.replace('/');
+
+    // 适配后端实际返回的数据格式
+    // 后端返回: { code: 200, msg: "OK", data: { access_token: "...", username: "admin" } }
+    if (res.data && res.data.access_token) {
+      userStore.setToken(res.data.access_token);
+
+      // 构建用户信息对象
+      const userInfo = {
+        username: res.data.username,
+        token: res.data.access_token
+      };
+      userStore.setUserInfo(userInfo);
+
+      ElMessage.success('登录成功');
+      userStore.closeLoginDialog();
+      // 立刻获取回话列表
+      await sessionStore.requestSessionList(1, true);
+      router.replace('/');
+    } else {
+      ElMessage.error('登录失败：返回数据格式错误');
+    }
   }
   catch (error) {
     console.error('请求错误:', error);
+    ElMessage.error('登录失败，请检查用户名和密码');
   }
 }
 </script>

@@ -2,11 +2,11 @@ from typing import Optional
 
 from fastapi import APIRouter, UploadFile, File, Form, Query
 
-from app.controllers.memory_controller import MemoryController, MemoryQueryRequest, MemoryAddRequest
+from app.controllers.memory_controller import MemoryQueryRequest, MemoryAddRequest, memory_controller
 from app.services.memory_service import KnowledgeType
 
 router = APIRouter()
-memory_controller = MemoryController()
+
 
 
 @router.post("/upload")

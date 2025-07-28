@@ -3,15 +3,10 @@
 MCP工具定义模块
 为SuperIntelligentCustomerService系统定义MCP工具
 """
-import json
-import asyncio
 from typing import List, Dict, Any, Optional
-from datetime import datetime
 
 import httpx
 from pydantic import BaseModel, Field
-
-from app.settings.config import settings
 
 
 class MCPTool(BaseModel):

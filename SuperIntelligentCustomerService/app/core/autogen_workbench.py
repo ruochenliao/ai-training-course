@@ -4,17 +4,15 @@ AutoGen Workbench集成模块
 集成MCP工具到AutoGen AgentChat系统
 """
 import json
-import asyncio
-from typing import List, Dict, Any, Optional, Callable
-from datetime import datetime
+from typing import List, Dict, Any, Optional
 
-from autogen_core.tools import FunctionTool
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.base import TaskResult
 from autogen_core.model_context import BufferedChatCompletionContext
+from autogen_core.tools import FunctionTool
 
-from app.core.mcp_tools import MCP_TOOLS_REGISTRY, execute_mcp_tool
 from app.core.llms import get_model_client
+from app.core.mcp_tools import MCP_TOOLS_REGISTRY, execute_mcp_tool
 
 
 class MCPToolWrapper:
