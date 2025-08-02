@@ -30,7 +30,7 @@ class KnowledgeBaseUpdate(BaseModel):
 class KnowledgeBaseResponse(KnowledgeBaseBase):
     """知识库响应模型"""
     id: int
-    owner_id: str
+    owner_id: int
     is_public: bool
     settings: Optional[Dict[str, Any]]
     document_count: str

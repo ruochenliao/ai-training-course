@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from app.db.session import get_db
-from app.core.security import get_current_user_id
+from app.core.security import get_current_user
 from app.models.agent import Agent, AgentTemplate, AgentType, AgentStatus
 from app.models.user import User
 from app.schemas.agent import (
@@ -20,10 +20,43 @@ from app.schemas.agent import (
 router = APIRouter()
 
 
+@router.get("/debug")
+async def debug_auth(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    调试认证信息
+    """
+    # 测试数据库查询
+    try:
+        agent_count = db.query(Agent).count()
+        user_agents = db.query(Agent).filter(Agent.owner_id == current_user.id).count()
+        public_agents = db.query(Agent).filter(Agent.is_public == True).count()
+
+        return {
+            "user_id": current_user.id,
+            "username": current_user.username,
+            "is_active": current_user.is_active,
+            "is_superuser": current_user.is_superuser,
+            "total_agents": agent_count,
+            "user_agents": user_agents,
+            "public_agents": public_agents,
+            "message": "Authentication and database working correctly"
+        }
+    except Exception as e:
+        return {
+            "user_id": current_user.id,
+            "username": current_user.username,
+            "error": str(e),
+            "message": "Authentication working but database error"
+        }
+
+
 @router.post("/", response_model=AgentResponse)
 async def create_agent(
     agent_data: AgentCreate,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -39,7 +72,7 @@ async def create_agent(
         model_name=agent_data.model_name,
         temperature=str(agent_data.temperature) if agent_data.temperature else "0.7",
         max_tokens=str(agent_data.max_tokens) if agent_data.max_tokens else "2000",
-        owner_id=current_user_id,
+        owner_id=current_user.id,
         knowledge_base_ids=agent_data.knowledge_base_ids,
         is_public=agent_data.is_public or False
     )
@@ -58,32 +91,32 @@ async def get_agents(
     type: Optional[AgentType] = None,
     is_public: Optional[bool] = None,
     search: Optional[str] = None,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     获取智能体列表
     """
     query = db.query(Agent).filter(
-        (Agent.owner_id == current_user_id) | (Agent.is_public == True)
+        (Agent.owner_id == current_user.id) | (Agent.is_public == True)
     )
-    
+
     if type:
         query = query.filter(Agent.type == type)
-    
+
     if is_public is not None:
         query = query.filter(Agent.is_public == is_public)
-    
+
     if search:
         query = query.filter(
             (Agent.name.contains(search)) |
             (Agent.description.contains(search))
         )
-    
+
     agents = query.filter(Agent.is_active == True).order_by(
         Agent.updated_at.desc()
     ).offset(skip).limit(limit).all()
-    
+
     return agents
 
 
@@ -91,14 +124,14 @@ async def get_agents(
 async def get_my_agents(
     skip: int = 0,
     limit: int = 20,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     获取我的智能体列表
     """
     agents = db.query(Agent).filter(
-        Agent.owner_id == current_user_id,
+        Agent.owner_id == current_user.id,
         Agent.is_active == True
     ).order_by(Agent.updated_at.desc()).offset(skip).limit(limit).all()
     
@@ -132,7 +165,7 @@ async def get_agent_templates(
 @router.get("/{agent_id}", response_model=AgentResponse)
 async def get_agent(
     agent_id: int,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -147,7 +180,7 @@ async def get_agent(
         )
     
     # 检查权限：公开的智能体或者是自己的智能体
-    if not agent.is_public and agent.owner_id != current_user_id:
+    if not agent.is_public and agent.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="权限不足"
@@ -160,7 +193,7 @@ async def get_agent(
 async def update_agent(
     agent_id: int,
     agent_update: AgentUpdate,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -168,7 +201,7 @@ async def update_agent(
     """
     agent = db.query(Agent).filter(
         Agent.id == agent_id,
-        Agent.owner_id == current_user_id
+        Agent.owner_id == current_user.id
     ).first()
     
     if not agent:
@@ -194,7 +227,7 @@ async def update_agent(
 @router.delete("/{agent_id}")
 async def delete_agent(
     agent_id: int,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -202,7 +235,7 @@ async def delete_agent(
     """
     agent = db.query(Agent).filter(
         Agent.id == agent_id,
-        Agent.owner_id == current_user_id
+        Agent.owner_id == current_user.id
     ).first()
     
     if not agent:
@@ -221,7 +254,7 @@ async def delete_agent(
 @router.post("/{agent_id}/clone", response_model=AgentResponse)
 async def clone_agent(
     agent_id: int,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -236,7 +269,7 @@ async def clone_agent(
         )
     
     # 检查权限：公开的智能体或者是自己的智能体
-    if not original_agent.is_public and original_agent.owner_id != current_user_id:
+    if not original_agent.is_public and original_agent.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="权限不足"
@@ -253,7 +286,7 @@ async def clone_agent(
         model_name=original_agent.model_name,
         temperature=original_agent.temperature,
         max_tokens=original_agent.max_tokens,
-        owner_id=current_user_id,
+        owner_id=current_user.id,
         knowledge_base_ids=original_agent.knowledge_base_ids,
         is_public=False  # 克隆的智能体默认为私有
     )
@@ -268,7 +301,7 @@ async def clone_agent(
 @router.post("/{agent_id}/like")
 async def like_agent(
     agent_id: int,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -293,7 +326,7 @@ async def like_agent(
 @router.post("/templates/{template_id}/create", response_model=AgentResponse)
 async def create_agent_from_template(
     template_id: int,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -318,7 +351,7 @@ async def create_agent_from_template(
         type=AgentType.CUSTOM,  # 从模板创建的默认为自定义类型
         config=template.template_config,
         prompt_template=template.prompt_template,
-        owner_id=current_user_id,
+        owner_id=current_user.id,
         is_public=False
     )
     

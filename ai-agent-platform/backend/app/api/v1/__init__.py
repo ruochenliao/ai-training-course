@@ -4,7 +4,7 @@ API v1 路由模块
 
 from fastapi import APIRouter
 
-from app.api.v1 import health, auth, users, conversations, agents, knowledge, files
+from app.api.v1 import health, auth, users, conversations, agents, knowledge, files, system, chat, admin, templates
 
 # 创建API路由器
 api_router = APIRouter()
@@ -18,5 +18,8 @@ api_router.include_router(users.router, prefix="/users", tags=["用户管理"])
 api_router.include_router(agents.router, prefix="/agents", tags=["智能体"])
 api_router.include_router(knowledge.router, prefix="/knowledge-bases", tags=["知识库"])
 api_router.include_router(conversations.router, prefix="/conversations", tags=["对话"])
+api_router.include_router(chat.router, prefix="/chat", tags=["聊天"])
 api_router.include_router(files.router, prefix="/files", tags=["文件管理"])
-# api_router.include_router(admin.router, prefix="/admin", tags=["管理后台"])
+api_router.include_router(system.router, prefix="/system", tags=["系统管理"])
+api_router.include_router(templates.router, prefix="/templates", tags=["智能体模板"])
+api_router.include_router(admin.router, prefix="/admin", tags=["管理后台"])

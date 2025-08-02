@@ -115,7 +115,10 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Plus, Search, User, ChatDotRound, Star, MoreFilled
 } from '@element-plus/icons-vue'
-import { agentApi } from '@/api/agent'
+import { agentApi, type Agent } from '@/api/agent'
+import { formatTime } from '@/utils'
+import LoadingOverlay from '@/components/LoadingOverlay.vue'
+import ErrorBoundary from '@/components/ErrorBoundary.vue'
 
 const router = useRouter()
 
@@ -142,7 +145,7 @@ const searchParams = computed(() => ({
 const fetchAgents = async () => {
   loading.value = true
   try {
-    const response = await agentApi.getAgents(searchParams.value)
+    const response = await agentApi.getList(searchParams.value)
     agents.value = response.data
     total.value = response.total || response.data.length
   } catch (error) {
@@ -203,7 +206,7 @@ const handleCommand = async (command: string) => {
 
 const cloneAgent = async (id: number) => {
   try {
-    await agentApi.cloneAgent(id)
+    await agentApi.clone(id)
     ElMessage.success('智能体克隆成功')
     fetchAgents()
   } catch (error) {
@@ -217,8 +220,8 @@ const deleteAgent = async (id: number) => {
     await ElMessageBox.confirm('确定要删除这个智能体吗？', '确认删除', {
       type: 'warning'
     })
-    
-    await agentApi.deleteAgent(id)
+
+    await agentApi.delete(id)
     ElMessage.success('智能体删除成功')
     fetchAgents()
   } catch (error) {

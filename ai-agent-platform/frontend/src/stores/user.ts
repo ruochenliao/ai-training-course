@@ -16,6 +16,7 @@ export const useUserStore = defineStore('user', () => {
   const userRole = computed(() => userInfo.value?.role || '')
   const userName = computed(() => userInfo.value?.username || '')
   const userAvatar = computed(() => userInfo.value?.avatar || '')
+  const avatar = computed(() => userInfo.value?.avatar || '')
   
   // 登录
   const login = async (loginParams: LoginParams) => {
@@ -157,6 +158,7 @@ export const useUserStore = defineStore('user', () => {
     userRole,
     userName,
     userAvatar,
+    avatar,
 
     // 方法
     login,

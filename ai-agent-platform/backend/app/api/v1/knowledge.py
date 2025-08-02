@@ -9,8 +9,9 @@ import json
 from datetime import datetime
 
 from app.db.session import get_db
-from app.core.security import get_current_user_id
+from app.core.security import get_current_user
 from app.models.knowledge import KnowledgeBase, Document, DocumentChunk
+from app.models.user import User
 from app.schemas.knowledge import (
     KnowledgeBaseCreate,
     KnowledgeBaseResponse,
@@ -27,7 +28,7 @@ router = APIRouter()
 @router.post("/", response_model=KnowledgeBaseResponse)
 async def create_knowledge_base(
     kb_data: KnowledgeBaseCreate,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -36,7 +37,7 @@ async def create_knowledge_base(
     knowledge_base = KnowledgeBase(
         name=kb_data.name,
         description=kb_data.description,
-        owner_id=current_user_id,
+        owner_id=current_user.id,
         is_public=kb_data.is_public or False,
         settings=kb_data.settings or {}
     )
@@ -54,14 +55,14 @@ async def get_knowledge_bases(
     limit: int = 20,
     search: Optional[str] = None,
     is_public: Optional[bool] = None,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     获取知识库列表
     """
     query = db.query(KnowledgeBase).filter(
-        (KnowledgeBase.owner_id == current_user_id) | (KnowledgeBase.is_public == True)
+        (KnowledgeBase.owner_id == current_user.id) | (KnowledgeBase.is_public == True)
     )
     
     if search:
@@ -84,14 +85,14 @@ async def get_knowledge_bases(
 async def get_my_knowledge_bases(
     skip: int = 0,
     limit: int = 20,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     获取我的知识库列表
     """
     knowledge_bases = db.query(KnowledgeBase).filter(
-        KnowledgeBase.owner_id == current_user_id
+        KnowledgeBase.owner_id == current_user.id
     ).order_by(KnowledgeBase.updated_at.desc()).offset(skip).limit(limit).all()
     
     return knowledge_bases
@@ -100,7 +101,7 @@ async def get_my_knowledge_bases(
 @router.get("/{kb_id}", response_model=KnowledgeBaseResponse)
 async def get_knowledge_base(
     kb_id: int,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -115,7 +116,7 @@ async def get_knowledge_base(
         )
     
     # 检查权限
-    if not knowledge_base.is_public and knowledge_base.owner_id != current_user_id:
+    if not knowledge_base.is_public and knowledge_base.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="权限不足"
@@ -128,7 +129,7 @@ async def get_knowledge_base(
 async def update_knowledge_base(
     kb_id: int,
     kb_update: KnowledgeBaseUpdate,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -136,7 +137,7 @@ async def update_knowledge_base(
     """
     knowledge_base = db.query(KnowledgeBase).filter(
         KnowledgeBase.id == kb_id,
-        KnowledgeBase.owner_id == current_user_id
+        KnowledgeBase.owner_id == current_user.id
     ).first()
     
     if not knowledge_base:
@@ -160,7 +161,7 @@ async def update_knowledge_base(
 @router.delete("/{kb_id}")
 async def delete_knowledge_base(
     kb_id: int,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -168,7 +169,7 @@ async def delete_knowledge_base(
     """
     knowledge_base = db.query(KnowledgeBase).filter(
         KnowledgeBase.id == kb_id,
-        KnowledgeBase.owner_id == current_user_id
+        KnowledgeBase.owner_id == current_user.id
     ).first()
     
     if not knowledge_base:
@@ -188,7 +189,7 @@ async def get_documents(
     kb_id: int,
     skip: int = 0,
     limit: int = 20,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -202,7 +203,7 @@ async def get_documents(
             detail="知识库不存在"
         )
     
-    if not knowledge_base.is_public and knowledge_base.owner_id != current_user_id:
+    if not knowledge_base.is_public and knowledge_base.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="权限不足"
@@ -219,7 +220,7 @@ async def get_documents(
 async def upload_document(
     kb_id: int,
     file: UploadFile = File(...),
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -228,7 +229,7 @@ async def upload_document(
     # 验证知识库权限
     knowledge_base = db.query(KnowledgeBase).filter(
         KnowledgeBase.id == kb_id,
-        KnowledgeBase.owner_id == current_user_id
+        KnowledgeBase.owner_id == current_user.id
     ).first()
     
     if not knowledge_base:
@@ -286,7 +287,7 @@ async def upload_document(
 async def delete_document(
     kb_id: int,
     doc_id: int,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -295,7 +296,7 @@ async def delete_document(
     # 验证知识库权限
     knowledge_base = db.query(KnowledgeBase).filter(
         KnowledgeBase.id == kb_id,
-        KnowledgeBase.owner_id == current_user_id
+        KnowledgeBase.owner_id == current_user.id
     ).first()
     
     if not knowledge_base:
@@ -326,7 +327,7 @@ async def delete_document(
 async def search_knowledge_base(
     kb_id: int,
     search_request: SearchRequest,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -340,7 +341,7 @@ async def search_knowledge_base(
             detail="知识库不存在"
         )
     
-    if not knowledge_base.is_public and knowledge_base.owner_id != current_user_id:
+    if not knowledge_base.is_public and knowledge_base.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="权限不足"

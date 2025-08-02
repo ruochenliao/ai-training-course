@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.db.session import get_db
-from app.core.security import get_current_user_id, get_password_hash
+from app.core.security import get_current_user, get_password_hash
 from app.models.user import User
 from app.schemas.user import UserResponse, UserUpdate, ChangePassword
 
@@ -16,13 +16,13 @@ router = APIRouter()
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user(
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     获取当前用户信息
     """
-    user = db.query(User).filter(User.id == current_user_id).first()
+    user = db.query(User).filter(User.id == current_user.id).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -34,13 +34,13 @@ async def get_current_user(
 @router.put("/me", response_model=UserResponse)
 async def update_current_user(
     user_update: UserUpdate,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     更新当前用户信息
     """
-    user = db.query(User).filter(User.id == current_user_id).first()
+    user = db.query(User).filter(User.id == current_user.id).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -60,13 +60,13 @@ async def update_current_user(
 @router.post("/change-password")
 async def change_password(
     password_data: ChangePassword,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     修改密码
     """
-    user = db.query(User).filter(User.id == current_user_id).first()
+    user = db.query(User).filter(User.id == current_user.id).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -93,14 +93,14 @@ async def get_users(
     skip: int = 0,
     limit: int = 20,
     search: str = None,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     获取用户列表（管理员功能）
     """
     # 检查当前用户是否为管理员
-    current_user = db.query(User).filter(User.id == current_user_id).first()
+    current_user = db.query(User).filter(User.id == current_user.id).first()
     if not current_user or not current_user.is_superuser:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -124,14 +124,14 @@ async def get_users(
 @router.get("/{user_id}", response_model=UserResponse)
 async def get_user(
     user_id: int,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     获取指定用户信息
     """
     # 检查权限：只能查看自己的信息或管理员可以查看所有用户
-    current_user = db.query(User).filter(User.id == current_user_id).first()
+    current_user = db.query(User).filter(User.id == current_user.id).first()
     if not current_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -158,14 +158,14 @@ async def get_user(
 async def update_user_status(
     user_id: int,
     is_active: bool,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     更新用户状态（管理员功能）
     """
     # 检查当前用户是否为管理员
-    current_user = db.query(User).filter(User.id == current_user_id).first()
+    current_user = db.query(User).filter(User.id == current_user.id).first()
     if not current_user or not current_user.is_superuser:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

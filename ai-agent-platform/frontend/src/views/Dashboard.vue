@@ -137,6 +137,8 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { Avatar, Document, ChatDotRound, User, Plus, FolderAdd } from '@element-plus/icons-vue'
 import { formatTime } from '@/utils'
+import { agentApi } from '@/api/agent'
+import { systemApi } from '@/api/system'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -170,19 +172,31 @@ const startChat = () => {
 // 获取统计数据
 const fetchStats = async () => {
   try {
-    // 这里应该调用实际的API
-    // const response = await systemApi.getStats()
-    // stats.value = response.data
-    
-    // 模拟数据
+    // 获取智能体数量
+    const agentsResponse = await agentApi.getList({ limit: 1000 })
+    const agentCount = agentsResponse.data?.length || 0
+
+    // 获取系统健康状态
+    const healthResponse = await systemApi.getHealth()
+
+    // 更新统计数据
+    stats.value = {
+      agentCount,
+      knowledgeCount: 8, // 暂时使用模拟数据
+      todayChats: 156,   // 暂时使用模拟数据
+      onlineUsers: 23    // 暂时使用模拟数据
+    }
+
+    console.log('统计数据获取成功:', stats.value)
+  } catch (error) {
+    console.error('获取统计数据失败:', error)
+    // 使用模拟数据作为后备
     stats.value = {
       agentCount: 12,
       knowledgeCount: 8,
       todayChats: 156,
       onlineUsers: 23
     }
-  } catch (error) {
-    console.error('获取统计数据失败:', error)
   }
 }
 

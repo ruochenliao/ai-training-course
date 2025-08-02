@@ -13,7 +13,8 @@ from datetime import datetime
 import mimetypes
 
 from app.db.session import get_db
-from app.core.security import get_current_user_id
+from app.core.security import get_current_user
+from app.models.user import User
 from app.core.config import settings
 from app.models.knowledge import UploadedFile
 from app.schemas.files import FileResponse, FileUploadResponse
@@ -67,7 +68,7 @@ def generate_unique_filename(original_filename: str) -> str:
 async def upload_file(
     file: UploadFile = File(...),
     description: Optional[str] = Form(None),
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -108,7 +109,7 @@ async def upload_file(
         file_size=len(content),
         content_type=file.content_type,
         description=description,
-        uploaded_by=current_user_id
+        uploaded_by=current_user.id
     )
     
     db.add(uploaded_file)
@@ -129,7 +130,7 @@ async def upload_file(
 async def upload_multiple_files(
     files: List[UploadFile] = File(...),
     descriptions: Optional[List[str]] = Form(None),
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -183,7 +184,7 @@ async def upload_multiple_files(
                 file_size=len(content),
                 content_type=file.content_type,
                 description=description,
-                uploaded_by=current_user_id
+                uploaded_by=current_user.id
             )
             
             db.add(uploaded_file)
@@ -213,13 +214,13 @@ async def get_files(
     skip: int = 0,
     limit: int = 20,
     file_type: Optional[str] = None,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     获取用户上传的文件列表
     """
-    query = db.query(UploadedFile).filter(UploadedFile.uploaded_by == current_user_id)
+    query = db.query(UploadedFile).filter(UploadedFile.uploaded_by == current_user.id)
     
     if file_type:
         query = query.filter(UploadedFile.content_type.contains(file_type))
@@ -232,7 +233,7 @@ async def get_files(
 @router.get("/{file_id}", response_model=FileResponse)
 async def get_file_info(
     file_id: int,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -240,7 +241,7 @@ async def get_file_info(
     """
     file_record = db.query(UploadedFile).filter(
         UploadedFile.id == file_id,
-        UploadedFile.uploaded_by == current_user_id
+        UploadedFile.uploaded_by == current_user.id
     ).first()
     
     if not file_record:
@@ -255,7 +256,7 @@ async def get_file_info(
 @router.get("/{file_id}/download")
 async def download_file(
     file_id: int,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -263,7 +264,7 @@ async def download_file(
     """
     file_record = db.query(UploadedFile).filter(
         UploadedFile.id == file_id,
-        UploadedFile.uploaded_by == current_user_id
+        UploadedFile.uploaded_by == current_user.id
     ).first()
     
     if not file_record:
@@ -288,7 +289,7 @@ async def download_file(
 @router.delete("/{file_id}")
 async def delete_file(
     file_id: int,
-    current_user_id: str = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -296,7 +297,7 @@ async def delete_file(
     """
     file_record = db.query(UploadedFile).filter(
         UploadedFile.id == file_id,
-        UploadedFile.uploaded_by == current_user_id
+        UploadedFile.uploaded_by == current_user.id
     ).first()
     
     if not file_record:

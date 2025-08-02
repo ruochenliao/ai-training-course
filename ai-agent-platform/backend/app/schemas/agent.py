@@ -51,7 +51,7 @@ class AgentResponse(AgentBase):
     model_name: Optional[str]
     temperature: str
     max_tokens: str
-    owner_id: str
+    owner_id: int
     knowledge_base_ids: Optional[List[int]]
     chat_count: str
     like_count: str

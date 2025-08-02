@@ -23,40 +23,121 @@ const routes: Array<RouteRecordRaw> = [
     }
   },
   {
-    path: '/dashboard',
-    name: 'Dashboard',
-    component: () => import('@/views/Dashboard.vue'),
+    path: '/',
+    component: () => import('@/components/Layout.vue'),
     meta: {
-      title: '仪表盘',
       requiresAuth: true
-    }
-  },
-  {
-    path: '/agents',
-    name: 'AgentList',
-    component: () => import('@/views/agents/AgentList.vue'),
-    meta: {
-      title: '智能体管理',
-      requiresAuth: true
-    }
-  },
-  {
-    path: '/agents/:id',
-    name: 'AgentDetail',
-    component: () => import('@/views/agents/AgentDetail.vue'),
-    meta: {
-      title: '智能体详情',
-      requiresAuth: true
-    }
-  },
-  {
-    path: '/knowledge',
-    name: 'KnowledgeList',
-    component: () => import('@/views/knowledge/KnowledgeList.vue'),
-    meta: {
-      title: '知识库管理',
-      requiresAuth: true
-    }
+    },
+    children: [
+      {
+        path: 'dashboard',
+        name: 'Dashboard',
+        component: () => import('@/views/Dashboard.vue'),
+        meta: {
+          title: '仪表盘',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'agents',
+        name: 'AgentList',
+        component: () => import('@/views/agents/AgentList.vue'),
+        meta: {
+          title: '智能体管理',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'agents/create',
+        name: 'AgentCreate',
+        component: () => import('@/views/agents/AgentCreate.vue'),
+        meta: {
+          title: '创建智能体',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'agents/:id/edit',
+        name: 'AgentEdit',
+        component: () => import('@/views/agents/AgentEdit.vue'),
+        meta: {
+          title: '编辑智能体',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'agents/:id',
+        name: 'AgentDetail',
+        component: () => import('@/views/agents/AgentDetail.vue'),
+        meta: {
+          title: '智能体详情',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'knowledge',
+        name: 'KnowledgeList',
+        component: () => import('@/views/knowledge/KnowledgeList.vue'),
+        meta: {
+          title: '知识库管理',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'knowledge/create',
+        name: 'KnowledgeCreate',
+        component: () => import('@/views/knowledge/KnowledgeCreate.vue'),
+        meta: {
+          title: '创建知识库',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'knowledge/:id/upload',
+        name: 'KnowledgeUpload',
+        component: () => import('@/views/knowledge/KnowledgeUpload.vue'),
+        meta: {
+          title: '文件上传',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'chat',
+        name: 'Chat',
+        component: () => import('@/views/Chat.vue'),
+        meta: {
+          title: '对话管理',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'analytics',
+        name: 'Analytics',
+        component: () => import('@/views/Analytics.vue'),
+        meta: {
+          title: '数据分析',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'settings',
+        name: 'Settings',
+        component: () => import('@/views/Settings.vue'),
+        meta: {
+          title: '系统设置',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'profile',
+        name: 'Profile',
+        component: () => import('@/views/Profile.vue'),
+        meta: {
+          title: '个人资料',
+          requiresAuth: true
+        }
+      }
+    ]
   },
   {
     path: '/:pathMatch(.*)*',

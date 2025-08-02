@@ -18,7 +18,7 @@ from app.db.session import get_db
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # JWT Bearer认证
-security = HTTPBearer()
+security = HTTPBearer(auto_error=True)
 
 
 def create_access_token(
@@ -98,14 +98,14 @@ async def get_current_user_id(
     """
     token = credentials.credentials
     user_id = verify_token(token)
-    
+
     if user_id is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="无效的认证凭据",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     return user_id
 
 

@@ -43,7 +43,7 @@ class ConversationResponse(ConversationBase):
     对话响应模式
     """
     id: int
-    user_id: str
+    user_id: int
     agent_id: Optional[int] = None
     status: str
     is_active: bool

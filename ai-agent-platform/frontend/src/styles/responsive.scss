@@ -1,0 +1,248 @@
+// 响应式断点
+$breakpoints: (
+  xs: 480px,
+  sm: 768px,
+  md: 992px,
+  lg: 1200px,
+  xl: 1920px
+);
+
+// 媒体查询混入
+@mixin respond-to($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    @media (min-width: map-get($breakpoints, $breakpoint)) {
+      @content;
+    }
+  } @else {
+    @warn "Unknown breakpoint: #{$breakpoint}";
+  }
+}
+
+@mixin respond-below($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    @media (max-width: map-get($breakpoints, $breakpoint) - 1px) {
+      @content;
+    }
+  } @else {
+    @warn "Unknown breakpoint: #{$breakpoint}";
+  }
+}
+
+// 响应式工具类
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 16px;
+  
+  @include respond-to(sm) {
+    max-width: 720px;
+    padding: 0 24px;
+  }
+  
+  @include respond-to(md) {
+    max-width: 960px;
+  }
+  
+  @include respond-to(lg) {
+    max-width: 1140px;
+  }
+  
+  @include respond-to(xl) {
+    max-width: 1320px;
+  }
+}
+
+// 隐藏/显示工具类
+.hidden-xs {
+  @include respond-below(sm) {
+    display: none !important;
+  }
+}
+
+.hidden-sm {
+  @include respond-below(md) {
+    display: none !important;
+  }
+}
+
+.hidden-md {
+  @include respond-below(lg) {
+    display: none !important;
+  }
+}
+
+.visible-xs {
+  display: none !important;
+  
+  @include respond-below(sm) {
+    display: block !important;
+  }
+}
+
+.visible-sm {
+  display: none !important;
+  
+  @include respond-below(md) {
+    display: block !important;
+  }
+}
+
+// 文字大小响应式
+.text-responsive {
+  font-size: 14px;
+  
+  @include respond-to(sm) {
+    font-size: 16px;
+  }
+  
+  @include respond-to(md) {
+    font-size: 18px;
+  }
+}
+
+// 间距响应式
+.padding-responsive {
+  padding: 12px;
+  
+  @include respond-to(sm) {
+    padding: 16px;
+  }
+  
+  @include respond-to(md) {
+    padding: 24px;
+  }
+}
+
+.margin-responsive {
+  margin: 12px;
+  
+  @include respond-to(sm) {
+    margin: 16px;
+  }
+  
+  @include respond-to(md) {
+    margin: 24px;
+  }
+}
+
+// 网格系统
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -8px;
+  
+  @include respond-to(sm) {
+    margin: 0 -12px;
+  }
+}
+
+.col {
+  flex: 1;
+  padding: 0 8px;
+  
+  @include respond-to(sm) {
+    padding: 0 12px;
+  }
+}
+
+// 移动端优化
+@include respond-below(sm) {
+  .mobile-stack {
+    flex-direction: column !important;
+    
+    > * {
+      width: 100% !important;
+      margin-bottom: 12px;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+  
+  .mobile-center {
+    text-align: center !important;
+  }
+  
+  .mobile-full-width {
+    width: 100% !important;
+  }
+  
+  // 表格响应式
+  .table-responsive {
+    overflow-x: auto;
+    
+    table {
+      min-width: 600px;
+    }
+  }
+  
+  // 卡片响应式
+  .card-mobile {
+    margin: 8px;
+    border-radius: 8px;
+  }
+  
+  // 按钮响应式
+  .btn-mobile {
+    width: 100%;
+    margin-bottom: 8px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// 平板优化
+@include respond-below(md) {
+  .tablet-stack {
+    flex-direction: column !important;
+  }
+  
+  .tablet-center {
+    text-align: center !important;
+  }
+}
+
+// 触摸设备优化
+@media (hover: none) and (pointer: coarse) {
+  .touch-friendly {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .hover-effect:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+// 高分辨率屏幕优化
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .high-dpi {
+    // 高分辨率屏幕特定样式
+  }
+}
+
+// 打印样式
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+  
+  body {
+    font-size: 12pt;
+    line-height: 1.4;
+    color: #000;
+    background: #fff;
+  }
+  
+  .page-break {
+    page-break-before: always;
+  }
+}
