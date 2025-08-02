@@ -1,7 +1,7 @@
 // 全局样式文件
 
 // 导入变量
-@import './variables.scss';
+@use './variables.scss' as *;
 
 // 全局重置样式
 * {

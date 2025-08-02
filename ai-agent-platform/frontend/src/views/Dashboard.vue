@@ -12,7 +12,7 @@
             <div class="stat-content">
               <div class="stat-icon">
                 <el-icon size="40" color="#409eff">
-                  <Robot />
+                  <Avatar />
                 </el-icon>
               </div>
               <div class="stat-info">
@@ -135,7 +135,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { Robot, Document, ChatDotRound, User, Plus, FolderAdd } from '@element-plus/icons-vue'
+import { Avatar, Document, ChatDotRound, User, Plus, FolderAdd } from '@element-plus/icons-vue'
 import { formatTime } from '@/utils'
 
 const router = useRouter()
@@ -156,15 +156,15 @@ const currentDate = computed(() => {
 
 // 快速操作
 const createAgent = () => {
-  router.push('/agents/create')
+  router.push('/agents')
 }
 
 const createKnowledge = () => {
-  router.push('/knowledge/create')
+  router.push('/knowledge')
 }
 
 const startChat = () => {
-  router.push('/chat')
+  router.push('/agents')
 }
 
 // 获取统计数据

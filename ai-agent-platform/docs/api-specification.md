@@ -29,25 +29,492 @@
 ### 2.1 用户登录
 ```http
 POST /api/v1/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+username=user@example.com&password=password123
+```
+
+**响应**:
+```json
+{
+  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+  "refresh_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+  "token_type": "bearer",
+  "expires_in": 1800,
+  "user": {
+    "id": 1,
+    "username": "user",
+    "email": "user@example.com",
+    "full_name": "User Name",
+    "is_active": true,
+    "is_superuser": false
+  }
+}
+```
+
+### 2.2 用户注册
+```http
+POST /api/v1/auth/register
 Content-Type: application/json
 
 {
-  "username": "user@example.com",
-  "password": "password123"
+  "username": "newuser",
+  "email": "newuser@example.com",
+  "password": "password123",
+  "full_name": "New User"
+}
+```
+
+### 2.3 刷新令牌
+```http
+POST /api/v1/auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+}
+```
+
+### 2.4 用户登出
+```http
+POST /api/v1/auth/logout
+Authorization: Bearer {access_token}
+```
+
+## 3. 用户管理接口
+
+### 3.1 获取当前用户信息
+```http
+GET /api/v1/users/me
+Authorization: Bearer {access_token}
+```
+
+### 3.2 更新当前用户信息
+```http
+PUT /api/v1/users/me
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "full_name": "Updated Name",
+  "avatar_url": "https://example.com/avatar.jpg"
+}
+```
+
+### 3.3 修改密码
+```http
+POST /api/v1/users/change-password
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "old_password": "oldpass123",
+  "new_password": "newpass123"
+}
+```
+
+## 4. 智能体管理接口
+
+### 4.1 获取智能体列表
+```http
+GET /api/v1/agents?skip=0&limit=20&search=keyword&type=chat&is_public=true
+Authorization: Bearer {access_token}
+```
+
+**响应**:
+```json
+[
+  {
+    "id": 1,
+    "name": "智能客服",
+    "description": "专业的客服助手",
+    "avatar_url": "https://example.com/avatar.jpg",
+    "type": "chat",
+    "status": "active",
+    "config": {},
+    "prompt_template": "你是一个专业的客服助手...",
+    "model_name": "gpt-4",
+    "temperature": "0.7",
+    "max_tokens": "2000",
+    "owner_id": "1",
+    "knowledge_base_ids": [1, 2],
+    "chat_count": "156",
+    "like_count": "23",
+    "is_public": true,
+    "is_active": true,
+    "created_at": "2025-08-02T10:30:00Z",
+    "updated_at": "2025-08-02T10:30:00Z"
+  }
+]
+```
+
+### 4.2 获取我的智能体列表
+```http
+GET /api/v1/agents/my?skip=0&limit=20
+Authorization: Bearer {access_token}
+```
+
+### 4.3 获取智能体详情
+```http
+GET /api/v1/agents/{agent_id}
+Authorization: Bearer {access_token}
+```
+
+### 4.4 创建智能体
+```http
+POST /api/v1/agents
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "name": "新智能体",
+  "description": "智能体描述",
+  "type": "chat",
+  "prompt_template": "你是一个...",
+  "model_name": "gpt-4",
+  "temperature": 0.7,
+  "max_tokens": 2000,
+  "knowledge_base_ids": [1],
+  "is_public": false
+}
+```
+
+### 4.5 更新智能体
+```http
+PUT /api/v1/agents/{agent_id}
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "name": "更新的名称",
+  "description": "更新的描述"
+}
+```
+
+### 4.6 删除智能体
+```http
+DELETE /api/v1/agents/{agent_id}
+Authorization: Bearer {access_token}
+```
+
+### 4.7 克隆智能体
+```http
+POST /api/v1/agents/{agent_id}/clone
+Authorization: Bearer {access_token}
+```
+
+### 4.8 点赞智能体
+```http
+POST /api/v1/agents/{agent_id}/like
+Authorization: Bearer {access_token}
+```
+
+### 4.9 获取智能体模板
+```http
+GET /api/v1/agents/templates?skip=0&limit=20&category=customer_service
+Authorization: Bearer {access_token}
+```
+
+### 4.10 从模板创建智能体
+```http
+POST /api/v1/agents/templates/{template_id}/create
+Authorization: Bearer {access_token}
+```
+
+## 5. 对话管理接口
+
+### 5.1 创建对话
+```http
+POST /api/v1/conversations
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "title": "与智能客服的对话",
+  "agent_id": 1
+}
+```
+
+### 5.2 获取对话列表
+```http
+GET /api/v1/conversations?skip=0&limit=20&agent_id=1
+Authorization: Bearer {access_token}
+```
+
+### 5.3 获取对话详情
+```http
+GET /api/v1/conversations/{conversation_id}
+Authorization: Bearer {access_token}
+```
+
+### 5.4 更新对话
+```http
+PUT /api/v1/conversations/{conversation_id}
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "title": "新的对话标题"
+}
+```
+
+### 5.5 删除对话
+```http
+DELETE /api/v1/conversations/{conversation_id}
+Authorization: Bearer {access_token}
+```
+
+### 5.6 获取对话消息
+```http
+GET /api/v1/conversations/{conversation_id}/messages?skip=0&limit=50
+Authorization: Bearer {access_token}
+```
+
+### 5.7 发送消息
+```http
+POST /api/v1/conversations/{conversation_id}/messages
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "content": "你好，我需要帮助",
+  "message_type": "text"
+}
+```
+
+### 5.8 发送消息（流式响应）
+```http
+POST /api/v1/conversations/{conversation_id}/messages/stream
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "content": "请帮我分析这个问题",
+  "message_type": "text"
+}
+```
+
+**响应**（Server-Sent Events）:
+```
+data: {"content": "我", "message_id": 123}
+
+data: {"content": "来", "message_id": 123}
+
+data: {"content": "帮", "message_id": 123}
+
+data: {"done": true, "message_id": 123}
+```
+
+## 6. 知识库管理接口
+
+### 6.1 创建知识库
+```http
+POST /api/v1/knowledge-bases
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "name": "产品知识库",
+  "description": "包含所有产品相关信息",
+  "is_public": false,
+  "settings": {
+    "chunk_size": 1000,
+    "chunk_overlap": 200
+  }
+}
+```
+
+### 6.2 获取知识库列表
+```http
+GET /api/v1/knowledge-bases?skip=0&limit=20&search=keyword&is_public=true
+Authorization: Bearer {access_token}
+```
+
+**响应**:
+```json
+[
+  {
+    "id": 1,
+    "name": "产品知识库",
+    "description": "包含所有产品相关信息",
+    "owner_id": "1",
+    "is_public": false,
+    "settings": {},
+    "document_count": "25",
+    "total_size": "1048576",
+    "created_at": "2025-08-02T10:30:00Z",
+    "updated_at": "2025-08-02T10:30:00Z"
+  }
+]
+```
+
+### 6.3 获取我的知识库列表
+```http
+GET /api/v1/knowledge-bases/my?skip=0&limit=20
+Authorization: Bearer {access_token}
+```
+
+### 6.4 获取知识库详情
+```http
+GET /api/v1/knowledge-bases/{kb_id}
+Authorization: Bearer {access_token}
+```
+
+### 6.5 更新知识库
+```http
+PUT /api/v1/knowledge-bases/{kb_id}
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "name": "更新的知识库名称",
+  "description": "更新的描述",
+  "is_public": true
+}
+```
+
+### 6.6 删除知识库
+```http
+DELETE /api/v1/knowledge-bases/{kb_id}
+Authorization: Bearer {access_token}
+```
+
+### 6.7 获取知识库文档列表
+```http
+GET /api/v1/knowledge-bases/{kb_id}/documents?skip=0&limit=20
+Authorization: Bearer {access_token}
+```
+
+### 6.8 上传文档到知识库
+```http
+POST /api/v1/knowledge-bases/{kb_id}/upload
+Authorization: Bearer {access_token}
+Content-Type: multipart/form-data
+
+file: [binary file data]
+```
+
+**响应**:
+```json
+{
+  "message": "文档上传成功",
+  "document_id": 123,
+  "status": "processing"
+}
+```
+
+### 6.9 删除文档
+```http
+DELETE /api/v1/knowledge-bases/{kb_id}/documents/{doc_id}
+Authorization: Bearer {access_token}
+```
+
+### 6.10 搜索知识库
+```http
+POST /api/v1/knowledge-bases/{kb_id}/search
+Authorization: Bearer {access_token}
+Content-Type: application/json
+
+{
+  "query": "如何使用产品功能",
+  "top_k": 5,
+  "score_threshold": 0.7
 }
 ```
 
 **响应**:
 ```json
 {
-  "code": 200,
-  "message": "Login successful",
-  "data": {
-    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-    "refresh_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-    "token_type": "bearer",
-    "expires_in": 3600,
-    "user": {
+  "query": "如何使用产品功能",
+  "results": [
+    {
+      "content": "产品功能使用说明...",
+      "score": 0.95,
+      "document_id": 123,
+      "chunk_id": 456,
+      "metadata": {}
+    }
+  ],
+  "total": 1
+}
+```
+
+## 7. 文件管理接口
+
+### 7.1 单文件上传
+```http
+POST /api/v1/files/upload
+Authorization: Bearer {access_token}
+Content-Type: multipart/form-data
+
+file: [binary file data]
+description: 文件描述（可选）
+```
+
+**响应**:
+```json
+{
+  "file_id": 123,
+  "original_filename": "document.pdf",
+  "file_size": 1048576,
+  "content_type": "application/pdf",
+  "upload_url": "/api/v1/files/123",
+  "message": "文件上传成功"
+}
+```
+
+### 7.2 多文件上传
+```http
+POST /api/v1/files/upload/multiple
+Authorization: Bearer {access_token}
+Content-Type: multipart/form-data
+
+files: [multiple binary file data]
+descriptions: ["描述1", "描述2"]（可选）
+```
+
+### 7.3 获取文件列表
+```http
+GET /api/v1/files?skip=0&limit=20&file_type=pdf
+Authorization: Bearer {access_token}
+```
+
+### 7.4 获取文件信息
+```http
+GET /api/v1/files/{file_id}
+Authorization: Bearer {access_token}
+```
+
+### 7.5 下载文件
+```http
+GET /api/v1/files/{file_id}/download
+Authorization: Bearer {access_token}
+```
+
+### 7.6 删除文件
+```http
+DELETE /api/v1/files/{file_id}
+Authorization: Bearer {access_token}
+```
+
+### 7.7 获取支持的文件类型
+```http
+GET /api/v1/files/types/supported
+```
+
+**响应**:
+```json
+{
+  "supported_types": {
+    "application/pdf": [".pdf"],
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+    "text/plain": [".txt"],
+    "text/markdown": [".md"]
+  },
+  "max_file_size": 52428800,
+  "max_file_size_mb": 50.0
+}
+```
       "id": 1,
       "username": "user@example.com",
       "full_name": "John Doe",

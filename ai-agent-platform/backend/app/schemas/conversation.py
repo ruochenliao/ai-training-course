@@ -20,16 +20,22 @@ class ConversationBase(BaseModel):
     """
     对话基础模式
     """
-    agent_type: AgentType
     title: Optional[str] = None
-    context: Optional[Dict[str, Any]] = None
 
 
 class ConversationCreate(ConversationBase):
     """
     创建对话模式
     """
-    pass
+    agent_id: int
+
+
+class ConversationUpdate(BaseModel):
+    """
+    更新对话模式
+    """
+    title: Optional[str] = None
+    status: Optional[str] = None
 
 
 class ConversationResponse(ConversationBase):
@@ -37,11 +43,13 @@ class ConversationResponse(ConversationBase):
     对话响应模式
     """
     id: int
-    user_id: int
+    user_id: str
+    agent_id: Optional[int] = None
+    status: str
     is_active: bool
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -50,17 +58,15 @@ class MessageBase(BaseModel):
     """
     消息基础模式
     """
-    role: MessageRole
     content: str
-    metadata: Optional[Dict[str, Any]] = None
-    attachments: Optional[List[Dict[str, Any]]] = None
+    message_type: Optional[str] = "text"
 
 
 class MessageCreate(MessageBase):
     """
     创建消息模式
     """
-    conversation_id: int
+    pass
 
 
 class MessageResponse(MessageBase):
@@ -69,10 +75,10 @@ class MessageResponse(MessageBase):
     """
     id: int
     conversation_id: int
-    feedback: Optional[FeedbackType] = None
-    feedback_comment: Optional[str] = None
+    role: str
+    tokens: Optional[int] = None
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 

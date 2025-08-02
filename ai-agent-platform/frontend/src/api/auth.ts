@@ -31,9 +31,11 @@ export interface UserInfo {
   id: number
   username: string
   email: string
-  avatar?: string
-  role: string
+  full_name?: string
+  avatar_url?: string
   is_active: boolean
+  is_superuser: boolean
+  last_login_at?: string
   created_at: string
   updated_at: string
 }
@@ -42,10 +44,18 @@ export interface UserInfo {
 export const authApi = {
   // 登录
   login: (data: LoginParams): Promise<ApiResponse<LoginResponse>> => {
+    // 转换为form-data格式，并去除前后空格
+    const params = new URLSearchParams()
+    params.append('username', data.username.trim())
+    params.append('password', data.password.trim())
+
     return request({
       url: API_PATHS.AUTH.LOGIN,
       method: 'post',
-      data
+      data: params,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
     })
   },
 

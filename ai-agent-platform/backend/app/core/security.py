@@ -9,8 +9,10 @@ from passlib.context import CryptContext
 from fastapi import HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends, Request
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.db.session import get_db
 
 # 密码加密上下文
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -154,9 +156,55 @@ def check_rate_limit(request: Request) -> bool:
     client_ip = request.client.host
     user_agent = request.headers.get("user-agent", "")
     key = f"{client_ip}:{user_agent}"
-    
+
     return rate_limiter.is_allowed(
         key,
         limit=settings.RATE_LIMIT_REQUESTS,
         window=settings.RATE_LIMIT_WINDOW
     )
+
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db)
+) -> "User":
+    """
+    获取当前用户（依赖注入）
+    """
+    from app.models.user import User
+
+    try:
+        # 验证token并获取用户ID
+        user_id = verify_token(credentials.credentials)
+
+        if user_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="无效的认证凭据",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # 从数据库获取用户信息
+        user = db.query(User).filter(User.id == int(user_id)).first()
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="用户不存在",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="用户已被禁用",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        return user
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="无效的认证凭据",
+            headers={"WWW-Authenticate": "Bearer"},
+        )

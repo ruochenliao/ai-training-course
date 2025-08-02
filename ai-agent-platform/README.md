@@ -135,8 +135,6 @@ ai-agent-platform/
 │   └── api-specification.md
 ├── docker/            # Docker配置文件
 ├── scripts/           # 部署和工具脚本
-├── task.md           # 详细任务清单
-├── todolist.md       # 待办事项列表
 └── README.md         # 项目说明
 ```
 

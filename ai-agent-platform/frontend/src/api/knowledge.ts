@@ -67,67 +67,73 @@ export interface UploadFileParams {
 // 知识库API接口
 export const knowledgeApi = {
   // 获取知识库列表
-  getList: (params?: KnowledgeListParams): Promise<ApiResponse<KnowledgeListResponse>> => {
+  getKnowledgeBases: (params?: any): Promise<ApiResponse<Knowledge[]>> => {
     return request({
-      url: API_PATHS.KNOWLEDGE.LIST,
+      url: '/api/v1/knowledge-bases',
+      method: 'get',
+      params
+    })
+  },
+
+  // 获取我的知识库列表
+  getMyKnowledgeBases: (params?: any): Promise<ApiResponse<Knowledge[]>> => {
+    return request({
+      url: '/api/v1/knowledge-bases/my',
       method: 'get',
       params
     })
   },
 
   // 获取知识库详情
-  getDetail: (id: number): Promise<ApiResponse<Knowledge>> => {
+  getKnowledgeBase: (id: number): Promise<ApiResponse<Knowledge>> => {
     return request({
-      url: `${API_PATHS.KNOWLEDGE.DETAIL}/${id}`,
+      url: `/api/v1/knowledge-bases/${id}`,
       method: 'get'
     })
   },
 
   // 创建知识库
-  create: (data: CreateKnowledgeParams): Promise<ApiResponse<Knowledge>> => {
+  createKnowledgeBase: (data: CreateKnowledgeParams): Promise<ApiResponse<Knowledge>> => {
     return request({
-      url: API_PATHS.KNOWLEDGE.CREATE,
+      url: '/api/v1/knowledge-bases',
       method: 'post',
       data
     })
   },
 
   // 更新知识库
-  update: (id: number, data: UpdateKnowledgeParams): Promise<ApiResponse<Knowledge>> => {
+  updateKnowledgeBase: (id: number, data: UpdateKnowledgeParams): Promise<ApiResponse<Knowledge>> => {
     return request({
-      url: `${API_PATHS.KNOWLEDGE.UPDATE}/${id}`,
+      url: `/api/v1/knowledge-bases/${id}`,
       method: 'put',
       data
     })
   },
 
   // 删除知识库
-  delete: (id: number): Promise<ApiResponse<null>> => {
+  deleteKnowledgeBase: (id: number): Promise<ApiResponse<null>> => {
     return request({
-      url: `${API_PATHS.KNOWLEDGE.DELETE}/${id}`,
+      url: `/api/v1/knowledge-bases/${id}`,
       method: 'delete'
     })
   },
 
-  // 获取知识库文件列表
-  getFiles: (knowledgeId: number, params?: { page?: number; size?: number }): Promise<ApiResponse<{ items: KnowledgeFile[]; total: number }>> => {
+  // 获取知识库文档列表
+  getDocuments: (kbId: number, params?: any): Promise<ApiResponse<any[]>> => {
     return request({
-      url: `${API_PATHS.KNOWLEDGE.DETAIL}/${knowledgeId}/files`,
+      url: `/api/v1/knowledge-bases/${kbId}/documents`,
       method: 'get',
       params
     })
   },
 
-  // 上传文件到知识库
-  uploadFiles: (data: UploadFileParams): Promise<ApiResponse<KnowledgeFile[]>> => {
+  // 上传文档到知识库
+  uploadDocument: (kbId: number, file: File): Promise<ApiResponse<any>> => {
     const formData = new FormData()
-    formData.append('knowledge_id', data.knowledge_id.toString())
-    data.files.forEach(file => {
-      formData.append('files', file)
-    })
+    formData.append('file', file)
 
     return request({
-      url: API_PATHS.KNOWLEDGE.UPLOAD,
+      url: `/api/v1/knowledge-bases/${kbId}/upload`,
       method: 'post',
       data: formData,
       headers: {
@@ -136,11 +142,20 @@ export const knowledgeApi = {
     })
   },
 
-  // 删除知识库文件
-  deleteFile: (knowledgeId: number, fileId: number): Promise<ApiResponse<null>> => {
+  // 删除文档
+  deleteDocument: (kbId: number, docId: number): Promise<ApiResponse<null>> => {
     return request({
-      url: `${API_PATHS.KNOWLEDGE.DETAIL}/${knowledgeId}/files/${fileId}`,
+      url: `/api/v1/knowledge-bases/${kbId}/documents/${docId}`,
       method: 'delete'
+    })
+  },
+
+  // 搜索知识库
+  searchKnowledgeBase: (kbId: number, data: any): Promise<ApiResponse<any>> => {
+    return request({
+      url: `/api/v1/knowledge-bases/${kbId}/search`,
+      method: 'post',
+      data
     })
   }
 }

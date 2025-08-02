@@ -67,3 +67,18 @@ class TokenPayload(BaseModel):
     """
     sub: Optional[str] = None
     exp: Optional[int] = None
+
+
+class UserResponse(BaseModel):
+    """
+    用户响应模式
+    """
+    id: int
+    username: str
+    email: str
+    full_name: Optional[str] = None
+    is_active: bool
+    is_superuser: bool
+
+    class Config:
+        from_attributes = True

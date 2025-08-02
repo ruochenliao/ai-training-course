@@ -7,13 +7,14 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
 
-from app.core.database import get_db
+from app.db.session import get_db
 from app.core.security import (
-    create_access_token, 
+    create_access_token,
     create_refresh_token,
     verify_password,
     get_password_hash,
-    verify_token
+    verify_token,
+    get_current_user
 )
 from app.core.config import settings
 from app.models.user import User
@@ -32,10 +33,10 @@ async def login(
     """
     # 查找用户
     user = db.query(User).filter(
-        (User.username == form_data.username) | 
+        (User.username == form_data.username) |
         (User.email == form_data.username)
     ).first()
-    
+
     if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -155,6 +156,27 @@ async def refresh_token(
         "token_type": "bearer",
         "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     }
+
+
+@router.get("/profile", response_model=UserResponse)
+async def get_profile(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    获取当前用户信息
+    """
+    return UserResponse(
+        id=current_user.id,
+        username=current_user.username,
+        email=current_user.email,
+        full_name=current_user.full_name,
+        avatar_url=current_user.avatar_url,
+        is_active=current_user.is_active,
+        is_superuser=current_user.is_superuser,
+        last_login_at=current_user.last_login_at,
+        created_at=current_user.created_at,
+        updated_at=current_user.updated_at
+    )
 
 
 @router.post("/logout")

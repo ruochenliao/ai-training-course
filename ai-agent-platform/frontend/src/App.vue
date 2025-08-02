@@ -12,7 +12,7 @@ const userStore = useUserStore()
 
 onMounted(() => {
   // 应用初始化时检查用户登录状态
-  userStore.checkAuth()
+  userStore.initializeAuth()
 })
 </script>
 

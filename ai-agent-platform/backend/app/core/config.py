@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # CORS配置
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
+    BACKEND_CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://localhost:8080",
         "http://127.0.0.1:3000",
@@ -83,6 +83,7 @@ class Settings(BaseSettings):
         "pdf", "docx", "pptx", "txt", "md",
         "jpg", "jpeg", "png", "gif", "bmp"
     ]
+    UPLOAD_DIR: str = "./uploads"
     
     # RAG配置
     RAG_CHUNK_SIZE: int = 1000

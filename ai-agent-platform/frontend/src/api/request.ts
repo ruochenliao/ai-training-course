@@ -7,7 +7,7 @@ import router from '@/router'
 
 // 创建axios实例
 const request: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json'
@@ -75,19 +75,22 @@ request.interceptors.request.use(
 
 // 响应拦截器
 request.interceptors.response.use(
-  (response: AxiosResponse<ApiResponse>) => {
+  (response: AxiosResponse) => {
     hideLoading()
 
-    const { code, message, data } = response.data
-
-    // 成功响应
-    if (code === 200 || code === 0) {
-      return response.data
+    // 如果响应状态码是2xx，直接返回数据
+    if (response.status >= 200 && response.status < 300) {
+      // 包装响应数据为统一格式
+      return {
+        code: 200,
+        message: 'success',
+        data: response.data
+      }
     }
 
     // 业务错误
-    ElMessage.error(message || '请求失败')
-    return Promise.reject(new Error(message || '请求失败'))
+    ElMessage.error('请求失败')
+    return Promise.reject(new Error('请求失败'))
   },
   (error) => {
     hideLoading()

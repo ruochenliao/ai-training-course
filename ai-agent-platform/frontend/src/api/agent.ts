@@ -74,54 +74,87 @@ export interface ChatResponse {
 // 智能体API接口
 export const agentApi = {
   // 获取智能体列表
-  getList: (params?: AgentListParams): Promise<ApiResponse<AgentListResponse>> => {
+  getAgents: (params?: any): Promise<ApiResponse<Agent[]>> => {
     return request({
-      url: API_PATHS.AGENT.LIST,
+      url: '/api/v1/agents',
+      method: 'get',
+      params
+    })
+  },
+
+  // 获取我的智能体列表
+  getMyAgents: (params?: any): Promise<ApiResponse<Agent[]>> => {
+    return request({
+      url: '/api/v1/agents/my',
       method: 'get',
       params
     })
   },
 
   // 获取智能体详情
-  getDetail: (id: number): Promise<ApiResponse<Agent>> => {
+  getAgent: (id: number): Promise<ApiResponse<Agent>> => {
     return request({
-      url: `${API_PATHS.AGENT.DETAIL}/${id}`,
+      url: `/api/v1/agents/${id}`,
       method: 'get'
     })
   },
 
   // 创建智能体
-  create: (data: CreateAgentParams): Promise<ApiResponse<Agent>> => {
+  createAgent: (data: CreateAgentParams): Promise<ApiResponse<Agent>> => {
     return request({
-      url: API_PATHS.AGENT.CREATE,
+      url: '/api/v1/agents',
       method: 'post',
       data
     })
   },
 
   // 更新智能体
-  update: (id: number, data: UpdateAgentParams): Promise<ApiResponse<Agent>> => {
+  updateAgent: (id: number, data: UpdateAgentParams): Promise<ApiResponse<Agent>> => {
     return request({
-      url: `${API_PATHS.AGENT.UPDATE}/${id}`,
+      url: `/api/v1/agents/${id}`,
       method: 'put',
       data
     })
   },
 
   // 删除智能体
-  delete: (id: number): Promise<ApiResponse<null>> => {
+  deleteAgent: (id: number): Promise<ApiResponse<null>> => {
     return request({
-      url: `${API_PATHS.AGENT.DELETE}/${id}`,
+      url: `/api/v1/agents/${id}`,
       method: 'delete'
     })
   },
 
-  // 与智能体聊天
-  chat: (data: ChatParams): Promise<ApiResponse<ChatResponse>> => {
+  // 克隆智能体
+  cloneAgent: (id: number): Promise<ApiResponse<Agent>> => {
     return request({
-      url: API_PATHS.AGENT.CHAT,
-      method: 'post',
-      data
+      url: `/api/v1/agents/${id}/clone`,
+      method: 'post'
+    })
+  },
+
+  // 点赞智能体
+  likeAgent: (id: number): Promise<ApiResponse<any>> => {
+    return request({
+      url: `/api/v1/agents/${id}/like`,
+      method: 'post'
+    })
+  },
+
+  // 获取智能体模板
+  getTemplates: (params?: any): Promise<ApiResponse<any[]>> => {
+    return request({
+      url: '/api/v1/agents/templates',
+      method: 'get',
+      params
+    })
+  },
+
+  // 从模板创建智能体
+  createFromTemplate: (templateId: number): Promise<ApiResponse<Agent>> => {
+    return request({
+      url: `/api/v1/agents/templates/${templateId}/create`,
+      method: 'post'
     })
   }
 }

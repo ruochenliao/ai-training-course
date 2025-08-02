@@ -32,6 +32,33 @@ const routes: Array<RouteRecordRaw> = [
     }
   },
   {
+    path: '/agents',
+    name: 'AgentList',
+    component: () => import('@/views/agents/AgentList.vue'),
+    meta: {
+      title: '智能体管理',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/agents/:id',
+    name: 'AgentDetail',
+    component: () => import('@/views/agents/AgentDetail.vue'),
+    meta: {
+      title: '智能体详情',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/knowledge',
+    name: 'KnowledgeList',
+    component: () => import('@/views/knowledge/KnowledgeList.vue'),
+    meta: {
+      title: '知识库管理',
+      requiresAuth: true
+    }
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('@/views/error/NotFound.vue'),
@@ -49,14 +76,23 @@ const router = createRouter({
 // 路由守卫
 router.beforeEach(async (to, from, next) => {
   NProgress.start()
-  
+
   const userStore = useUserStore()
-  
+
   // 设置页面标题
   if (to.meta.title) {
     document.title = `${to.meta.title} - 智能体应用综合平台`
   }
-  
+
+  // 如果有token但没有用户信息，先初始化认证状态
+  if (userStore.token && !userStore.userInfo) {
+    try {
+      await userStore.initializeAuth()
+    } catch (error) {
+      console.error('初始化认证状态失败:', error)
+    }
+  }
+
   // 检查是否需要认证
   if (to.meta.requiresAuth) {
     if (!userStore.isLoggedIn) {
@@ -86,7 +122,7 @@ router.beforeEach(async (to, from, next) => {
     next('/dashboard')
     return
   }
-  
+
   next()
 })
 
