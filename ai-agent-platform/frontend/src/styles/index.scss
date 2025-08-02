@@ -3,7 +3,7 @@
 // 导入变量
 @use './variables.scss' as *;
 // 导入响应式样式
-@import './responsive.scss';
+@use './responsive.scss' as *;
 
 // 全局重置样式
 * {

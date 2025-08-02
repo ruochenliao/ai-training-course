@@ -145,7 +145,7 @@ const searchParams = computed(() => ({
 const fetchAgents = async () => {
   loading.value = true
   try {
-    const response = await agentApi.getList(searchParams.value)
+    const response = await agentApi.getAgents(searchParams.value)
     agents.value = response.data
     total.value = response.total || response.data.length
   } catch (error) {

@@ -201,7 +201,7 @@ const filteredAgents = computed(() => {
 // 获取智能体列表
 const fetchAgents = async () => {
   try {
-    const response = await agentApi.getList()
+    const response = await agentApi.getAgents()
     availableAgents.value = response.data
   } catch (error) {
     console.error('获取智能体列表失败:', error)

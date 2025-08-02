@@ -173,7 +173,7 @@ const startChat = () => {
 const fetchStats = async () => {
   try {
     // 获取智能体数量
-    const agentsResponse = await agentApi.getList({ limit: 1000 })
+    const agentsResponse = await agentApi.getAgents({ limit: 1000 })
     const agentCount = agentsResponse.data?.length || 0
 
     // 获取系统健康状态
