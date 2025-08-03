@@ -11,7 +11,8 @@ import logging
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
-from app.db.session import check_db_connection
+from app.db.session import check_db_connection, init_db
+from app.db.init_db import init as init_database_data
 from app.api.v1 import api_router
 
 
@@ -33,6 +34,23 @@ async def lifespan(app: FastAPI):
     try:
         if check_db_connection():
             logger.info("✅ 数据库连接正常")
+
+            # 自动初始化数据库表
+            try:
+                logger.info("🔧 正在初始化数据库表...")
+                init_db()
+                logger.info("✅ 数据库表初始化完成")
+            except Exception as e:
+                logger.error(f"❌ 数据库表初始化失败: {e}")
+
+            # 自动初始化数据库数据
+            try:
+                logger.info("📊 正在初始化数据库数据...")
+                init_database_data()
+                logger.info("✅ 数据库数据初始化完成")
+            except Exception as e:
+                logger.error(f"❌ 数据库数据初始化失败: {e}")
+
         else:
             logger.warning("⚠️ 数据库连接失败，请检查配置")
     except Exception as e:

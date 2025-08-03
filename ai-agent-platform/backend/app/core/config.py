@@ -41,14 +41,14 @@ class Settings(BaseSettings):
         raise ValueError(v)
     
     # 数据库配置
-    DATABASE_URL: str = "mysql+pymysql://root:123456@122.51.212.243:3306/ai_platform"
+    DATABASE_URL: str = "mysql+pymysql://root:123456@192.168.244.128:3306/ai_platform"
     DATABASE_POOL_SIZE: int = 10
     DATABASE_MAX_OVERFLOW: int = 20
     DATABASE_POOL_TIMEOUT: int = 30
     DATABASE_POOL_RECYCLE: int = 3600
 
     # Redis配置
-    REDIS_URL: str = "redis://:123456@122.51.212.243:6379/0"
+    REDIS_URL: str = "redis://:123456@192.168.244.128:6379/0"
     REDIS_CACHE_TTL: int = 3600  # 1小时
     
     # Milvus配置
@@ -92,8 +92,8 @@ class Settings(BaseSettings):
     RAG_SCORE_THRESHOLD: float = 0.7
     
     # Celery配置
-    CELERY_BROKER_URL: str = "redis://:123456@122.51.212.243:6379/1"
-    CELERY_RESULT_BACKEND: str = "redis://:123456@122.51.212.243:6379/2"
+    CELERY_BROKER_URL: str = "redis://:123456@192.168.244.128:6379/1"
+    CELERY_RESULT_BACKEND: str = "redis://:123456@192.168.244.128:6379/2"
     CELERY_TASK_SERIALIZER: str = "json"
     CELERY_RESULT_SERIALIZER: str = "json"
     CELERY_ACCEPT_CONTENT: List[str] = ["json"]

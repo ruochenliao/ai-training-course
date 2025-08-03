@@ -91,37 +91,71 @@ git clone <repository-url>
 cd ai-agent-platform
 ```
 
-2. **启动基础服务** (Docker)
+2. **数据库和Redis配置**
+
+**外部服务配置**
+- MySQL: `192.168.244.128:3306` (用户名: root, 密码: 123456)
+- Redis: `192.168.244.128:6379` (密码: 123456)
+
+配置文件 `.env` 已经预配置好了连接信息：
 ```bash
-# 启动数据库和中间件服务
-docker-compose up -d mysql redis milvus minio
+# 数据库配置 (本地服务)
+DATABASE_URL=mysql+pymysql://root:123456@192.168.244.128:3306/ai_platform
+
+# Redis配置 (本地服务)
+REDIS_URL=redis://:123456@192.168.244.128:6379/0
+
+# Celery配置
+CELERY_BROKER_URL=redis://:123456@192.168.244.128:6379/1
+CELERY_RESULT_BACKEND=redis://:123456@192.168.244.128:6379/2
 ```
 
-3. **后端环境配置**
+**自动初始化功能**
+- 服务启动时会自动创建数据库（如果不存在）
+- 自动创建所有数据表
+- 自动初始化基础数据（角色、智能体模板、示例数据等）
+
+3. **快速启动**
+
+**使用启动脚本 (推荐)**
 ```bash
+# 安装Python依赖
+cd backend
+pip install -r requirements.txt
+cd ..
+
+# 启动后端服务 (会自动初始化数据库)
+python start.py backend
+
+# 或者使用PowerShell (Windows)
+.\start.ps1 backend
+```
+
+**手动启动**
+```bash
+# 后端服务
 cd backend
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-
-# 数据库迁移
-alembic upgrade head
-
-# 启动后端服务
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
 
-4. **前端环境配置**
-```bash
+# 前端服务 (新终端)
 cd frontend
 npm install
 npm run dev
 ```
 
-5. **访问应用**
+4. **访问应用**
 - 前端应用: http://localhost:3000
 - 后端API: http://localhost:8000
 - API文档: http://localhost:8000/docs
+- 健康检查: http://localhost:8000/health
+
+**默认管理员账号**
+- 邮箱: admin@example.com
+- 用户名: admin
+- 密码: admin123456
 
 ## 📁 项目结构
 
