@@ -53,6 +53,11 @@
           
           <el-menu-item index="/agents">
             <el-icon><Avatar /></el-icon>
+            <span>智能体列表</span>
+          </el-menu-item>
+
+          <el-menu-item index="/agent-management">
+            <el-icon><Robot /></el-icon>
             <span>智能体管理</span>
           </el-menu-item>
           
@@ -100,7 +105,8 @@ import {
   Avatar,
   Document,
   ChatDotRound,
-  DataAnalysis
+  DataAnalysis,
+  Robot
 } from '@element-plus/icons-vue'
 
 const route = useRoute()

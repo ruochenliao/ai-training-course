@@ -18,6 +18,36 @@ from app.models.user import User
 security_scheme = HTTPBearer()
 
 
+def get_current_user_websocket(
+    db: Session = Depends(get_db)
+) -> User:
+    """
+    WebSocket专用的用户认证（简化版）
+    在实际应用中，应该通过token验证用户身份
+
+    Args:
+        db: 数据库会话
+
+    Returns:
+        当前用户对象
+    """
+    # 这里简化处理，实际应该从WebSocket连接中获取token并验证
+    # 暂时返回一个默认的超级用户用于测试
+    user = crud.user.get_by_email(db, email="admin@example.com")
+    if not user:
+        # 如果没有找到用户，创建一个临时的超级用户对象
+        from app.models.user import User
+        user = User(
+            id=1,
+            email="admin@example.com",
+            username="admin",
+            full_name="Administrator",
+            is_active=True,
+            is_superuser=True
+        )
+    return user
+
+
 def get_db() -> Generator:
     """
     获取数据库会话

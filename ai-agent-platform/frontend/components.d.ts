@@ -7,7 +7,11 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AgentConfig: typeof import('./src/components/Agent/AgentConfig.vue')['default']
+    AgentDetails: typeof import('./src/components/Agent/AgentDetails.vue')['default']
+    ChatInterface: typeof import('./src/components/Chat/ChatInterface.vue')['default']
     ConfirmDialog: typeof import('./src/components/ConfirmDialog.vue')['default']
+    CreateAgent: typeof import('./src/components/Agent/CreateAgent.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']

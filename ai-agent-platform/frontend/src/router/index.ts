@@ -93,15 +93,6 @@ const routes: Array<RouteRecordRaw> = [
         }
       },
       {
-        path: 'knowledge/:id',
-        name: 'KnowledgeDetail',
-        component: () => import('@/views/knowledge/KnowledgeDetail.vue'),
-        meta: {
-          title: '知识库详情',
-          requiresAuth: true
-        }
-      },
-      {
         path: 'knowledge/:id/upload',
         name: 'KnowledgeUpload',
         component: () => import('@/views/knowledge/KnowledgeUpload.vue'),
@@ -116,6 +107,15 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/Chat.vue'),
         meta: {
           title: '对话管理',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'agent-management',
+        name: 'AgentManagement',
+        component: () => import('@/views/AgentManagement.vue'),
+        meta: {
+          title: '智能体管理',
           requiresAuth: true
         }
       },
