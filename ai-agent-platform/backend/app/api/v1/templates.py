@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
 
-from app.db.session import get_db
+from app.api.deps import get_db
 from app.core.security import get_current_user_id
 from app.models.agent import Agent
 from app.schemas.templates import (

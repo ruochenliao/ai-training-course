@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from app.db.session import get_db
+from app.api.deps import get_db
 from app.core.security import get_current_user
 from app.models.agent import Agent, AgentTemplate, AgentType, AgentStatus
 from app.models.user import User

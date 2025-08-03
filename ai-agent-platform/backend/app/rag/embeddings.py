@@ -278,5 +278,45 @@ class EmbeddingManager:
         logger.info("嵌入缓存已清空")
 
 
+class TokenCounter:
+    """Token计数器"""
+
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+
+    def count_tokens(self, text: str, model: str = "gpt-3.5-turbo") -> int:
+        """
+        计算文本的token数量
+
+        Args:
+            text: 输入文本
+            model: 模型名称
+
+        Returns:
+            token数量
+        """
+        try:
+            # 简单的token估算，实际应该使用tiktoken库
+            # 大约每4个字符为1个token
+            return len(text) // 4
+        except Exception as e:
+            self.logger.error(f"计算token失败: {e}")
+            return 0
+
+    def count_tokens_batch(self, texts: List[str], model: str = "gpt-3.5-turbo") -> List[int]:
+        """
+        批量计算token数量
+
+        Args:
+            texts: 文本列表
+            model: 模型名称
+
+        Returns:
+            token数量列表
+        """
+        return [self.count_tokens(text, model) for text in texts]
+
+
 # 全局嵌入管理器
 embedding_manager = EmbeddingManager()
+token_counter = TokenCounter()

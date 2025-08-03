@@ -8,7 +8,7 @@ from typing import List, Optional
 import json
 from datetime import datetime
 
-from app.db.session import get_db
+from app.api.deps import get_db
 from app.core.security import get_current_user
 from app.models.knowledge import KnowledgeBase, Document, DocumentChunk
 from app.models.user import User

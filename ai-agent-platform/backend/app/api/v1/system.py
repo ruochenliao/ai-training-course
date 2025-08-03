@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import datetime, timedelta
 
-from app.db.session import get_db
+from app.api.deps import get_db
 from app.models.agent import Agent
 from app.models.user import User
 from app.models.knowledge import KnowledgeBase

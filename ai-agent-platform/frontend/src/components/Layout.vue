@@ -70,6 +70,21 @@
             <el-icon><ChatDotRound /></el-icon>
             <span>对话管理</span>
           </el-menu-item>
+
+          <el-menu-item index="/workflow-designer">
+            <el-icon><Share /></el-icon>
+            <span>工作流设计器</span>
+          </el-menu-item>
+
+          <el-menu-item index="/plugin-management">
+            <el-icon><Grid /></el-icon>
+            <span>插件管理</span>
+          </el-menu-item>
+
+          <el-menu-item index="/system-monitor">
+            <el-icon><Monitor /></el-icon>
+            <span>系统监控</span>
+          </el-menu-item>
           
           <el-menu-item index="/analytics">
             <el-icon><DataAnalysis /></el-icon>
@@ -106,7 +121,10 @@ import {
   Document,
   ChatDotRound,
   DataAnalysis,
-  Robot
+  Robot,
+  Share,
+  Grid,
+  Monitor
 } from '@element-plus/icons-vue'
 
 const route = useRoute()

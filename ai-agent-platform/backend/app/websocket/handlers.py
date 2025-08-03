@@ -209,7 +209,7 @@ class ChatHandler(BaseHandler):
     async def _get_knowledge_qa_response(self, content: str, metadata: Dict[str, Any]) -> str:
         """获取知识库问答智能体响应"""
         # 这里应该调用实际的知识库问答智能体
-        return f"根据知识库搜索，关于"{content}"的信息如下：\n\n这是一个示例回答。实际使用时，系统会从知识库中检索相关信息并生成准确的答案。\n\n如果您需要更详细的信息，请提供更具体的问题。"
+        return f"根据知识库搜索，关于\"{content}\"的信息如下：\n\n这是一个示例回答。实际使用时，系统会从知识库中检索相关信息并生成准确的答案。\n\n如果您需要更详细的信息，请提供更具体的问题。"
     
     async def _get_content_creation_response(self, content: str, metadata: Dict[str, Any]) -> str:
         """获取内容创作智能体响应"""

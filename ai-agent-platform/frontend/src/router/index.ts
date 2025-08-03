@@ -111,20 +111,38 @@ const routes: Array<RouteRecordRaw> = [
         }
       },
       {
-        path: 'agent-management',
-        name: 'AgentManagement',
-        component: () => import('@/views/AgentManagement.vue'),
-        meta: {
-          title: '智能体管理',
-          requiresAuth: true
-        }
-      },
-      {
         path: 'analytics',
         name: 'Analytics',
         component: () => import('@/views/Analytics.vue'),
         meta: {
           title: '数据分析',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'workflow-designer',
+        name: 'WorkflowDesigner',
+        component: () => import('@/views/WorkflowDesigner.vue'),
+        meta: {
+          title: '工作流设计器',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'plugin-management',
+        name: 'PluginManagement',
+        component: () => import('@/views/PluginManagement.vue'),
+        meta: {
+          title: '插件管理',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'system-monitor',
+        name: 'SystemMonitor',
+        component: () => import('@/views/SystemMonitor.vue'),
+        meta: {
+          title: '系统监控',
           requiresAuth: true
         }
       },

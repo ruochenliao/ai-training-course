@@ -8,7 +8,7 @@ from sqlalchemy import func, desc
 from typing import List, Optional
 from datetime import datetime, timedelta
 
-from app.db.session import get_db
+from app.api.deps import get_db
 from app.core.security import get_current_user_id
 from app.models.user import User
 from app.models.agent import Agent
