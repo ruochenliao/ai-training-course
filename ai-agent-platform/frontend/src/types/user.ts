@@ -6,9 +6,12 @@ export interface User {
   email: string
   full_name?: string
   avatar_url?: string
+  phone?: string
+  bio?: string
   is_active: boolean
   is_superuser: boolean
   created_at: string
+  updated_at?: string
   last_login_at?: string
 }
 

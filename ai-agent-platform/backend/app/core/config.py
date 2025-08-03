@@ -78,10 +78,10 @@ class Settings(BaseSettings):
     EMBEDDING_BATCH_SIZE: int = 100
     
     # 文件处理配置
-    MAX_FILE_SIZE: int = 100 * 1024 * 1024  # 100MB
+    MAX_FILE_SIZE: int = 500 * 1024 * 1024  # 500MB
     ALLOWED_FILE_TYPES: List[str] = [
-        "pdf", "docx", "pptx", "txt", "md",
-        "jpg", "jpeg", "png", "gif", "bmp"
+        "txt", "md", "pdf", "doc", "docx",
+        "ppt", "pptx", "xls", "xlsx"
     ]
     UPLOAD_DIR: str = "./uploads"
     

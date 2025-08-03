@@ -15,7 +15,7 @@
       <div class="agent-header">
         <div class="agent-avatar">
           <el-avatar :size="80" :src="agent.avatar_url">
-            <el-icon size="40"><Robot /></el-icon>
+            <el-icon size="40"><Avatar /></el-icon>
           </el-avatar>
         </div>
         <div class="agent-info">
@@ -143,8 +143,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  ArrowLeft, Robot, ChatDotRound, Star, Calendar, Edit, CopyDocument 
+import {
+  ArrowLeft, Avatar, ChatDotRound, Star, Calendar, Edit, CopyDocument
 } from '@element-plus/icons-vue'
 import { agentApi } from '@/api/agent'
 import { useUserStore } from '@/stores/user'

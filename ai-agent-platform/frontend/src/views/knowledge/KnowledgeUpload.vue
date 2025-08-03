@@ -38,7 +38,7 @@
             </div>
             <template #tip>
               <div class="el-upload__tip">
-                支持 txt、md、pdf、doc、docx、ppt、pptx、xls、xlsx 格式文件，单个文件不超过 10MB
+                支持 txt、md、pdf、doc、docx、ppt、pptx、xls、xlsx 格式文件，单个文件不超过 500MB
               </div>
             </template>
           </el-upload>
@@ -188,8 +188,8 @@ const uploadProgress = ref<UploadProgress[]>([])
 // 文件变化处理
 const handleFileChange = (file: UploadFile, files: UploadFiles) => {
   // 检查文件大小
-  if (file.raw && file.raw.size > 10 * 1024 * 1024) {
-    ElMessage.error('文件大小不能超过 10MB')
+  if (file.raw && file.raw.size > 500 * 1024 * 1024) {
+    ElMessage.error('文件大小不能超过 500MB')
     files.splice(files.indexOf(file), 1)
     return
   }
@@ -266,7 +266,7 @@ const handleUpload = async () => {
 const refreshFileList = async () => {
   fileListLoading.value = true
   try {
-    const response = await knowledgeApi.getFiles(knowledgeId)
+    const response = await knowledgeApi.getDocuments(knowledgeId)
     uploadedFiles.value = response.data
   } catch (error) {
     console.error('获取文件列表失败:', error)

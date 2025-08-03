@@ -240,10 +240,15 @@ async def upload_document(
     
     # 验证文件类型
     allowed_types = [
-        "application/pdf",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "text/plain",
-        "text/markdown"
+        "text/plain",  # txt
+        "text/markdown",  # md
+        "application/pdf",  # pdf
+        "application/msword",  # doc
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",  # docx
+        "application/vnd.ms-powerpoint",  # ppt
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",  # pptx
+        "application/vnd.ms-excel",  # xls
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"  # xlsx
     ]
     
     if file.content_type not in allowed_types:
@@ -254,7 +259,14 @@ async def upload_document(
     
     # 读取文件内容
     content = await file.read()
-    
+
+    # 检查文件大小
+    if len(content) > 500 * 1024 * 1024:  # 500MB
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="文件大小不能超过 500MB"
+        )
+
     # 创建文档记录
     document = Document(
         title=file.filename,

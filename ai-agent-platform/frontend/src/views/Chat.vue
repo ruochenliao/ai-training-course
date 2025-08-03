@@ -254,7 +254,7 @@ const selectSession = async (sessionId: number) => {
   const session = sessions.value.find(s => s.id === sessionId)
   if (session) {
     try {
-      const response = await agentApi.getDetail(session.agent_id)
+      const response = await agentApi.getAgent(session.agent_id)
       currentAgent.value = response.data
     } catch (error) {
       console.error('获取智能体信息失败:', error)
