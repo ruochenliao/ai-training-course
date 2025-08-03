@@ -4,9 +4,7 @@ API v1 路由模块
 
 from fastapi import APIRouter
 
-from app.api.v1 import health, auth, users, conversations, agents, knowledge, files, system, chat, admin, templates, workflow, websocket_api
-# 暂时注释掉插件API，避免导入问题
-# from app.api.v1 import plugins
+from app.api.v1 import health, auth, users, conversations, agents, knowledge, files, system, chat, admin, templates, workflow, websocket_api, plugins
 
 # 创建API路由器
 api_router = APIRouter()
@@ -26,6 +24,5 @@ api_router.include_router(system.router, prefix="/system", tags=["系统管理"]
 api_router.include_router(templates.router, prefix="/templates", tags=["智能体模板"])
 api_router.include_router(admin.router, prefix="/admin", tags=["管理后台"])
 api_router.include_router(workflow.router, prefix="/workflow", tags=["工作流管理"])
-# 暂时注释掉插件路由
-# api_router.include_router(plugins.router, prefix="/plugins", tags=["插件管理"])
+api_router.include_router(plugins.router, prefix="/plugins", tags=["插件管理"])
 api_router.include_router(websocket_api.router, prefix="/ws", tags=["WebSocket通信"])

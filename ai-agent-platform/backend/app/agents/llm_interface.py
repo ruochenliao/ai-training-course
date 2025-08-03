@@ -157,15 +157,138 @@ class OpenAIProvider(BaseLLMProvider):
             raise
 
 
+class DeepseekProvider(BaseLLMProvider):
+    """Deepseek提供者"""
+
+    def __init__(self, api_key: str = None, base_url: str = None):
+        self.client = AsyncOpenAI(
+            api_key=api_key or settings.DEEPSEEK_API_KEY,
+            base_url=base_url or settings.DEEPSEEK_BASE_URL
+        )
+
+    async def generate(self, prompt: str, model: str = "deepseek-chat",
+                      temperature: float = 0.7, max_tokens: int = 128000, **kwargs) -> LLMResponse:
+        """生成文本"""
+        try:
+            messages = [{"role": "user", "content": prompt}]
+            response = await self.client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                **kwargs
+            )
+
+            content = response.choices[0].message.content
+            usage = {
+                "prompt_tokens": response.usage.prompt_tokens,
+                "completion_tokens": response.usage.completion_tokens,
+                "total_tokens": response.usage.total_tokens
+            }
+
+            return LLMResponse(
+                content=content,
+                model=model,
+                usage=usage,
+                metadata={"provider": "deepseek"}
+            )
+
+        except Exception as e:
+            logger.error(f"Deepseek文本生成失败: {e}")
+            raise
+
+    async def generate_stream(self, prompt: str, model: str = "deepseek-chat",
+                             temperature: float = 0.7, max_tokens: int = 128000, **kwargs) -> AsyncGenerator[str, None]:
+        """流式生成文本"""
+        try:
+            messages = [{"role": "user", "content": prompt}]
+            stream = await self.client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                stream=True,
+                **kwargs
+            )
+
+            async for chunk in stream:
+                if chunk.choices[0].delta.content:
+                    yield chunk.choices[0].delta.content
+
+        except Exception as e:
+            logger.error(f"Deepseek流式文本生成失败: {e}")
+            raise
+
+    async def chat(self, messages: List[Dict[str, str]], model: str = "deepseek-chat",
+                   temperature: float = 0.7, max_tokens: int = 128000, **kwargs) -> LLMResponse:
+        """对话生成"""
+        try:
+            response = await self.client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                **kwargs
+            )
+
+            content = response.choices[0].message.content
+            usage = {
+                "prompt_tokens": response.usage.prompt_tokens,
+                "completion_tokens": response.usage.completion_tokens,
+                "total_tokens": response.usage.total_tokens
+            }
+
+            return LLMResponse(
+                content=content,
+                model=model,
+                usage=usage,
+                metadata={"provider": "deepseek"}
+            )
+
+        except Exception as e:
+            logger.error(f"Deepseek对话生成失败: {e}")
+            raise
+
+    async def chat_stream(self, messages: List[Dict[str, str]], model: str = "deepseek-chat",
+                         temperature: float = 0.7, max_tokens: int = 128000, **kwargs) -> AsyncGenerator[str, None]:
+        """流式对话生成"""
+        try:
+            stream = await self.client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                stream=True,
+                **kwargs
+            )
+
+            async for chunk in stream:
+                if chunk.choices[0].delta.content:
+                    yield chunk.choices[0].delta.content
+
+        except Exception as e:
+            logger.error(f"Deepseek流式对话生成失败: {e}")
+            raise
+
+
 class LLMManager:
     """LLM管理器"""
     
     def __init__(self):
         self.providers: Dict[str, BaseLLMProvider] = {}
-        self.default_provider = "openai"
-        
-        # 初始化默认提供者
-        self.register_provider("openai", OpenAIProvider())
+        self.default_provider = "deepseek"  # 设置Deepseek为默认提供者
+
+        # 初始化提供者
+        self.register_provider("deepseek", DeepseekProvider())  # 注册Deepseek提供者
+
+        # 只有在配置了OpenAI API密钥时才注册OpenAI提供者
+        if settings.OPENAI_API_KEY:
+            try:
+                self.register_provider("openai", OpenAIProvider())  # 注册OpenAI提供者
+            except Exception as e:
+                logger.warning(f"OpenAI提供者初始化失败，跳过注册: {e}")
+        else:
+            logger.info("未配置OpenAI API密钥，跳过OpenAI提供者注册")
     
     def register_provider(self, name: str, provider: BaseLLMProvider):
         """注册LLM提供者"""

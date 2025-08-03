@@ -58,6 +58,33 @@ export const API_PATHS = {
     HEALTH: '/health',
     INFO: '/api/v1/system/info',
     STATS: '/api/v1/system/stats',
+  },
+
+  // 插件管理
+  PLUGIN: {
+    LIST: '/api/v1/plugins',
+    DETAIL: '/api/v1/plugins',
+    ACTIVATE: '/api/v1/plugins',
+    DEACTIVATE: '/api/v1/plugins',
+    CONFIG: '/api/v1/plugins',
+    RELOAD: '/api/v1/plugins',
+    EXECUTE: '/api/v1/plugins',
+    INSTALL: '/api/v1/plugins/install',
+    UNINSTALL: '/api/v1/plugins',
+    TYPES: '/api/v1/plugins/types/available',
+    STATUSES: '/api/v1/plugins/status/available',
+    MARKET_SEARCH: '/api/v1/plugins/market/search',
+    MARKET_DETAIL: '/api/v1/plugins/market',
+    MARKET_INSTALL: '/api/v1/plugins/market',
+    LOGS: '/api/v1/plugins',
+    STATS: '/api/v1/plugins/stats',
+    EXPORT: '/api/v1/plugins',
+    IMPORT: '/api/v1/plugins',
+    VALIDATE: '/api/v1/plugins',
+    DEPENDENCIES: '/api/v1/plugins',
+    CHECK_UPDATES: '/api/v1/plugins/check-updates',
+    UPDATE: '/api/v1/plugins',
+    BATCH: '/api/v1/plugins/batch',
   }
 }
 

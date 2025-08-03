@@ -6,11 +6,13 @@
 
 import asyncio
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 import numpy as np
 from openai import AsyncOpenAI
 import hashlib
 import json
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -87,14 +89,89 @@ class OpenAIEmbedding(EmbeddingModel):
 
 class LocalEmbedding(EmbeddingModel):
     """本地嵌入模型（使用sentence-transformers）"""
-    
-    def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
+
+    def __init__(self, model_name: str = "BAAI/bge-small-zh-v1.5"):  # 使用小型中文嵌入模型，加载更快
         try:
             from sentence_transformers import SentenceTransformer
-            self.model = SentenceTransformer(model_name)
+            import os
+
+            # 设置模型缓存目录到项目的models文件夹
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+            models_dir = os.path.join(project_root, "models")
+            os.makedirs(models_dir, exist_ok=True)
+
+            # 设置环境变量，让sentence-transformers使用我们的models目录
+            os.environ['SENTENCE_TRANSFORMERS_HOME'] = models_dir
+
+            # 检查模型是否已存在
+            model_path = os.path.join(models_dir, model_name.replace("/", "_"))
+            if os.path.exists(model_path):
+                logger.info(f"📂 加载本地模型: {model_name}")
+            else:
+                logger.info(f"📥 下载模型: {model_name}")
+
+            self.model = SentenceTransformer(model_name, cache_folder=models_dir)
             super().__init__(model_name, self.model.get_sentence_embedding_dimension())
         except ImportError:
             raise ImportError("需要安装sentence-transformers: pip install sentence-transformers")
+
+
+class BGEReranker:
+    """BGE重排模型"""
+
+    def __init__(self, model_name: str = "BAAI/bge-reranker-v2-m3"):
+        try:
+            from sentence_transformers import CrossEncoder
+            import os
+
+            # 设置模型缓存目录
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+            models_dir = os.path.join(project_root, "models")
+            os.makedirs(models_dir, exist_ok=True)
+            os.environ['SENTENCE_TRANSFORMERS_HOME'] = models_dir
+
+            self.model_name = model_name
+            self.model = CrossEncoder(model_name, cache_folder=models_dir)
+            logger.info(f"✅ BGE重排模型加载完成: {model_name}")
+
+        except ImportError:
+            raise ImportError("需要安装sentence-transformers: pip install sentence-transformers")
+        except Exception as e:
+            logger.error(f"BGE重排模型加载失败: {e}")
+            raise
+
+    async def rerank(self, query: str, documents: List[str], top_k: int = 10) -> List[Tuple[int, float]]:
+        """重排文档
+
+        Args:
+            query: 查询文本
+            documents: 文档列表
+            top_k: 返回前k个结果
+
+        Returns:
+            List[Tuple[int, float]]: (原始索引, 重排分数) 的列表，按分数降序排列
+        """
+        try:
+            if not documents:
+                return []
+
+            # 准备查询-文档对
+            pairs = [(query, doc) for doc in documents]
+
+            # 在线程池中运行重排（因为CrossEncoder是同步的）
+            loop = asyncio.get_event_loop()
+            scores = await loop.run_in_executor(None, self.model.predict, pairs)
+
+            # 创建(索引, 分数)对并排序
+            indexed_scores = [(i, float(score)) for i, score in enumerate(scores)]
+            indexed_scores.sort(key=lambda x: x[1], reverse=True)
+
+            return indexed_scores[:top_k]
+
+        except Exception as e:
+            logger.error(f"BGE重排失败: {e}")
+            # 返回原始顺序
+            return [(i, 0.0) for i in range(min(len(documents), top_k))]
     
     async def embed_text(self, text: str) -> List[float]:
         """将单个文本转换为向量"""
@@ -154,35 +231,157 @@ class EmbeddingCache:
         self.cache.clear()
 
 
+
 class EmbeddingManager:
     """嵌入管理器"""
-    
-    def __init__(self, default_model: str = "openai"):
+
+    def __init__(self, default_model: str = "bge-zh"):  # 直接使用BGE中文模型作为默认
         self.models: Dict[str, EmbeddingModel] = {}
+        self.reranker: Optional[BGEReranker] = None  # 重排模型
         self.default_model = default_model
         self.cache = EmbeddingCache()
-        
+        self._loading_models = set()  # 正在加载的模型
+        self._loaded_models = set()  # 已加载的模型
+        self._executor = ThreadPoolExecutor(max_workers=2)  # 后台加载线程池
+
         # 初始化默认模型
         self._initialize_models()
+
+    def _is_model_downloaded(self, model_name: str) -> bool:
+        """检查模型是否已下载到本地"""
+        try:
+            import os
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+            models_dir = os.path.join(project_root, "models")
+
+            # Hugging Face模型的存储格式是 models--org--model-name
+            hf_model_path = os.path.join(models_dir, f"models--{model_name.replace('/', '--')}")
+
+            # 检查模型目录是否存在
+            if os.path.exists(hf_model_path):
+                # 检查snapshots目录是否存在且不为空
+                snapshots_dir = os.path.join(hf_model_path, "snapshots")
+                if os.path.exists(snapshots_dir):
+                    snapshots = os.listdir(snapshots_dir)
+                    if snapshots:
+                        # 检查最新的snapshot是否包含模型文件
+                        latest_snapshot = os.path.join(snapshots_dir, snapshots[0])
+                        if os.path.exists(latest_snapshot):
+                            files = os.listdir(latest_snapshot)
+                            has_config = any(f.startswith('config') and f.endswith('.json') for f in files)
+                            has_model = any(f.endswith(('.bin', '.safetensors')) for f in files)
+                            return has_config and has_model
+            return False
+        except Exception:
+            return False
     
     def _initialize_models(self):
         """初始化嵌入模型"""
         try:
-            # OpenAI模型
-            self.models["openai"] = OpenAIEmbedding()
-            self.models["openai-small"] = OpenAIEmbedding("text-embedding-3-small")
-            self.models["openai-large"] = OpenAIEmbedding("text-embedding-3-large")
-            
-            # 本地模型
-            try:
-                self.models["local"] = LocalEmbedding()
-                self.models["local-multilingual"] = LocalEmbedding("paraphrase-multilingual-MiniLM-L12-v2")
-            except ImportError:
-                logger.warning("本地嵌入模型不可用，请安装sentence-transformers")
-            
+            # BGE中文嵌入模型（后台异步加载）
+            logger.info("BGE嵌入模型将在后台加载...")
+
+            # OpenAI模型（如果配置了API密钥）
+            if settings.OPENAI_API_KEY:
+                try:
+                    self.models["openai"] = OpenAIEmbedding()
+                    self.models["openai-small"] = OpenAIEmbedding("text-embedding-3-small")
+                    self.models["openai-large"] = OpenAIEmbedding("text-embedding-3-large")
+                except Exception as e:
+                    logger.warning(f"OpenAI嵌入模型初始化失败: {e}")
+
             logger.info(f"初始化嵌入模型: {list(self.models.keys())}")
+            logger.info(f"默认嵌入模型: {self.default_model}")
         except Exception as e:
             logger.error(f"初始化嵌入模型失败: {e}")
+
+    def start_background_bge_loading(self):
+        """启动后台BGE模型下载和加载任务"""
+        self._start_background_loading()
+
+    def _start_background_loading(self):
+        """内部方法：启动后台BGE模型加载任务"""
+        def load_bge_models():
+            """智能加载BGE模型（优先使用本地已下载的模型）"""
+            try:
+                # 优先加载小型BGE中文模型（更快）
+                if "bge-zh" not in self.models and "bge-zh" not in self._loaded_models:
+                    self._loading_models.add("bge-zh")
+                    try:
+                        model_name = "BAAI/bge-small-zh-v1.5"
+                        if self._is_model_downloaded(model_name):
+                            logger.info("📂 加载本地BGE中文模型...")
+                        else:
+                            logger.info("📥 下载BGE中文模型...")
+
+                        bge_zh_model = LocalEmbedding(model_name)
+                        self.models["bge-zh"] = bge_zh_model
+                        self._loaded_models.add("bge-zh")
+                        logger.info("✅ BGE中文模型就绪")
+
+                        # 设置BGE模型为默认模型
+                        self.default_model = "bge-zh"
+                        logger.info("🔄 BGE嵌入模型已就绪")
+                    except Exception as e:
+                        logger.error(f"❌ BGE中文模型加载失败: {e}")
+                    finally:
+                        self._loading_models.discard("bge-zh")
+
+                # 然后加载大型BGE中文模型（可选）
+                if "bge-large" not in self.models and "bge-large" not in self._loaded_models:
+                    self._loading_models.add("bge-large")
+                    try:
+                        model_name = "BAAI/bge-large-zh-v1.5"
+                        if self._is_model_downloaded(model_name):
+                            logger.info("📂 加载本地BGE大型模型...")
+                        else:
+                            logger.info("📥 下载BGE大型模型...")
+
+                        bge_large_model = LocalEmbedding(model_name)
+                        self.models["bge-large"] = bge_large_model
+                        self._loaded_models.add("bge-large")
+                        logger.info("✅ BGE大型模型就绪")
+                    except Exception as e:
+                        logger.error(f"❌ BGE大型模型加载失败: {e}")
+                    finally:
+                        self._loading_models.discard("bge-large")
+
+                # 加载BGE重排模型
+                if self.reranker is None:
+                    try:
+                        reranker_model_name = "BAAI/bge-reranker-v2-m3"
+                        if self._is_model_downloaded(reranker_model_name):
+                            logger.info("📂 加载本地BGE重排模型...")
+                        else:
+                            logger.info("📥 下载BGE重排模型...")
+
+                        self.reranker = BGEReranker(reranker_model_name)
+                        logger.info("✅ BGE重排模型就绪")
+                    except Exception as e:
+                        logger.error(f"❌ BGE重排模型加载失败: {e}")
+
+                logger.info(f"🎉 模型加载完成 - 嵌入: {len(self.models)}个, 重排: {'✅' if self.reranker else '❌'}")
+
+            except Exception as e:
+                logger.error(f"❌ BGE模型加载失败: {e}")
+
+        # 在后台线程中执行加载任务
+        self._executor.submit(load_bge_models)
+
+    def get_model_status(self) -> Dict[str, str]:
+        """获取模型加载状态"""
+        status = {}
+        for model_name in ["bge-zh", "bge-large"]:
+            if model_name in self._loading_models:
+                status[model_name] = "loading"
+            elif model_name in self.models:
+                status[model_name] = "ready"
+            else:
+                status[model_name] = "not_loaded"
+
+        # 添加重排模型状态
+        status["reranker"] = "ready" if self.reranker else "not_loaded"
+        return status
     
     def get_model(self, model_name: str = None) -> EmbeddingModel:
         """获取嵌入模型"""
@@ -276,6 +475,27 @@ class EmbeddingManager:
         """清空缓存"""
         self.cache.clear()
         logger.info("嵌入缓存已清空")
+
+    async def rerank_documents(self, query: str, documents: List[str], top_k: int = 10) -> List[Tuple[int, float]]:
+        """使用BGE重排模型对文档进行重排
+
+        Args:
+            query: 查询文本
+            documents: 文档列表
+            top_k: 返回前k个结果
+
+        Returns:
+            List[Tuple[int, float]]: (原始索引, 重排分数) 的列表，按分数降序排列
+        """
+        if self.reranker is None:
+            logger.warning("重排模型未加载，返回原始顺序")
+            return [(i, 0.0) for i in range(min(len(documents), top_k))]
+
+        return await self.reranker.rerank(query, documents, top_k)
+
+    def has_reranker(self) -> bool:
+        """检查是否有可用的重排模型"""
+        return self.reranker is not None
 
 
 class TokenCounter:

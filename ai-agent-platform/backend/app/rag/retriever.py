@@ -111,29 +111,61 @@ class QueryExpander:
 
 class Reranker:
     """重排序器"""
-    
+
     def __init__(self):
         pass
-    
-    async def rerank(self, query: str, results: List[SearchResult], 
+
+    async def rerank(self, query: str, results: List[SearchResult],
                     top_k: int = 10) -> List[SearchResult]:
         """重排序搜索结果"""
         try:
             if len(results) <= top_k:
                 return results
-            
-            # 使用LLM进行重排序
+
+            # 优先使用BGE重排模型
+            if embedding_manager.has_reranker():
+                reranked_results = await self._bge_rerank(query, results, top_k)
+                if reranked_results:
+                    return reranked_results
+
+            # 如果BGE重排失败，使用LLM进行重排序
             reranked_results = await self._llm_rerank(query, results, top_k)
-            
+
             # 如果LLM重排序失败，使用基于规则的重排序
             if not reranked_results:
                 reranked_results = self._rule_based_rerank(query, results, top_k)
-            
+
             return reranked_results
-            
+
         except Exception as e:
             logger.error(f"重排序失败: {e}")
             return results[:top_k]
+
+    async def _bge_rerank(self, query: str, results: List[SearchResult],
+                         top_k: int) -> List[SearchResult]:
+        """使用BGE重排模型重排序"""
+        try:
+            # 提取文档内容
+            documents = [result.document.content for result in results]
+
+            # 使用BGE重排模型
+            reranked_indices = await embedding_manager.rerank_documents(query, documents, top_k)
+
+            # 构建重排后的结果
+            reranked_results = []
+            for rank, (original_idx, rerank_score) in enumerate(reranked_indices):
+                if 0 <= original_idx < len(results):
+                    result = results[original_idx]
+                    result.rank = rank + 1
+                    result.rerank_score = rerank_score  # 添加重排分数
+                    reranked_results.append(result)
+
+            logger.info(f"✅ BGE重排完成，返回{len(reranked_results)}个结果")
+            return reranked_results
+
+        except Exception as e:
+            logger.error(f"BGE重排失败: {e}")
+            return []
     
     async def _llm_rerank(self, query: str, results: List[SearchResult], 
                          top_k: int) -> List[SearchResult]:

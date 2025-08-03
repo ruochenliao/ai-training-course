@@ -1,6 +1,16 @@
+# Copyright (c) 2025 左岚. All rights reserved.
 """
 智能体应用综合平台 - 主应用入口
 """
+
+import sys
+import os
+from pathlib import Path
+
+# 添加backend目录到Python路径，使用相对路径
+current_file = Path(__file__).resolve()  # 获取当前文件的绝对路径
+backend_dir = current_file.parent.parent  # 向上两级到backend目录
+sys.path.insert(0, str(backend_dir))  # 添加到Python路径
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,6 +24,7 @@ from app.core.config import settings
 from app.db.session import check_db_connection, init_db
 from app.db.init_db import init as init_database_data
 from app.api.v1 import api_router
+from app.rag.embeddings import embedding_manager
 
 
 # 配置日志
@@ -23,6 +34,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# 减少各种组件的日志详细程度
+logging.getLogger('sqlalchemy.engine').setLevel(logging.ERROR)  # 只显示错误
+logging.getLogger('sqlalchemy.pool').setLevel(logging.ERROR)
+logging.getLogger('sentence_transformers').setLevel(logging.WARNING)  # 减少模型加载日志
+logging.getLogger('transformers').setLevel(logging.WARNING)
+logging.getLogger('torch').setLevel(logging.WARNING)
+logging.getLogger('urllib3').setLevel(logging.WARNING)
+logging.getLogger('watchfiles').setLevel(logging.WARNING)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -30,31 +50,18 @@ async def lifespan(app: FastAPI):
     # 启动时执行
     logger.info("🚀 智能体应用综合平台启动中...")
 
-    # 检查数据库连接
+    # 自动初始化数据库
     try:
-        if check_db_connection():
-            logger.info("✅ 数据库连接正常")
-
-            # 自动初始化数据库表
-            try:
-                logger.info("🔧 正在初始化数据库表...")
-                init_db()
-                logger.info("✅ 数据库表初始化完成")
-            except Exception as e:
-                logger.error(f"❌ 数据库表初始化失败: {e}")
-
-            # 自动初始化数据库数据
-            try:
-                logger.info("📊 正在初始化数据库数据...")
-                init_database_data()
-                logger.info("✅ 数据库数据初始化完成")
-            except Exception as e:
-                logger.error(f"❌ 数据库数据初始化失败: {e}")
-
-        else:
-            logger.warning("⚠️ 数据库连接失败，请检查配置")
+        init_database_data()  # 这个函数现在会自动检查数据库状态并决定是否初始化数据
     except Exception as e:
-        logger.error(f"❌ 数据库连接检查失败: {e}")
+        logger.error(f"❌ 数据库初始化失败: {e}")
+
+    # 启动BGE模型后台下载任务
+    try:
+        embedding_manager.start_background_bge_loading()
+        logger.info("🤖 BGE模型后台加载中...")
+    except Exception as e:
+        logger.error(f"❌ BGE模型后台任务启动失败: {e}")
 
     logger.info("✅ 应用启动完成")
 
@@ -127,14 +134,21 @@ async def health_check():
     """健康检查"""
     db_status = "connected" if check_db_connection() else "disconnected"
 
+    # 获取嵌入模型状态
+    embedding_status = embedding_manager.get_model_status()
+
     return {
         "status": "healthy" if db_status == "connected" else "degraded",
         "timestamp": time.time(),
         "version": settings.VERSION,
         "environment": settings.ENVIRONMENT,
         "database": db_status,
+        "embedding_models": embedding_status,
+        "default_embedding_model": embedding_manager.default_model,
         "services": {
             "database": db_status,
+            "deepseek_llm": "ready",
+            "embedding": "ready" if embedding_status else "unknown",
             "redis": "unknown",  # 可以后续添加Redis检查
             "milvus": "unknown"  # 可以后续添加Milvus检查
         }

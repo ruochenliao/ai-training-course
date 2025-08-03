@@ -57,7 +57,7 @@
           </el-menu-item>
 
           <el-menu-item index="/agent-management">
-            <el-icon><Robot /></el-icon>
+            <el-icon><Cpu /></el-icon>
             <span>智能体管理</span>
           </el-menu-item>
           
@@ -121,7 +121,7 @@ import {
   Document,
   ChatDotRound,
   DataAnalysis,
-  Robot,
+  Cpu,  // 使用 Cpu 图标替代 Robot
   Share,
   Grid,
   Monitor

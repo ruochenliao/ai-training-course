@@ -214,7 +214,7 @@ class ChatHandler(BaseHandler):
     async def _get_content_creation_response(self, content: str, metadata: Dict[str, Any]) -> str:
         """获取内容创作智能体响应"""
         # 这里应该调用实际的内容创作智能体
-        return f"基于您的需求"{content}"，我为您创作了以下内容：\n\n这是一个示例创作内容。实际使用时，系统会根据您的具体要求生成高质量的文案、文章或其他类型的内容。\n\n如果您需要调整风格或内容，请告诉我具体的要求。"
+        return f"基于您的需求\"{content}\"，我为您创作了以下内容：\n\n这是一个示例创作内容。实际使用时，系统会根据您的具体要求生成高质量的文案、文章或其他类型的内容。\n\n如果您需要调整风格或内容，请告诉我具体的要求。"
     
     def _get_agent_name(self, agent_type: str) -> str:
         """获取智能体名称"""

@@ -51,19 +51,23 @@ class Document:
 
 class SearchResult:
     """搜索结果"""
-    
-    def __init__(self, document: Document, score: float, rank: int = 0):
+
+    def __init__(self, document: Document, score: float, rank: int = 0, rerank_score: float = None):
         self.document = document
-        self.score = score
+        self.score = score  # 原始相似度分数
         self.rank = rank
-    
+        self.rerank_score = rerank_score  # 重排分数
+
     def to_dict(self) -> Dict[str, Any]:
         """转换为字典"""
-        return {
+        result = {
             "document": self.document.to_dict(),
             "score": self.score,
             "rank": self.rank
         }
+        if self.rerank_score is not None:
+            result["rerank_score"] = self.rerank_score
+        return result
 
 
 class BaseVectorStore(ABC):

@@ -12,7 +12,7 @@
           <el-card class="stat-card">
             <div class="stat-content">
               <div class="stat-icon active">
-                <el-icon><Robot /></el-icon>
+                <el-icon><Cpu /></el-icon>
               </div>
               <div class="stat-info">
                 <h3>{{ stats.activeAgents }}</h3>
@@ -205,8 +205,8 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  Robot, ChatDotRound, SuccessFilled, Timer, Refresh, Plus 
+import {
+  Cpu, ChatDotRound, SuccessFilled, Timer, Refresh, Plus
 } from '@element-plus/icons-vue'
 import AgentDetails from '@/components/Agent/AgentDetails.vue'
 import AgentConfig from '@/components/Agent/AgentConfig.vue'
@@ -371,7 +371,7 @@ const getAgentIcon = (type: string) => {
     tool_calling: 'tools',
     summarizing: 'document'
   }
-  return icons[type] || 'robot'
+  return icons[type] || 'cpu'
 }
 
 const getStatusType = (status: string) => {

@@ -5,15 +5,28 @@
 """
 
 from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 from sqlalchemy.orm import Session
+from sqlalchemy import and_, or_
 from pydantic import BaseModel
 
 from app.api.deps import get_db, get_current_active_superuser
+from app.core.security import get_current_user
 from app.models.user import User
-# 暂时注释掉插件系统导入，避免循环依赖
-# from app.plugins.manager import plugin_manager
-# from app.plugins.base import PluginType, PluginStatus
+from app.models.plugin import Plugin, PluginExecution, PluginMarketplace
+from app.schemas.plugin import (
+    PluginCreate,
+    PluginUpdate,
+    PluginResponse,
+    PluginExecuteRequest,
+    PluginExecuteResponse,
+    PluginInstallRequest,
+    PluginMarketplaceResponse,
+    PluginStatsResponse,
+    PluginSearchRequest,
+    PluginSearchResponse,
+    PluginValidationResult
+)
 
 router = APIRouter()
 
@@ -47,7 +60,7 @@ class PluginAction(BaseModel):
 async def get_plugins(
     plugin_type: Optional[str] = None,
     status: Optional[str] = None,
-    current_user: User = Depends(get_current_active_superuser),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -82,11 +95,35 @@ async def get_plugins(
             description="Slack集成插件",
             author="AI Agent Platform",
             type="integration",
-            status="inactive",
-            dependencies=[],
+            status="active",
+            dependencies=["requests"],
             permissions=["network.http"],
-            config={"webhook_url": "", "token": ""},
-            tags=["slack", "integration"]
+            config={"webhook_url": "", "channel": "#general"},
+            tags=["slack", "communication", "integration"]
+        ),
+        PluginInfo(
+            name="data_processor",
+            version="2.1.0",
+            description="数据处理插件",
+            author="Data Team",
+            type="processor",
+            status="inactive",
+            dependencies=["pandas", "numpy"],
+            permissions=["file.read", "file.write"],
+            config={"batch_size": 1000, "timeout": 30},
+            tags=["data", "processing", "analytics"]
+        ),
+        PluginInfo(
+            name="weather_api",
+            version="1.5.0",
+            description="天气API插件",
+            author="Weather Corp",
+            type="api",
+            status="active",
+            dependencies=["requests"],
+            permissions=["network.http"],
+            config={"api_key": "", "default_city": "Beijing"},
+            tags=["weather", "api", "external"]
         )
     ]
 

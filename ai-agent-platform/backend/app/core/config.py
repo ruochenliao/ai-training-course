@@ -71,10 +71,17 @@ class Settings(BaseSettings):
     OPENAI_MODEL: str = "gpt-4o"
     OPENAI_MAX_TOKENS: int = 4000
     OPENAI_TEMPERATURE: float = 0.7
+
+    # Deepseek配置
+    DEEPSEEK_API_KEY: str = "sk-56f5743d59364543a00109a4c1c10a56"
+    DEEPSEEK_BASE_URL: str = "https://api.deepseek.com/v1"
+    DEEPSEEK_MODEL: str = "deepseek-chat"
+    DEEPSEEK_MAX_TOKENS: int = 128000
+    DEEPSEEK_TEMPERATURE: float = 0.7
     
     # 嵌入模型配置
-    EMBEDDING_MODEL: str = "text-embedding-ada-002"
-    EMBEDDING_DIMENSION: int = 1536
+    EMBEDDING_MODEL: str = "bge-zh"  # 使用BGE中文嵌入模型
+    EMBEDDING_DIMENSION: int = 512  # BGE-small-zh-v1.5的维度
     EMBEDDING_BATCH_SIZE: int = 100
     
     # 文件处理配置

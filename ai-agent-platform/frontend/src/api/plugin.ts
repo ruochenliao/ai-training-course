@@ -2,7 +2,9 @@
  * 插件管理API
  */
 
-import { request } from '@/utils/request'
+import request from './request'
+import type { ApiResponse } from './request'
+import { API_PATHS } from './baseUrl'
 
 export interface Plugin {
   name: string

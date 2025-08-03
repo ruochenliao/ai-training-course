@@ -325,27 +325,43 @@ def create_initial_data(db: Session) -> None:
     create_sample_chat_sessions(db, user)
 
 
+def is_database_empty(db: Session) -> bool:
+    """
+    检查数据库是否为空（没有用户数据）
+    """
+    try:
+        # 检查用户表是否有数据
+        user_count = db.query(crud.user.model).count()
+        return user_count == 0
+    except Exception as e:
+        logger.warning(f"检查数据库状态失败: {e}")
+        return True  # 如果检查失败，假设数据库为空
+
+
 def init() -> None:
     """
     初始化数据库和数据
     """
-    logger.info("开始初始化数据库...")
-    
     # 检查数据库连接
     if not check_db_connection():
-        logger.error("数据库连接失败，请检查配置")
+        logger.error("❌ 数据库连接失败，请检查配置")
         return
-    
-    # 创建数据库表
+
+    # 自动创建数据库表（静默）
     init_db()
-    
-    # 创建初始数据
+    logger.info("✅ 数据库表检查完成")
+
+    # 检查是否需要初始化数据
     db = SessionLocal()
     try:
-        create_initial_data(db)
-        logger.info("数据库初始化完成")
+        if is_database_empty(db):
+            logger.info("📊 初始化基础数据...")
+            create_initial_data(db)
+            logger.info("✅ 数据库初始化完成")
+        else:
+            logger.info("📊 数据库已就绪")
     except Exception as e:
-        logger.error(f"创建初始数据失败: {e}")
+        logger.error(f"❌ 数据库初始化失败: {e}")
         raise
     finally:
         db.close()

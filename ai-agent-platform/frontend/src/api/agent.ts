@@ -74,6 +74,15 @@ export interface ChatResponse {
 // 智能体API接口
 export const agentApi = {
   // 获取智能体列表
+  getList: (params?: any): Promise<ApiResponse<Agent[]>> => {
+    return request({
+      url: '/api/v1/agents',
+      method: 'get',
+      params
+    })
+  },
+
+  // 获取智能体列表 (别名)
   getAgents: (params?: any): Promise<ApiResponse<Agent[]>> => {
     return request({
       url: '/api/v1/agents',

@@ -75,6 +75,15 @@ const routes: Array<RouteRecordRaw> = [
         }
       },
       {
+        path: 'agent-management',
+        name: 'AgentManagement',
+        component: () => import('@/views/AgentManagement.vue'),
+        meta: {
+          title: '智能体管理',
+          requiresAuth: true
+        }
+      },
+      {
         path: 'knowledge',
         name: 'KnowledgeList',
         component: () => import('@/views/knowledge/KnowledgeList.vue'),

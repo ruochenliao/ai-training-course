@@ -4,7 +4,7 @@
     <div class="chat-header">
       <div class="agent-info">
         <el-avatar :size="40" :src="currentAgent.avatar">
-          <el-icon><Robot /></el-icon>
+          <el-icon><Cpu /></el-icon>
         </el-avatar>
         <div class="agent-details">
           <h3>{{ currentAgent.name }}</h3>
@@ -54,7 +54,7 @@
             <el-icon><User /></el-icon>
           </el-avatar>
           <el-avatar :size="32" v-else>
-            <el-icon><Robot /></el-icon>
+            <el-icon><Cpu /></el-icon>
           </el-avatar>
         </div>
         
@@ -162,8 +162,8 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { 
-  Robot, User, ArrowDown, Delete, Loading, Warning, Promotion 
+import {
+  Cpu, User, ArrowDown, Delete, Loading, Warning, Promotion
 } from '@element-plus/icons-vue'
 import { useWebSocket } from '@/composables/useWebSocket'
 import { useUserStore } from '@/stores/user'
