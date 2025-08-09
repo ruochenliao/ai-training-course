@@ -1,10 +1,15 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 知识库相关的Pydantic模型
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any, List
+# # Standard library imports
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+# # Third-party imports
+from pydantic import BaseModel, Field
 
 
 class KnowledgeBaseBase(BaseModel):

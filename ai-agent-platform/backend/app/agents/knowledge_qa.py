@@ -1,19 +1,23 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 知识库问答智能体
 
 基于企业知识库回答专业问题，提供准确的信息检索和问答服务。
 """
 
-import logging
-from typing import Dict, Any, List, Optional
-import json
+# # Standard library imports
 from datetime import datetime
 from enum import Enum
+import json
+import logging
+from typing import Any, Dict, List, Optional
 
-from .base import BaseAgent, AgentMessage, AgentConfig
-from .llm_interface import llm_manager
+# # Local folder imports
+from ..rag.generator import CitationStyle, GenerationStrategy
 from ..rag.rag_agent import RAGAgent, RAGConfig
-from ..rag.generator import GenerationStrategy, CitationStyle
+from .base import AgentConfig, AgentMessage, BaseAgent
+from .llm_interface import llm_manager
 
 logger = logging.getLogger(__name__)
 

@@ -1,16 +1,22 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 API依赖项
 """
+# # Standard library imports
 from typing import Generator, Optional
 
+# # Third-party imports
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import jwt, JWTError
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
+# # Local application imports
 from app.core import security
 from app.core.config import settings
 from app.db.session import get_db as get_database_session
+
 # 暂时注释掉可能导致循环导入的模块
 # from app import crud
 from app.models.user import User
@@ -167,30 +173,8 @@ def get_optional_current_user(
     return user
 
 
-def get_current_user_websocket(
-    db: Session = Depends(get_db)
-) -> User:
-    """
-    WebSocket专用的用户认证（简化版）
-    在实际应用中，应该通过token验证用户身份
-
-    Args:
-        db: 数据库会话
-
-    Returns:
-        当前用户对象
-    """
-    # 这里简化处理，实际应该从WebSocket连接中获取token并验证
-    # 暂时返回一个默认的超级用户用于测试
-    user = User(
-        id=1,
-        email="admin@example.com",
-        username="admin",
-        full_name="Administrator",
-        is_active=True,
-        is_superuser=True
-    )
-    return user
+# WebSocket用户认证函数已移除
+# 实时通信功能已迁移到SSE，使用标准的JWT认证
 
 
 def get_current_active_superuser(

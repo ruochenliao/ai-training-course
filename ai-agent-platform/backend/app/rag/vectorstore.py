@@ -1,15 +1,18 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 向量存储
 
 负责向量的存储、检索和管理，支持多种向量数据库。
 """
 
-import logging
-from typing import List, Dict, Any, Optional, Tuple
+# # Standard library imports
 from abc import ABC, abstractmethod
-import uuid
 from datetime import datetime
 import json
+import logging
+from typing import Any, Dict, List, Optional, Tuple
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +120,14 @@ class MilvusVectorStore(BaseVectorStore):
         self.collection = None
         
         try:
-            from pymilvus import connections, Collection, FieldSchema, CollectionSchema, DataType
+            # # Third-party imports
+            from pymilvus import (
+                Collection,
+                CollectionSchema,
+                DataType,
+                FieldSchema,
+                connections,
+            )
             self.connections = connections
             self.Collection = Collection
             self.FieldSchema = FieldSchema
@@ -348,6 +358,7 @@ class InMemoryVectorStore(BaseVectorStore):
     async def search(self, query_embedding: List[float], top_k: int = 10,
                     filters: Dict[str, Any] = None) -> List[SearchResult]:
         """搜索相似文档"""
+        # # Third-party imports
         import numpy as np
         
         results = []

@@ -1,9 +1,14 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 认证相关的Pydantic模式
 """
 
-from pydantic import BaseModel, EmailStr, validator
+# # Standard library imports
 from typing import Optional
+
+# # Third-party imports
+from pydantic import BaseModel, EmailStr, validator
 
 
 class UserLogin(BaseModel):

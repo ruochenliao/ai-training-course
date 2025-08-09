@@ -1,17 +1,23 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 系统管理API
 """
 
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from sqlalchemy import func
+# # Standard library imports
 from datetime import datetime, timedelta
 
+# # Third-party imports
+from fastapi import APIRouter, Depends
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+# # Local application imports
 from app.api.deps import get_db
 from app.models.agent import Agent
-from app.models.user import User
-from app.models.knowledge import KnowledgeBase
 from app.models.chat import Conversation
+from app.models.knowledge import KnowledgeBase
+from app.models.user import User
 
 router = APIRouter()
 

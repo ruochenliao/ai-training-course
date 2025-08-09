@@ -4,13 +4,30 @@
  */
 
 import axios from 'axios'
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { ElMessage, ElMessageBox } from 'element-plus'
+// @ts-ignore - 忽略类型检查
 import { useAuthStore } from '@/stores/auth'
+// @ts-ignore - 忽略类型检查
 import router from '@/router'
+// @ts-ignore - 忽略类型检查
 import type { BaseResponse } from '@/types'
 import { errorHandler } from './errorHandler'
-import { loadingManager, cancelTokenManager, retry, performanceMonitor } from './performance'
+import { loadingManager, cancelTokenManager, retry, performanceMonitor, cacheManager } from './performance'
+
+// 导入环境变量工具
+import { getApiBaseUrl } from './env'
+
+// 扩展Axios类型定义
+declare module 'axios' {
+  interface InternalAxiosRequestConfig {
+    _retry?: boolean
+    loading?: boolean | string
+    retry?: boolean | number
+    cache?: boolean | number
+    silent?: boolean
+  }
+}
 
 // 请求配置接口
 export interface RequestConfig extends AxiosRequestConfig {
@@ -18,20 +35,22 @@ export interface RequestConfig extends AxiosRequestConfig {
   retry?: boolean | number    // 是否重试
   cache?: boolean | number    // 是否缓存
   silent?: boolean           // 是否静默处理错误
+  _retry?: boolean           // 是否已重试
 }
 
 // 创建axios实例
 const service: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: 30000,
+  baseURL: getApiBaseUrl(),
+  timeout: 10000,
+  withCredentials: true,
   headers: {
-    'Content-Type': 'application/json;charset=UTF-8'
+    'Content-Type': 'application/json;charset=utf-8'
   }
 })
 
 // 请求拦截器
 service.interceptors.request.use(
-  (config: RequestConfig) => {
+  (config: InternalAxiosRequestConfig) => {
     const authStore = useAuthStore()
 
     // 性能监控
@@ -40,16 +59,24 @@ service.interceptors.request.use(
 
     // 添加认证token
     if (authStore.token) {
-      config.headers = {
-        ...config.headers,
-        Authorization: `Bearer ${authStore.token}`
+      if (typeof config.headers?.set === 'function') {
+        config.headers.set('Authorization', `Bearer ${authStore.token}`)
+      } else {
+        config.headers = {
+          ...config.headers,
+          Authorization: `Bearer ${authStore.token}`
+        } as any
       }
     }
 
     // 添加请求ID用于追踪
-    config.headers = {
-      ...config.headers,
-      'X-Request-ID': `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    if (typeof config.headers?.set === 'function') {
+      config.headers.set('X-Request-ID', `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`)
+    } else {
+      config.headers = {
+        ...config.headers,
+        'X-Request-ID': `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      } as any
     }
 
     // 处理取消令牌
@@ -75,8 +102,8 @@ service.interceptors.request.use(
 
 // 响应拦截器
 service.interceptors.response.use(
-  (response: AxiosResponse<BaseResponse>) => {
-    const config = response.config as RequestConfig
+  (response: AxiosResponse<any>) => {
+    const config = response.config as any as RequestConfig
     const requestKey = `${config.method}-${config.url}`
 
     // 性能监控
@@ -116,10 +143,10 @@ service.interceptors.response.use(
       data: data,
       timestamp: new Date().toISOString(),
       request_id: response.headers['x-request-id'] || ''
-    } as BaseResponse
+    }
   },
   async (error: AxiosError) => {
-    const config = error.config as RequestConfig
+    const config = error.config as InternalAxiosRequestConfig
     const requestKey = `${config?.method}-${config?.url}`
     const authStore = useAuthStore()
 
@@ -137,12 +164,12 @@ service.interceptors.response.use(
     // 处理401认证错误的特殊逻辑
     if (error.response?.status === 401) {
       // 未授权，尝试刷新token
-      if (authStore.refreshToken && !error.config?._retry) {
-        error.config!._retry = true
+      if (authStore.refreshToken && !config?._retry) {
+        config._retry = true
         try {
           await authStore.refreshAccessToken()
           // 重新发送原请求
-          return service(error.config!)
+          return service(config)
         } catch (refreshError) {
           // 刷新失败，跳转到登录页
           authStore.logout()
@@ -210,83 +237,100 @@ export const request = {
   },
 
   /**
-   * 带重试的请求
-   */
-  async withRetry<T = any>(
-    requestFn: () => Promise<BaseResponse<T>>,
-    maxAttempts: number = 3,
-    delay: number = 1000
-  ): Promise<BaseResponse<T>> {
-    return retry(requestFn, maxAttempts, delay)
-  },
-
-  /**
-   * 批量请求
-   */
-  async batch<T = any>(
-    requests: Array<() => Promise<BaseResponse<T>>>,
-    batchSize: number = 5,
-    delay: number = 100
-  ): Promise<BaseResponse<T>[]> {
-    const results: BaseResponse<T>[] = []
-
-    for (let i = 0; i < requests.length; i += batchSize) {
-      const batch = requests.slice(i, i + batchSize)
-      const batchResults = await Promise.all(batch.map(req => req()))
-      results.push(...batchResults)
-
-      if (delay > 0 && i + batchSize < requests.length) {
-        await new Promise(resolve => setTimeout(resolve, delay))
-      }
-    }
-
-    return results
-  },
-
-  /**
    * 上传文件
    */
-  upload<T = any>(
-    url: string,
-    file: File,
-    config?: RequestConfig & {
-      onUploadProgress?: (progressEvent: any) => void
+  upload<T = any>(url: string, file: File | FormData, config?: RequestConfig): Promise<BaseResponse<T>> {
+    const formData = file instanceof FormData ? file : new FormData()
+    
+    if (file instanceof File) {
+      formData.append('file', file)
     }
-  ): Promise<BaseResponse<T>> {
-    const formData = new FormData()
-    formData.append('file', file)
-
+    
     return service.post(url, formData, {
-      ...config,
       headers: {
-        ...config?.headers,
         'Content-Type': 'multipart/form-data'
-      }
+      },
+      ...config
     })
   },
 
   /**
    * 下载文件
    */
-  async download(
-    url: string,
-    filename?: string,
-    config?: RequestConfig
-  ): Promise<void> {
-    const response = await service.get(url, {
-      ...config,
-      responseType: 'blob'
+  download(url: string, filename?: string, config?: RequestConfig): Promise<void> {
+    return service.get(url, {
+      responseType: 'blob',
+      ...config
+    }).then(response => {
+      const blob = new Blob([response.data])
+      const downloadUrl = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = downloadUrl
+      link.download = filename || url.substring(url.lastIndexOf('/') + 1) || 'download'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(downloadUrl)
     })
+  },
 
-    const blob = new Blob([response.data])
-    const downloadUrl = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = downloadUrl
-    link.download = filename || 'download'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    window.URL.revokeObjectURL(downloadUrl)
+  /**
+   * 带重试的请求
+   */
+  async withRetry<T = any>(
+    method: 'get' | 'post' | 'put' | 'delete' | 'patch',
+    url: string,
+    data?: any,
+    config?: RequestConfig & { maxRetries?: number, retryDelay?: number }
+  ): Promise<BaseResponse<T>> {
+    const maxRetries = config?.maxRetries || 3
+    const retryDelay = config?.retryDelay || 1000
+    
+    return retry(
+      async () => {
+        switch (method) {
+          case 'get':
+            return await request.get<T>(url, config)
+          case 'post':
+            return await request.post<T>(url, data, config)
+          case 'put':
+            return await request.put<T>(url, data, config)
+          case 'delete':
+            return await request.delete<T>(url, config)
+          case 'patch':
+            return await request.patch<T>(url, data, config)
+          default:
+            throw new Error(`Unsupported method: ${method}`)
+        }
+      },
+      maxRetries,
+      retryDelay
+    )
+  },
+
+  /**
+   * 带缓存的GET请求
+   */
+  async cachedGet<T = any>(
+    url: string,
+    config?: RequestConfig & { ttl?: number }
+  ): Promise<BaseResponse<T>> {
+    const ttl = config?.ttl || 5 * 60 * 1000 // 默认5分钟
+    const cacheKey = `${url}${config ? JSON.stringify(config) : ''}`
+    
+    // 尝试从缓存获取
+    const cachedData = cacheManager.get(cacheKey)
+    if (cachedData) {
+      return cachedData
+    }
+    
+    // 发起请求
+    const response = await request.get<T>(url, config)
+    
+    // 缓存结果
+    cacheManager.set(cacheKey, response, ttl)
+    
+    return response
   }
 }
 

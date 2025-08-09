@@ -456,6 +456,20 @@ frontend/.env.development.local
 frontend/.env.production.local
 frontend/auto-imports.d.ts
 frontend/components.d.ts
+frontend/*.tsbuildinfo
+frontend/test-*.js
+frontend/test-*.ts
+
+# 类型系统测试和验证文件
+frontend/src/utils/type-test.ts
+frontend/src/utils/type-fix-validation.ts
+frontend/src/utils/final-validation.ts
+frontend/src/types/type-validation.ts
+
+# 项目总结和文档文件
+**/TYPE_SYSTEM_REFACTOR.md
+**/REFACTOR_*.md
+**/SUMMARY_*.md
 
 # 开发工具生成的文件
 *.pyc

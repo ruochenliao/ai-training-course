@@ -1,31 +1,37 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 插件管理API
 
 提供插件的安装、卸载、激活、停用等管理功能。
 """
 
-from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
-from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
-from pydantic import BaseModel
+# # Standard library imports
+from typing import Any, Dict, List, Optional
 
-from app.api.deps import get_db, get_current_active_superuser
+# # Third-party imports
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from pydantic import BaseModel
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import Session
+
+# # Local application imports
+from app.api.deps import get_current_active_superuser, get_db
 from app.core.security import get_current_user
-from app.models.user import User
 from app.models.plugin import Plugin, PluginExecution, PluginMarketplace
+from app.models.user import User
 from app.schemas.plugin import (
     PluginCreate,
-    PluginUpdate,
-    PluginResponse,
     PluginExecuteRequest,
     PluginExecuteResponse,
     PluginInstallRequest,
     PluginMarketplaceResponse,
-    PluginStatsResponse,
+    PluginResponse,
     PluginSearchRequest,
     PluginSearchResponse,
-    PluginValidationResult
+    PluginStatsResponse,
+    PluginUpdate,
+    PluginValidationResult,
 )
 
 router = APIRouter()
@@ -349,8 +355,9 @@ async def install_plugin(
     """
     try:
         # 保存上传的文件
-        import tempfile
+        # # Standard library imports
         import os
+        import tempfile
         
         with tempfile.NamedTemporaryFile(delete=False, suffix=".zip") as temp_file:
             content = await file.read()

@@ -8,6 +8,7 @@ from .user import crud_user
 from .role import crud_role
 from .permission import crud_permission
 from .menu import crud_menu
+from .audit_log import CRUDAuditLog
 from .department import crud_department
 
 __all__ = [

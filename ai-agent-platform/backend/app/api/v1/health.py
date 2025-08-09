@@ -1,15 +1,21 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 健康检查API
 """
 
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+# # Standard library imports
 import time
-import psutil
-from typing import Dict, Any
+from typing import Any, Dict
 
-from app.db.session import get_db, check_db_connection
+# # Third-party imports
+from fastapi import APIRouter, Depends
+import psutil
+from sqlalchemy.orm import Session
+
+# # Local application imports
 from app.core.config import settings
+from app.db.session import check_db_connection, get_db
 
 router = APIRouter()
 

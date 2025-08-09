@@ -20,17 +20,19 @@ import {
 } from '@/utils/auth'
 import type {
   LoginRequest,
+  User,
   UserInfo,
   UserProfile,
   ChangePasswordRequest,
   MenuRoute
 } from '@/types'
+import type { AuthStoreType } from '@/types/store-types'
 
 export const useAuthStore = defineStore('auth', () => {
   // 状态
   const token = ref<string>(getToken() || '')
   const refreshToken = ref<string>(getRefreshToken() || '')
-  const userInfo = ref<UserInfo | null>(getUserInfo())
+  const userInfo = ref<User | null>(getUserInfo())
   const permissions = ref<string[]>([])
   const roles = ref<string[]>([])
   const menus = ref<MenuRoute[]>([])
@@ -219,11 +221,11 @@ export const useAuthStore = defineStore('auth', () => {
     permissions,
     roles,
     menus,
-    
+
     // 计算属性
     isLoggedIn,
     isSuperUser,
-    
+
     // 方法
     login,
     logout,
@@ -233,5 +235,5 @@ export const useAuthStore = defineStore('auth', () => {
     hasPermission,
     hasRole,
     initAuth
-  }
+  } as AuthStoreType
 })

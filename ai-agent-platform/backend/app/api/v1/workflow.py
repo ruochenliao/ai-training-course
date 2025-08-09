@@ -1,20 +1,26 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 工作流API端点
 
 提供工作流管理的REST API接口。
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
-from sqlalchemy.orm import Session
-from typing import List, Dict, Any, Optional
-from pydantic import BaseModel
-import uuid
+# # Standard library imports
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+import uuid
 
-from app.api.deps import get_db, get_current_user
-from app.models.user import User
-from app.agents.workflow import workflow_manager, WorkflowStatus
+# # Third-party imports
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+# # Local application imports
 from app.agents.base import agent_registry
+from app.agents.workflow import WorkflowStatus, workflow_manager
+from app.api.deps import get_current_user, get_db
+from app.models.user import User
 
 router = APIRouter()
 

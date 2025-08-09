@@ -1,12 +1,16 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 插件注册表
 
 管理插件类的注册和查找。
 """
 
-from typing import Dict, Type, List, Optional
+# # Standard library imports
 import logging
+from typing import Dict, List, Optional, Type
 
+# # Local folder imports
 from .base import BasePlugin, PluginType
 
 logger = logging.getLogger(__name__)

@@ -1,10 +1,15 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 模板相关的Pydantic模型
 """
 
-from pydantic import BaseModel, Field
-from typing import List, Optional
+# # Standard library imports
 from enum import Enum
+from typing import List, Optional
+
+# # Third-party imports
+from pydantic import BaseModel, Field
 
 
 class TemplateCategory(str, Enum):

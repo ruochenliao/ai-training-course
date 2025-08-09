@@ -1,13 +1,18 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 路由智能体
 
 负责分析用户请求并将其路由到合适的专业智能体。
 """
 
+# # Standard library imports
 import json
 import logging
-from typing import Dict, Any, List, Optional
-from .base import BaseAgent, AgentMessage, AgentConfig
+from typing import Any, Dict, List, Optional
+
+# # Local folder imports
+from .base import AgentConfig, AgentMessage, BaseAgent
 from .llm_interface import llm_manager
 
 logger = logging.getLogger(__name__)

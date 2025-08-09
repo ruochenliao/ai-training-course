@@ -1,19 +1,23 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 邮件发送插件
 
 提供邮件发送功能的工具插件。
 """
 
+# # Standard library imports
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import logging
 import smtplib
 import ssl
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
-from email import encoders
-from typing import Dict, Any, List
-import logging
+from typing import Any, Dict, List
 
-from ..base import ToolPlugin, PluginMetadata, PluginType
+# # Local folder imports
+from ..base import PluginMetadata, PluginType, ToolPlugin
 from ..registry import plugin
 
 logger = logging.getLogger(__name__)

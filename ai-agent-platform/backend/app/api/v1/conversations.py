@@ -1,29 +1,35 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 对话管理API
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status, WebSocket, WebSocketDisconnect
-from fastapi.responses import StreamingResponse
-from sqlalchemy.orm import Session
-from typing import List, Optional, Dict
-import json
+# # Standard library imports
 import asyncio
 from datetime import datetime
+import json
 import logging
+from typing import Dict, List, Optional
+
+# # Third-party imports
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
+from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
+# # Local application imports
 from app.api.deps import get_db
 from app.core.security import get_current_user
-from app.models.user import User
-from app.models.chat import Conversation, Message
 from app.models.agent import Agent
+from app.models.chat import Conversation, Message
+from app.models.user import User
 from app.schemas.conversation import (
-    ConversationCreate, 
-    ConversationResponse, 
-    MessageCreate, 
+    ConversationCreate,
+    ConversationResponse,
+    ConversationUpdate,
+    MessageCreate,
     MessageResponse,
-    ConversationUpdate
 )
 
 router = APIRouter()
@@ -312,165 +318,10 @@ async def send_message_stream(
     )
 
 
-# WebSocket连接管理器
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: Dict[str, WebSocket] = {}
-        self.user_connections: Dict[str, List[str]] = {}
-
-    async def connect(self, websocket: WebSocket, connection_id: str, user_id: str):
-        await websocket.accept()
-        self.active_connections[connection_id] = websocket
-
-        if user_id not in self.user_connections:
-            self.user_connections[user_id] = []
-        self.user_connections[user_id].append(connection_id)
-
-        logger.info(f"WebSocket连接建立: {connection_id}, 用户: {user_id}")
-
-    def disconnect(self, connection_id: str, user_id: str):
-        if connection_id in self.active_connections:
-            del self.active_connections[connection_id]
-
-        if user_id in self.user_connections:
-            if connection_id in self.user_connections[user_id]:
-                self.user_connections[user_id].remove(connection_id)
-            if not self.user_connections[user_id]:
-                del self.user_connections[user_id]
-
-        logger.info(f"WebSocket连接断开: {connection_id}, 用户: {user_id}")
-
-    async def send_personal_message(self, message: dict, connection_id: str):
-        if connection_id in self.active_connections:
-            websocket = self.active_connections[connection_id]
-            try:
-                await websocket.send_json(message)
-            except Exception as e:
-                logger.error(f"发送消息失败: {e}")
-
-    async def send_to_user(self, message: dict, user_id: str):
-        if user_id in self.user_connections:
-            for connection_id in self.user_connections[user_id]:
-                await self.send_personal_message(message, connection_id)
+# WebSocket功能已移除，使用SSE (Server-Sent Events) 替代
+# 相关实现请参考 app/sse/ 模块
 
 
-manager = ConnectionManager()
-
-
-@router.websocket("/ws/{conversation_id}")
-async def websocket_chat(
-    websocket: WebSocket,
-    conversation_id: int,
-    db: Session = Depends(get_db)
-):
-    """
-    WebSocket实时聊天
-    """
-    connection_id = f"ws_{conversation_id}_{datetime.utcnow().timestamp()}"
-
-    try:
-        # 这里应该验证用户权限，简化处理
-        user_id = "temp_user"  # 实际应该从token中获取
-
-        await manager.connect(websocket, connection_id, user_id)
-
-        # 验证对话是否存在
-        conversation = db.query(Conversation).filter(
-            Conversation.id == conversation_id
-        ).first()
-
-        if not conversation:
-            await websocket.send_json({
-                "type": "error",
-                "message": "对话不存在"
-            })
-            return
-
-        # 发送连接成功消息
-        await websocket.send_json({
-            "type": "connected",
-            "conversation_id": conversation_id,
-            "message": "WebSocket连接成功"
-        })
-
-        while True:
-            # 接收客户端消息
-            data = await websocket.receive_json()
-            message_type = data.get("type", "message")
-
-            if message_type == "message":
-                content = data.get("content", "")
-                if not content:
-                    await websocket.send_json({
-                        "type": "error",
-                        "message": "消息内容不能为空"
-                    })
-                    continue
-
-                # 保存用户消息
-                user_message = Message(
-                    conversation_id=conversation_id,
-                    content=content,
-                    role="user",
-                    message_type="text"
-                )
-                db.add(user_message)
-                db.commit()
-                db.refresh(user_message)
-
-                # 发送用户消息确认
-                await websocket.send_json({
-                    "type": "user_message",
-                    "message_id": user_message.id,
-                    "content": content,
-                    "timestamp": user_message.created_at.isoformat()
-                })
-
-                # 发送正在输入状态
-                await websocket.send_json({
-                    "type": "typing",
-                    "message": "AI正在思考..."
-                })
-
-                # 模拟AI回复
-                await asyncio.sleep(1)
-                ai_response = f"这是对消息'{content}'的AI回复。"
-
-                # 保存AI消息
-                ai_message = Message(
-                    conversation_id=conversation_id,
-                    content=ai_response,
-                    role="assistant",
-                    message_type="text"
-                )
-                db.add(ai_message)
-                db.commit()
-                db.refresh(ai_message)
-
-                # 发送AI回复
-                await websocket.send_json({
-                    "type": "assistant_message",
-                    "message_id": ai_message.id,
-                    "content": ai_response,
-                    "timestamp": ai_message.created_at.isoformat()
-                })
-
-                # 更新对话时间
-                conversation.updated_at = datetime.utcnow()
-                db.commit()
-
-            elif message_type == "ping":
-                await websocket.send_json({"type": "pong"})
-
-    except WebSocketDisconnect:
-        manager.disconnect(connection_id, user_id)
-    except Exception as e:
-        logger.error(f"WebSocket错误: {e}")
-        try:
-            await websocket.send_json({
-                "type": "error",
-                "message": f"服务器错误: {str(e)}"
-            })
-        except:
-            pass
-        manager.disconnect(connection_id, user_id)
+# WebSocket端点已移除
+# 实时通信功能已迁移到SSE (Server-Sent Events)
+# 请使用 /api/v1/conversations/{conversation_id}/stream 端点

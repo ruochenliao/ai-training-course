@@ -1,13 +1,20 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 对话相关的Pydantic模式
 """
 
-from pydantic import BaseModel, validator
-from typing import Optional, Dict, Any, List
+# # Standard library imports
 from datetime import datetime
-from app.models.chat import MessageRole
-from app.models.agent import AgentType
 import enum
+from typing import Any, Dict, List, Optional
+
+# # Third-party imports
+from pydantic import BaseModel, validator
+
+# # Local application imports
+from app.models.agent import AgentType
+from app.models.chat import MessageRole
 
 
 class FeedbackType(str, enum.Enum):

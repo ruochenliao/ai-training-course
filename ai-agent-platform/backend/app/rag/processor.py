@@ -1,19 +1,23 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 文档处理器
 
 负责文档的解析、分块、预处理等功能。
 """
 
-import re
-import logging
-from typing import List, Dict, Any, Optional, Tuple
-from enum import Enum
-import uuid
+# # Standard library imports
 from datetime import datetime
+from enum import Enum
+import logging
 from pathlib import Path
+import re
+from typing import Any, Dict, List, Optional, Tuple
+import uuid
 
+# # Local folder imports
+from .embeddings import TokenCounter, embedding_manager
 from .vectorstore import Document
-from .embeddings import embedding_manager, TokenCounter
 
 logger = logging.getLogger(__name__)
 
@@ -367,6 +371,7 @@ class DocumentProcessor:
     def _read_pdf(self, file_path: Path) -> str:
         """读取PDF文件"""
         try:
+            # # Third-party imports
             import PyPDF2
             text = ""
             with open(file_path, 'rb') as f:
@@ -383,6 +388,7 @@ class DocumentProcessor:
     def _read_docx(self, file_path: Path) -> str:
         """读取DOCX文件"""
         try:
+            # # Third-party imports
             from docx import Document
             doc = Document(file_path)
             text = ""

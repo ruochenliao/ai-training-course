@@ -1,25 +1,31 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 知识库管理API
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
-from sqlalchemy.orm import Session
-from typing import List, Optional
-import json
+# # Standard library imports
 from datetime import datetime
+import json
+from typing import List, Optional
 
+# # Third-party imports
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from sqlalchemy.orm import Session
+
+# # Local application imports
 from app.api.deps import get_db
 from app.core.security import get_current_user
-from app.models.knowledge import KnowledgeBase, Document, DocumentChunk
+from app.models.knowledge import Document, DocumentChunk, KnowledgeBase
 from app.models.user import User
 from app.schemas.knowledge import (
+    DocumentChunkResponse,
+    DocumentResponse,
     KnowledgeBaseCreate,
     KnowledgeBaseResponse,
     KnowledgeBaseUpdate,
-    DocumentResponse,
-    DocumentChunkResponse,
     SearchRequest,
-    SearchResponse
+    SearchResponse,
 )
 
 router = APIRouter()

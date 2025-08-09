@@ -1,18 +1,25 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 向量化管理器
 
 负责文本的向量化处理，支持多种嵌入模型。
 """
 
+# # Standard library imports
 import asyncio
-import logging
-from typing import List, Dict, Any, Optional, Tuple
-import numpy as np
-from openai import AsyncOpenAI
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
+import logging
 import threading
-from concurrent.futures import ThreadPoolExecutor
+from typing import Any, Dict, List, Optional, Tuple
+
+# # Third-party imports
+import numpy as np
+from openai import AsyncOpenAI
+
+# # Local application imports
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -92,8 +99,11 @@ class LocalEmbedding(EmbeddingModel):
 
     def __init__(self, model_name: str = "BAAI/bge-small-zh-v1.5"):  # 使用小型中文嵌入模型，加载更快
         try:
-            from sentence_transformers import SentenceTransformer
+            # # Standard library imports
             import os
+
+            # # Third-party imports
+            from sentence_transformers import SentenceTransformer
 
             # 设置模型缓存目录到项目的models文件夹
             project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -121,8 +131,11 @@ class BGEReranker:
 
     def __init__(self, model_name: str = "BAAI/bge-reranker-v2-m3"):
         try:
-            from sentence_transformers import CrossEncoder
+            # # Standard library imports
             import os
+
+            # # Third-party imports
+            from sentence_transformers import CrossEncoder
 
             # 设置模型缓存目录
             project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -250,6 +263,7 @@ class EmbeddingManager:
     def _is_model_downloaded(self, model_name: str) -> bool:
         """检查模型是否已下载到本地"""
         try:
+            # # Standard library imports
             import os
             project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
             models_dir = os.path.join(project_root, "models")

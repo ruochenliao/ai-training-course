@@ -1,10 +1,30 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 API v1 路由模块
 """
 
+# # Third-party imports
 from fastapi import APIRouter
 
-from app.api.v1 import health, auth, users, conversations, agents, knowledge, files, system, chat, admin, templates, workflow, websocket_api, plugins
+# # Local application imports
+from app.api.v1 import (
+    admin,
+    agents,
+    auth,
+    chat,
+    conversations,
+    files,
+    health,
+    knowledge,
+    monitoring,
+    plugins,
+    sse_api,
+    system,
+    templates,
+    users,
+    workflow,
+)
 
 # 创建API路由器
 api_router = APIRouter()
@@ -25,4 +45,5 @@ api_router.include_router(templates.router, prefix="/templates", tags=["智能�
 api_router.include_router(admin.router, prefix="/admin", tags=["管理后台"])
 api_router.include_router(workflow.router, prefix="/workflow", tags=["工作流管理"])
 api_router.include_router(plugins.router, prefix="/plugins", tags=["插件管理"])
-api_router.include_router(websocket_api.router, prefix="/ws", tags=["WebSocket通信"])
+api_router.include_router(sse_api.router, prefix="/sse", tags=["SSE实时通信"])
+api_router.include_router(monitoring.router, prefix="/monitoring", tags=["监控管理"])

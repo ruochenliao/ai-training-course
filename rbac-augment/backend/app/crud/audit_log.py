@@ -81,68 +81,82 @@ class CRUDAuditLog(CRUDBase[AuditLog, AuditLogCreate, None]):
         now = datetime.now()
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
-        # 基础统计
-        total_logs = await AuditLog.all().count()
-        today_logs = await AuditLog.filter(created_at__gte=today_start).count()
-        success_logs = await AuditLog.filter(status=AuditStatus.SUCCESS).count()
-        failed_logs = await AuditLog.filter(status=AuditStatus.FAILED).count()
+        try:
+            # 基础统计
+            total_logs = await AuditLog.all().count()
+            today_logs = await AuditLog.filter(created_at__gte=today_start).count()
+            success_logs = await AuditLog.filter(status=AuditStatus.SUCCESS).count()
+            failed_logs = await AuditLog.filter(status=AuditStatus.FAILED).count()
 
-        # 按操作类型统计
-        action_stats = {}
-        for action in AuditAction:
-            count = await AuditLog.filter(action=action).count()
-            if count > 0:
-                action_stats[action.value] = count
+            # 按操作类型统计
+            action_stats = {}
+            for action in AuditAction:
+                count = await AuditLog.filter(action=action).count()
+                if count > 0:
+                    action_stats[action.value] = count
 
-        # 按级别统计
-        level_stats = {}
-        for level in AuditLevel:
-            count = await AuditLog.filter(level=level).count()
-            if count > 0:
-                level_stats[level.value] = count
+            # 按级别统计
+            level_stats = {}
+            for level in AuditLevel:
+                count = await AuditLog.filter(level=level).count()
+                if count > 0:
+                    level_stats[level.value] = count
 
-        # 按资源类型统计
-        resource_stats = await AuditLog.all().group_by("resource_type").annotate(
-            count=Count("id")
-        ).values("resource_type", "count")
-        
-        logs_by_resource = {item["resource_type"]: item["count"] for item in resource_stats}
+            # 按资源类型统计
+            resource_stats = await AuditLog.all().group_by("resource_type").annotate(
+                count=Count("id")
+            ).values("resource_type", "count")
+            
+            logs_by_resource = {item["resource_type"]: item["count"] for item in resource_stats}
 
-        # 活跃用户TOP10
-        user_stats = await AuditLog.filter(user_id__isnull=False).group_by("user_id", "username").annotate(
-            count=Count("id")
-        ).order_by("-count").limit(10).values("user_id", "username", "count")
+            # 活跃用户TOP10
+            user_stats = await AuditLog.filter(user_id__isnull=False).group_by("user_id", "username").annotate(
+                count=Count("id")
+            ).order_by("-count").limit(10).values("user_id", "username", "count")
 
-        top_users = [
-            {
-                "user_id": item["user_id"],
-                "username": item["username"],
-                "action_count": item["count"]
+            top_users = [
+                {
+                    "user_id": item["user_id"],
+                    "username": item["username"],
+                    "action_count": item["count"]
+                }
+                for item in user_stats
+            ]
+
+            # 最近的关键操作
+            recent_critical = await AuditLog.filter(
+                level=AuditLevel.CRITICAL
+            ).order_by("-created_at").limit(10).all()
+
+            recent_critical_data = []
+            for log in recent_critical:
+                log_data = await log.to_dict()
+                recent_critical_data.append(log_data)
+
+            return {
+                "total_logs": total_logs,
+                "today_logs": today_logs,
+                "success_logs": success_logs,
+                "failed_logs": failed_logs,
+                "logs_by_action": action_stats,
+                "logs_by_level": level_stats,
+                "logs_by_resource": logs_by_resource,
+                "top_users": top_users,
+                "recent_critical": recent_critical_data
             }
-            for item in user_stats
-        ]
-
-        # 最近的关键操作
-        recent_critical = await AuditLog.filter(
-            level=AuditLevel.CRITICAL
-        ).order_by("-created_at").limit(10).all()
-
-        recent_critical_data = []
-        for log in recent_critical:
-            log_data = await log.to_dict()
-            recent_critical_data.append(log_data)
-
-        return {
-            "total_logs": total_logs,
-            "today_logs": today_logs,
-            "success_logs": success_logs,
-            "failed_logs": failed_logs,
-            "logs_by_action": action_stats,
-            "logs_by_level": level_stats,
-            "logs_by_resource": logs_by_resource,
-            "top_users": top_users,
-            "recent_critical": recent_critical_data
-        }
+        except Exception as e:
+            # 如果发生错误，返回空统计数据
+            return {
+                "total_logs": 0,
+                "today_logs": 0,
+                "success_logs": 0,
+                "failed_logs": 0,
+                "logs_by_action": {},
+                "logs_by_level": {},
+                "logs_by_resource": {},
+                "top_users": [],
+                "recent_critical": []
+            }
 
     async def get_user_activity(self, user_id: int, days: int = 30) -> Dict[str, Any]:
         """获取用户活动统计"""
@@ -312,6 +326,34 @@ class CRUDAuditLog(CRUDBase[AuditLog, AuditLogCreate, None]):
             })
 
         return summaries
+
+
+    async def batch_delete(self, log_ids: List[int]) -> int:
+        """批量删除审计日志"""
+        try:
+            # 执行批量删除
+            deleted_count = await self.model.filter(id__in=log_ids).delete()
+            return deleted_count
+        except Exception as e:
+            # 发生异常时返回0
+            return 0
+    
+    async def delete_old_logs(self, cutoff_date: datetime, level: Optional[str] = None) -> int:
+        """删除过期的审计日志"""
+        try:
+            # 构建查询条件
+            query = self.model.filter(created_at__lt=cutoff_date)
+            
+            # 如果指定了级别，则添加级别过滤
+            if level:
+                query = query.filter(level=level)
+            
+            # 执行删除
+            deleted_count = await query.delete()
+            return deleted_count
+        except Exception as e:
+            # 发生异常时返回0
+            return 0
 
 
 # 创建CRUD实例

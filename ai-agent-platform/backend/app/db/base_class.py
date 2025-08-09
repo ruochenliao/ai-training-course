@@ -1,7 +1,12 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 SQLAlchemy模型基类定义
 """
+# # Standard library imports
 from typing import Any
+
+# # Third-party imports
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
 
 

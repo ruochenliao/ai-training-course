@@ -1,17 +1,21 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 Text2SQL智能体
 
 将自然语言查询转换为SQL语句，并执行数据分析。
 """
 
-import logging
-import re
-import json
-from typing import Dict, Any, List, Optional, Tuple
+# # Standard library imports
 from datetime import datetime
 from enum import Enum
+import json
+import logging
+import re
+from typing import Any, Dict, List, Optional, Tuple
 
-from .base import BaseAgent, AgentMessage, AgentConfig
+# # Local folder imports
+from .base import AgentConfig, AgentMessage, BaseAgent
 from .llm_interface import llm_manager
 
 logger = logging.getLogger(__name__)

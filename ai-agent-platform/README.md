@@ -4,7 +4,7 @@
 
 智能体应用综合平台是一个集成了前沿AI技术的"一站式"智能体解决方案平台，旨在成为企业数字化转型的核心引擎。平台提供四个核心智能体服务：
 
-- **🤖 智能客服智能体**: 流式对话、工具调用、会话管理
+- **🤖 智能客服智能体**: SSE实时对话、工具调用、会话管理
 - **📊 Text2SQL数据分析智能体**: 自然语言转SQL、数据可视化  
 - **📚 企业知识库问答智能体**: RAG检索问答、来源引用
 - **✍️ 文案创作智能体**: 结构化创作、模板选择、多格式输出
@@ -17,7 +17,7 @@
 - Vue.js 3 + TypeScript + Vite
 - Element-Plus / Ant Design Vue
 - Pinia (状态管理)
-- Socket.io (WebSocket客户端)
+- EventSource (SSE客户端)
 
 **后端**:
 - Python 3.11+ + FastAPI
@@ -214,8 +214,9 @@ docker-compose ps
 ## 📖 文档
 
 - [架构设计文档](docs/architecture-design.md)
-- [数据库设计文档](docs/database-design.md)  
+- [数据库设计文档](docs/database-design.md)
 - [API接口规范](docs/api-specification.md)
+- [SSE实时通信使用指南](SSE_USAGE.md)
 - [详细任务清单](task.md)
 - [开发待办事项](todolist.md)
 
@@ -272,4 +273,4 @@ docker-compose ps
 
 ---
 
-*最后更新: 2025-08-02*
+*最后更新: 2025-08-09 (SSE替换完成)*

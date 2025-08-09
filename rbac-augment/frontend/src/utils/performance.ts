@@ -445,8 +445,13 @@ export class AnimationFrameManager {
     if (this.rafId) return
 
     const loop = () => {
-      for (const callback of this.callbacks.values()) {
-        callback()
+      const callbacks = Array.from(this.callbacks.values())
+      for (const callback of callbacks) {
+        try {
+          callback()
+        } catch (error) {
+          console.error('Animation frame callback error:', error)
+        }
       }
       
       if (this.callbacks.size > 0) {

@@ -1,0 +1,92 @@
+# Copyright (c) 2025 左岚. All rights reserved.
+
+# ==================== Python 后端专用忽略规则 ====================
+
+# Python 字节码
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 虚拟环境
+venv/
+env/
+.venv/
+.env/
+
+# 环境变量文件
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# 数据库文件
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+rbac.db*
+rbac_test.db*
+
+# 日志文件
+logs/
+*.log
+log/
+
+# 上传文件
+uploads/
+media/
+static/uploads/
+
+# 测试相关
+tests/__pycache__/
+test_*.py
+*_test.py
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE 文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# 分发/打包
+build/
+dist/
+*.egg-info/
+
+# 缓存
+.cache/
+.mypy_cache/
+
+# 性能分析
+*.prof
+
+# 调试文件
+*.pdb
+
+# 文档构建
+docs/_build/
+
+# 密钥和证书
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+
+# 配置文件（敏感信息）
+config/local.py
+config/production.py
+secrets.json

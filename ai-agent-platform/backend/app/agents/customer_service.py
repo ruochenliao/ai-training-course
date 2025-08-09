@@ -1,18 +1,22 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 客服智能体
 
 专门处理客户服务相关问题，包括咨询、投诉、售后等。
 """
 
-import logging
-from typing import Dict, Any, List, Optional
-import json
+# # Standard library imports
 from datetime import datetime
 from enum import Enum
+import json
+import logging
+from typing import Any, Dict, List, Optional
 
-from .base import BaseAgent, AgentMessage, AgentConfig
-from .llm_interface import llm_manager
+# # Local folder imports
 from ..rag.rag_agent import RAGAgent
+from .base import AgentConfig, AgentMessage, BaseAgent
+from .llm_interface import llm_manager
 
 logger = logging.getLogger(__name__)
 

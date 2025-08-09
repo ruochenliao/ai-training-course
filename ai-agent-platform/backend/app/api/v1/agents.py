@@ -1,20 +1,26 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 智能体管理API
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+# # Standard library imports
 from typing import List, Optional
 
+# # Third-party imports
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+# # Local application imports
 from app.api.deps import get_db
 from app.core.security import get_current_user
-from app.models.agent import Agent, AgentTemplate, AgentType, AgentStatus
+from app.models.agent import Agent, AgentStatus, AgentTemplate, AgentType
 from app.models.user import User
 from app.schemas.agent import (
-    AgentCreate, 
-    AgentResponse, 
+    AgentCreate,
+    AgentResponse,
+    AgentTemplateResponse,
     AgentUpdate,
-    AgentTemplateResponse
 )
 
 router = APIRouter()

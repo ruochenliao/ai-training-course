@@ -1,10 +1,18 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 Pydantic模式定义
 """
 
-from app.schemas.auth import Token, UserLogin, UserCreate
-from app.schemas.user import UserResponse, UserUpdate, ChangePassword
-from app.schemas.conversation import ConversationCreate, ConversationResponse, MessageCreate, MessageResponse
+# # Local application imports
+from app.schemas.auth import Token, UserCreate, UserLogin
+from app.schemas.conversation import (
+    ConversationCreate,
+    ConversationResponse,
+    MessageCreate,
+    MessageResponse,
+)
+from app.schemas.user import ChangePassword, UserResponse, UserUpdate
 
 __all__ = [
     "Token",

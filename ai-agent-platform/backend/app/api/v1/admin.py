@@ -1,23 +1,29 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 管理员API
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
-from typing import List, Optional
+# # Standard library imports
 from datetime import datetime, timedelta
+from typing import List, Optional
 
+# # Third-party imports
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import desc, func
+from sqlalchemy.orm import Session
+
+# # Local application imports
 from app.api.deps import get_db
 from app.core.security import get_current_user_id
-from app.models.user import User
 from app.models.agent import Agent
-from app.models.knowledge import KnowledgeBase
 from app.models.chat import Conversation, Message
+from app.models.knowledge import KnowledgeBase
+from app.models.user import User
 from app.schemas.admin import (
     AdminStatsResponse,
+    SystemHealthResponse,
     UserManagementResponse,
-    SystemHealthResponse
 )
 
 router = APIRouter()
@@ -211,6 +217,7 @@ async def get_system_health(
         db_message = f"数据库连接异常: {str(e)}"
     
     # 磁盘空间检查（简化版）
+    # # Standard library imports
     import shutil
     try:
         disk_usage = shutil.disk_usage("/")
@@ -235,6 +242,7 @@ async def get_system_health(
         disk_usage_percent = 0
     
     # 内存使用检查（简化版）
+    # # Third-party imports
     import psutil
     try:
         memory = psutil.virtual_memory()

@@ -1,15 +1,20 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 用户CRUD操作
 """
+# # Standard library imports
 from typing import Any, Dict, Optional, Union
 
-from sqlalchemy.orm import Session
+# # Third-party imports
 from sqlalchemy import or_
+from sqlalchemy.orm import Session
 
+# # Local application imports
+from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
-from app.core.security import get_password_hash, verify_password
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):

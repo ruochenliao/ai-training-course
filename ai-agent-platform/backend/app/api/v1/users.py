@@ -1,15 +1,21 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 用户管理API
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+# # Standard library imports
 from typing import List
 
+# # Third-party imports
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+# # Local application imports
 from app.api.deps import get_db
 from app.core.security import get_current_user, get_password_hash
 from app.models.user import User
-from app.schemas.user import UserResponse, UserUpdate, ChangePassword
+from app.schemas.user import ChangePassword, UserResponse, UserUpdate
 
 router = APIRouter()
 
@@ -74,6 +80,7 @@ async def change_password(
         )
     
     # 验证旧密码
+    # # Local application imports
     from app.core.security import verify_password
     if not verify_password(password_data.old_password, user.password_hash):
         raise HTTPException(

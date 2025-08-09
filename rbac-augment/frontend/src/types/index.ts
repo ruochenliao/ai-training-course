@@ -1,7 +1,10 @@
+// Copyright (c) 2025 左岚. All rights reserved.
+
 /**
- * 类型定义入口文件
+ * 类型定义入口文件 - 完整重构版本
  */
 
+// 核心类型模块
 export * from './api'
 export * from './auth'
 export * from './user'
@@ -9,6 +12,12 @@ export * from './role'
 export * from './permission'
 export * from './menu'
 export * from './department'
+
+// 扩展类型模块
+export * from './env'
+export * from './element-plus'
+export * from './type-validation'
+export * from './store-types'
 
 // 通用类型
 export interface SelectOption {

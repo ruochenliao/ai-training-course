@@ -1,0 +1,102 @@
+# Copyright (c) 2025 左岚. All rights reserved.
+
+# ==================== Vue.js 前端专用忽略规则 ====================
+
+# 依赖目录
+node_modules/
+.pnpm-store/
+
+# 构建输出
+dist/
+dist-ssr/
+build/
+
+# 环境变量文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 日志文件
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# 编辑器目录和文件
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# TypeScript
+*.tsbuildinfo
+auto-imports.d.ts
+components.d.ts
+
+# 测试相关
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+test-results.xml
+
+# 缓存
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# 临时文件
+*.local
+*.tmp
+*.temp
+
+# 热重载
+*.hot-update.*
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# 测试和验证文件
+test-*.js
+test-*.ts
+*-test.js
+*-test.ts
+
+# 类型系统测试文件
+src/utils/type-test.ts
+src/utils/type-fix-validation.ts
+src/utils/final-validation.ts
+src/types/type-validation.ts
+
+# 总结和文档文件
+TYPE_SYSTEM_REFACTOR.md
+REFACTOR_*.md
+SUMMARY_*.md
+
+# 调试文件
+*.map
+
+# 性能分析
+*.cpuprofile
+
+# 包管理器锁文件（根据团队需要选择保留）
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# 上传和媒体文件
+uploads/
+public/uploads/
+
+# 构建分析
+stats.html
+bundle-analyzer-report.html

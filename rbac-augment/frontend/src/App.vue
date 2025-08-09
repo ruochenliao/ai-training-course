@@ -1,22 +1,40 @@
 <template>
   <div id="app">
     <router-view />
-    <StagewiseToolbar v-if="isDev" :config="{ plugins: [VuePlugin] }" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
-import { StagewiseToolbar } from '@stagewise/toolbar-vue'
-import VuePlugin from '@stagewise-plugins/vue'
-import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
+import enUs from 'element-plus/dist/locale/en.mjs'
+import { useGlobalConfig } from 'element-plus'
+import type { AuthStoreType, AppStoreType } from '@/types/store-types'
 
-const authStore = useAuthStore()
-const appStore = useAppStore()
+const authStore = useAuthStore() as AuthStoreType
+const appStore = useAppStore() as AppStoreType
+const { locale } = useI18n()
+const globalConfig = useGlobalConfig()
 
-const isDev = ref(import.meta.env.DEV)
+// 监听语言变化，同步更新 Element Plus 的语言包
+watch(() => appStore.language, (newLang) => {
+  // 更新 i18n 的 locale
+  locale.value = newLang
+  
+  try {
+    // 更新 Element Plus 的语言包
+    // 使用类型断言处理 Element Plus 的全局配置
+    const config = globalConfig as any
+    if (config.locale) {
+      config.locale.value = newLang === 'zh-CN' ? zhCn : enUs
+    }
+  } catch (error) {
+    console.error('更新 Element Plus 语言包失败:', error)
+  }
+}, { immediate: true })
 
 onMounted(async () => {
   // 初始化应用设置

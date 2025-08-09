@@ -1,15 +1,20 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 总结智能体
 
 负责对文本、对话、文档等内容进行总结和摘要。
 """
 
+# # Standard library imports
+from enum import Enum
 import json
 import logging
-from typing import Dict, Any, List, Optional
-from enum import Enum
-from .base import BaseAgent, AgentMessage, AgentConfig
-from .llm_interface import llm_manager, TokenCounter
+from typing import Any, Dict, List, Optional
+
+# # Local folder imports
+from .base import AgentConfig, AgentMessage, BaseAgent
+from .llm_interface import TokenCounter, llm_manager
 
 logger = logging.getLogger(__name__)
 

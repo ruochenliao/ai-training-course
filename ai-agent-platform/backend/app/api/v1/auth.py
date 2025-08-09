@@ -1,22 +1,28 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 认证授权API
 """
 
+# # Standard library imports
+from datetime import timedelta
+
+# # Third-party imports
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from datetime import timedelta
 
-from app.db.session import get_db
+# # Local application imports
+from app.core.config import settings
 from app.core.security import (
     create_access_token,
     create_refresh_token,
-    verify_password,
+    get_current_user,
     get_password_hash,
+    verify_password,
     verify_token,
-    get_current_user
 )
-from app.core.config import settings
+from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import Token, UserCreate, UserLogin, UserResponse
 
@@ -61,6 +67,7 @@ async def login(
     refresh_token = create_refresh_token(subject=str(user.id))
     
     # 更新最后登录时间
+    # # Standard library imports
     from datetime import datetime
     user.last_login_at = datetime.utcnow()
     db.commit()

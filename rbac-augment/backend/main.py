@@ -40,7 +40,7 @@ def create_app() -> FastAPI:
     )
     
     # 添加自定义中间件（注意顺序：安全中间件 -> 异常处理 -> 认证 -> 审计）
-    # app.add_middleware(AuditMiddleware)  # 暂时禁用审计中间件
+    app.add_middleware(AuditMiddleware)  # 启用审计中间件
     app.add_middleware(ExceptionMiddleware)
     app.add_middleware(AuthMiddleware)
     app.add_middleware(SecurityMiddleware)
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=8000,
+        port=8001,
         reload=settings.DEBUG,
         log_level="info" if not settings.DEBUG else "debug",
     )

@@ -1,21 +1,25 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 插件管理器
 
 负责插件的加载、激活、停用、卸载等管理功能。
 """
 
-import os
-import json
+# # Standard library imports
 import asyncio
 import importlib
 import importlib.util
-from typing import Dict, List, Optional, Type, Any
-from pathlib import Path
+import json
 import logging
+import os
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Type
 
+# # Local folder imports
 from .base import BasePlugin, PluginMetadata, PluginStatus, PluginType
-from .registry import plugin_registry
 from .loader import PluginLoader
+from .registry import plugin_registry
 
 logger = logging.getLogger(__name__)
 
@@ -334,6 +338,7 @@ class PluginManager:
             # 删除插件文件
             plugin_dir = self.plugins_dir / plugin_name
             if plugin_dir.exists():
+                # # Standard library imports
                 import shutil
                 shutil.rmtree(plugin_dir)
             

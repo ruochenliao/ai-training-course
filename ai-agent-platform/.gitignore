@@ -279,3 +279,35 @@ uploads/
 downloads/
 data/
 storage/
+
+# 智能体平台特定文件
+ai_platform.db
+backend/ai_platform.db
+backend/logs/
+backend/venv/
+frontend/node_modules/
+frontend/dist/
+frontend/auto-imports.d.ts
+frontend/components.d.ts
+
+# 开发过程文件（可选删除）
+task.md
+todolist.md
+
+# 模型文件（太大不适合提交）
+models/models--*/
+*.bin
+*.safetensors
+*.onnx
+*.pt
+*.pth
+
+# 测试和临时文件
+test_*.py
+*_test.py
+tests/
+__tests__/
+*.test.js
+*.spec.js
+.coverage
+htmlcov/

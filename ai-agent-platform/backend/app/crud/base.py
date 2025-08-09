@@ -1,12 +1,17 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 通用CRUD基类
 """
+# # Standard library imports
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 
+# # Third-party imports
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+# # Local application imports
 from app.db.base_class import Base
 
 ModelType = TypeVar("ModelType", bound=Base)

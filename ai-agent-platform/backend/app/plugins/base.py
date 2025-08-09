@@ -1,14 +1,17 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 插件基类
 
 定义插件的基础接口和元数据结构。
 """
 
+# # Standard library imports
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 from enum import Enum
 import logging
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

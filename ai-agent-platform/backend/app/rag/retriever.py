@@ -1,19 +1,23 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 文档检索器
 
 负责查询扩展、文档检索和结果重排序。
 """
 
+# # Standard library imports
 import asyncio
-import logging
-from typing import List, Dict, Any, Optional, Tuple
-import json
-import re
 from datetime import datetime
+import json
+import logging
+import re
+from typing import Any, Dict, List, Optional, Tuple
 
-from .vectorstore import VectorStore, SearchResult, Document
-from .embeddings import embedding_manager
+# # Local folder imports
 from ..agents.llm_interface import llm_manager
+from .embeddings import embedding_manager
+from .vectorstore import Document, SearchResult, VectorStore
 
 logger = logging.getLogger(__name__)
 

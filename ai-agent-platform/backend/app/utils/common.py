@@ -1,11 +1,14 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 通用工具函数
 """
-import hashlib
-import uuid
+# # Standard library imports
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+import hashlib
 import re
+from typing import Any, Dict, List, Optional
+import uuid
 
 
 def generate_uuid() -> str:
@@ -174,6 +177,7 @@ def extract_keywords(text: str, max_keywords: int = 10) -> List[str]:
     keywords = [word for word in words if len(word) > 2 and word not in stop_words]
     
     # 统计词频并返回最常见的词
+    # # Standard library imports
     from collections import Counter
     word_counts = Counter(keywords)
     

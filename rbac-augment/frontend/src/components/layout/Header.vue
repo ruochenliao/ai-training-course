@@ -25,7 +25,8 @@
 
     <!-- 右侧操作区域 -->
     <div class="header-right">
-
+      <!-- 语言切换 -->
+      <LanguageSwitcher class="language-dropdown" />
 
       <!-- 通知消息 -->
       <el-tooltip content="消息通知" placement="bottom">
@@ -74,7 +75,7 @@
             :src="authStore.userInfo?.avatar"
             class="user-avatar"
           >
-            <el-icon><User /></el-icon>
+            <el-icon><UserIcon /></el-icon>
           </el-avatar>
           <div class="user-details">
             <span class="user-name">{{ displayUserName }}</span>
@@ -88,7 +89,7 @@
         <template #dropdown>
           <el-dropdown-menu class="user-dropdown-menu">
             <el-dropdown-item command="profile" class="dropdown-item">
-              <el-icon><User /></el-icon>
+              <el-icon><UserIcon /></el-icon>
               <span>个人资料</span>
             </el-dropdown-item>
             <el-dropdown-item command="password" class="dropdown-item">
@@ -164,24 +165,47 @@
  */
 import { computed, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
-import { Search, Bell, FullScreen, Aim, Sunny, Moon, User, Lock, Setting, SwitchButton, Fold, Expand, ArrowDown } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
+import { Search, Bell, FullScreen, Aim, Sunny, Moon, User as UserIcon, Lock, Setting, SwitchButton, Fold, Expand, ArrowDown } from '@element-plus/icons-vue'
+
+// 导入store和组件
 import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
-import type { ChangePasswordRequest } from '@/types'
+import type { ChangePasswordRequest, User as UserType } from '@/types'
+import type { AuthStoreType, AppStoreType } from '@/types/store-types'
+import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
 
 // ==================== 响应式数据定义 ====================
 
 const route = useRoute()
 const router = useRouter()
-const appStore = useAppStore()
-const authStore = useAuthStore()
+const appStore = useAppStore() as AppStoreType
+const authStore = useAuthStore() as {
+  token: string
+  refreshToken: string
+  userInfo: UserType | null
+  permissions: string[]
+  roles: string[]
+  menus: any[]
+  login: (username: string, password: string) => Promise<void>
+  logout: () => Promise<void>
+  refreshAccessToken: () => Promise<void>
+  fetchUserProfile: () => Promise<void>
+  changePassword: (passwordData: ChangePasswordRequest) => Promise<void>
+  hasPermission: (permission: string | string[]) => boolean
+  hasRole: (role: string | string[]) => boolean
+  initAuth: () => Promise<void>
+  isLoggedIn: boolean
+  isSuperUser: boolean
+}
 
 // 全屏状态管理
 const isFullscreen = ref(false)
 
 // 搜索功能相关
 const searchKeyword = ref('')
+
 
 // 通知消息相关
 const notificationCount = ref(3) // 模拟通知数量
@@ -241,7 +265,7 @@ const passwordRules: FormRules = {
   confirm_password: [
     { required: true, message: '请确认新密码', trigger: 'blur' },
     {
-      validator: (rule, value, callback) => {
+      validator: (rule: any, value: any, callback: any) => {
         if (value !== passwordForm.new_password) {
           callback(new Error('两次输入的密码不一致'))
         } else {
@@ -475,6 +499,26 @@ document.addEventListener('fullscreenchange', () => {
     display: flex;
     align-items: center;
     gap: 12px;
+
+    // 语言切换样式
+    .language-dropdown {
+      .header-btn {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        
+        .language-text {
+          font-size: 14px;
+          margin-left: 4px;
+        }
+      }
+      
+      :deep(.el-dropdown-menu__item.is-active) {
+        color: $primary-color;
+        font-weight: 500;
+        background-color: rgba($primary-color, 0.1);
+      }
+    }
 
     // 搜索框样式
     .search-box {

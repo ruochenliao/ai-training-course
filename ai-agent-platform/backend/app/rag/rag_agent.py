@@ -1,20 +1,24 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 RAG智能体
 
 整合文档处理、检索和生成功能的完整RAG系统。
 """
 
-import logging
-from typing import List, Dict, Any, Optional
-import json
+# # Standard library imports
 from datetime import datetime
+import json
+import logging
+from typing import Any, Dict, List, Optional
 
-from ..agents.base import BaseAgent, AgentMessage, AgentConfig
-from .vectorstore import VectorStore, Document
-from .processor import DocumentProcessor, ChunkStrategy
-from .retriever import DocumentRetriever
-from .generator import ResponseGenerator, GenerationStrategy, CitationStyle
+# # Local folder imports
+from ..agents.base import AgentConfig, AgentMessage, BaseAgent
 from .embeddings import embedding_manager
+from .generator import CitationStyle, GenerationStrategy, ResponseGenerator
+from .processor import ChunkStrategy, DocumentProcessor
+from .retriever import DocumentRetriever
+from .vectorstore import Document, VectorStore
 
 logger = logging.getLogger(__name__)
 

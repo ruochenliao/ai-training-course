@@ -1,10 +1,15 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 聊天相关的Pydantic模型
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any
+# # Standard library imports
 from datetime import datetime
+from typing import Any, Dict, Optional
+
+# # Third-party imports
+from pydantic import BaseModel, Field
 
 
 class ChatRequest(BaseModel):
@@ -56,11 +61,6 @@ class MessageInfo(BaseModel):
     timestamp: str = Field(..., description="时间戳")
 
 
-class WebSocketMessage(BaseModel):
-    """WebSocket消息"""
-    type: str = Field(..., description="消息类型")
-    content: Optional[str] = Field(None, description="消息内容")
-    session_id: Optional[int] = Field(None, description="会话ID")
-    message_id: Optional[int] = Field(None, description="消息ID")
-    timestamp: Optional[str] = Field(None, description="时间戳")
+# WebSocket消息模式已移除
+# 实时通信功能已迁移到SSE，使用标准的消息模式
     metadata: Optional[Dict[str, Any]] = Field(None, description="元数据")

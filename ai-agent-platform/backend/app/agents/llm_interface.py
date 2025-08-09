@@ -1,17 +1,24 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 LLM接口封装
 
 提供统一的LLM调用接口，支持多种模型切换和错误处理。
 """
 
-import asyncio
-import logging
-from typing import Dict, Any, List, Optional, AsyncGenerator
+# # Standard library imports
 from abc import ABC, abstractmethod
+import asyncio
+import json
+import logging
+import time
+from typing import Any, AsyncGenerator, Dict, List, Optional
+
+# # Third-party imports
 import openai
 from openai import AsyncOpenAI
-import json
-import time
+
+# # Local application imports
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)

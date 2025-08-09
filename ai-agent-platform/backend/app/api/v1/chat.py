@@ -1,20 +1,26 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 聊天API - 简化的聊天接口
 """
 
+# # Standard library imports
+import asyncio
+from datetime import datetime
+import json
+from typing import Optional
+
+# # Third-party imports
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
-from typing import Optional
-import json
-import asyncio
-from datetime import datetime
 
-from app.db.session import get_db
+# # Local application imports
 from app.core.security import get_current_user
-from app.models.user import User
-from app.models.chat import Conversation, Message
+from app.db.session import get_db
 from app.models.agent import Agent
+from app.models.chat import Conversation, Message
+from app.models.user import User
 from app.schemas.chat import ChatRequest, ChatResponse
 
 router = APIRouter()

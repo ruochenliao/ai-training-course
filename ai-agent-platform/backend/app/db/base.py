@@ -1,4 +1,6 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 数据库基础设置和初始化
 """
 from app.db.base_class import Base  # noqa

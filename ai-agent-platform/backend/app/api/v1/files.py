@@ -1,22 +1,28 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 文件上传管理API
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
-from fastapi.responses import FileResponse
-from sqlalchemy.orm import Session
-from typing import List, Optional
-import os
-import uuid
-import shutil
+# # Standard library imports
 from datetime import datetime
 import mimetypes
+import os
+import shutil
+from typing import List, Optional
+import uuid
 
+# # Third-party imports
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi.responses import FileResponse
+from sqlalchemy.orm import Session
+
+# # Local application imports
 from app.api.deps import get_db
-from app.core.security import get_current_user
-from app.models.user import User
 from app.core.config import settings
+from app.core.security import get_current_user
 from app.models.knowledge import UploadedFile
+from app.models.user import User
 from app.schemas.files import FileResponse, FileUploadResponse
 
 router = APIRouter()

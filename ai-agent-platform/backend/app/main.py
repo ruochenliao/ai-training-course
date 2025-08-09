@@ -3,35 +3,42 @@
 智能体应用综合平台 - 主应用入口
 """
 
-import sys
+# # Standard library imports
 import os
 from pathlib import Path
+import sys
 
 # 添加backend目录到Python路径，使用相对路径
 current_file = Path(__file__).resolve()  # 获取当前文件的绝对路径
 backend_dir = current_file.parent.parent  # 向上两级到backend目录
 sys.path.insert(0, str(backend_dir))  # 添加到Python路径
 
+# # Standard library imports
+from contextlib import asynccontextmanager
+import logging
+import time
+
+# # Third-party imports
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+
 # from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
-import time
-import logging
-from contextlib import asynccontextmanager
 
-from app.core.config import settings
-from app.db.session import check_db_connection, init_db
-from app.db.init_db import init as init_database_data
+# # Local application imports
 from app.api.v1 import api_router
+from app.core.config import settings
+from app.core.simple_cache import cache_manager
+from app.core.database_pool import db_pool_manager
+from app.core.logging_config import structured_logger
+from app.core.metrics import metrics_manager
+from app.core.tracing import tracing_manager
+from app.db.init_db import init as init_database_data
+from app.db.session import check_db_connection, init_db
 from app.rag.embeddings import embedding_manager
 
-
-# 配置日志
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+# 初始化结构化日志
+structured_logger = structured_logger
 logger = logging.getLogger(__name__)
 
 # 减少各种组件的日志详细程度
@@ -172,6 +179,7 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
 if __name__ == "__main__":
+    # # Third-party imports
     import uvicorn
     
     uvicorn.run(

@@ -1,16 +1,21 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 安全相关功能：JWT认证、密码加密等
 """
 
+# # Standard library imports
 from datetime import datetime, timedelta
-from typing import Any, Union, Optional
-from jose import jwt, JWTError
+from typing import Any, Optional, Union
+
+# # Third-party imports
+from fastapi import Depends, HTTPException, Request, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi import Depends, Request
 from sqlalchemy.orm import Session
 
+# # Local application imports
 from app.core.config import settings
 from app.db.session import get_db
 
@@ -171,6 +176,7 @@ async def get_current_user(
     """
     获取当前用户（依赖注入）
     """
+    # # Local application imports
     from app.models.user import User
 
     try:

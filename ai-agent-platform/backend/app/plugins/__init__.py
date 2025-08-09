@@ -1,13 +1,16 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 插件系统
 
 提供插件的注册、加载、管理功能。
 """
 
-from .manager import PluginManager
+# # Local folder imports
 from .base import BasePlugin, PluginMetadata
-from .registry import plugin_registry
 from .loader import PluginLoader
+from .manager import PluginManager
+from .registry import plugin_registry
 
 __all__ = [
     'PluginManager',

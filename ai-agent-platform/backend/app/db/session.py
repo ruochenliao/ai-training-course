@@ -1,14 +1,21 @@
+# Copyright (c) 2025 左岚. All rights reserved.
 """
-数据库会话管理
+数据库会话管理 - 优化版本
 """
+# # Standard library imports
 import logging
 from typing import Generator
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.pool import QueuePool
-from sqlalchemy.exc import OperationalError
+
+# # Third-party imports
 import pymysql
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import QueuePool
+
+# # Local application imports
 from app.core.config import settings
+from app.core.database_pool import db_pool_manager
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +25,13 @@ def create_database_if_not_exists():
     如果数据库不存在则创建数据库
     """
     try:
+        # 检查是否为SQLite数据库
+        if settings.DATABASE_URL.startswith('sqlite'):
+            logger.info("使用SQLite数据库，无需预创建")
+            return
+
         # 解析数据库URL获取连接信息
+        # # Standard library imports
         import urllib.parse
         parsed = urllib.parse.urlparse(settings.DATABASE_URL)
 
@@ -58,29 +71,63 @@ def create_database_if_not_exists():
 
     except Exception as e:
         logger.error(f"创建数据库失败: {e}")
-        raise
+        # 对于SQLite，这不是致命错误
+        if not settings.DATABASE_URL.startswith('sqlite'):
+            raise
 
 
 # 确保数据库存在
 create_database_if_not_exists()
 
-# 创建数据库引擎
-engine = create_engine(
-    settings.DATABASE_URL,
-    poolclass=QueuePool,
-    pool_size=settings.DATABASE_POOL_SIZE,
-    max_overflow=settings.DATABASE_MAX_OVERFLOW,
-    pool_timeout=settings.DATABASE_POOL_TIMEOUT,
-    pool_recycle=settings.DATABASE_POOL_RECYCLE,
-    echo=settings.DEBUG  # 在调试模式下显示SQL语句
-)
+# 根据数据库类型选择连接方式
+if settings.DATABASE_URL.startswith('sqlite'):
+    logger.info("使用SQLite数据库，采用传统连接方式")
+    # SQLite使用传统连接方式
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from sqlalchemy.pool import StaticPool
 
-# 创建会话工厂
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine
-)
+    engine = create_engine(
+        settings.DATABASE_URL,
+        poolclass=StaticPool,
+        connect_args={'check_same_thread': False},
+        echo=settings.DEBUG
+    )
+
+    SessionLocal = sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=engine
+    )
+else:
+    # MySQL等其他数据库尝试使用优化的连接池
+    try:
+        db_pool_manager.initialize()
+        engine = db_pool_manager.engine
+        SessionLocal = db_pool_manager.SessionLocal
+        logger.info("使用优化的数据库连接池")
+    except Exception as e:
+        logger.warning(f"连接池初始化失败，使用传统数据库连接: {e}")
+        # 降级到传统连接方式
+        from sqlalchemy import create_engine
+        from sqlalchemy.orm import sessionmaker
+        from sqlalchemy.pool import QueuePool
+
+        engine = create_engine(
+            settings.DATABASE_URL,
+            poolclass=QueuePool,
+            pool_size=settings.DATABASE_POOL_SIZE,
+            max_overflow=settings.DATABASE_MAX_OVERFLOW,
+            pool_timeout=settings.DATABASE_POOL_TIMEOUT,
+            pool_recycle=settings.DATABASE_POOL_RECYCLE,
+            echo=settings.DEBUG
+        )
+
+        SessionLocal = sessionmaker(
+            autocommit=False,
+            autoflush=False,
+            bind=engine
+        )
 
 
 def get_db() -> Generator[Session, None, None]:
@@ -105,6 +152,7 @@ def init_db() -> None:
     创建所有表
     """
     try:
+        # # Local application imports
         from app.db.base import Base
         Base.metadata.create_all(bind=engine)
         logger.info("数据库表创建成功")
@@ -115,13 +163,11 @@ def init_db() -> None:
 
 def check_db_connection() -> bool:
     """
-    检查数据库连接
+    检查数据库连接 - 使用优化的健康检查
     """
     try:
-        with engine.connect() as connection:
-            connection.execute(text("SELECT 1"))
-        logger.info("数据库连接正常")
-        return True
+        health_result = db_pool_manager.health_check()
+        return health_result.get('status') == 'healthy'
     except Exception as e:
-        logger.error(f"数据库连接失败: {e}")
+        logger.error(f"数据库连接检查失败: {e}")
         return False

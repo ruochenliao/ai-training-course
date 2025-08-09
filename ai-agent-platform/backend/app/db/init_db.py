@@ -1,17 +1,23 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 数据库初始化脚本
 """
+# # Standard library imports
 import logging
+
+# # Third-party imports
 from sqlalchemy.orm import Session
 
-from app.db.session import SessionLocal, init_db, check_db_connection
+# # Local application imports
 from app import crud
-from app.schemas.user import UserCreate
 from app.core.config import settings
-from app.models.user import Role
-from app.models.agent import AgentTemplate, AgentType, AgentStatus
+from app.db.session import SessionLocal, check_db_connection, init_db
+from app.models.agent import AgentStatus, AgentTemplate, AgentType
+from app.models.chat import ChatSession, Conversation, SessionStatus
 from app.models.knowledge import KnowledgeBaseType
-from app.models.chat import Conversation, ChatSession, SessionStatus
+from app.models.user import Role
+from app.schemas.user import UserCreate
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -207,6 +213,7 @@ def create_sample_chat_sessions(db: Session, user) -> None:
     logger.info("创建示例聊天会话数据...")
 
     # 获取第一个智能体
+    # # Local application imports
     from app.models.agent import Agent
     agent = db.query(Agent).first()
 

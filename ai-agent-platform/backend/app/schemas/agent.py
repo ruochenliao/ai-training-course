@@ -1,11 +1,18 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 智能体相关的Pydantic模型
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any, List
+# # Standard library imports
 from datetime import datetime
-from app.models.agent import AgentType, AgentStatus
+from typing import Any, Dict, List, Optional
+
+# # Third-party imports
+from pydantic import BaseModel, Field
+
+# # Local application imports
+from app.models.agent import AgentStatus, AgentType
 
 
 class AgentBase(BaseModel):

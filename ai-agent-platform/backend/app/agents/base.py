@@ -1,15 +1,20 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 基础智能体类
 
 定义了所有智能体的基础接口和通用功能。
 """
 
+# # Standard library imports
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional, Union
-from pydantic import BaseModel
-import logging
 import asyncio
 from datetime import datetime
+import logging
+from typing import Any, Dict, List, Optional, Union
+
+# # Third-party imports
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 

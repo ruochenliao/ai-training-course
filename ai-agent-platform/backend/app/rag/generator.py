@@ -1,17 +1,21 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 响应生成器
 
 基于检索到的文档片段生成高质量的答案。
 """
 
-import logging
-from typing import List, Dict, Any, Optional, Tuple
-import json
+# # Standard library imports
 from datetime import datetime
 from enum import Enum
+import json
+import logging
+from typing import Any, Dict, List, Optional, Tuple
 
+# # Local folder imports
+from ..agents.llm_interface import TokenCounter, llm_manager
 from .vectorstore import SearchResult
-from ..agents.llm_interface import llm_manager, TokenCounter
 
 logger = logging.getLogger(__name__)
 

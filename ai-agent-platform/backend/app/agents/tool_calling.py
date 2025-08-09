@@ -1,13 +1,18 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 工具调用智能体
 
 负责调用各种外部工具和API来完成特定任务。
 """
 
+# # Standard library imports
 import json
 import logging
-from typing import Dict, Any, List, Optional, Callable
-from .base import BaseAgent, AgentMessage, AgentConfig
+from typing import Any, Callable, Dict, List, Optional
+
+# # Local folder imports
+from .base import AgentConfig, AgentMessage, BaseAgent
 from .llm_interface import llm_manager
 
 logger = logging.getLogger(__name__)
@@ -140,8 +145,9 @@ class ToolCallingAgent(BaseAgent):
     
     def _register_basic_tools(self):
         """注册基础工具"""
+        # # Standard library imports
         import asyncio
-        
+
         # 计算器工具
         def calculator(expression: str) -> str:
             """计算数学表达式"""

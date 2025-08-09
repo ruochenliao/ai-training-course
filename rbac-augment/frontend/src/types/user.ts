@@ -1,6 +1,10 @@
+// Copyright (c) 2025 左岚. All rights reserved.
+
 /**
  * 用户相关类型定义
  */
+
+import type { Role } from './role'
 
 // 用户基础信息
 export interface User {
@@ -59,14 +63,19 @@ export interface RoleAssignRequest {
   role_ids: number[]
 }
 
-// 角色信息
-export interface Role {
-  id: number
-  name: string
-  code: string
-  description?: string
-  is_active: boolean
-  sort_order: number
-  created_at: string
-  updated_at: string
+// 用户状态枚举
+export enum UserStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  SUSPENDED = 'suspended',
+  PENDING = 'pending'
+}
+
+// 用户扩展信息
+export interface UserExtended extends User {
+  status: UserStatus
+  last_ip?: string
+  login_count: number
+  failed_login_count: number
+  locked_until?: string
 }

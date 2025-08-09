@@ -1,16 +1,20 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 内容创作智能体
 
 专门用于创作各类文案、文章、营销内容等。
 """
 
-import logging
-from typing import Dict, Any, List, Optional
-import json
+# # Standard library imports
 from datetime import datetime
 from enum import Enum
+import json
+import logging
+from typing import Any, Dict, List, Optional
 
-from .base import BaseAgent, AgentMessage, AgentConfig
+# # Local folder imports
+from .base import AgentConfig, AgentMessage, BaseAgent
 from .llm_interface import llm_manager
 
 logger = logging.getLogger(__name__)

@@ -1,11 +1,16 @@
 """
+# Copyright (c) 2025 左岚. All rights reserved.
+
 应用配置管理
 """
 
+# # Standard library imports
+import secrets
 from typing import List, Optional, Union
+
+# # Third-party imports
 from pydantic import AnyHttpUrl, validator
 from pydantic_settings import BaseSettings
-import secrets
 
 
 class Settings(BaseSettings):
