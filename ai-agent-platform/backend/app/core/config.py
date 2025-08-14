@@ -78,7 +78,7 @@ class Settings(BaseSettings):
     OPENAI_TEMPERATURE: float = 0.7
 
     # Deepseek配置
-    DEEPSEEK_API_KEY: str = "sk-56f5743d59364543a00109a4c1c10a56"
+    DEEPSEEK_API_KEY: str = "sk-bc51a0cbd90a43f9bcee3736678af370"
     DEEPSEEK_BASE_URL: str = "https://api.deepseek.com/v1"
     DEEPSEEK_MODEL: str = "deepseek-chat"
     DEEPSEEK_MAX_TOKENS: int = 128000
